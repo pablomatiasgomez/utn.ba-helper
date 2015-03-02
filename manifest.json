@@ -1,0 +1,35 @@
+﻿{
+    "manifest_version": 2,
+
+    "name": "Siga Helper",
+    "short_name": "SigaH",
+    "description": "Extension para mostrar mas items en el siga de FRBA UTN como por ejemplo el promedio de finales.",
+    "author": "Pablo Matías Gomez",
+    "version": "1.0",
+
+    "icons": {
+        "16": "images/icons/icon16.png",
+        "48": "images/icons/icon48.png",
+        "128": "images/icons/icon128.png" 
+    },
+
+    "web_accessible_resources": [
+        "images/*.*",
+        "css/styles.css",
+        "js/functions.js"
+    ],
+
+    "content_scripts": [
+        {
+            "matches": [
+                "*://*.siga.frba.utn.edu.ar/*"
+            ],
+
+            "js": [
+                "js/jquery-1.11.0.js", 
+                "js/functions.js"
+            ]
+        }
+    ]
+}
+
