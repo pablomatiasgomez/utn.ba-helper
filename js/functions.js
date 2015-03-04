@@ -8,6 +8,7 @@
     var aprobados = [];
     var desaprobados = [];
 
+    // .. avgs
     var addNoteToArray = function($tr, arr) {
         var note = $tr.find("td:last").text();
 
@@ -22,7 +23,9 @@
         });
         return sum / arr.length;
     };
+    // .. 
 
+    // .. Peso academico
     var getFirstExamYear = function() {
         var firstExamDate = $(".std-canvas table:first tbody tr:last td:first").text();
         return firstExamDate.split("/")[2];
@@ -38,7 +41,6 @@
                     if (data.status == 200) {
                         var startDate = $(data.responseText).find(".std-canvas table:first tbody tr:last td:first").text();
                         var startYear = startDate.split("/")[2];
-                        console.log(startYear);
                         localStorage.setItem(STORAGE_START_YEAR_KEY, startYear);
                         setPesoAcademico(startYear);
                     } else {
@@ -54,7 +56,7 @@
         var pesoAcademico = 11 * aprobados.length - 5 * yearsCount - 3 * desaprobados.length;
 
         $(".std-canvas p.peso-academico").remove();
-        $(".std-canvas p:first").after("<p class='peso-academico'>Peso academico: <b>" + pesoAcademico + "</b> <small>(11*" + aprobados.length + " - 5*" + yearsCount + " - 3*" + desaprobados.length + ")</small> <a class='helper change-year'>Cambiar año de inicio</a><input class='year-change' type='text' value='" + startYear + "'/></p>");
+        $(".std-canvas p:first").after("<p class='peso-academico'>Peso academico: <b>" + pesoAcademico + "</b> <small>(11*" + aprobados.length + " - 5*" + yearsCount + " - 3*" + desaprobados.length + ")</small> <a class='helper change-year'>Cambiar año de ingreso</a><input class='year-change' type='text' value='" + startYear + "'/></p>");
         bindChangeYear();
     };
 
@@ -76,6 +78,7 @@
             }
         });
     };
+    // ..
 
     if (location.pathname == PATH_NAME_FINALES) {
 
@@ -235,3 +238,86 @@
     }
 })();
 
+// Add preview for the current selected hours
+(function() {
+    var PATH_NAME_PRE_INSCRIPCION_POP_UP = "/alu/preins.do";
+    
+    var getAllHours = function($table) {
+        var getTurnIndex = function(turn) {
+            if (turn == "m") {
+                return 0;
+            } else if (turn == "t") {
+                return 1;
+            } else if (turn == "n") {
+                return 2;
+            }
+            return 0;
+        };
+
+        var hoursUsed = {};
+/*
+        0
+        1
+        2
+        3
+        4
+        5
+        6
+        
+        7
+        8
+        9
+        10
+        11
+        12
+        13
+
+        14
+        15
+        16
+        17
+        18
+        19
+
+*/
+        $table.find("tbody tr").each(function(){
+            var $td = $(this).find("td:eq(1):not(.soft-back)");
+            if ($td.length) {
+                var code = $(this).find("td:first").text().match(/\[(.*?)\]/)[1];
+
+                var str = $td.text().substr(0, 8);
+
+                var day = str.split("(")[0];
+                var turn = str.match(/\(([^)]+)\)/)[1];
+                var firstHour = (getTurnIndex(turn) * 7) + parseInt(str.split(")")[1].split(":")[0]);
+                var lastHour = (getTurnIndex(turn) * 7) + parseInt(str.split(")")[1].split(":")[1]);
+
+                if (!hoursUsed[day]) {
+                    hoursUsed[day] = {};
+                }
+
+                for (var i = firstHour; i<= lastHour; i++) {
+                    hoursUsed[day][i] = code;
+                }
+            }
+        });
+
+        return hoursUsed;
+    };
+
+    var setTable = function(hoursUsed) {
+        console.log(hoursUsed);
+        // todo continue here..
+        var $table = $("<table>");
+        $table.append("<tbody>");
+        $table.append('<tr><th></th><th colspan="7">Mañana</th><th colspan="7">Tarde</th><th colspan="7">Noche</th></tr>');
+
+    };
+
+    if (location.pathname == PATH_NAME_PRE_INSCRIPCION_POP_UP) {
+        if ($(".std-canvas table").length > 2) {
+            var hoursUsed = getAllHours($(".std-canvas table:last"));
+            setTable(hoursUsed);
+        }
+    }
+})();
