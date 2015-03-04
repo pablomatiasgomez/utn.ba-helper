@@ -2,7 +2,12 @@
 // Show avgs: 
 (function() {
     var PATH_NAME_FINALES = "/alu/acfin.do";
-    
+    var STORAGE_START_YEAR_KEY = "startYear";
+    var KEY_ENTER = 13;
+
+    var aprobados = [];
+    var desaprobados = [];
+
     var addNoteToArray = function($tr, arr) {
         var note = $tr.find("td:last").text();
 
@@ -18,9 +23,61 @@
         return sum / arr.length;
     };
 
+    var getFirstExamYear = function() {
+        var firstExamDate = $(".std-canvas table:first tbody tr:last td:first").text();
+        return firstExamDate.split("/")[2];
+    };
+
+    var lookForStartYear = function() {
+        if (localStorage.getItem(STORAGE_START_YEAR_KEY)) {
+            setPesoAcademico(localStorage.getItem(STORAGE_START_YEAR_KEY));
+        } else {
+            $.ajax({
+                url: "http://siga.frba.utn.edu.ar/alu/libreta.do", 
+                complete: function(data) {
+                    if (data.status == 200) {
+                        var startDate = $(data.responseText).find(".std-canvas table:first tbody tr:last td:first").text();
+                        var startYear = startDate.split("/")[2];
+                        console.log(startYear);
+                        localStorage.setItem(STORAGE_START_YEAR_KEY, startYear);
+                        setPesoAcademico(startYear);
+                    } else {
+                        setPesoAcademico(getFirstExamYear());
+                    }
+                }
+            });
+        }
+    };
+
+    var setPesoAcademico = function(startYear) {
+        var yearsCount = (new Date().getFullYear() - startYear + 1);
+        var pesoAcademico = 11 * aprobados.length - 5 * yearsCount - 3 * desaprobados.length;
+
+        $(".std-canvas p.peso-academico").remove();
+        $(".std-canvas p:first").after("<p class='peso-academico'>Peso academico: <b>" + pesoAcademico + "</b> <small>(11*" + aprobados.length + " - 5*" + yearsCount + " - 3*" + desaprobados.length + ")</small> <a class='helper change-year'>Cambiar año de inicio</a><input class='year-change' type='text' value='" + startYear + "'/></p>");
+        bindChangeYear();
+    };
+
+    var bindChangeYear = function() {
+        $(".std-canvas .change-year").on("click", function() {
+            $(this).hide();
+            $(this).parent().find(".year-change").show();
+        });
+
+        $(".std-canvas .year-change").on("keydown", function(e) {
+            if (e.keyCode === KEY_ENTER) {
+                var value = $(this).val();
+                if (!isNaN(value)) {
+                    localStorage.setItem(STORAGE_START_YEAR_KEY, value);
+                    setPesoAcademico(value);
+                }
+                e.preventDefault();
+                return false;
+            }
+        });
+    };
+
     if (location.pathname == PATH_NAME_FINALES) {
-        var aprobados = [];
-        var desaprobados = [];
 
         $(".std-canvas table:first tbody tr").each(function() {
             addNoteToArray($(this), aprobados);
@@ -30,9 +87,9 @@
             addNoteToArray($(this), desaprobados);
         });
 
-        $(".std-canvas p:first").after("<p>Promedio con desaprobados: " + getAvgFromArray(aprobados.concat(desaprobados)).toString().substr(0, 4) + "</p>");
-        $(".std-canvas p:first").after("<p>Promedio sin desaprobados: " + getAvgFromArray(aprobados).toString().substr(0, 4) + "</p>");
-
+        $(".std-canvas p:first").after("<p>Promedio con desaprobados: <b>" + getAvgFromArray(aprobados.concat(desaprobados)).toString().substr(0, 4) + "</b></p>");
+        $(".std-canvas p:first").after("<p>Promedio sin desaprobados: <b>" + getAvgFromArray(aprobados).toString().substr(0, 4) + "</b></p>");
+        lookForStartYear(); // Para calcular el peso academico.
     }
 })();
 

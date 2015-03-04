@@ -1,0 +1,14 @@
+a.helper {
+	cursor: pointer;
+	text-transform: initial;
+	font-size: 14px;
+}
+
+a.helper:hover {
+	border-bottom: none !important;
+}
+
+.year-change {
+	display: none;
+	font-size: 14px;
+}
