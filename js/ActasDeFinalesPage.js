@@ -18,7 +18,7 @@ var ActasDeFinalesPage = function(utils) {
 		var sum = arr.reduce(function(a, b) {
 			return a + b;
 		});
-		return sum / arr.length;
+		return Math.round(sum / arr.length * 100) / 100;
 	};
 	// .. 
 
@@ -63,8 +63,8 @@ var ActasDeFinalesPage = function(utils) {
 			addNoteToArray($(this), desaprobados);
 		});
 
-		$(".std-canvas p:first").after("<p>Promedio con desaprobados: <b>" + getAvgFromArray(aprobados.concat(desaprobados)).toString().substr(0, 4) + "</b></p>");
-		$(".std-canvas p:first").after("<p>Promedio sin desaprobados: <b>" + getAvgFromArray(aprobados).toString().substr(0, 4) + "</b></p>");
+		$(".std-canvas p:first").after("<p>Promedio con desaprobados: <b>" + getAvgFromArray(aprobados.concat(desaprobados)) + "</b></p>");
+		$(".std-canvas p:first").after("<p>Promedio sin desaprobados: <b>" + getAvgFromArray(aprobados) + "</b></p>");
 		utils.getStartYear(setPesoAcademico);
 	})();
 	
