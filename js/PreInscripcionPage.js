@@ -15,30 +15,43 @@ var PreInscripcionPage = function(utils) {
 		var hoursUsed = {};
 
 		$table.find("tbody tr").each(function(){
-			var $td = $(this).find("td:eq(1):not(.soft-back)");
-			if ($td.length) {
-				var code = $(this).find("td:first").text().match(/\[(.*?)\]/)[1];
+			var $tdAlternates = $(this).find("td:not(:first)").not(".soft-back");
+			
+			if ($tdAlternates.length) {
+				var subjectCode = $(this).find("td:first").text().match(/\[(.*?)\]/)[1];
 
-				// TODO this. (get all hours)
-				var str = $td.text().replace("CAMPUS", "").replace("MEDRANO", "");
+				$tdAlternates.each(function(alternateIndex) {
 
-				$.each(str.split(" "), function() {
-					var schedule = utils.parseScheduleString(this);
+					var strArray = utils.getTextNodes($(this));
+					if (!strArray.length) {
+						strArray = utils.getTextNodes($(this).find("a"));
+					}
 
-					if (schedule) {
-						var firstHour = parseInt(schedule.firstHour) + (getTurnIndex(schedule.turn) * 7);
-						var lastHour = parseInt(schedule.lastHour) + (getTurnIndex(schedule.turn) * 7);
+					if (strArray.length) {
+						var str = strArray[0].replace("CAMPUS", "").replace("MEDRANO", ""); // This is not necessary, but just in case.
 
-						if (!hoursUsed[schedule.day]) {
-							hoursUsed[schedule.day] = {};
-						}
+						$.each(str.split(" "), function() {
+							var schedule = utils.parseScheduleString(this);
 
-						for (var i = firstHour; i<= lastHour; i++) {
-							hoursUsed[schedule.day][i] = code;
-						}
+							if (schedule) {
+								var firstHour = parseInt(schedule.firstHour) + (getTurnIndex(schedule.turn) * 7);
+								var lastHour = parseInt(schedule.lastHour) + (getTurnIndex(schedule.turn) * 7);
+
+								if (!hoursUsed[alternateIndex]) {
+									hoursUsed[alternateIndex] = {};
+								}
+
+								if (!hoursUsed[alternateIndex][schedule.day]) {
+									hoursUsed[alternateIndex][schedule.day] = {};
+								}
+
+								for (var i = firstHour; i<= lastHour; i++) {
+									hoursUsed[alternateIndex][schedule.day][i] = subjectCode;
+								}
+							}
+						});
 					}
 				});
-				
 			}
 		});
 
@@ -46,31 +59,37 @@ var PreInscripcionPage = function(utils) {
 	};
 
 	var setTable = function(hoursUsed) {
-		var $table = $("<table>");
-		var $tbody = $("<tbody>");
+		var $divContainer = $("<div>");
 
-		$table.append($tbody);
-		$tbody.append('<tr><th></th><th colspan="7">Mañana</th><th colspan="7">Tarde</th><th colspan="7">Noche</th></tr>');
+		for (var alternateIndex in hoursUsed) {
+			var $table = $("<table>");
+			var $tbody = $("<tbody>");
 
-		for (var day in utils.days) {
-			var $tr = $("<tr>");
-			$tr.append($("<td>", { html: utils.days[day] }));
+			$table.append($tbody);
+			$tbody.append('<tr><th></th><th colspan="7">Mañana</th><th colspan="7">Tarde</th><th colspan="7">Noche</th></tr>');
 
-			for (var i = 0; i <= 19; i++) {
-				var code = hoursUsed[day] ? hoursUsed[day][i] : "";
-				if (code) {
-					code = "#" + code.split("").reverse().join("");
-				} else {
-					code ="transparent";
+			for (var day in utils.days) {
+				var $tr = $("<tr>");
+				$tr.append($("<td>", { html: utils.days[day] }));
+
+				for (var i = 0; i <= 19; i++) {
+					var subjectCode = hoursUsed[alternateIndex][day] ? hoursUsed[alternateIndex][day][i] : "";
+					if (subjectCode) {
+						subjectCode = "#" + subjectCode.split("").reverse().join("");
+					} else {
+						subjectCode = "transparent";
+					}
+					$tr.append($("<td>", { style: "background-color:" + subjectCode, html: "&nbsp;" }));
 				}
-				$tr.append($("<td>", { style: "background-color:" + code, html: "&nbsp;" }));
+				$tbody.append($tr);
 			}
-			$tbody.append($tr);
-		}
 
-		var $p = $("<p>", { html: "Preview de cursada" });
-		$(".std-canvas table:last").parent().after($p);
-		$p.after($table);
+			var $p = $("<p>", { html: "Preview de cursada (Alt " + (parseInt(alternateIndex) + 1) + ")" });
+			var $divTable = $("<div>").append($table);
+			$divContainer.append($p);
+			$divContainer.append($divTable);
+		}
+		$(".std-canvas table:last").parent().after($divContainer.children());
 	};
 
 	(function() {

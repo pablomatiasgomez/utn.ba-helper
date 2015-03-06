@@ -146,6 +146,17 @@ var Utils = function() {
 		};
 	};
 
+	var getTextNodes = function($item) {
+		var arr = $item.contents().filter(function() {
+			return this.nodeType !== 1;
+		});
+		var strArr = [];
+		$(arr).each(function() {
+			strArr.push($(this).text());
+		});
+		return strArr;
+	};
+
 	// Public
 	return {
 		hours: hours,
@@ -154,6 +165,8 @@ var Utils = function() {
 
 		getStartYear: getStartYear,
 		setStartYear: setStartYear,
-		parseScheduleString: parseScheduleString
+		parseScheduleString: parseScheduleString,
+
+		getTextNodes: getTextNodes
 	};
 };
