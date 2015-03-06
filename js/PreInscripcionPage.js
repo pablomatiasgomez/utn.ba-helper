@@ -15,41 +15,42 @@ var PreInscripcionPage = function(utils) {
 		var hoursUsed = {};
 
 		$table.find("tbody tr").each(function(){
-			var $tdAlternates = $(this).find("td:not(:first)").not(".soft-back");
+			var $tdAlternates = $(this).find("td:not(:first)");
 			
 			if ($tdAlternates.length) {
 				var subjectCode = $(this).find("td:first").text().match(/\[(.*?)\]/)[1];
 
 				$tdAlternates.each(function(alternateIndex) {
+					if (!$(this).hasClass("soft-back")) {
+						var strArray = utils.getTextNodes($(this));
+						if (!strArray.length) {
+							strArray = utils.getTextNodes($(this).find("a"));
+						}
 
-					var strArray = utils.getTextNodes($(this));
-					if (!strArray.length) {
-						strArray = utils.getTextNodes($(this).find("a"));
-					}
+						if (strArray.length) {
+							var str = strArray[0].replace("CAMPUS", "").replace("MEDRANO", ""); // This is not necessary, but just in case.
 
-					if (strArray.length) {
-						var str = strArray[0].replace("CAMPUS", "").replace("MEDRANO", ""); // This is not necessary, but just in case.
+							$.each(str.split(" "), function() {
+								var schedule = utils.parseScheduleString(this);
 
-						$.each(str.split(" "), function() {
-							var schedule = utils.parseScheduleString(this);
+								if (schedule) {
+									var firstHour = parseInt(schedule.firstHour) + (getTurnIndex(schedule.turn) * 7);
+									var lastHour = parseInt(schedule.lastHour) + (getTurnIndex(schedule.turn) * 7);
 
-							if (schedule) {
-								var firstHour = parseInt(schedule.firstHour) + (getTurnIndex(schedule.turn) * 7);
-								var lastHour = parseInt(schedule.lastHour) + (getTurnIndex(schedule.turn) * 7);
+									if (!hoursUsed[alternateIndex]) {
+										hoursUsed[alternateIndex] = {};
+									}
 
-								if (!hoursUsed[alternateIndex]) {
-									hoursUsed[alternateIndex] = {};
+									if (!hoursUsed[alternateIndex][schedule.day]) {
+										hoursUsed[alternateIndex][schedule.day] = {};
+									}
+
+									for (var i = firstHour; i<= lastHour; i++) {
+										hoursUsed[alternateIndex][schedule.day][i] = subjectCode;
+									}
 								}
-
-								if (!hoursUsed[alternateIndex][schedule.day]) {
-									hoursUsed[alternateIndex][schedule.day] = {};
-								}
-
-								for (var i = firstHour; i<= lastHour; i++) {
-									hoursUsed[alternateIndex][schedule.day][i] = subjectCode;
-								}
-							}
-						});
+							});
+						}
 					}
 				});
 			}
