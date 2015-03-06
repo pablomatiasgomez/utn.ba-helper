@@ -59,9 +59,11 @@ var ActasDeFinalesPage = function(utils) {
 			addNoteToArray($(this), aprobados);
 		});
 
-		$(".std-canvas table:last tbody tr").each(function() {
-			addNoteToArray($(this), desaprobados);
-		});
+		if ($(".std-canvas table").length > 1) {
+			$(".std-canvas table:last tbody tr").each(function() {
+				addNoteToArray($(this), desaprobados);
+			});
+		}
 
 		$(".std-canvas p:first").after("<p>Promedio con desaprobados: <b>" + getAvgFromArray(aprobados.concat(desaprobados)) + "</b></p>");
 		$(".std-canvas p:first").after("<p>Promedio sin desaprobados: <b>" + getAvgFromArray(aprobados) + "</b></p>");
