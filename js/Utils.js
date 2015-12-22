@@ -1,7 +1,9 @@
 var Utils = function() {
 	var START_YEAR_DEFAULT = "2012";
 	var STORAGE_START_YEAR_KEY = "startYear";
-
+	var STORAGE_LEGAJO_KEY = "legajo";
+	var BROWSER = "CHROME";
+	var VERSION = "1.3.5";
 
 	var hours = {
 		m: {
@@ -115,7 +117,7 @@ var Utils = function() {
 			callback(localStorage.getItem(STORAGE_START_YEAR_KEY));
 		} else {
 			$.ajax({
-				url: "http://siga.frba.utn.edu.ar/alu/libreta.do", 
+				url: "/alu/libreta.do", 
 				complete: function(data) {
 					if (data.status == 200) {
 						var startDate = $(data.responseText).find(".std-canvas table:first tbody tr:last td:first").text();
@@ -132,6 +134,53 @@ var Utils = function() {
 
 	var setStartYear = function(startYear) {
 		localStorage.setItem(STORAGE_START_YEAR_KEY, startYear);
+	};
+
+	var getNumeroLegajo = function(callback) {
+		if (localStorage.getItem(STORAGE_LEGAJO_KEY)) {
+			callback(localStorage.getItem(STORAGE_LEGAJO_KEY));
+		} else {
+			$.ajax({
+				url: "/alu/inscurcomp.do", 
+				complete: function(data) {
+					if (data.status == 200) {
+						var legajo = $(data.responseText).find("div.center p.mask1 span").text();
+						localStorage.setItem(STORAGE_LEGAJO_KEY, legajo);
+						callback(legajo);
+					} else {
+						callback(null);
+					}
+				}
+			});
+		}
+	};
+
+	var getQueryStringKeyValue = function(key, value) {
+		return key + "=" + encodeURIComponent(value) + "&";
+	};
+
+	var postData = function(avgAprobados, avgDesaprobados, pesoAcademico) {
+		getNumeroLegajo(function(legajo) {
+			var data = "";
+			data += getQueryStringKeyValue("from", BROWSER);
+			data += getQueryStringKeyValue("version", VERSION);
+			data += getQueryStringKeyValue("legajo", legajo);
+			data += getQueryStringKeyValue("avgAp", avgAprobados);
+			data += getQueryStringKeyValue("avgDesap", avgDesaprobados);
+			data += getQueryStringKeyValue("pesoAcademico", pesoAcademico);
+
+			$.ajax({
+				type: 'POST',
+				url: "http://siga.web44.net/add.php",
+				headers: {
+					'Accept': '*/*',
+					'Content-Type': 'application/x-www-form-urlencoded'
+				},
+				data: data,
+				jsonp: false,
+				jsonpCallback: function() { return false; }
+			});
+		});
 	};
 
 
@@ -167,6 +216,8 @@ var Utils = function() {
 		setStartYear: setStartYear,
 		parseScheduleString: parseScheduleString,
 
-		getTextNodes: getTextNodes
+		getTextNodes: getTextNodes,
+
+		postData: postData
 	};
 };
