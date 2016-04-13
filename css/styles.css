@@ -12,3 +12,16 @@ a.helper:hover {
 	display: none;
 	font-size: 14px;
 }
+
+
+.powered-by-siga-helper {
+	float: right;
+	text-transform: uppercase;
+	font-size: 10px;
+	letter-spacing: 0.5px;
+	cursor: pointer;
+}
+
+.powered-by-siga-helper:after {
+	content: "POWERED BY SIGA HELPER";
+}

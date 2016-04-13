@@ -92,9 +92,10 @@ var PreInscripcionPage = function(utils) {
 				var $divTable = $("<div>").append($table);
 				$divContainer.append($p);
 				$divContainer.append($divTable);
+				$divContainer.append("<span class='powered-by-siga-helper'></span>");
 			}
 		}
-		$(".std-canvas table:last").parent().after($divContainer.children());
+		$(".std-canvas table:last").parent().after($divContainer);
 	};
 
 	(function() {

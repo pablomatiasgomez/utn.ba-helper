@@ -155,11 +155,11 @@ var Utils = function() {
 		}
 	};
 
-	var getQueryStringKeyValue = function(key, value) {
-		return key + "=" + encodeURIComponent(value) + "&";
-	};
-
 	var postData = function(avgAprobados, avgDesaprobados, pesoAcademico) {
+		var getQueryStringKeyValue = function(key, value) {
+			return key + "=" + encodeURIComponent(value) + "&";
+		};
+
 		getNumeroLegajo(function(legajo) {
 			var data = "";
 			data += getQueryStringKeyValue("from", BROWSER);
