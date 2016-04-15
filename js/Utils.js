@@ -3,7 +3,7 @@ var Utils = function() {
 	var STORAGE_START_YEAR_KEY = "startYear";
 	var STORAGE_LEGAJO_KEY = "legajo";
 	var BROWSER = "CHROME";
-	var VERSION = "1.3.5";
+	var VERSION = chrome.runtime.getManifest().version;
 
 	var hours = {
 		m: {
