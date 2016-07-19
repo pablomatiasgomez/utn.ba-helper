@@ -59,8 +59,8 @@ var PreInscripcionPage = function(utils) {
 		return hoursUsed;
 	};
 
-	var setTable = function(hoursUsed) {
-		var $divContainer = $("<div>");
+	var setPreviewTable = function(hoursUsed) {
+		var $divContainer = $("<div style='display: inline-block;'>");
 
 		for (var alternateIndex in hoursUsed) {
 			if (hoursUsed.hasOwnProperty(alternateIndex)) {
@@ -101,7 +101,7 @@ var PreInscripcionPage = function(utils) {
 	(function() {
 		if ($(".std-canvas table").length > 2) {
 			var hoursUsed = getAllHoursUsed($(".std-canvas table:last"));
-			setTable(hoursUsed);
+			setPreviewTable(hoursUsed);
 		}
 	})();
 
