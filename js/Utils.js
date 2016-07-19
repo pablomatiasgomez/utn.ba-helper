@@ -110,6 +110,10 @@ var Utils = function() {
 		t: "Tarde",
 		n: "Noche"
 	};
+	var sedes = {
+		CAMPUS: "CAMPUS",
+		MEDRANO: "MEDRANO"
+	};
 
 
 	var getStartYear = function(callback) {
@@ -211,6 +215,7 @@ var Utils = function() {
 		hours: hours,
 		days: days,
 		turns: turns,
+		sedes: sedes,
 
 		getStartYear: getStartYear,
 		setStartYear: setStartYear,

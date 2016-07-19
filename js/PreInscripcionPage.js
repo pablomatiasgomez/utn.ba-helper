@@ -63,37 +63,33 @@ var PreInscripcionPage = function(utils) {
 		var $divContainer = $("<div style='display: inline-block;'>");
 
 		for (var alternateIndex in hoursUsed) {
-			if (hoursUsed.hasOwnProperty(alternateIndex)) {
-				var $table = $("<table>");
-				var $tbody = $("<tbody>");
+			var $table = $("<table>");
+			var $tbody = $("<tbody>");
 
-				$table.append($tbody);
-				$tbody.append('<tr><th></th><th colspan="7">Mañana</th><th colspan="7">Tarde</th><th colspan="7">Noche</th></tr>');
+			$table.append($tbody);
+			$tbody.append('<tr><th></th><th colspan="7">Mañana</th><th colspan="7">Tarde</th><th colspan="7">Noche</th></tr>');
 
-				for (var day in utils.days) {
-					if (utils.days.hasOwnProperty(day)) {
-						var $tr = $("<tr>");
-						$tr.append($("<td>", { html: utils.days[day] }));
+			for (var day in utils.days) {
+				var $tr = $("<tr>");
+				$tr.append($("<td>", { html: utils.days[day] }));
 
-						for (var i = 0; i <= 19; i++) {
-							var subjectCode = hoursUsed[alternateIndex][day] ? hoursUsed[alternateIndex][day][i] : "";
-							if (subjectCode) {
-								subjectCode = "#" + subjectCode.split("").reverse().join("");
-							} else {
-								subjectCode = "transparent";
-							}
-							$tr.append($("<td>", { style: "background-color:" + subjectCode, html: "&nbsp;" }));
-						}
-						$tbody.append($tr);
+				for (var i = 0; i <= 19; i++) {
+					var subjectCode = hoursUsed[alternateIndex][day] ? hoursUsed[alternateIndex][day][i] : "";
+					if (subjectCode) {
+						subjectCode = "#" + subjectCode.split("").reverse().join("");
+					} else {
+						subjectCode = "transparent";
 					}
+					$tr.append($("<td>", { style: "background-color:" + subjectCode, html: "&nbsp;" }));
 				}
-
-				var $p = $("<p>", { html: "Preview de cursada (Alt " + (parseInt(alternateIndex) + 1) + ")" });
-				var $divTable = $("<div>").append($table);
-				$divContainer.append($p);
-				$divContainer.append($divTable);
-				$divContainer.append("<span class='powered-by-siga-helper'></span>");
+				$tbody.append($tr);
 			}
+
+			var $p = $("<p>", { html: "Preview de cursada (Alt " + (parseInt(alternateIndex) + 1) + ")" });
+			var $divTable = $("<div>").append($table);
+			$divContainer.append($p);
+			$divContainer.append($divTable);
+			$divContainer.append("<span class='powered-by-siga-helper'></span>");
 		}
 		$(".std-canvas table:last").parent().after($divContainer);
 	};
