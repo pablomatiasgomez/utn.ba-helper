@@ -187,8 +187,7 @@ var Utils = function() {
 		});
 	};
 
-
-	var parseScheduleString = function(str) {
+	var getScheduleFromString = function(str) {
 		if (str.indexOf("(") == -1 || str.indexOf(":") == -1) return;
 
 		return {
@@ -197,6 +196,21 @@ var Utils = function() {
 			firstHour: str.split(")")[1].split(":")[0],
 			lastHour: str.split(")")[1].split(":")[1],
 		};
+	};
+
+	var getSchedulesFromString = function(str) {
+		if (!str) return [];
+
+		return str.split(" ").map(getScheduleFromString).filter(function(el) { return !!el; });
+	};
+
+
+	var getTimeInfoStringFromSchedules = function(schedules) {
+		var getStringForSchedule = function(schedule) {
+			return days[schedule.day] + " (" + turns[schedule.turn] + ") " + hours[schedule.turn][schedule.firstHour].start + "hs a " + hours[schedule.turn][schedule.lastHour].end + "hs";
+		};
+
+		return schedules.map(getStringForSchedule).join(" y ");
 	};
 
 	var getTextNodes = function($item) {
@@ -219,7 +233,9 @@ var Utils = function() {
 
 		getStartYear: getStartYear,
 		setStartYear: setStartYear,
-		parseScheduleString: parseScheduleString,
+
+		getSchedulesFromString: getSchedulesFromString,
+		getTimeInfoStringFromSchedules: getTimeInfoStringFromSchedules,
 
 		getTextNodes: getTextNodes,
 

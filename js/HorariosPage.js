@@ -24,7 +24,7 @@ var HorariosPage = function(utils) {
 		return materiasByColor;
 	};
 	
-	var setMateriasName = function() {
+	var setMateriasNameInTable = function() {
 		var getMateriaName = function(name) {
 			if (name.length > 20) {
 				return name.substr(0, 20) + "...";
@@ -51,13 +51,22 @@ var HorariosPage = function(utils) {
 		});
 	};
 
+	var addTimeInfo = function($tr) {
+		$(".std-canvas table:first tr:not(:first)").each(function() {
+			var $td = $(this).find("td:nth(7)")
+			var schedules = utils.getSchedulesFromString($td.text());
+			$td.html($td.text() + "<br /><b>" + utils.getTimeInfoStringFromSchedules(schedules) + "</b>");
+		});
+	};
+
 	var addPoweredBy = function() {
-		$(".std-canvas table:last").parent().css("display", "inline-block").append("<span class='powered-by-siga-helper'></span>");
+		$(".std-canvas table").parent().css("display", "inline-block").append("<span class='powered-by-siga-helper'></span>");
 	};
 
 	// Init
 	(function() {
-		setMateriasName();
+		addTimeInfo();
+		setMateriasNameInTable();
 		addPoweredBy();
 	})();
 	

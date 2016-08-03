@@ -45,30 +45,15 @@ var PreInscripcionPopUpPage = function(utils) {
 		$divFilters.find("select").on("change", onFilterChange);
 	};
 
-	var getTimeInfoString = function(schedules) {
-		var getStringForSchedule = function(schedule) {
-			if (schedule) {
-				return utils.days[schedule.day] + " (" + utils.turns[schedule.turn] + ") " + utils.hours[schedule.turn][schedule.firstHour].start + "hs a " + utils.hours[schedule.turn][schedule.lastHour].end + "hs";
-			}
-			return "";
-		};
-
-		var finalStr = "";
-		schedules.forEach(function(schedule) {
-			finalStr += getStringForSchedule(schedule) + " y ";
-		});
-		return finalStr.substr(0, finalStr.length - 3);
-	};
-
 	var addTimeInfo = function($tr) {
 		var $td = $tr.find("td:eq(2)");
-		var schedules = $td.text().split(" ").map(utils.parseScheduleString);
+		var schedules = utils.getSchedulesFromString($td.text());
 
 		$tr.attr("days", schedules.map(function(schedule) { return schedule.day; }).join(","));
 		$tr.attr("turns", schedules.map(function(schedule) { return schedule.turn; }).join(","));
 		$tr.attr("sedes", $tr.find("td:eq(3)").text());
 
-		$td.html($td.text() + "<br /><b>" + getTimeInfoString(schedules) + "</b>");
+		$td.html($td.text() + "<br /><b>" + utils.getTimeInfoStringFromSchedules(schedules) + "</b>");
 	};
 
 	// Init

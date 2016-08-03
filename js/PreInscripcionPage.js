@@ -30,24 +30,20 @@ var PreInscripcionPage = function(utils) {
 						if (strArray.length) {
 							var str = strArray[0].replace("CAMPUS", "").replace("MEDRANO", ""); // This is not necessary, but just in case.
 
-							$.each(str.split(" "), function() {
-								var schedule = utils.parseScheduleString(this);
+							utils.getSchedulesFromString(str).forEach(function(schedule) {
+								var firstHour = parseInt(schedule.firstHour) + (getTurnIndex(schedule.turn) * 7);
+								var lastHour = parseInt(schedule.lastHour) + (getTurnIndex(schedule.turn) * 7);
 
-								if (schedule) {
-									var firstHour = parseInt(schedule.firstHour) + (getTurnIndex(schedule.turn) * 7);
-									var lastHour = parseInt(schedule.lastHour) + (getTurnIndex(schedule.turn) * 7);
+								if (!hoursUsed[alternateIndex]) {
+									hoursUsed[alternateIndex] = {};
+								}
 
-									if (!hoursUsed[alternateIndex]) {
-										hoursUsed[alternateIndex] = {};
-									}
+								if (!hoursUsed[alternateIndex][schedule.day]) {
+									hoursUsed[alternateIndex][schedule.day] = {};
+								}
 
-									if (!hoursUsed[alternateIndex][schedule.day]) {
-										hoursUsed[alternateIndex][schedule.day] = {};
-									}
-
-									for (var i = firstHour; i<= lastHour; i++) {
-										hoursUsed[alternateIndex][schedule.day][i] = subjectCode;
-									}
+								for (var i = firstHour; i <= lastHour; i++) {
+									hoursUsed[alternateIndex][schedule.day][i] = subjectCode;
 								}
 							});
 						}
