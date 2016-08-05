@@ -53,7 +53,7 @@ var HorariosPage = function(utils) {
 
 	var addTimeInfo = function($tr) {
 		$(".std-canvas table:first tr:not(:first)").each(function() {
-			var $td = $(this).find("td:nth(7)")
+			var $td = $(this).find("td:nth(7)");
 			var schedules = utils.getSchedulesFromString($td.text());
 			$td.html($td.text() + "<br /><b>" + utils.getTimeInfoStringFromSchedules(schedules) + "</b>");
 		});
