@@ -121,7 +121,7 @@ var Utils = function() {
 			callback(localStorage.getItem(STORAGE_START_YEAR_KEY));
 		} else {
 			$.ajax({
-				url: "/alu/libreta.do", 
+				url: "/alu/libreta.do",
 				complete: function(data) {
 					if (data.status == 200) {
 						var startDate = $(data.responseText).find(".std-canvas table:first tbody tr:last td:first").text();
@@ -145,7 +145,7 @@ var Utils = function() {
 			callback(localStorage.getItem(STORAGE_LEGAJO_KEY));
 		} else {
 			$.ajax({
-				url: "/alu/inscurcomp.do", 
+				url: "/alu/inscurcomp.do",
 				complete: function(data) {
 					if (data.status == 200) {
 						var legajo = $(data.responseText).find("div.center p.mask1 span").text();
