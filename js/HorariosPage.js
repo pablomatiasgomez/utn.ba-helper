@@ -16,7 +16,7 @@ var HorariosPage = function(utils) {
 		var materiasByColor = {};
 
 		$(".std-canvas table:first tr:not(:first)").each(function() {
-			var name = $(this).find("td:nth(2)").text();
+			var name = $(this).find("td:nth(2)").text().trim();
 			var color = rgb2hex($(this).find("td:nth(8)").css("background-color"));
 			materiasByColor[color] = name;
 		});
