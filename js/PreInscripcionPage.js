@@ -18,7 +18,11 @@ var PreInscripcionPage = function(utils) {
 			var $tdAlternates = $(this).find("td:not(:first)");
 			
 			if ($tdAlternates.length) {
-				var subjectCode = $(this).find("td:first").text().match(/\[(.*?)\]/)[1];
+				var tdSubject = $(this).find("td:first").text();
+				var subject = {
+					code: tdSubject.match(/\[(.*?)\]/)[1],
+					name: tdSubject.split(" ").slice(1).join(" ")
+				};
 
 				$tdAlternates.each(function(alternateIndex) {
 					if (!$(this).hasClass("soft-back")) {
@@ -43,7 +47,7 @@ var PreInscripcionPage = function(utils) {
 								}
 
 								for (var i = firstHour; i <= lastHour; i++) {
-									hoursUsed[alternateIndex][schedule.day][i] = subjectCode;
+									hoursUsed[alternateIndex][schedule.day][i] = subject;
 								}
 							});
 						}
@@ -53,6 +57,20 @@ var PreInscripcionPage = function(utils) {
 		});
 
 		return hoursUsed;
+	};
+
+	var getRandomRGBBySubjectCode = function(subjectCode) {
+		var arr = ((parseInt(subjectCode.toString().replace(/0/g, "2")) * 31)).toString().slice(-6);
+		var r = parseInt(arr.slice(0, 2) / 100 * 255);
+		var g = parseInt(arr.slice(2, 4) / 100 * 255);
+		var b = parseInt(arr.slice(4, 6) / 100 * 255);
+
+		while (((0.2126*r) + (0.7152*g) + (0.0722*b))  < 128) {
+			r = parseInt(Math.min(255, r * 1.1));
+			g = parseInt(Math.min(255, g * 1.1));
+			b = parseInt(Math.min(255, b * 1.1));
+		}
+		return "#" + r.toString(16) + g.toString(16) + b.toString(16);
 	};
 
 	var setPreviewTable = function(hoursUsed) {
@@ -65,18 +83,24 @@ var PreInscripcionPage = function(utils) {
 			$table.append($tbody);
 			$tbody.append('<tr><th></th><th colspan="7">Mañana</th><th colspan="7">Tarde</th><th colspan="7">Noche</th></tr>');
 
+
 			for (var day in utils.days) {
 				var $tr = $("<tr>");
 				$tr.append($("<td>", { html: utils.days[day] }));
 
+				var lastColor = null;
 				for (var i = 0; i <= 19; i++) {
-					var subjectCode = hoursUsed[alternateIndex][day] ? hoursUsed[alternateIndex][day][i] : "";
-					if (subjectCode) {
-						subjectCode = "#" + subjectCode.split("").reverse().join("");
-					} else {
-						subjectCode = "transparent";
+					var subject = hoursUsed[alternateIndex][day] ? hoursUsed[alternateIndex][day][i] : null;
+
+					var color = "transparent";
+					var text = "&nbsp;";
+					if (subject) {
+						color = getRandomRGBBySubjectCode(subject.code);
+						if (lastColor != color) text = utils.cutSubjectName(subject.name);
 					}
-					$tr.append($("<td>", { style: "background-color:" + subjectCode, html: "&nbsp;" }));
+					lastColor = color;
+
+					$tr.append($("<td>", { class: "name-container", style: "background-color:" + color, html: text }));
 				}
 				$tbody.append($tr);
 			}
@@ -95,7 +119,7 @@ var PreInscripcionPage = function(utils) {
 		var $th = $table.find("tr:first > th:first");
 
 		// Check used to be sure that the given table is the one that has the used hours
-		if ($th.length && $th.text() == "") {
+		if ($th.length && $th.text() === "") {
 			var hoursUsed = getAllHoursUsed($table);
 			setPreviewTable(hoursUsed);
 		}

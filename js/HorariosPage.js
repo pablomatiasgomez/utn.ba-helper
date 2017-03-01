@@ -12,40 +12,27 @@ var HorariosPage = function(utils) {
 		return "#" + hex(rgb[1]) + hex(rgb[2]) + hex(rgb[3]);
 	};
 
-	var getMateriasByColor = function() {
-		var materiasByColor = {};
+	var getSubjectsByColor = function() {
+		var subjectsByColor = {};
 
 		$(".std-canvas table:first tr:not(:first)").each(function() {
 			var name = $(this).find("td:nth(2)").text().trim();
 			var color = rgb2hex($(this).find("td:nth(8)").css("background-color"));
-			materiasByColor[color] = name;
+			subjectsByColor[color] = name;
 		});
 
-		return materiasByColor;
+		return subjectsByColor;
 	};
 	
-	var setMateriasNameInTable = function() {
-		var getMateriaName = function(name) {
-			if (name.length > 20) {
-				return name.substr(0, 20) + "...";
-			} else {
-				return name;
-			}
-		};
-
-		var materiasByColor = getMateriasByColor();
+	var setSubjectsNameInTable = function() {
+		var subjectsByColor = getSubjectsByColor();
 		var last = null;
 
 		$(".std-canvas table:last tr:not(:first) td").each(function() {
 			var color = rgb2hex($(this).css("background-color"));
-			if (color && last != color && materiasByColor[color]) {
-				$(this).text(getMateriaName(materiasByColor[color]));
-				$(this).css({
-					"max-width": "0",
-					"white-space": "nowrap",
-					"font-size": "13px",
-    				"padding": "5px"
-				});
+			if (color && last != color && subjectsByColor[color]) {
+				$(this).text(utils.cutSubjectName(subjectsByColor[color]));
+				$(this).addClass("name-container");
 			}
 			last = color;
 		});
@@ -66,7 +53,7 @@ var HorariosPage = function(utils) {
 	// Init
 	(function() {
 		addTimeInfo();
-		setMateriasNameInTable();
+		setSubjectsNameInTable();
 		addPoweredBy();
 	})();
 	

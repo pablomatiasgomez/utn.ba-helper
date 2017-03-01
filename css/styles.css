@@ -25,3 +25,11 @@ a.helper:hover {
 .powered-by-siga-helper:after {
 	content: "POWERED BY SIGA HELPER";
 }
+
+/* Shows subject name on table */
+table .name-container {
+	max-width: 0;
+	white-space: nowrap;
+	font-size: 13px;
+	padding: 5px;
+}

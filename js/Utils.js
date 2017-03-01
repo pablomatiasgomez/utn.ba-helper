@@ -224,6 +224,15 @@ var Utils = function() {
 		return strArr;
 	};
 
+	var cutSubjectName = function(name) {
+		name = name.trim();
+		if (name.length > 20) {
+			return name.substr(0, 20) + "...";
+		} else {
+			return name;
+		}
+	};
+
 	// Public
 	return {
 		hours: hours,
@@ -239,6 +248,8 @@ var Utils = function() {
 
 		getTextNodes: getTextNodes,
 
-		postData: postData
+		postData: postData,
+
+		cutSubjectName: cutSubjectName
 	};
 };
