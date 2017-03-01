@@ -91,8 +91,12 @@ var PreInscripcionPage = function(utils) {
 	};
 
 	(function() {
-		if ($(".std-canvas table").length > 2) {
-			var hoursUsed = getAllHoursUsed($(".std-canvas table:last"));
+		var $table = $(".std-canvas table:last");
+		var $th = $table.find("tr:first > th:first");
+
+		// Check used to be sure that the given table is the one that has the used hours
+		if ($th.length && $th.text() == "") {
+			var hoursUsed = getAllHoursUsed($table);
 			setPreviewTable(hoursUsed);
 		}
 	})();
