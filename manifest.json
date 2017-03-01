@@ -5,7 +5,7 @@
     "short_name": "SigaH",
     "description": "Extension para mostrar mas items en el siga de FRBA UTN como por ejemplo el promedio de finales.",
     "author": "Pablo Matías Gomez",
-    "version": "1.6.2",
+    "version": "1.7.0",
 
     "icons": {
         "16": "images/icons/icon16.png",
