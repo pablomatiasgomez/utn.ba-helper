@@ -14,13 +14,23 @@ var ActasDeFinalesPage = function(utils) {
 	var $aprobadosTable = $(".std-canvas table:first");
 	var $desaprobadosTable = $(".std-canvas table").length > 1 ? $(".std-canvas table:last") : $();
 
-	// .. avgs
-	var addNoteToArray = function($tr, arr) {
-		var note = $tr.find("td:last").text();
 
-		if (note && !isNaN(note)) {
-			arr.push(parseInt(note));
+	var getPonderatedNote = function(note) {
+		var newNote = (2 / 3) * (note + 5);
+		return Math.round(newNote * 100) / 100; // Only 2 decimals should be used.
+	};
+
+	// .. avgs
+	var processNoteRow = function($tr, arr) {
+		var date = utils.parseDate($tr.find("td:first").text());
+		var note = parseInt($tr.find("td:eq(5)").text());
+		if (isNaN(note)) return;
+
+		if (date < utils.NEW_NOTES_REGULATION_DATE && note >= 4) {
+			note = getPonderatedNote(note);
+			$tr.find("td:eq(6)").text(note);
 		}
+		arr.push(note);
 	};
 
 	var getAvgFromArray = function(arr) {
@@ -32,11 +42,11 @@ var ActasDeFinalesPage = function(utils) {
 
 	var setAvgs = function() {
 		$aprobadosTable.find("tbody tr").each(function() {
-			addNoteToArray($(this), aprobados);
+			processNoteRow($(this), aprobados);
 		});
 
 		$desaprobadosTable.find("tbody tr").each(function() {
-			addNoteToArray($(this), desaprobados);
+			processNoteRow($(this), desaprobados);
 		});
 
 		avgDesaprobados = getAvgFromArray(aprobados.concat(desaprobados));
@@ -97,9 +107,15 @@ var ActasDeFinalesPage = function(utils) {
 		$(".std-canvas p:first").after($helperTable);
 	};
 
+	var addPonderatedColumn = function() {
+		$aprobadosTable.find("tr:not(:first)").append("<td></td>");
+		$aprobadosTable.find("tr:first").append("<th>Nota ponderada</th>");
+	};
+
 	// Init
 	(function() {
 		appendTable();
+		addPonderatedColumn();
 		setAvgs();
 		utils.getStartYear(setPesoAcademico);
 

@@ -5,7 +5,7 @@ var Utils = function() {
 	var BROWSER = "CHROME";
 	var VERSION = chrome.runtime.getManifest().version;
 
-	var hours = {
+	var HOURS = {
 		m: {
 			0: {
 				start: "7:45",
@@ -97,7 +97,7 @@ var Utils = function() {
 			}
 		}
 	};
-	var days = {
+	var DAYS = {
 		Lu: "Lunes",
 		Ma: "Martes",
 		Mi: "Miercoles",
@@ -105,15 +105,16 @@ var Utils = function() {
 		Vi: "Viernes",
 		Sa: "Sabado"
 	};
-	var turns = {
+	var TIME_SHIFTS = {
 		m: "Mañana",
 		t: "Tarde",
 		n: "Noche"
 	};
-	var sedes = {
+	var BRANCHES = {
 		CAMPUS: "CAMPUS",
 		MEDRANO: "MEDRANO"
 	};
+	var NEW_NOTES_REGULATION_DATE = new Date(2017, 2, 10); // Doesn't have to be exact.. just using March 10th.
 
 
 	var getStartYear = function(callback) {
@@ -207,7 +208,7 @@ var Utils = function() {
 
 	var getTimeInfoStringFromSchedules = function(schedules) {
 		var getStringForSchedule = function(schedule) {
-			return days[schedule.day] + " (" + turns[schedule.turn] + ") " + hours[schedule.turn][schedule.firstHour].start + "hs a " + hours[schedule.turn][schedule.lastHour].end + "hs";
+			return DAYS[schedule.day] + " (" + TIME_SHIFTS[schedule.turn] + ") " + HOURS[schedule.turn][schedule.firstHour].start + "hs a " + HOURS[schedule.turn][schedule.lastHour].end + "hs";
 		};
 
 		return schedules.map(getStringForSchedule).join(" y ");
@@ -233,12 +234,19 @@ var Utils = function() {
 		}
 	};
 
+	// Parses a date with format DD/MM/YYYY
+	var parseDate = function(dateStr) {
+		var dateParts = dateStr.split("/");
+		return new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);
+	};
+
 	// Public
 	return {
-		hours: hours,
-		days: days,
-		turns: turns,
-		sedes: sedes,
+		HOURS: HOURS,
+		DAYS: DAYS,
+		TIME_SHIFTS: TIME_SHIFTS,
+		BRANCHES: BRANCHES,
+		NEW_NOTES_REGULATION_DATE: NEW_NOTES_REGULATION_DATE,
 
 		getStartYear: getStartYear,
 		setStartYear: setStartYear,
@@ -250,6 +258,7 @@ var Utils = function() {
 
 		postData: postData,
 
-		cutSubjectName: cutSubjectName
+		cutSubjectName: cutSubjectName,
+		parseDate: parseDate
 	};
 };

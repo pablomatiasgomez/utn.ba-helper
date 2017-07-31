@@ -84,9 +84,9 @@ var PreInscripcionPage = function(utils) {
 			$tbody.append('<tr><th></th><th colspan="7">Mañana</th><th colspan="7">Tarde</th><th colspan="7">Noche</th></tr>');
 
 
-			for (var day in utils.days) {
+			for (var day in utils.DAYS) {
 				var $tr = $("<tr>");
-				$tr.append($("<td>", { html: utils.days[day] }));
+				$tr.append($("<td>", { html: utils.DAYS[day] }));
 
 				var lastColor = null;
 				for (var i = 0; i <= 19; i++) {

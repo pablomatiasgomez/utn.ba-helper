@@ -15,20 +15,20 @@ var PreInscripcionPopUpPage = function(utils) {
 		var $divFilters = $("<div class='filters'><div class='bold'>Filtros:</div></div>");
 
 		$divFilters.append("<span>Turno: </span>");
-		$divFilters.append(getSelect("turns", utils.turns));
+		$divFilters.append(getSelect("time-shifts", utils.TIME_SHIFTS));
 
 		$divFilters.append("<span>Dia: </span>");
-		$divFilters.append(getSelect("days", utils.days));
+		$divFilters.append(getSelect("days", utils.DAYS));
 
 		$divFilters.append("<span>Sede: </span>");
-		$divFilters.append(getSelect("sedes", utils.sedes));
+		$divFilters.append(getSelect("branches", utils.BRANCHES));
 
 		return $divFilters;
 	};
 
 	var bindFilterEvents = function($divFilters) {
 		var onFilterChange = function() {
-			var filters = ["turns", "days", "sedes"];
+			var filters = ["time-shifts", "days", "branches"];
 			var filterValues = {};
 			filters.forEach(function(filter) {
 				filterValues[filter] = $divFilters.find("select." + filter).val();
@@ -50,8 +50,8 @@ var PreInscripcionPopUpPage = function(utils) {
 		var schedules = utils.getSchedulesFromString($td.text());
 
 		$tr.attr("days", schedules.map(function(schedule) { return schedule.day; }).join(","));
-		$tr.attr("turns", schedules.map(function(schedule) { return schedule.turn; }).join(","));
-		$tr.attr("sedes", $tr.find("td:eq(3)").text());
+		$tr.attr("time-shifts", schedules.map(function(schedule) { return schedule.turn; }).join(","));
+		$tr.attr("branches", $tr.find("td:eq(3)").text());
 
 		$td.html($td.text() + "<br /><b>" + utils.getTimeInfoStringFromSchedules(schedules) + "</b>");
 	};
