@@ -65,10 +65,10 @@ var PreInscripcionPage = function(utils) {
 		var g = parseInt(arr.slice(2, 4) / 100 * 255);
 		var b = parseInt(arr.slice(4, 6) / 100 * 255);
 
-		while (((0.2126*r) + (0.7152*g) + (0.0722*b))  < 128) {
-			r = parseInt(Math.min(255, r * 1.1));
-			g = parseInt(Math.min(255, g * 1.1));
-			b = parseInt(Math.min(255, b * 1.1));
+		while (((0.2126*r) + (0.7152*g) + (0.0722*b)) < 128) {
+			r = Math.ceil(Math.min(255, r * 1.1));
+			g = Math.ceil(Math.min(255, g * 1.1));
+			b = Math.ceil(Math.min(255, b * 1.1));
 		}
 		return "#" + r.toString(16) + g.toString(16) + b.toString(16);
 	};
