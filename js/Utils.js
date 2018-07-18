@@ -1,9 +1,4 @@
-var Utils = function() {
-	var START_YEAR_DEFAULT = "2012";
-	var STORAGE_START_YEAR_KEY = "startYear";
-	var STORAGE_LEGAJO_KEY = "legajo";
-	var BROWSER = "CHROME";
-	var VERSION = chrome.runtime.getManifest().version;
+var Utils = function(pagesDataParser) {
 
 	var HOURS = {
 		m: {
@@ -116,78 +111,6 @@ var Utils = function() {
 	};
 	var NEW_NOTES_REGULATION_DATE = new Date(2017, 2, 10); // Doesn't have to be exact.. just using March 10th.
 
-
-	var getStartYear = function(callback) {
-		if (localStorage.getItem(STORAGE_START_YEAR_KEY)) {
-			callback(localStorage.getItem(STORAGE_START_YEAR_KEY));
-		} else {
-			$.ajax({
-				url: "/alu/libreta.do",
-				complete: function(data) {
-					if (data.status == 200) {
-						var startDate = $(data.responseText).find(".std-canvas table:first tbody tr:last td:first").text();
-						var startYear = startDate.split("/")[2];
-						localStorage.setItem(STORAGE_START_YEAR_KEY, startYear);
-						callback(startYear);
-					} else {
-						callback(START_YEAR_DEFAULT);
-					}
-				}
-			});
-		}
-	};
-
-	var setStartYear = function(startYear) {
-		localStorage.setItem(STORAGE_START_YEAR_KEY, startYear);
-	};
-
-	var getNumeroLegajo = function(callback) {
-		if (localStorage.getItem(STORAGE_LEGAJO_KEY)) {
-			callback(localStorage.getItem(STORAGE_LEGAJO_KEY));
-		} else {
-			$.ajax({
-				url: "/alu/inscurcomp.do",
-				complete: function(data) {
-					if (data.status == 200) {
-						var legajo = $(data.responseText).find("div.center p.mask1 span").text();
-						localStorage.setItem(STORAGE_LEGAJO_KEY, legajo);
-						callback(legajo);
-					} else {
-						callback(null);
-					}
-				}
-			});
-		}
-	};
-
-	var postData = function(avgAprobados, avgDesaprobados, pesoAcademico) {
-		var getQueryStringKeyValue = function(key, value) {
-			return key + "=" + encodeURIComponent(value) + "&";
-		};
-
-		getNumeroLegajo(function(legajo) {
-			var data = "";
-			data += getQueryStringKeyValue("from", BROWSER);
-			data += getQueryStringKeyValue("version", VERSION);
-			data += getQueryStringKeyValue("legajo", legajo);
-			data += getQueryStringKeyValue("avgAp", avgAprobados);
-			data += getQueryStringKeyValue("avgDesap", avgDesaprobados);
-			data += getQueryStringKeyValue("pesoAcademico", pesoAcademico);
-
-			$.ajax({
-				type: 'POST',
-				url: "http://siga.web44.net/add.php",
-				headers: {
-					'Accept': '*/*',
-					'Content-Type': 'application/x-www-form-urlencoded'
-				},
-				data: data,
-				jsonp: false,
-				jsonpCallback: function() { return false; }
-			});
-		});
-	};
-
 	var getScheduleFromString = function(str) {
 		if (str.indexOf("(") == -1 || str.indexOf(":") == -1) return;
 
@@ -204,7 +127,6 @@ var Utils = function() {
 
 		return str.split(" ").map(getScheduleFromString).filter(function(el) { return !!el; });
 	};
-
 
 	var getTimeInfoStringFromSchedules = function(schedules) {
 		var getStringForSchedule = function(schedule) {
@@ -248,16 +170,11 @@ var Utils = function() {
 		BRANCHES: BRANCHES,
 		NEW_NOTES_REGULATION_DATE: NEW_NOTES_REGULATION_DATE,
 
-		getStartYear: getStartYear,
-		setStartYear: setStartYear,
-
 		getSchedulesFromString: getSchedulesFromString,
 		getTimeInfoStringFromSchedules: getTimeInfoStringFromSchedules,
 
 		getTextNodes: getTextNodes,
-
-		postData: postData,
-
+		
 		cutSubjectName: cutSubjectName,
 		parseDate: parseDate
 	};
