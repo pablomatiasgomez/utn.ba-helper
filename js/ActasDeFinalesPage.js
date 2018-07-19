@@ -1,6 +1,4 @@
-var ActasDeFinalesPage = function(utils) {
-	
-	var KEY_ENTER = 13;
+var ActasDeFinalesPage = function(pagesDataParser, dataTracker, utils) {
 	
 	var aprobados = [];
 	var desaprobados = [];
@@ -69,38 +67,16 @@ var ActasDeFinalesPage = function(utils) {
 		pesoAcademico = 11 * aprobados.length - 5 * yearsCount - 3 * desaprobados.length;
 
 		$helperTable.find(".peso-academico").remove();
-		$helperTable.find("tbody").prepend("<tr class='peso-academico'><td>Peso academico</td><td> <b>" + pesoAcademico + "</b> <small>(11*" + aprobados.length + " - 5*" + yearsCount + " - 3*" + desaprobados.length + ")</small> <a class='helper change-year'>Cambiar año de ingreso</a><input class='year-change' type='text' value='" + startYear + "'/></td></tr>");
-		bindChangeYear();
+		$helperTable.find("tbody").prepend("<tr class='peso-academico'><td>Peso academico</td><td> <b>" + pesoAcademico + "</b> <small>(11*" + aprobados.length + " - 5*" + yearsCount + " - 3*" + desaprobados.length + ")</small></td></tr>");
+		postData();
 	};
 
-
-	var bindChangeYear = function() {
-		$(".std-canvas .change-year").on("click", function() {
-			$(this).hide();
-			$(this).parent().find(".year-change").show();
-		});
-
-		$(".std-canvas .year-change").on("keydown", function(e) {
-			if (e.keyCode === KEY_ENTER) {
-				var value = $(this).val();
-				if (!isNaN(value)) {
-					utils.setStartYear(value);
-					setPesoAcademico(value);
-				}
-				e.preventDefault();
-				return false;
-			}
-		});
-	};
 	// ..
 
 	var postData = function() {
-		var timer = setInterval(function() {
-			if (avgAprobados && avgDesaprobados && pesoAcademico) {
-				clearInterval(timer);
-				utils.postData(avgAprobados, avgDesaprobados, pesoAcademico);
-			}
-		}, 1000);
+		return pagesDataParser.getNumeroLegajo().then(legajo => {
+			return dataTracker.trackPesoAcademico(legajo, avgAprobados, avgDesaprobados, pesoAcademico);
+		});
 	};
 
 	var appendTable = function() {
@@ -112,17 +88,26 @@ var ActasDeFinalesPage = function(utils) {
 		$aprobadosTable.find("tr:first").append("<th>Nota ponderada</th>");
 	};
 
+	var getStartYear = function() {
+		return pagesDataParser.getStartYear().then(startYear => {
+			if (!startYear) {
+				startYear = $(".std-canvas table tr").toArray()
+					.map(elem => $(elem).find("td:first").text().split("/")[2])
+					.sort()
+					[0] || "2012"; // Last fall back...
+			} 
+			return startYear;
+		});
+	};
+
 	// Init
 	(function() {
 		appendTable();
 		addPonderatedColumn();
 		setAvgs();
-		utils.getStartYear(setPesoAcademico);
-
-		postData();
+		getStartYear().then(startYear => setPesoAcademico(startYear));
 	})();
 	
-
 	// Public
 	return {};
 };
