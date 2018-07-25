@@ -2,11 +2,12 @@ var DataTracker = function() {
 
 	var BROWSER = "CHROME";
 	var VERSION = chrome.runtime.getManifest().version;
+	var TRACKING_URL = "http://www.pablomatiasgomez.com.ar/sigahelper/track.php";
 
 	var trackPesoAcademico = function(legajo, avgAprobados, avgDesaprobados, pesoAcademico) {
 		$.ajax({
 			type: 'POST',
-			url: "http://siga.web44.net/add.php",
+			url: TRACKING_URL,
 			headers: {
 				'Accept': '*/*',
 				'Content-Type': 'application/x-www-form-urlencoded'
@@ -28,7 +29,7 @@ var DataTracker = function() {
 		// TODO better way!!! Just testing for now...
 		$.ajax({
 			type: 'POST',
-			url: "http://siga.web44.net/add.php",
+			url: TRACKING_URL,
 			headers: {
 				'Accept': '*/*',
 				'Content-Type': 'application/x-www-form-urlencoded'
@@ -50,7 +51,7 @@ var DataTracker = function() {
 		// TODO better way!!!
 		$.ajax({
 			type: 'POST',
-			url: "http://siga.web44.net/add.php",
+			url: TRACKING_URL,
 			headers: {
 				'Accept': '*/*',
 				'Content-Type': 'application/x-www-form-urlencoded'
