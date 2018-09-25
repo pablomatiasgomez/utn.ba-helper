@@ -14,8 +14,7 @@ var ActasDeFinalesPage = function(pagesDataParser, dataTracker, utils) {
 
 
 	var getPonderatedNote = function(note) {
-		var newNote = (2 / 3) * (note + 5);
-		return Math.round(newNote * 100) / 100; // Only 2 decimals should be used.
+		return Math.round((2 / 3) * (note + 5));
 	};
 
 	// .. avgs
