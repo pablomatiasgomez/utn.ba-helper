@@ -7,14 +7,27 @@ var ActasDeFinalesPage = function(pagesDataParser, dataTracker, utils) {
 	var avgAprobados;
 	var avgDesaprobados;
 
-	var $helperTable = $("<div style='display:inline-block;'><table><tbody></tbody></table><span class='powered-by-siga-helper'></span></div>");
+	var $helperTable = $("<div style='display:inline-block;'><table><tbody></tbody></table></div>");
 
 	var $aprobadosTable = $(".std-canvas table:first");
 	var $desaprobadosTable = $(".std-canvas table").length > 1 ? $(".std-canvas table:last") : $();
 
+	// Segun ordenanza 1549
+	var PONDERATED_NOTES = {
+		1: 1,
+		2: 2.67,
+		3: 4.33,
+		4: 6,
+		5: 6.67,
+		6: 7.33,
+		7: 8,
+		8: 8.67,
+		9: 9.33,
+		10: 10
+	};
 
 	var getPonderatedNote = function(note) {
-		return Math.round((2 / 3) * (note + 5));
+		return PONDERATED_NOTES[parseInt(note)];
 	};
 
 	// .. avgs
@@ -23,7 +36,7 @@ var ActasDeFinalesPage = function(pagesDataParser, dataTracker, utils) {
 		var note = parseInt($tr.find("td:eq(5)").text());
 		if (isNaN(note)) return;
 
-		if (date < utils.NEW_NOTES_REGULATION_DATE && note >= 4) {
+		if (date < utils.NEW_NOTES_REGULATION_DATE) {
 			note = getPonderatedNote(note);
 			$tr.find("td:eq(6)").text(note);
 		}
@@ -83,8 +96,9 @@ var ActasDeFinalesPage = function(pagesDataParser, dataTracker, utils) {
 	};
 
 	var addPonderatedColumn = function() {
-		$aprobadosTable.find("tr:not(:first)").append("<td></td>");
-		$aprobadosTable.find("tr:first").append("<th>Nota ponderada</th>");
+		var $bothTables = $aprobadosTable.add($desaprobadosTable);
+		$bothTables.find("tr:not(:first)").append("<td></td>");
+		$bothTables.find("tr:first").append("<th>Nota ponderada *</th>");
 	};
 
 	var getStartYear = function() {
@@ -99,12 +113,22 @@ var ActasDeFinalesPage = function(pagesDataParser, dataTracker, utils) {
 		});
 	};
 
+	var addPoweredBy = function() {
+		$(".std-canvas table").parent().css("display", "inline-block").append("<span class='powered-by-siga-helper'></span>");
+	};
+
+	var addPonderatedNoteExplanation = function() {
+		$(".std-canvas").append("<div>* La nota ponderada es calculada por el siga helper segun Ordenanza Nº 1549</div>");
+	};
+
 	// Init
 	(function() {
 		appendTable();
 		addPonderatedColumn();
 		setAvgs();
 		getStartYear().then(startYear => setPesoAcademico(startYear));
+		addPoweredBy();
+		addPonderatedNoteExplanation();
 	})();
 	
 	// Public
