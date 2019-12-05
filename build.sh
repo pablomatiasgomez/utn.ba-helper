@@ -1,0 +1,1 @@
+zip -vr out.zip css/ images/ js/ manifest.json
