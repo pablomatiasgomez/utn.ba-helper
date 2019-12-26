@@ -22,17 +22,17 @@ Array.prototype.flatMap = function(lambda) {
 	var PATH_NAME_PRE_INSCRIPCION = "/alu/preins.do";
 	var PATH_NAME_PRE_INSCRIPCION_POP_UP = "/alu/preinscolas.do";
 
-	var dataTracker = new DataTracker();
-	var pagesDataParser = new PagesDataParser(dataTracker);
+	var apiConnector = new ApiConnector();
+	var pagesDataParser = new PagesDataParser(apiConnector);
 	var utils = new Utils(pagesDataParser);
-	var teachersCollector = new TeachersCollector(pagesDataParser, dataTracker);
+	var teachersCollector = new TeachersCollector(pagesDataParser, apiConnector);
 
 	switch (location.pathname) {
 		case PATH_NAME_HORARIOS:
 			HorariosPage(utils);
 			break;
 		case PATH_NAME_FINALES:
-			ActasDeFinalesPage(pagesDataParser, dataTracker, utils);
+			ActasDeFinalesPage(pagesDataParser, apiConnector, utils);
 			break;
 		case PATH_NAME_PRE_INSCRIPCION_POP_UP:
 			PreInscripcionPopUpPage(utils);

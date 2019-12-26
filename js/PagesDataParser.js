@@ -1,4 +1,4 @@
-var PagesDataParser = function(dataTracker) {
+var PagesDataParser = function(apiConnector) {
 
 	var getPageContents = function(url) {
 		return $.ajax(url);
@@ -154,7 +154,7 @@ var PagesDataParser = function(dataTracker) {
 
 	var trackError = function(error, methodName) {
 		console.log(error);
-		dataTracker.logError(methodName, error);
+		apiConnector.logError(methodName, error);
 	};
 
 	// Public

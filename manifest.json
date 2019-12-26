@@ -5,7 +5,7 @@
     "short_name": "SigaH",
     "description": "Extension para mostrar mas items en el siga de FRBA UTN como por ejemplo el promedio de finales.",
     "author": "Pablo Matías Gomez",
-    "version": "2.0.5",
+    "version": "3.0.0",
 
     "icons": {
         "16": "images/icons/icon16.png",
@@ -24,21 +24,21 @@
             "matches": [
                 "*://*.siga.frba.utn.edu.ar/*"
             ],
-
             "js": [
-                "js/jquery-3.1.0.min.js",
-                "js/TeachersCollector.js",
-                "js/DataTracker.js",
+                "js/jquery-3.4.1.min.js",
                 "js/Utils.js",
-                "js/HorariosPage.js",
-                "js/ActasDeFinalesPage.js",
-                "js/ListadoMateriasPage.js",
+                "js/ApiConnector.js",
+                "js/TeachersCollector.js",
                 "js/PagesDataParser.js",
-                "js/PreInscripcionPopUpPage.js",
-                "js/PreInscripcionPage.js",
+                
+                "js/pages/HorariosPage.js",
+                "js/pages/ActasDeFinalesPage.js",
+                "js/pages/ListadoMateriasPage.js",
+                "js/pages/PreInscripcionPopUpPage.js",
+                "js/pages/PreInscripcionPage.js",
+                
                 "js/functions.js"
             ],
-
             "css": [
                 "css/styles.css"
             ]

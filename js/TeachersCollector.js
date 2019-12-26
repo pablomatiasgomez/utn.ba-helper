@@ -1,4 +1,4 @@
-var TeachersCollector = function(pagesDataParser, dataTracker) {
+var TeachersCollector = function(pagesDataParser, apiConnector) {
 
 	let SESSION_STORAGE_CHECKED_KEY = "SigaHelper.TeachersCollected";
 
@@ -6,7 +6,7 @@ var TeachersCollector = function(pagesDataParser, dataTracker) {
 		if (sessionStorage.getItem(SESSION_STORAGE_CHECKED_KEY)) return;
 
 		return pagesDataParser.getTeachersFromPoll().then(teachers => {
-			return dataTracker.trackTeachers(teachers);
+			return apiConnector.trackTeachers(teachers);
 		}).then(() => {
 			sessionStorage.setItem(SESSION_STORAGE_CHECKED_KEY, true);
 		});

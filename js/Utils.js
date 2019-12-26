@@ -109,7 +109,28 @@ var Utils = function(pagesDataParser) {
 		CAMPUS: "CAMPUS",
 		MEDRANO: "MEDRANO"
 	};
-	var NEW_NOTES_REGULATION_DATE = new Date(2017, 2, 10); // Doesn't have to be exact.. just using March 10th.
+	var NEW_GRADES_REGULATION_DATE = new Date(2017, 2, 10); // Doesn't have to be exact.. just using March 10th.
+	var WEIGTHED_GRADES = {
+		// Segun ordenanza 1549
+		1: 1,
+		2: 2.67,
+		3: 4.33,
+		4: 6,
+		5: 6.67,
+		6: 7.33,
+		7: 8,
+		8: 8.67,
+		9: 9.33,
+		10: 10
+	};
+
+	var getWeightedGrade = function(date, grade) {
+		if (date < utils.NEW_GRADES_REGULATION_DATE) {
+			return WEIGTHED_GRADES[grade];
+		} else {
+			return grade;
+		}
+	};
 
 	var getScheduleFromString = function(str) {
 		if (str.indexOf("(") == -1 || str.indexOf(":") == -1) return;
@@ -168,7 +189,8 @@ var Utils = function(pagesDataParser) {
 		DAYS: DAYS,
 		TIME_SHIFTS: TIME_SHIFTS,
 		BRANCHES: BRANCHES,
-		NEW_NOTES_REGULATION_DATE: NEW_NOTES_REGULATION_DATE,
+		
+		getWeightedGrade: getWeightedGrade,
 
 		getSchedulesFromString: getSchedulesFromString,
 		getTimeInfoStringFromSchedules: getTimeInfoStringFromSchedules,
