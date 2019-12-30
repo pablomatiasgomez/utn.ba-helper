@@ -1,13 +1,18 @@
-var PagesDataParser = function(apiConnector) {
+let PagesDataParser = function (apiConnector) {
 
-	var getPageContents = function(url) {
+	let trackError = function (error, methodName) {
+		console.log(error);
+		apiConnector.logError(methodName, error);
+	};
+
+	let getPageContents = function (url) {
 		return $.ajax(url);
 	};
 
-	var getStartYear = function() {
+	let getStartYear = function () {
 		return getPageContents("/alu/libreta.do").then(responseText => {
-			var startDate = $(responseText).find(".std-canvas table:first tbody tr:last td:first").text();
-			var startYear = startDate.split("/")[2];
+			let startDate = $(responseText).find(".std-canvas table:first tbody tr:last td:first").text();
+			let startYear = startDate.split("/")[2];
 			return startYear;
 		}).catch(e => {
 			trackError(e, "getStartYear");
@@ -15,17 +20,16 @@ var PagesDataParser = function(apiConnector) {
 		});
 	};
 
-	var getNumeroLegajo = function() {
+	let getLegajo = function () {
 		return getPageContents("/alu/inscurcomp.do").then(responseText => {
-			var legajo = $(responseText).find("div.center p.mask1 span").text();
-			return legajo;
+			return $(responseText).find("div.center p.mask1 span").text();
 		}).catch(e => {
 			trackError(e, "getNumeroLegajo");
 			return null;
 		});
 	};
 
-	var getSubjects = function() {
+	let getSubjects = function () {
 		let getSubjectsFromPage = page => {
 			return getPageContents(page).then(responseText => {
 				return $(responseText).find(".std-canvas table:first tbody tr:not(:first)")
@@ -52,7 +56,7 @@ var PagesDataParser = function(apiConnector) {
 		});
 	};
 
-	var getTeachersFromPoll = function() {
+	let getTeachersFromPoll = function () {
 		return getPageContents("/alu/encdoc.do").then(responseText => {
 			return $(responseText).find(".std-canvas .tab")
 				.toArray()
@@ -82,7 +86,7 @@ var PagesDataParser = function(apiConnector) {
 		});
 	};
 
-	var getSentSurveys = function() {
+	var getSentSurveys = function () {
 		return getPageContents("/alu/encdoc.do").then(responseText => {
 			return $(responseText).find(".std-canvas .tab")
 				.toArray()
@@ -151,16 +155,10 @@ var PagesDataParser = function(apiConnector) {
 		});
 	};
 
-
-	var trackError = function(error, methodName) {
-		console.log(error);
-		apiConnector.logError(methodName, error);
-	};
-
 	// Public
 	return {
 		getStartYear: getStartYear,
-		getNumeroLegajo: getNumeroLegajo,
+		getLegajo: getLegajo,
 		getSubjects: getSubjects,
 		getTeachersFromPoll: getTeachersFromPoll
 	};

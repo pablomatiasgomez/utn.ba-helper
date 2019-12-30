@@ -1,19 +1,29 @@
-var ApiConnector = function() {
+let ApiConnector = function () {
 
 	const CLIENT = "CHROME@" + chrome.runtime.getManifest().version;
-	const BASE_API_URL = "http://www.pablomatiasgomez.com.ar/sigahelper/v1";
-	const TRACKING_URL = BASE_API_URL + "/userstats";
+	const BASE_API_URL = "http://localhost:8080/sigahelper/v1";
+	//const BASE_API_URL = "http://www.pablomatiasgomez.com.ar/sigahelper/v1";
+	const TRACKING_URL = "http://www.pablomatiasgomez.com.ar/sigahelper/track.php";
 
-	var logUserStats = function(legajo, avgAprobados, avgDesaprobados, pesoAcademico) {
-		postData(TRACKING_URL, {
-			legajo: legajo,
-			avgAp: avgAprobados,
-			avgDesap: avgDesaprobados,
-			pesoAcademico: pesoAcademico,
+	let logError = function (methodName, error) {
+		return postData(BASE_API_URL + "/errors", {
+			method: methodName,
+			error: error,
 		});
 	};
 
-	var trackTeachers = function(teachers) {
+	let logUserStats = function (legajo, pesoAcademico, passingGradesAverage, allGradesAverage, passingGradesCount, failingGradesCount) {
+		return postData(BASE_API_URL + "/user-stats", {
+			id: legajo,
+			pesoAcademico: pesoAcademico,
+			passingGradesAverage: passingGradesAverage,
+			allGradesAverage: allGradesAverage,
+			passingGradesCount: passingGradesCount,
+			failingGradesCount: failingGradesCount
+		});
+	};
+
+	let trackTeachers = function (teachers) {
 		// TODO better way!!! Just testing for now...
 		$.ajax({
 			type: 'POST',
@@ -31,49 +41,29 @@ var ApiConnector = function() {
 				pesoAcademico: 0,
 			},
 			jsonp: false,
-			jsonpCallback: function() { return false; }
+			jsonpCallback: function () {
+				return false;
+			}
 		});
 	};
 
-	var logError = function(occuredOn, error) {
-		// TODO better way!!!
-		$.ajax({
-			type: 'POST',
-			url: TRACKING_URL,
-			headers: {
-				'Accept': '*/*',
-				'Content-Type': 'application/x-www-form-urlencoded'
-			},
-			data: {
-				from: BROWSER,
-				version: VERSION,
-				legajo: occuredOn + "-" + error,
-				avgAp: 0,
-				avgDesap: 0,
-				pesoAcademico: 0,
-			},
-			jsonp: false,
-			jsonpCallback: function() { return false; }
-		});
-	};
-
-
-	var postData = function(url, data) {
-		$.ajax({
+	let postData = function (url, data) {
+		return $.ajax({
 			type: "POST",
 			url: url,
 			dataType: "json",
 			contentType: "application/json; charset=utf-8",
 			headers: {
-				"X-SigaHelper-Client": CLIENT,
+				"X-Client": CLIENT,
 			},
-			data: data
+			data: JSON.stringify(data)
 		});
-	}
+	};
+
 	// Public
 	return {
 		logUserStats: logUserStats,
-		trackTeachers:trackTeachers,
+		trackTeachers: trackTeachers,
 		logError: logError,
 	};
 };

@@ -1,31 +1,30 @@
-Array.prototype.removeIf = function(callback) {
-	var i = 0;
+Array.prototype.removeIf = function (callback) {
+	let i = 0;
 	while (i < this.length) {
 		if (callback(this[i], i)) {
 			this.splice(i, 1);
-		}
-		else {
+		} else {
 			++i;
 		}
 	}
 };
 
-Array.prototype.flatMap = function(lambda) {
-    return Array.prototype.concat.apply([], this.map(lambda));
+Array.prototype.flatMap = function (lambda) {
+	return Array.prototype.concat.apply([], this.map(lambda));
 };
 
 
-(function() {
-	var PATH_NAME_HORARIOS = "/alu/horarios.do";
-	var PATH_NAME_FINALES = "/alu/acfin.do";
-	var PATH_NAME_LISTADO_MATERIAS = "/alu/mat.do";
-	var PATH_NAME_PRE_INSCRIPCION = "/alu/preins.do";
-	var PATH_NAME_PRE_INSCRIPCION_POP_UP = "/alu/preinscolas.do";
+(function () {
+	const PATH_NAME_HORARIOS = "/alu/horarios.do";
+	const PATH_NAME_FINALES = "/alu/acfin.do";
+	const PATH_NAME_LISTADO_MATERIAS = "/alu/mat.do";
+	const PATH_NAME_PRE_INSCRIPCION = "/alu/preins.do";
+	const PATH_NAME_PRE_INSCRIPCION_POP_UP = "/alu/preinscolas.do";
 
-	var apiConnector = new ApiConnector();
-	var pagesDataParser = new PagesDataParser(apiConnector);
-	var utils = new Utils(pagesDataParser);
-	var teachersCollector = new TeachersCollector(pagesDataParser, apiConnector);
+	let apiConnector = new ApiConnector();
+	let pagesDataParser = new PagesDataParser(apiConnector);
+	let utils = new Utils();
+	let teachersCollector = new TeachersCollector(pagesDataParser, apiConnector);
 
 	switch (location.pathname) {
 		case PATH_NAME_HORARIOS:
@@ -48,7 +47,7 @@ Array.prototype.flatMap = function(lambda) {
 
 	teachersCollector.collectIfNeeded();
 
-	$("body").on("click", ".powered-by-siga-helper", function() {
+	$("body").on("click", ".powered-by-siga-helper", function () {
 		window.open("https://chrome.google.com/webstore/detail/siga-helper/jdgdheoeghamkhfppapjchbojhehimpe", "_blank");
 	});
 
