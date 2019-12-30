@@ -2,24 +2,30 @@ let PagesDataParser = function (apiConnector) {
 
 	let trackError = function (error, methodName) {
 		console.log(error);
-		apiConnector.logError(methodName, error);
+		return apiConnector.logError(methodName, error);
 	};
 
 	let getPageContents = function (url) {
 		return $.ajax(url);
 	};
 
+	/**
+	 * Tries to resolve the starting year in the university for the current student.
+	 * @return {Promise<String>}
+	 */
 	let getStartYear = function () {
 		return getPageContents("/alu/libreta.do").then(responseText => {
 			let startDate = $(responseText).find(".std-canvas table:first tbody tr:last td:first").text();
-			let startYear = startDate.split("/")[2];
-			return startYear;
+			return startDate.split("/")[2];
 		}).catch(e => {
 			trackError(e, "getStartYear");
 			return null;
 		});
 	};
 
+	/**
+	 * @return {Promise<String>}
+	 */
 	let getLegajo = function () {
 		return getPageContents("/alu/inscurcomp.do").then(responseText => {
 			return $(responseText).find("div.center p.mask1 span").text();
@@ -29,8 +35,13 @@ let PagesDataParser = function (apiConnector) {
 		});
 	};
 
-	let getSubjects = function () {
-		let getSubjectsFromPage = page => {
+	/**
+	 * Gets all the courses that the student has taken, not including the failed ones.
+	 * The returned object contains the signed courses, which does not include the passed ones. The passed courses are included in a different proeprty.
+	 * @return {Promise<{signed: Array<String>, passed: Array<String>}>}
+	 */
+	let getCourses = function () {
+		let getCoursesFromPage = page => {
 			return getPageContents(page).then(responseText => {
 				return $(responseText).find(".std-canvas table:first tbody tr:not(:first)")
 					.map((i, elem) => $(elem).find("td:eq(1)").text())
@@ -39,19 +50,17 @@ let PagesDataParser = function (apiConnector) {
 		};
 
 		return Promise.all([
-			getSubjectsFromPage("/alu/acfin.do"),
-			getSubjectsFromPage("/alu/actp.do")
+			getCoursesFromPage("/alu/acfin.do"),
+			getCoursesFromPage("/alu/actp.do")
 		]).then(results => {
-			let approvedSubjects = results[0];
-			let signedSubjects = results[1];
-
-			signedSubjects.removeIf(subject => approvedSubjects.indexOf(subject) !== -1);
+			let passedCourses = results[0];
+			let signedCourses = results[1].filter(course => passedCourses.indexOf(course) === -1);
 			return {
-				approved: approvedSubjects,
-				signed: signedSubjects
+				passed: passedCourses,
+				signed: signedCourses
 			};
 		}).catch(e => {
-			trackError(e, "getSubjects");
+			trackError(e, "getCourses");
 			throw e;
 		});
 	};
@@ -63,18 +72,18 @@ let PagesDataParser = function (apiConnector) {
 				.flatMap(elem => {
 					let course = $(elem).find("p").text().split(" ");
 					let time = $(elem).prevAll("p").first().text().replace("_Encuesta", "").trim();
-					let courseCode = course[0];
-					let subjectCode = course[1];
+					let classCode = course[0];
+					let courseCode = course[1];
 					return $(elem).find("table tr")
 						.toArray()
-						// For each teacher we return an object with the same subject & course
 						.map(elem => {
+							// For each teacher we return an object with the same class & course
 							let teacherName = $(elem).find("td:first").text();
 							let teacherPosition = $(elem).find("td:eq(1)").text();
 							return {
 								time: time,
-								courseCode: courseCode,
-								subjectCode: subjectCode,
+								classCode: classCode, // was courseCode
+								courseCode: courseCode, // was subjectCode
 								teacherName: teacherName,
 								teacherPosition: teacherPosition
 							};
@@ -86,15 +95,15 @@ let PagesDataParser = function (apiConnector) {
 		});
 	};
 
-	var getSentSurveys = function () {
+	let getSentSurveys = function () {
 		return getPageContents("/alu/encdoc.do").then(responseText => {
 			return $(responseText).find(".std-canvas .tab")
 				.toArray()
 				.flatMap(elem => {
 					let course = $(elem).find("p").text().split(" ");
 					let time = $(elem).prevAll("p").first().text().replace("_Encuesta", "").trim();
-					let courseCode = course[0];
-					let subjectCode = course[1];
+					let classCode = course[0];
+					let courseCode = course[1];
 					return $(elem).find("table tr")
 						.toArray()
 						.filter(elem => {
@@ -137,7 +146,7 @@ let PagesDataParser = function (apiConnector) {
 										let answer = {
 											question: $(row).find("td").text(),
 											value: comboValue
-										}
+										};
 										if (["Rta Libre", "Libre"].indexOf(comboValue) !== -1) {
 											answer.text = $(row).next().find("textarea").val();
 										}
@@ -159,7 +168,7 @@ let PagesDataParser = function (apiConnector) {
 	return {
 		getStartYear: getStartYear,
 		getLegajo: getLegajo,
-		getSubjects: getSubjects,
+		getCourses: getCourses,
 		getTeachersFromPoll: getTeachersFromPoll
 	};
 };

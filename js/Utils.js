@@ -1,4 +1,4 @@
-var Utils = function () {
+let Utils = function () {
 
 	const HOURS = {
 		m: {
@@ -154,18 +154,18 @@ var Utils = function () {
 			.join(" y ");
 	};
 
-	var getTextNodes = function ($item) {
-		var arr = $item.contents().filter(function () {
+	let getTextNodes = function ($item) {
+		let arr = $item.contents().filter(function () {
 			return this.nodeType !== 1;
 		});
-		var strArr = [];
+		let strArr = [];
 		$(arr).each(function () {
 			strArr.push($(this).text());
 		});
 		return strArr;
 	};
 
-	var cutSubjectName = function (name) {
+	let trimCourseName = function (name) {
 		name = name.trim();
 		if (name.length > 20) {
 			return name.substr(0, 20) + "...";
@@ -194,7 +194,7 @@ var Utils = function () {
 
 		getTextNodes: getTextNodes,
 
-		cutSubjectName: cutSubjectName,
+		trimCourseName: trimCourseName,
 		parseDate: parseDate
 	};
 };

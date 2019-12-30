@@ -1,14 +1,15 @@
-var TeachersCollector = function(pagesDataParser, apiConnector) {
+let TeachersCollector = function (pagesDataParser, apiConnector) {
 
 	let SESSION_STORAGE_CHECKED_KEY = "SigaHelper.TeachersCollected";
 
-	var collectIfNeeded = function() {
+	let collectIfNeeded = function () {
+		// TODO this should be checked for each legajo.
 		if (sessionStorage.getItem(SESSION_STORAGE_CHECKED_KEY)) return;
 
 		return pagesDataParser.getTeachersFromPoll().then(teachers => {
-			return apiConnector.trackTeachers(teachers);
+			return apiConnector.postTeachers(teachers);
 		}).then(() => {
-			sessionStorage.setItem(SESSION_STORAGE_CHECKED_KEY, true);
+			sessionStorage.setItem(SESSION_STORAGE_CHECKED_KEY, JSON.stringify(true));
 		});
 	};
 

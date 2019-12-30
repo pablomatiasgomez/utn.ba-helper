@@ -3,7 +3,6 @@ let ApiConnector = function () {
 	const CLIENT = "CHROME@" + chrome.runtime.getManifest().version;
 	const BASE_API_URL = "http://localhost:8080/sigahelper/v1";
 	//const BASE_API_URL = "http://www.pablomatiasgomez.com.ar/sigahelper/v1";
-	const TRACKING_URL = "http://www.pablomatiasgomez.com.ar/sigahelper/track.php";
 
 	let logError = function (methodName, error) {
 		return postData(BASE_API_URL + "/errors", {
@@ -12,7 +11,7 @@ let ApiConnector = function () {
 		});
 	};
 
-	let logUserStats = function (legajo, pesoAcademico, passingGradesAverage, allGradesAverage, passingGradesCount, failingGradesCount) {
+	let logUserStat = function (legajo, pesoAcademico, passingGradesAverage, allGradesAverage, passingGradesCount, failingGradesCount) {
 		return postData(BASE_API_URL + "/user-stats", {
 			id: legajo,
 			pesoAcademico: pesoAcademico,
@@ -23,28 +22,9 @@ let ApiConnector = function () {
 		});
 	};
 
-	let trackTeachers = function (teachers) {
-		// TODO better way!!! Just testing for now...
-		$.ajax({
-			type: 'POST',
-			url: TRACKING_URL,
-			headers: {
-				'Accept': '*/*',
-				'Content-Type': 'application/x-www-form-urlencoded'
-			},
-			data: {
-				from: BROWSER,
-				version: VERSION,
-				legajo: JSON.stringify(teachers),
-				avgAp: 0,
-				avgDesap: 0,
-				pesoAcademico: 0,
-			},
-			jsonp: false,
-			jsonpCallback: function () {
-				return false;
-			}
-		});
+	let postTeachers = function (teachers) {
+		// TODO finish this
+		return postData(BASE_API_URL + "/teachers", teachers);
 	};
 
 	let postData = function (url, data) {
@@ -62,8 +42,8 @@ let ApiConnector = function () {
 
 	// Public
 	return {
-		logUserStats: logUserStats,
-		trackTeachers: trackTeachers,
+		logUserStat: logUserStat,
+		postTeachers: postTeachers,
 		logError: logError,
 	};
 };

@@ -1,19 +1,3 @@
-Array.prototype.removeIf = function (callback) {
-	let i = 0;
-	while (i < this.length) {
-		if (callback(this[i], i)) {
-			this.splice(i, 1);
-		} else {
-			++i;
-		}
-	}
-};
-
-Array.prototype.flatMap = function (lambda) {
-	return Array.prototype.concat.apply([], this.map(lambda));
-};
-
-
 (function () {
 	const PATH_NAME_HORARIOS = "/alu/horarios.do";
 	const PATH_NAME_FINALES = "/alu/acfin.do";

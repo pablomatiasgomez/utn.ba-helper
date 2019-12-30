@@ -1,63 +1,59 @@
-var HorariosPage = function(utils) {
+let HorariosPage = function (utils) {
 
-	var rgb2hex = function(rgb) {
+	let rgb2hex = function (rgb) {
 		if (/^#[0-9A-F]{6}$/i.test(rgb)) return rgb;
 
 		rgb = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
 		if (!rgb) return rgb;
 
-		function hex(x) {
-			return ("0" + parseInt(x).toString(16)).slice(-2);
-		}
+		const hex = x => ("0" + parseInt(x).toString(16)).slice(-2);
 		return "#" + hex(rgb[1]) + hex(rgb[2]) + hex(rgb[3]);
 	};
 
-	var getSubjectsByColor = function() {
-		var subjectsByColor = {};
+	let getClassesByColor = function () {
+		let classesByColor = {};
 
-		$(".std-canvas table:first tr:not(:first)").each(function() {
-			var name = $(this).find("td:nth(2)").text().trim();
-			var color = $(this).find("td[style]:last").css("background-color");
+		$(".std-canvas table:first tr:not(:first)").each(function () {
+			let name = $(this).find("td:nth(2)").text().trim();
+			let color = $(this).find("td[style]:last").css("background-color");
 			if (!name || !color) return;
-			subjectsByColor[rgb2hex(color)] = name;
+			classesByColor[rgb2hex(color)] = name;
 		});
-
-		return subjectsByColor;
+		return classesByColor;
 	};
-	
-	var setSubjectsNameInTable = function() {
-		var subjectsByColor = getSubjectsByColor();
-		var last = null;
 
-		$(".std-canvas table:last tr:not(:first) td").each(function() {
-			var color = rgb2hex($(this).css("background-color"));
-			if (color && last != color && subjectsByColor[color]) {
-				$(this).text(utils.cutSubjectName(subjectsByColor[color]));
+	let setClassNamesInTable = function () {
+		let classesByColor = getClassesByColor();
+		let last = null;
+
+		$(".std-canvas table:last tr:not(:first) td").each(function () {
+			let color = rgb2hex($(this).css("background-color"));
+			if (color && last !== color && classesByColor[color]) {
+				$(this).text(utils.trimCourseName(classesByColor[color]));
 				$(this).addClass("name-container");
 			}
 			last = color;
 		});
 	};
 
-	var addTimeInfo = function($tr) {
-		$(".std-canvas table:first tr:not(:first)").each(function() {
-			var $td = $(this).find("td:nth(5)");
-			var schedules = utils.getSchedulesFromString($td.text());
+	let addTimeInfo = function () {
+		$(".std-canvas table:first tr:not(:first)").each(function () {
+			let $td = $(this).find("td:nth(5)");
+			let schedules = utils.getSchedulesFromString($td.text());
 			$td.html($td.text() + "<br /><b>" + utils.getTimeInfoStringFromSchedules(schedules) + "</b>");
 		});
 	};
 
-	var addPoweredBy = function() {
+	let addPoweredBy = function () {
 		$(".std-canvas table").parent().css("display", "inline-block").append("<span class='powered-by-siga-helper'></span>");
 	};
 
 	// Init
-	(function() {
+	(function () {
 		addTimeInfo();
-		setSubjectsNameInTable();
+		setClassNamesInTable();
 		addPoweredBy();
 	})();
-	
 
 	// Public
 	return {};

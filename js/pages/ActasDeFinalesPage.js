@@ -1,5 +1,5 @@
-var ActasDeFinalesPage = function(pagesDataParser, apiConnector, utils) {
-	
+let ActasDeFinalesPage = function (pagesDataParser, apiConnector, utils) {
+
 	let passingGrades = [];
 	let failingGrades = [];
 
@@ -12,8 +12,7 @@ var ActasDeFinalesPage = function(pagesDataParser, apiConnector, utils) {
 	let $passingGradesTable = $(".std-canvas table:first");
 	let $failingGradesTable = $(".std-canvas table").length > 1 ? $(".std-canvas table:last") : $();
 
-	// .. avgs
-	let processNoteRow = function ($tr, arr) {
+	let processGradeRow = function ($tr, gradesArray) {
 		let date = utils.parseDate($tr.find("td:first").text());
 		let grade = parseInt($tr.find("td:eq(5)").text());
 		if (isNaN(grade)) return;
@@ -22,7 +21,7 @@ var ActasDeFinalesPage = function(pagesDataParser, apiConnector, utils) {
 		if (grade !== weightedGrade) {
 			$tr.find("td:eq(6)").text(weightedGrade);
 		}
-		arr.push(weightedGrade);
+		gradesArray.push(weightedGrade);
 	};
 
 	let getAvgFromArray = function (arr) {
@@ -30,9 +29,9 @@ var ActasDeFinalesPage = function(pagesDataParser, apiConnector, utils) {
 		return Math.round(sum / arr.length * 100) / 100;
 	};
 
-	let setAvgs = function () {
-		$passingGradesTable.find("tbody tr").each((i, tr) => processNoteRow($(tr), passingGrades));
-		$failingGradesTable.find("tbody tr").each((i, tr) => processNoteRow($(tr), failingGrades));
+	let calculateAndAppendAverages = function () {
+		$passingGradesTable.find("tbody tr").each((i, tr) => processGradeRow($(tr), passingGrades));
+		$failingGradesTable.find("tbody tr").each((i, tr) => processGradeRow($(tr), failingGrades));
 
 		allGradesAverage = getAvgFromArray(passingGrades.concat(failingGrades));
 		passingGradesAverage = getAvgFromArray(passingGrades);
@@ -56,9 +55,9 @@ var ActasDeFinalesPage = function(pagesDataParser, apiConnector, utils) {
 	};
 
 	// ..
-	let postData = function () {
+	let logUserStat = function () {
 		return pagesDataParser.getLegajo().then(legajo => {
-			return apiConnector.logUserStats(legajo, pesoAcademico, passingGradesAverage, allGradesAverage, passingGrades.length, failingGrades.length);
+			return apiConnector.logUserStat(legajo, pesoAcademico, passingGradesAverage, allGradesAverage, passingGrades.length, failingGrades.length);
 		});
 	};
 
@@ -93,17 +92,17 @@ var ActasDeFinalesPage = function(pagesDataParser, apiConnector, utils) {
 	};
 
 	// Init
-	(function() {
+	(function () {
 		appendTable();
 		addWeightedGradeColumn();
-		setAvgs();
+		calculateAndAppendAverages();
 		getStartYear()
 			.then(startYear => setPesoAcademico(startYear))
-			.then(() => postData());
+			.then(() => logUserStat());
 		addPoweredBy();
 		addWeightedGradeExplanation();
 	})();
-	
+
 	// Public
 	return {};
 };
