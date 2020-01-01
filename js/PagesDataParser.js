@@ -1,8 +1,8 @@
 let PagesDataParser = function (utils, apiConnector) {
 
 	let trackError = function (error, methodName) {
-		console.error(error);
-		return apiConnector.logError(methodName, error);
+		console.error("Error at " + methodName, error);
+		return apiConnector.logError(methodName, typeof error === 'object' ? JSON.stringify(error) : error);
 	};
 
 	let getPageContents = function (url) {
@@ -154,8 +154,8 @@ let PagesDataParser = function (utils, apiConnector) {
 
 				let isInFirstQuarter = false;
 				let isInSecondQuarter = false;
-				for (let m of FIRST_QUARTER_MONTHS) if(months.has(m)) isInFirstQuarter = true;
-				for (let m of SECOND_QUARTER_MONTHS) if(months.has(m)) isInSecondQuarter = true;
+				for (let m of FIRST_QUARTER_MONTHS) if (months.has(m)) isInFirstQuarter = true;
+				for (let m of SECOND_QUARTER_MONTHS) if (months.has(m)) isInSecondQuarter = true;
 				let quarter;
 
 				if (isInFirstQuarter && isInSecondQuarter) {
@@ -165,7 +165,7 @@ let PagesDataParser = function (utils, apiConnector) {
 				} else if (isInSecondQuarter) {
 					quarter = "2C";
 				} else {
-					throw "Couldn't parse months: " + Array.from(months);;
+					throw "Couldn't parse months: " + Array.from(months);
 				}
 				return {
 					year: year,
