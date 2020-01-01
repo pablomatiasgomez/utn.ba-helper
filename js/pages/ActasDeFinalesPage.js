@@ -56,8 +56,8 @@ let ActasDeFinalesPage = function (pagesDataParser, apiConnector, utils) {
 
 	// ..
 	let logUserStat = function () {
-		return pagesDataParser.getLegajo().then(legajo => {
-			return apiConnector.logUserStat(legajo, pesoAcademico, passingGradesAverage, allGradesAverage, passingGrades.length, failingGrades.length);
+		return pagesDataParser.getStudentId().then(studentId => {
+			return apiConnector.logUserStat(studentId, pesoAcademico, passingGradesAverage, allGradesAverage, passingGrades.length, failingGrades.length);
 		});
 	};
 

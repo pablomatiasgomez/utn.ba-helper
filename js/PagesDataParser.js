@@ -1,7 +1,7 @@
 let PagesDataParser = function (apiConnector) {
 
 	let trackError = function (error, methodName) {
-		console.log(error);
+		console.error(error);
 		return apiConnector.logError(methodName, error);
 	};
 
@@ -24,14 +24,17 @@ let PagesDataParser = function (apiConnector) {
 	};
 
 	/**
+	 * Tries to resolve and return the student id for the current logged in user.
 	 * @return {Promise<String>}
 	 */
-	let getLegajo = function () {
+	let getStudentId = function () {
 		return getPageContents("/alu/inscurcomp.do").then(responseText => {
-			return $(responseText).find("div.center p.mask1 span").text();
+			let studentId = $(responseText).find("div.center p.mask1 span").text();
+			if (!studentId) throw "Couldn't get studentId from responseText: " + responseText;
+			return studentId;
 		}).catch(e => {
-			trackError(e, "getNumeroLegajo");
-			return null;
+			trackError(e, "getStudentId");
+			throw e;
 		});
 	};
 
@@ -65,36 +68,53 @@ let PagesDataParser = function (apiConnector) {
 		});
 	};
 
-	let getTeachersFromPoll = function () {
+	const TYPE_REGEX_PARSER = /^(docente|auxiliares) (\d{4}) (a|1|2)(nual|er c|do c)$/g;
+
+	/**
+	 * Fetches all the current surveys that the user has to take o has taken.
+	 * For each of them resolves the current professor name, class, course, quarter, etc.
+	 * @return an array of objects for each combination of professor and class
+	 */
+	let getProfessorClassesFromSurveys = function () {
 		return getPageContents("/alu/encdoc.do").then(responseText => {
 			return $(responseText).find(".std-canvas .tab")
 				.toArray()
 				.flatMap(elem => {
-					let course = $(elem).find("p").text().split(" ");
-					let time = $(elem).prevAll("p").first().text().replace("_Encuesta", "").trim();
-					let classCode = course[0];
-					let courseCode = course[1];
+					let typeStr = $(elem).prevAll("p").first().text().toLowerCase().replace("encuesta", "").replace("_", " ").trim();
+					let groups = TYPE_REGEX_PARSER.exec(typeStr);
+					if (!groups || groups.length !== 5) throw "Type couldn't be parsed: " + typeStr;
+
+					let surveyKind = groups[1].toUpperCase(); // DOCENTE, AUXILIARES
+					let year = parseInt(groups[2]); // 2018, 2019, ...
+					let quarter = groups[3] === "a" ? "A" : (groups[3] + "C"); // A, 1C, 2C
+
+					let classTaken = $(elem).find("p").text().split(" ");
+					let classCode = classTaken[0];
+					let courseCode = classTaken[1];
 					return $(elem).find("table tr")
 						.toArray()
 						.map(elem => {
-							// For each teacher we return an object with the same class & course
-							let teacherName = $(elem).find("td:first").text();
-							let teacherPosition = $(elem).find("td:eq(1)").text();
+							// For each professor we return an object with the same class & course
+							let professorName = $(elem).find("td:first").text();
+							let professorRole = $(elem).find("td:eq(1)").text();
 							return {
-								time: time,
-								classCode: classCode, // was courseCode
-								courseCode: courseCode, // was subjectCode
-								teacherName: teacherName,
-								teacherPosition: teacherPosition
+								surveyKind: surveyKind,
+								year: year,
+								quarter: quarter,
+								classCode: classCode,
+								courseCode: courseCode,
+								professorName: professorName,
+								professorRole: professorRole
 							};
 						});
 				});
 		}).catch(e => {
-			trackError(e, "getTeachersFromPoll");
+			trackError(e, "getProfessorClassesFromSurveys");
 			throw e;
 		});
 	};
 
+	/*
 	let getSentSurveys = function () {
 		return getPageContents("/alu/encdoc.do").then(responseText => {
 			return $(responseText).find(".std-canvas .tab")
@@ -163,12 +183,13 @@ let PagesDataParser = function (apiConnector) {
 			throw e;
 		});
 	};
+	 */
 
 	// Public
 	return {
 		getStartYear: getStartYear,
-		getLegajo: getLegajo,
+		getStudentId: getStudentId,
 		getCourses: getCourses,
-		getTeachersFromPoll: getTeachersFromPoll
+		getProfessorClassesFromSurveys: getProfessorClassesFromSurveys
 	};
 };

@@ -8,7 +8,7 @@
 	let apiConnector = new ApiConnector();
 	let pagesDataParser = new PagesDataParser(apiConnector);
 	let utils = new Utils();
-	let teachersCollector = new TeachersCollector(pagesDataParser, apiConnector);
+	let professorClassesCollector = new ProfessorClassesCollector(pagesDataParser, apiConnector);
 
 	switch (location.pathname) {
 		case PATH_NAME_HORARIOS:
@@ -29,7 +29,7 @@
 		default:
 	}
 
-	teachersCollector.collectIfNeeded();
+	professorClassesCollector.collectIfNeeded();
 
 	$("body").on("click", ".powered-by-siga-helper", function () {
 		window.open("https://chrome.google.com/webstore/detail/siga-helper/jdgdheoeghamkhfppapjchbojhehimpe", "_blank");

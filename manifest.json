@@ -28,7 +28,7 @@
                 "js/jquery-3.4.1.min.js",
                 "js/Utils.js",
                 "js/ApiConnector.js",
-                "js/TeachersCollector.js",
+                "js/ProfessorClassesCollector.js",
                 "js/PagesDataParser.js",
                 
                 "js/pages/HorariosPage.js",

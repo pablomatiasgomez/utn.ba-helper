@@ -1,8 +1,8 @@
 let ApiConnector = function () {
 
 	const CLIENT = "CHROME@" + chrome.runtime.getManifest().version;
-	const BASE_API_URL = "http://localhost:8080/sigahelper/v1";
-	//const BASE_API_URL = "http://www.pablomatiasgomez.com.ar/sigahelper/v1";
+	//const BASE_API_URL = "http://localhost:8080/sigahelper/v1";
+	const BASE_API_URL = "http://www.pablomatiasgomez.com.ar/sigahelper/v1";
 
 	let logError = function (methodName, error) {
 		return postData(BASE_API_URL + "/errors", {
@@ -11,9 +11,9 @@ let ApiConnector = function () {
 		});
 	};
 
-	let logUserStat = function (legajo, pesoAcademico, passingGradesAverage, allGradesAverage, passingGradesCount, failingGradesCount) {
+	let logUserStat = function (studentId, pesoAcademico, passingGradesAverage, allGradesAverage, passingGradesCount, failingGradesCount) {
 		return postData(BASE_API_URL + "/user-stats", {
-			id: legajo,
+			studentId: studentId,
 			pesoAcademico: pesoAcademico,
 			passingGradesAverage: passingGradesAverage,
 			allGradesAverage: allGradesAverage,
@@ -22,9 +22,8 @@ let ApiConnector = function () {
 		});
 	};
 
-	let postTeachers = function (teachers) {
-		// TODO finish this
-		return postData(BASE_API_URL + "/teachers", teachers);
+	let postProfessorClasses = function (professorClasses) {
+		return postData(BASE_API_URL + "/professor-classes", professorClasses);
 	};
 
 	let postData = function (url, data) {
@@ -43,7 +42,7 @@ let ApiConnector = function () {
 	// Public
 	return {
 		logUserStat: logUserStat,
-		postTeachers: postTeachers,
+		postProfessorClasses: postProfessorClasses,
 		logError: logError,
 	};
 };
