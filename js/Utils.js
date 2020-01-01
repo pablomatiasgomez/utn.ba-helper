@@ -110,7 +110,7 @@ let Utils = function () {
 		MEDRANO: "MEDRANO"
 	};
 	const NEW_GRADES_REGULATION_DATE = new Date(2017, 2, 10); // Doesn't have to be exact.. just using March 10th.
-	const WEIGTHED_GRADES = {
+	const WEIGHTED_GRADES = {
 		// Segun ordenanza 1549
 		1: 1,
 		2: 2.67,
@@ -126,7 +126,7 @@ let Utils = function () {
 
 	let getWeightedGrade = function (date, grade) {
 		if (date < NEW_GRADES_REGULATION_DATE) {
-			return WEIGTHED_GRADES[grade];
+			return WEIGHTED_GRADES[grade];
 		} else {
 			return grade;
 		}
@@ -137,7 +137,7 @@ let Utils = function () {
 
 		return {
 			day: str.split("(")[0].replace("á", "a"),
-			turn: str.match(/\(([^)]+)\)/)[1],
+			shift: str.match(/\(([^)]+)\)/)[1],
 			firstHour: str.split(")")[1].split(":")[0],
 			lastHour: str.split(")")[1].split(":")[1],
 		};
@@ -150,7 +150,7 @@ let Utils = function () {
 
 	let getTimeInfoStringFromSchedules = function (schedules) {
 		return schedules
-			.map(schedule => DAYS[schedule.day] + " (" + TIME_SHIFTS[schedule.turn] + ") " + HOURS[schedule.turn][schedule.firstHour].start + "hs a " + HOURS[schedule.turn][schedule.lastHour].end + "hs")
+			.map(schedule => DAYS[schedule.day] + " (" + TIME_SHIFTS[schedule.shift] + ") " + HOURS[schedule.shift][schedule.firstHour].start + "hs a " + HOURS[schedule.shift][schedule.lastHour].end + "hs")
 			.join(" y ");
 	};
 
@@ -195,6 +195,6 @@ let Utils = function () {
 		getTextNodes: getTextNodes,
 
 		trimCourseName: trimCourseName,
-		parseDate: parseDate
+		parseDate: parseDate,
 	};
 };

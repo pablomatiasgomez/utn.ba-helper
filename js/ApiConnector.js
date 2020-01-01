@@ -1,8 +1,8 @@
 let ApiConnector = function () {
 
 	const CLIENT = "CHROME@" + chrome.runtime.getManifest().version;
-	//const BASE_API_URL = "http://localhost:8080/sigahelper/v1";
-	const BASE_API_URL = "http://www.pablomatiasgomez.com.ar/sigahelper/v1";
+	const BASE_API_URL = "http://localhost:8080/sigahelper/v1";
+	//const BASE_API_URL = "http://www.pablomatiasgomez.com.ar/sigahelper/v1";
 
 	let logError = function (methodName, error) {
 		return postData(BASE_API_URL + "/errors", {
@@ -26,6 +26,41 @@ let ApiConnector = function () {
 		return postData(BASE_API_URL + "/professor-classes", professorClasses);
 	};
 
+	let postClassSchedules = function (classSchedules) {
+		return postData(BASE_API_URL + "/class-schedules", classSchedules.map(classSchedule => {
+			return {
+				year: classSchedule.year,
+				quarter: classSchedule.quarter,
+				classCode: classSchedule.classCode,
+				courseCode: classSchedule.courseCode,
+				branch: classSchedule.branch,
+				schedules: classSchedule.schedules.map(mapSchedule)
+			};
+		}));
+	};
+
+	const DAYS_MAPPING = {
+		"Lu": "MONDAY",
+		"Ma": "TUESDAY",
+		"Mi": "WEDNESDAY",
+		"Ju": "THURSDAY",
+		"Vi": "FRIDAY",
+		"Sa": "SATURDAY",
+	};
+	const SHIFTS_MAPPING = {
+		"m": "MORNING",
+		"t": "AFTERNOON",
+		"n": "NIGHT",
+	};
+	let mapSchedule = function (schedule) {
+		return {
+			day: DAYS_MAPPING[schedule.day],
+			shift: SHIFTS_MAPPING[schedule.shift],
+			firstHour: parseInt(schedule.firstHour),
+			lastHour: parseInt(schedule.lastHour),
+		};
+	};
+
 	let postData = function (url, data) {
 		return $.ajax({
 			type: "POST",
@@ -43,6 +78,7 @@ let ApiConnector = function () {
 	return {
 		logUserStat: logUserStat,
 		postProfessorClasses: postProfessorClasses,
+		postClassSchedules: postClassSchedules,
 		logError: logError,
 	};
 };

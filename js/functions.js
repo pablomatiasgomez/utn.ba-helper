@@ -1,32 +1,20 @@
 (function () {
-	const PATH_NAME_HORARIOS = "/alu/horarios.do";
-	const PATH_NAME_FINALES = "/alu/acfin.do";
-	const PATH_NAME_LISTADO_MATERIAS = "/alu/mat.do";
-	const PATH_NAME_PRE_INSCRIPCION = "/alu/preins.do";
-	const PATH_NAME_PRE_INSCRIPCION_POP_UP = "/alu/preinscolas.do";
-
-	let apiConnector = new ApiConnector();
-	let pagesDataParser = new PagesDataParser(apiConnector);
 	let utils = new Utils();
+	let apiConnector = new ApiConnector();
+	let pagesDataParser = new PagesDataParser(utils, apiConnector);
 	let professorClassesCollector = new ProfessorClassesCollector(pagesDataParser, apiConnector);
 
-	switch (location.pathname) {
-		case PATH_NAME_HORARIOS:
-			HorariosPage(utils);
-			break;
-		case PATH_NAME_FINALES:
-			ActasDeFinalesPage(pagesDataParser, apiConnector, utils);
-			break;
-		case PATH_NAME_PRE_INSCRIPCION_POP_UP:
-			PreInscripcionPopUpPage(utils);
-			break;
-		case PATH_NAME_PRE_INSCRIPCION:
-			PreInscripcionPage(utils);
-			break;
-		case PATH_NAME_LISTADO_MATERIAS:
-			ListadoMateriasPage(pagesDataParser);
-			break;
-		default:
+	const PAGE_HANDLERS = {
+		"/alu/horarios.do": () => HorariosPage(utils),
+		"/alu/acfin.do": () => ActasDeFinalesPage(pagesDataParser, apiConnector, utils),
+		"/alu/mat.do": () => ListadoMateriasPage(pagesDataParser),
+		"/alu/preins.do": () => PreInscripcionPage(utils),
+		"/alu/preinscolas.do": () => PreInscripcionPopUpPage(utils),
+	};
+
+	let handler = PAGE_HANDLERS[location.pathname];
+	if (handler) {
+		handler();
 	}
 
 	professorClassesCollector.collectIfNeeded();

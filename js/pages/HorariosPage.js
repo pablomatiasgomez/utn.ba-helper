@@ -14,7 +14,7 @@ let HorariosPage = function (utils) {
 		let classesByColor = {};
 
 		$(".std-canvas table:first tr:not(:first)").each(function () {
-			let name = $(this).find("td:nth(2)").text().trim();
+			let name = $(this).find("td:nth-child(3)").text().trim();
 			let color = $(this).find("td[style]:last").css("background-color");
 			if (!name || !color) return;
 			classesByColor[rgb2hex(color)] = name;
@@ -38,7 +38,9 @@ let HorariosPage = function (utils) {
 
 	let addTimeInfo = function () {
 		$(".std-canvas table:first tr:not(:first)").each(function () {
-			let $td = $(this).find("td:nth(5)");
+			let $td = $(this).find("td:nth-child(6)");
+			if (!$td.length) return;
+
 			let schedules = utils.getSchedulesFromString($td.text());
 			$td.html($td.text() + "<br /><b>" + utils.getTimeInfoStringFromSchedules(schedules) + "</b>");
 		});

@@ -51,7 +51,7 @@ let PreInscripcionPopUpPage = function (utils) {
 			return schedule.day;
 		}).join(","));
 		$tr.attr("time-shifts", schedules.map(function (schedule) {
-			return schedule.turn;
+			return schedule.shift;
 		}).join(","));
 		$tr.attr("branches", $tr.find("td:eq(3)").text());
 

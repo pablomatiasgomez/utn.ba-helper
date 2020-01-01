@@ -1,12 +1,12 @@
 let PreInscripcionPage = function (utils) {
 
 	let getAllUsedHours = function ($table) {
-		let getTurnIndex = function (turn) {
-			if (turn === "m") {
+		let getShiftIndex = function (shift) {
+			if (shift === "m") {
 				return 0;
-			} else if (turn === "t") {
+			} else if (shift === "t") {
 				return 1;
-			} else if (turn === "n") {
+			} else if (shift === "n") {
 				return 2;
 			}
 			return 0;
@@ -35,8 +35,8 @@ let PreInscripcionPage = function (utils) {
 							let str = strArray[0].replace("CAMPUS", "").replace("MEDRANO", ""); // This is not needed, but just in case.
 
 							utils.getSchedulesFromString(str).forEach(function (schedule) {
-								let firstHour = parseInt(schedule.firstHour) + (getTurnIndex(schedule.turn) * 7);
-								let lastHour = parseInt(schedule.lastHour) + (getTurnIndex(schedule.turn) * 7);
+								let firstHour = parseInt(schedule.firstHour) + (getShiftIndex(schedule.shift) * 7);
+								let lastHour = parseInt(schedule.lastHour) + (getShiftIndex(schedule.shift) * 7);
 
 								if (!usedHours[alternateIndex]) {
 									usedHours[alternateIndex] = {};
