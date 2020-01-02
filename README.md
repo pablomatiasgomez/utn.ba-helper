@@ -24,3 +24,11 @@ See: https://chrome.google.com/webstore/detail/siga-helper/jdgdheoeghamkhfppapjc
 	* Trackear la informacion enviada en la encuesta docente y servirla en alguna pagina
 	* Trackear profesores segun la encuesta docente y poder predecir cual va a ser el profesor de una cursada a inscribirse
 
+
+# Glossary
+
+Course: Materia
+Class: Cursada
+Grade: Nota
+Pass: Aprobado
+Fail: Desaprobado
