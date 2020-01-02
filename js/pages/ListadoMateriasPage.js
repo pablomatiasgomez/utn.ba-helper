@@ -1,7 +1,7 @@
 let ListadoMateriasPage = function (pagesDataParser) {
 
 	let setIframe = function () {
-		pagesDataParser.getCourses().then(courses => {
+		pagesDataParser.getPassedCourses().then(courses => {
 			let passed = encodeURIComponent(courses.passed.join(","));
 			let signed = encodeURIComponent(courses.signed.join(","));
 			let iframeUrl = `http://www.materiasutn.com/?approved=${passed}&signed=${signed}&readMode=true`;

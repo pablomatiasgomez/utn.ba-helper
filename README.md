@@ -26,12 +26,12 @@ Extensión para Chrome que agrega una serie de features sobre el SIGA de la <a h
 
 - En la sección de "Horarios de cursada", calcular y mostrar:
     - Nombre de la materia en la grilla de horarios.
-    - Horario de cursada con detalle explicito. Ej: "Ma(n)1:3 Ju(n)1:5" -> "Martes (Noche) 19:00hs a 21:30hs y Jueves (Noche) 19:00hs a 23:00hs".
+    - Horario de cursada con detalle explícito. Ej: "Ma(n)1:3 Ju(n)1:5" -> "Martes (Noche) 19:00hs a 21:30hs y Jueves (Noche) 19:00hs a 23:00hs".
 
 - En la sección de "Pre inscripción a cursos", calcular y mostrar:
     - Grilla con el preview de las alternativas de cursadas seleccionadas.
     - Filtros en el popup de inscripción de cursos por día/turno/sede.
-    - Horario de cursada con detalle explicito en el popup de inscripción de cursos. Ej: "Ma(n)1:3 Ju(n)1:5" -> "Martes (Noche) 19:00hs a 21:30hs y Jueves (Noche) 19:00hs a 23:00hs".
+    - Horario de cursada con detalle explícito en el popup de inscripción de cursos. Ej: "Ma(n)1:3 Ju(n)1:5" -> "Martes (Noche) 19:00hs a 21:30hs y Jueves (Noche) 19:00hs a 23:00hs".
 
 - Tracking anónimo de las encuestas docentes para poder publicar esta información y que sea de libre acceso para todos.
 

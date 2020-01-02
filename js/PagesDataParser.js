@@ -43,7 +43,7 @@ let PagesDataParser = function (utils, apiConnector) {
 	 * The returned object contains the signed courses, which does not include the passed ones. The passed courses are included in a different proeprty.
 	 * @return {Promise<{signed: Array<String>, passed: Array<String>}>}
 	 */
-	let getCourses = function () {
+	let getPassedCourses = function () {
 		let getCoursesFromPage = page => {
 			return getPageContents(page).then(responseText => {
 				return $(responseText).find(".std-canvas table:first tbody tr:not(:first)")
@@ -63,7 +63,7 @@ let PagesDataParser = function (utils, apiConnector) {
 				signed: signedCourses
 			};
 		}).catch(e => {
-			trackError(e, "getCourses");
+			trackError(e, "getPassedCourses");
 			throw e;
 		});
 	};
@@ -300,7 +300,7 @@ let PagesDataParser = function (utils, apiConnector) {
 		getStartYear: getStartYear,
 		getStudentId: getStudentId,
 
-		getCourses: getCourses,
+		getPassedCourses: getPassedCourses,
 
 		getClassSchedules: getClassSchedules,
 		getProfessorClassesFromSurveys: getProfessorClassesFromSurveys,
