@@ -1,8 +1,7 @@
 let ApiConnector = function () {
 
 	const CLIENT = "CHROME@" + chrome.runtime.getManifest().version;
-	const BASE_API_URL = "http://localhost:8080/sigahelper/v1";
-	//const BASE_API_URL = "http://www.pablomatiasgomez.com.ar/sigahelper/v1";
+	const BASE_API_URL = "http://www.pablomatiasgomez.com.ar/sigahelper/v1";
 
 	let logError = function (methodName, error) {
 		return postData(BASE_API_URL + "/errors", {
