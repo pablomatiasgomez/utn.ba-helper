@@ -68,62 +68,15 @@ let PagesDataParser = function (utils, apiConnector) {
 		});
 	};
 
-	const TYPE_REGEX_PARSER = /^(docente|auxiliares) (\d{4}) (a|1|2)(nual|er c|do c)$/g;
-
-	/**
-	 * Fetches all the current surveys that the user has to take o has taken.
-	 * For each of them resolves the current professor name, class, course, quarter, etc.
-	 * @return an array of objects for each combination of professor and class
-	 */
-	let getProfessorClassesFromSurveys = function () {
-		return getPageContents("/alu/encdoc.do").then(responseText => {
-			return $(responseText).find(".std-canvas .tab")
-				.toArray()
-				.flatMap(elem => {
-					let typeStr = $(elem).prevAll("p").first().text().toLowerCase().replace("encuesta", "").replace("_", " ").trim();
-					let groups = TYPE_REGEX_PARSER.exec(typeStr);
-					if (!groups || groups.length !== 5) throw "Type couldn't be parsed: " + typeStr;
-
-					let surveyKind = groups[1].toUpperCase(); // DOCENTE, AUXILIARES
-					let year = parseInt(groups[2]); // 2018, 2019, ...
-					let quarter = groups[3] === "a" ? "A" : (groups[3] + "C"); // A, 1C, 2C
-
-					let classTaken = $(elem).find("p").text().split(" ");
-					let classCode = classTaken[0];
-					let courseCode = classTaken[1];
-					return $(elem).find("table tr")
-						.toArray()
-						.map(elem => {
-							// For each professor we return an object with the same class & course
-							let professorName = $(elem).find("td:first").text();
-							let professorRole = $(elem).find("td:eq(1)").text();
-							return {
-								surveyKind: surveyKind,
-								year: year,
-								quarter: quarter,
-								classCode: classCode,
-								courseCode: courseCode,
-								professorName: professorName,
-								professorRole: professorRole
-							};
-						});
-				});
-		}).catch(e => {
-			trackError(e, "getProfessorClassesFromSurveys");
-			throw e;
-		});
-	};
-
 	/**
 	 * Fetches the current classes that the student is having in order to know the schedules of them
 	 * @return an array of objects for each class, that contains the schedule for it.
 	 */
 	let getClassSchedules = function () {
-		const FN_HORARIOS_ONCLICK_REGEX = /^if\(fn_horarios_set\((\d+),'(.*)','(.*)','(.*)'\)\){return jslib_submit/;
 		let setFormCookies = (jsOnClick) => {
 			// onclick string is something like this:
 			// "if(fn_horarios_set(38736,'K3573','082032','Matemática Superior')){return jslib_submit(null,'/alu/asist.do',null,null,false );} else return false;"
-			let match = FN_HORARIOS_ONCLICK_REGEX.exec(jsOnClick);
+			let match = /^if\(fn_horarios_set\((\d+),'(.*)','(.*)','(.*)'\)\){return jslib_submit/.exec(jsOnClick);
 			if (!match || match.length !== 5) throw "jsOnClick couldn't be parsed: " + jsOnClick;
 			let cookies = {
 				ckidcu: parseInt(match[1]),
@@ -206,84 +159,152 @@ let PagesDataParser = function (utils, apiConnector) {
 		});
 	};
 
-
-	/*
-	let getSentSurveys = function () {
+	/**
+	 * Fetches the current surveys that the user has to take o has taken.
+	 * For each of them resolves the current professor name, class, course, quarter, etc.
+	 * @param onlyCompleted whether to include all surveys or only the completed ones.
+	 * @return {Promise<Array<{ }>>} an array of objects for each combination of professor and class
+	 */
+	let parseMetadataFromSurveyRows = function (onlyCompleted = false) {
 		return getPageContents("/alu/encdoc.do").then(responseText => {
 			return $(responseText).find(".std-canvas .tab")
 				.toArray()
 				.flatMap(elem => {
-					let course = $(elem).find("p").text().split(" ");
-					let time = $(elem).prevAll("p").first().text().replace("_Encuesta", "").trim();
-					let classCode = course[0];
-					let courseCode = course[1];
+					let typeStr = $(elem).prevAll("p").first().text().toLowerCase().replace("encuesta", "").replace("_", " ").trim();
+					let groups = /^(docente|auxiliares) (\d{4}) (a|1|2)(nual|er c|do c)$/g.exec(typeStr);
+					if (!groups || groups.length !== 5) throw "Type couldn't be parsed: " + typeStr;
+
+					let surveyKind = groups[1].toUpperCase(); // DOCENTE, AUXILIARES
+					let year = parseInt(groups[2]); // 2018, 2019, ...
+					let quarter = groups[3] === "a" ? "A" : (groups[3] + "C"); // A, 1C, 2C
+
+					let classTaken = $(elem).find("p").text().split(" ");
+					let classCode = classTaken[0];
+					let courseCode = classTaken[1];
 					return $(elem).find("table tr")
 						.toArray()
-						.filter(elem => {
-							let isCompleted = $(elem).find("td:eq(4) img").length > 0;
-							return isCompleted;
+						.filter(tr => {
+							let isCompleted = $(tr).find("td:eq(4) img").length > 0;
+							return !onlyCompleted || isCompleted;
 						})
-						.map(elem => {
-							// onclick string is something like this:
-							// "if(fn_encuesta(51,36218,52143,'Z3574 [950309] Economía','[JEFE DE TP] GALLONI GUILLEN, ROLANDO')){return jslib_submit(null,'/alu/encdocpop.do','popup',null,false );} else return false;";
-							// fn_encuesta function are like this:
-							// function fn_encuesta(form_iden,form_idcu,form_iddo,form_curnom,form_docnom){
-							let jsOnClick = $(elem).find("td:eq(3) a").attr("onclick");
+						.map(tr => {
+							let $tr = $(tr);
+							// For each professor we return an object with the same class & course
+							let professorName = $tr.find("td:first").text();
+							let professorRole = $tr.find("td:eq(1)").text();
+							return {
+								$tr: $tr, // This is only used in the case of fetching the survey values...
 
-							// 3 int params, and 2 string params.
-							let FN_ENCUESTA_ONCLICK_REGEX = /^if\(fn_encuesta\((\d+)\,(\d+)\,(\d+)\,\'(.*)\'\,\'(.*)\'\)\){return\ jslib_submit/;
-							let match = FN_ENCUESTA_ONCLICK_REGEX.exec(jsOnClick);
-							let form_iden = parseInt(match[1]);
-							let form_idcu = parseInt(match[2]);
-							let form_iddo = parseInt(match[3]);
-							let form_curnom = match[4];
-							let form_docnom = match[5];
-
-							$.ajax({
-								method: "POST",
-								url: "/alu/encdocpop.do",
-								data: {
-									form_submit: 0,
-									form_iden: form_iden,
-									form_idcu: form_idcu,
-									form_iddo: form_iddo,
-									form_curnom: form_curnom,
-									form_docnom: form_docnom
-								}
-							}).then(responseText => {
-								let values = $(responseText).find(".std-canvas table tr")
-									.toArray()
-									.map(row => {
-										let comboValue = $(row).find("td select option:selected").text();
-										if (!comboValue) return false;
-										let answer = {
-											question: $(row).find("td").text(),
-											value: comboValue
-										};
-										if (["Rta Libre", "Libre"].indexOf(comboValue) !== -1) {
-											answer.text = $(row).next().find("textarea").val();
-										}
-										return answer;
-									})
-									.filter(answer => !!answer);
-								console.log(values);
-								debugger;
-							});
+								surveyKind: surveyKind,
+								year: year,
+								quarter: quarter,
+								classCode: classCode,
+								courseCode: courseCode,
+								professorName: professorName,
+								professorRole: professorRole
+							};
 						});
 				});
+		}).catch(e => {
+			trackError(e, "parseMetadataFromSurveyRow");
+			throw e;
+		});
+	};
+
+	/**
+	 * Fetches all the current surveys that the user has to take o has taken.
+	 * For each of them resolves the current professor name, class, course, quarter, etc.
+	 * @return an array of objects for each combination of professor and class
+	 */
+	let getProfessorClassesFromSurveys = function () {
+		return parseMetadataFromSurveyRows(false).then(professorClasses => {
+			// For professor classes we don't want to grab any other information so we just remove the $tr
+			professorClasses.forEach(professorClass => delete professorClass["$tr"]);
+			return professorClasses;
+		});
+	};
+
+	let getTakenSurveys = function () {
+		let getAnswersFromSurvey = (jsOnClick) => {
+			// onclick string is something like this:
+			// "if(fn_encuesta(51,36218,52143,'Z3574 [950309] Economía','[JEFE DE TP] GALLONI GUILLEN, ROLANDO')){return jslib_submit(null,'/alu/encdocpop.do','popup',null,false );} else return false;";
+			let match = /^if\(fn_encuesta\((\d+),(\d+),(\d+),'(.*)','(.*)'\)\){return jslib_submit/.exec(jsOnClick);
+			let form_iden = parseInt(match[1]);
+			let form_idcu = parseInt(match[2]);
+			let form_iddo = parseInt(match[3]);
+			let form_curnom = match[4];
+			let form_docnom = match[5];
+
+			return $.ajax({
+				method: "POST",
+				url: "/alu/encdocpop.do",
+				data: {
+					form_submit: 0,
+					form_iden: form_iden,
+					form_idcu: form_idcu,
+					form_iddo: form_iddo,
+					form_curnom: form_curnom,
+					form_docnom: form_docnom
+				}
+			}).then(responseText => {
+				return $(responseText).find(".std-canvas table tr")
+					.toArray()
+					.map(tr => {
+						let $tr = $(tr);
+						let question = $tr.find("td:eq(0)").text().trim();
+						let comboValue = $tr.find("td:eq(1) select option:selected").text().trim();
+						if (!comboValue) return false;
+
+						let answer = {
+							question: question,
+						};
+						if (["Rta Libre", "Libre", "No opina"].indexOf(comboValue) !== -1) {
+							answer.type = "TEXT";
+							answer.value = $tr.next().find("textarea").val() || null;
+						} else {
+							answer.type = "PERCENTAGE";
+							answer.value = parseInt(comboValue);
+						}
+						return answer;
+					})
+					.filter(answer => !!answer);
+			});
+		};
+
+		return parseMetadataFromSurveyRows(true).then(surveysMetadata => {
+			return Promise.all(surveysMetadata.map(surveyMetadata => {
+				let jsOnClick = surveyMetadata.$tr.find("td:eq(3) a").attr("onclick");
+				return getAnswersFromSurvey(jsOnClick).then(answers => {
+					return {
+						surveyKind: surveyMetadata.surveyKind,
+						year: surveyMetadata.year,
+						quarter: surveyMetadata.quarter,
+						classCode: surveyMetadata.classCode,
+						courseCode: surveyMetadata.courseCode,
+						professorName: surveyMetadata.professorName,
+						professorRole: surveyMetadata.professorRole,
+
+						surveyFields: answers
+					};
+				});
+			}));
 		}).catch(e => {
 			trackError(e, "getSentSurveys");
 			throw e;
 		});
 	};
-	 */
+
 
 	// Public
 	return {
 		getStartYear: getStartYear,
 		getStudentId: getStudentId,
+
 		getCourses: getCourses,
+
+		getClassSchedules: getClassSchedules,
 		getProfessorClassesFromSurveys: getProfessorClassesFromSurveys,
-		getClassSchedules: getClassSchedules
+
+		getTakenSurveys: getTakenSurveys,
 	};
 };

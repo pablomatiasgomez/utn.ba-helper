@@ -22,10 +22,6 @@ let ApiConnector = function () {
 		});
 	};
 
-	let postProfessorClasses = function (professorClasses) {
-		return postData(BASE_API_URL + "/professor-classes", professorClasses);
-	};
-
 	let postClassSchedules = function (classSchedules) {
 		return postData(BASE_API_URL + "/class-schedules", classSchedules.map(classSchedule => {
 			return {
@@ -37,6 +33,14 @@ let ApiConnector = function () {
 				schedules: classSchedule.schedules.map(mapSchedule)
 			};
 		}));
+	};
+
+	let postProfessorClasses = function (professorClasses) {
+		return postData(BASE_API_URL + "/professor-classes", professorClasses);
+	};
+
+	let postProfessorSurveys = function (surveys) {
+		return postData(BASE_API_URL + "/professor-surveys", surveys);
 	};
 
 	const DAYS_MAPPING = {
@@ -77,8 +81,9 @@ let ApiConnector = function () {
 	// Public
 	return {
 		logUserStat: logUserStat,
-		postProfessorClasses: postProfessorClasses,
 		postClassSchedules: postClassSchedules,
+		postProfessorClasses: postProfessorClasses,
+		postProfessorSurveys: postProfessorSurveys,
 		logError: logError,
 	};
 };

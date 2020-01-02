@@ -2,7 +2,7 @@
 	let utils = new Utils();
 	let apiConnector = new ApiConnector();
 	let pagesDataParser = new PagesDataParser(utils, apiConnector);
-	let professorClassesCollector = new ProfessorClassesCollector(pagesDataParser, apiConnector);
+	let dataCollector = new DataCollector(pagesDataParser, apiConnector);
 
 	const PAGE_HANDLERS = {
 		"/alu/horarios.do": () => HorariosPage(utils),
@@ -17,7 +17,7 @@
 		handler();
 	}
 
-	professorClassesCollector.collectIfNeeded();
+	dataCollector.collectIfNeeded();
 
 	$("body").on("click", ".powered-by-siga-helper", function () {
 		window.open("https://chrome.google.com/webstore/detail/siga-helper/jdgdheoeghamkhfppapjchbojhehimpe", "_blank");
