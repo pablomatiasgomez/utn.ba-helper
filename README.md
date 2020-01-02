@@ -27,8 +27,10 @@ See: https://chrome.google.com/webstore/detail/siga-helper/jdgdheoeghamkhfppapjc
 
 # Glossary
 
-Course: Materia
-Class: Cursada
-Grade: Nota
-Pass: Aprobado
-Fail: Desaprobado
+| English | Spanish |
+| --- | --- |
+| Course | Materia |
+| Class | Cursada |
+| Grade | Nota |
+| Pass | Aprobado |
+| Fail | Desaprobado |
