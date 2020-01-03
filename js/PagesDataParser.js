@@ -73,86 +73,32 @@ let PagesDataParser = function (utils, apiConnector) {
 	 * @return an array of objects for each class, that contains the schedule for it.
 	 */
 	let getClassSchedules = function () {
-		let setFormCookies = (jsOnClick) => {
-			// onclick string is something like this:
-			// "if(fn_horarios_set(38736,'K3573','082032','Matemática Superior')){return jslib_submit(null,'/alu/asist.do',null,null,false );} else return false;"
-			let match = /^if\(fn_horarios_set\((\d+),'(.*)','(.*)','(.*)'\)\){return jslib_submit/.exec(jsOnClick);
-			if (!match || match.length !== 5) throw "jsOnClick couldn't be parsed: " + jsOnClick;
-			let cookies = {
-				ckidcu: parseInt(match[1]),
-				ckcucodigo: match[2],
-				ckmacodigo: match[3],
-				ckmanombre: match[4],
-			};
-			Object.entries(cookies).forEach(entry => document.cookie = `${entry[0]}=${entry[1]};path=/`);
-		};
-		const FIRST_QUARTER_MONTHS = new Set([3, 4, 5, 6]);
-		const SECOND_QUARTER_MONTHS = new Set([8, 9, 10, 11]);
-		let calculateYearAndQuarterFromDays = () => {
-			// Cookies should have been already set so we can get asist.do
-			return getPageContents("/alu/asist.do").then(responseText => {
-				let months = new Set();
-				let years = new Set();
-				$(responseText).find(".std-canvas table:first tr:not(:first)")
-					.toArray()
-					.filter(tr => $(tr).find("td").length === 5)
-					.map(tr => $(tr).find("td:eq(3)").text())
-					.forEach(date => {
-						let splits = date.split("/");
-						months.add(parseInt(splits[1]));
-						years.add(parseInt(splits[2]));
-					});
-				if (years.size !== 1) throw "Couldn't parse years: " + Array.from(years);
-				let year = Array.from(years)[0];
-
-				let isInFirstQuarter = false;
-				let isInSecondQuarter = false;
-				for (let m of FIRST_QUARTER_MONTHS) if (months.has(m)) isInFirstQuarter = true;
-				for (let m of SECOND_QUARTER_MONTHS) if (months.has(m)) isInSecondQuarter = true;
-				let quarter;
-
-				if (isInFirstQuarter && isInSecondQuarter) {
-					quarter = "A";
-				} else if (isInFirstQuarter) {
-					quarter = "1C";
-				} else if (isInSecondQuarter) {
-					quarter = "2C";
-				} else {
-					throw "Couldn't parse months: " + Array.from(months);
-				}
-				return {
-					year: year,
-					quarter: quarter
-				};
-			});
-		};
-
-		return getPageContents("/alu/horarios.do").then(responseText => {
-			return Promise.all($(responseText).find(".std-canvas table:first tr:not(:first)")
+		return getPageContents("/alu/inscurcomp.do").then(responseText => {
+			return $(responseText).find(".std-canvas table:eq(1) tr:not(:first)")
 				.toArray()
-				.filter(tr => $(tr).find("td").length >= 6)
 				.map(tr => {
 					let $tds = $(tr).find("td");
-					let classCode = $tds.eq(0).text();
-					let courseCode = $tds.eq(1).text();
-					let branch = $tds.eq(3).text();
+
+					let time = $tds.eq(1).text().split("(")[1].split(")")[0].trim(); // e.g. "2019 Cuat 2/2", "2019 Anual"
+					let groups = /^(\d{4}) (Cuat (1|2)\/2|Anual)$/.exec(time);
+					if (!groups) throw "Class time couldn't be parsed: " + time;
+
+					let year = parseInt(groups[1]); // 2018, 2019, ...
+					let quarter = groups[2] === "Anual" ? "A" : (groups[3] + "C"); // A, 1C, 2C
+					let classCode = $tds.eq(2).text().trim();
+					let courseCode = $tds.eq(0).text().trim();
+					let branch = $tds.eq(3).text().trim();
 					let schedules = utils.getSchedulesFromString($tds.eq(5).text());
 
-					// Calculate the year and quarter from the list of days:
-					let jsOnClick = $(tr).next("tr").find("td span:first a").attr("onclick");
-					setFormCookies(jsOnClick);
-
-					return calculateYearAndQuarterFromDays().then(result => {
-						return {
-							year: result.year,
-							quarter: result.quarter,
-							classCode: classCode,
-							courseCode: courseCode,
-							branch: branch,
-							schedules: schedules
-						};
-					});
-				}));
+					return {
+						year: year,
+						quarter: quarter,
+						classCode: classCode,
+						courseCode: courseCode,
+						branch: branch,
+						schedules: schedules
+					};
+				});
 		}).catch(e => {
 			trackError(e, "getClassSchedules");
 			throw e;
