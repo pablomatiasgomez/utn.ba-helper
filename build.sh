@@ -1,6 +1,12 @@
-rm out.zip
-mv js js.bk
-minify js.bk/ --out-dir js/ --builtIns false
-zip -vr out.zip css/ images/ js/ manifest.json
-rm -r js
-mv js.bk js
+JS_FILES="js/jquery-3.4.1.min.js \
+js/Utils.js js/ApiConnector.js \
+js/DataCollector.js \
+js/PagesDataParser.js \
+js/pages/HorariosPage.js \
+js/pages/ActasDeFinalesPage.js \
+js/pages/ListadoMateriasPage.js \
+js/pages/PreInscripcionPopUpPage.js \
+js/pages/PreInscripcionPage.js \
+js/functions.js"
+
+cat $JS_FILES > js/siga-helper.min.js
