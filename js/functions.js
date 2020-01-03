@@ -1,4 +1,7 @@
 (function () {
+	// We will only handle student pages, this avoids other kinds, and avoids logged out errors.
+	if (!location.pathname.startsWith("/alu")) return;
+
 	let utils = new Utils();
 	let apiConnector = new ApiConnector();
 	let pagesDataParser = new PagesDataParser(utils, apiConnector);
