@@ -12,7 +12,7 @@
 
 # Siga Helper Extension - Chrome Version
 
-Extensión para Chrome que agrega una serie de features sobre el SIGA de la <a href="http://siga.frba.utn.edu.ar/">UTN - FRBA</a>.
+Extensión para Chrome que agrega una serie de features sobre el <a href="http://siga.frba.utn.edu.ar/">SIGA de la UTN - FRBA</a>.
 
 ## Features
 
