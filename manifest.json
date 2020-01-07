@@ -26,6 +26,13 @@
                 "css/styles.css"
             ]
         }
-    ]
+    ],
+
+    "background": {
+        "scripts": [
+            "js/background.js"
+        ],
+        "persistent": false
+    }
 }
 

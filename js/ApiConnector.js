@@ -65,15 +65,19 @@ let ApiConnector = function () {
 	};
 
 	let postData = function (url, data) {
-		return $.ajax({
-			type: "POST",
-			url: url,
-			dataType: "json",
-			contentType: "application/json; charset=utf-8",
-			headers: {
-				"X-Client": CLIENT,
-			},
-			data: JSON.stringify(data)
+		return new Promise((resolve, reject) => {
+			chrome.runtime.sendMessage({
+				url: url,
+				method: 'POST',
+				headers: {
+					"X-Client": CLIENT,
+					"Content-type": "application/json; charset=utf-8"
+				},
+				body: JSON.stringify(data)
+			}, response => (response && response.error) ? reject(response.error) : resolve(response));
+		}).catch(e => {
+			console.error("Error while making request", e);
+			throw e;
 		});
 	};
 
