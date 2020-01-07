@@ -1,8 +1,27 @@
+#!/bin/bash
+
 ./build.sh
 
+echo "Starting packaging.."
+
+minifyJs () {
+  echo "Minifying $1"
+  mv "$1" "$1.bk"
+  minify "$1.bk" --out-file "$1" --builtIns false
+}
+restoreJs () {
+  echo "Restoring $1"
+  rm "$1"
+  mv "$1.bk" "$1"
+}
+
 rm out.zip
-mv js/siga-helper.min.js js/siga-helper.min.js.bk
-minify js/siga-helper.min.js.bk --out-file js/siga-helper.min.js --builtIns false
+
+minifyJs "js/siga-helper.min.js"
+minifyJs "js/background.js"
+
+echo "Creating out.zip ..."
 zip -vr out.zip css/ images/ js/siga-helper.min.js js/background.js manifest.json
-rm js/siga-helper.min.js
-mv js/siga-helper.min.js.bk js/siga-helper.min.js
+
+restoreJs "js/siga-helper.min.js"
+restoreJs "js/background.js"

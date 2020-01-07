@@ -1,3 +1,5 @@
+#!/bin/bash
+
 echo "Building app.."
 
 JS_FILES="js/jquery-3.4.1.min.js \
