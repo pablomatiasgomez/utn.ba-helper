@@ -5,13 +5,13 @@
     "short_name": "SigaHelper",
     "version": "3.0.2",
 
-    "description": "Extensión que agrega una serie de features sobre el SIGA de la UTN - FRBA, como por ejemplo el peso academico y el promedio de finales rendidos.",
+    "description": "Extensión que agrega features sobre el SIGA de la UTN - FRBA, como por ejemplo el peso academico y el promedio de finales rendidos.",
     "author": "Pablo Matías Gomez",
 
     "icons": {
         "16": "images/icons/icon16.png",
         "48": "images/icons/icon48.png",
-        "128": "images/icons/icon128.png" 
+        "128": "images/icons/icon128.png"
     },
 
     "content_scripts": [

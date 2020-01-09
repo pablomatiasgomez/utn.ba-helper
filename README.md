@@ -35,6 +35,13 @@ Extensión para Chrome que agrega una serie de features sobre el <a href="http:/
 
 - Tracking anónimo de las encuestas docentes para poder publicar esta información y que sea de libre acceso para todos.
 
+- Tracking anónimo de las cursadas para poder predecir qué profesores van a estar en un curso al momento de inscribirse.
+
+## Screenshots:
+
+<p align="center"><img src="https://github.com/pablomatiasgomez/siga-helper-chrome/blob/master/prints/ActasDeFinales.jpg" alt="screenshot"></p>
+<p align="center"><img src="https://github.com/pablomatiasgomez/siga-helper-chrome/blob/master/prints/PreInscripcion.jpg" alt="screenshot"></p>
+<p align="center"><img src="https://github.com/pablomatiasgomez/siga-helper-chrome/blob/master/prints/Horarios.jpg" alt="screenshot"></p>
 
 ## TODO list
 
