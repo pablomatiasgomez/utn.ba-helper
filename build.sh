@@ -2,8 +2,10 @@
 
 echo "Building app.."
 
-JS_FILES="js/jquery-3.4.1.min.js \
-js/Utils.js js/ApiConnector.js \
+JS_FILES="\
+js/jquery-3.4.1.min.js \
+js/Utils.js \
+js/ApiConnector.js \
 js/DataCollector.js \
 js/PagesDataParser.js \
 js/pages/HorariosPage.js \
