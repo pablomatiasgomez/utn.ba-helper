@@ -10,9 +10,9 @@ let ApiConnector = function () {
 		});
 	};
 
-	let logUserStat = function (studentId, pesoAcademico, passingGradesAverage, allGradesAverage, passingGradesCount, failingGradesCount) {
+	let logUserStat = function (hashedStudentId, pesoAcademico, passingGradesAverage, allGradesAverage, passingGradesCount, failingGradesCount) {
 		return postData(BASE_API_URL + "/user-stats", {
-			studentId: studentId,
+			hashedStudentId: hashedStudentId,
 			pesoAcademico: pesoAcademico,
 			passingGradesAverage: passingGradesAverage,
 			allGradesAverage: allGradesAverage,

@@ -1,4 +1,4 @@
-let ActasDeFinalesPage = function (pagesDataParser, apiConnector, utils) {
+let ActasDeFinalesPage = function (pagesDataParser, dataCollector, utils) {
 
 	let passingGrades = [];
 	let failingGrades = [];
@@ -56,9 +56,7 @@ let ActasDeFinalesPage = function (pagesDataParser, apiConnector, utils) {
 
 	// ..
 	let logUserStat = function () {
-		return pagesDataParser.getStudentId().then(studentId => {
-			return apiConnector.logUserStat(studentId, pesoAcademico, passingGradesAverage, allGradesAverage, passingGrades.length, failingGrades.length);
-		});
+		return dataCollector.logUserStat(pesoAcademico, passingGradesAverage, allGradesAverage, passingGrades.length, failingGrades.length);
 	};
 
 	let appendTable = function () {

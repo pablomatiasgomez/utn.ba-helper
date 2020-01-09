@@ -9,7 +9,7 @@
 
 	const PAGE_HANDLERS = {
 		"/alu/horarios.do": () => HorariosPage(utils),
-		"/alu/acfin.do": () => ActasDeFinalesPage(pagesDataParser, apiConnector, utils),
+		"/alu/acfin.do": () => ActasDeFinalesPage(pagesDataParser, dataCollector, utils),
 		"/alu/mat.do": () => ListadoMateriasPage(pagesDataParser),
 		"/alu/preins.do": () => PreInscripcionPage(utils),
 		"/alu/preinscolas.do": () => PreInscripcionPopUpPage(utils),
@@ -20,7 +20,7 @@
 		handler();
 	}
 
-	dataCollector.collectIfNeeded();
+	dataCollector.collectBackgroundDataIfNeeded();
 
 	$("body").on("click", ".powered-by-siga-helper", function () {
 		window.open("https://chrome.google.com/webstore/detail/siga-helper/jdgdheoeghamkhfppapjchbojhehimpe", "_blank");
