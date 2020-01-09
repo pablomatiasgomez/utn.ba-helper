@@ -30,7 +30,13 @@ let PagesDataParser = function (utils, apiConnector) {
 	let getStudentId = function () {
 		return getPageContents("/alu/inscurcomp.do").then(responseText => {
 			let studentId = $(responseText).find("div.center p.mask1 span").text();
-			if (!studentId) throw "Couldn't get studentId from responseText: " + responseText;
+			if (!studentId) {
+				// Check if the user has been logged out..
+				if ($(responseText).find("div.std-canvas div").text().trim() === "La sesión ha expirado") {
+					throw "Couldn't get studentId because the user has been logged out.";
+				}
+				throw "Couldn't get studentId from responseText: " + responseText;
+			}
 			return studentId;
 		}).catch(e => {
 			trackError(e, "getStudentId");
