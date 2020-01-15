@@ -1,54 +1,28 @@
-Array.prototype.removeIf = function(callback) {
-	var i = 0;
-	while (i < this.length) {
-		if (callback(this[i], i)) {
-			this.splice(i, 1);
-		}
-		else {
-			++i;
-		}
-	}
-};
+(function () {
+	// We will only handle student pages, this avoids other kinds, and avoids logged out errors.
+	if (!location.pathname.startsWith("/alu")) return;
 
-Array.prototype.flatMap = function(lambda) {
-    return Array.prototype.concat.apply([], this.map(lambda));
-};
+	let utils = new Utils();
+	let apiConnector = new ApiConnector();
+	let pagesDataParser = new PagesDataParser(utils, apiConnector);
+	let dataCollector = new DataCollector(pagesDataParser, apiConnector);
 
+	const PAGE_HANDLERS = {
+		"/alu/horarios.do": () => HorariosPage(utils),
+		"/alu/acfin.do": () => ActasDeFinalesPage(pagesDataParser, dataCollector, utils),
+		"/alu/mat.do": () => ListadoMateriasPage(pagesDataParser),
+		"/alu/preins.do": () => PreInscripcionPage(utils),
+		"/alu/preinscolas.do": () => PreInscripcionPopUpPage(utils),
+	};
 
-(function() {
-	var PATH_NAME_HORARIOS = "/alu/horarios.do";
-	var PATH_NAME_FINALES = "/alu/acfin.do";
-	var PATH_NAME_LISTADO_MATERIAS = "/alu/mat.do";
-	var PATH_NAME_PRE_INSCRIPCION = "/alu/preins.do";
-	var PATH_NAME_PRE_INSCRIPCION_POP_UP = "/alu/preinscolas.do";
-
-	var dataTracker = new DataTracker();
-	var pagesDataParser = new PagesDataParser(dataTracker);
-	var utils = new Utils(pagesDataParser);
-	var teachersCollector = new TeachersCollector(pagesDataParser, dataTracker);
-
-	switch (location.pathname) {
-		case PATH_NAME_HORARIOS:
-			HorariosPage(utils);
-			break;
-		case PATH_NAME_FINALES:
-			ActasDeFinalesPage(pagesDataParser, dataTracker, utils);
-			break;
-		case PATH_NAME_PRE_INSCRIPCION_POP_UP:
-			PreInscripcionPopUpPage(utils);
-			break;
-		case PATH_NAME_PRE_INSCRIPCION:
-			PreInscripcionPage(utils);
-			break;
-		case PATH_NAME_LISTADO_MATERIAS:
-			ListadoMateriasPage(pagesDataParser);
-			break;
-		default:
+	let handler = PAGE_HANDLERS[location.pathname];
+	if (handler) {
+		handler();
 	}
 
-	teachersCollector.collectIfNeeded();
+	dataCollector.collectBackgroundDataIfNeeded();
 
-	$("body").on("click", ".powered-by-siga-helper", function() {
+	$("body").on("click", ".powered-by-siga-helper", function () {
 		window.open("https://chrome.google.com/webstore/detail/siga-helper/jdgdheoeghamkhfppapjchbojhehimpe", "_blank");
 	});
 

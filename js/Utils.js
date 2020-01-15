@@ -1,6 +1,6 @@
-var Utils = function(pagesDataParser) {
+let Utils = function () {
 
-	var HOURS = {
+	const HOURS = {
 		m: {
 			0: {
 				start: "7:45",
@@ -92,7 +92,7 @@ var Utils = function(pagesDataParser) {
 			}
 		}
 	};
-	var DAYS = {
+	const DAYS = {
 		Lu: "Lunes",
 		Ma: "Martes",
 		Mi: "Miercoles",
@@ -100,54 +100,72 @@ var Utils = function(pagesDataParser) {
 		Vi: "Viernes",
 		Sa: "Sabado"
 	};
-	var TIME_SHIFTS = {
+	const TIME_SHIFTS = {
 		m: "Mañana",
 		t: "Tarde",
 		n: "Noche"
 	};
-	var BRANCHES = {
+	const BRANCHES = {
 		CAMPUS: "CAMPUS",
 		MEDRANO: "MEDRANO"
 	};
-	var NEW_NOTES_REGULATION_DATE = new Date(2017, 2, 10); // Doesn't have to be exact.. just using March 10th.
+	const NEW_GRADES_REGULATION_DATE = new Date(2017, 2, 10); // Doesn't have to be exact.. just using March 10th.
+	const WEIGHTED_GRADES = {
+		// Segun ordenanza 1549
+		1: 1,
+		2: 2.67,
+		3: 4.33,
+		4: 6,
+		5: 6.67,
+		6: 7.33,
+		7: 8,
+		8: 8.67,
+		9: 9.33,
+		10: 10
+	};
 
-	var getScheduleFromString = function(str) {
-		if (str.indexOf("(") == -1 || str.indexOf(":") == -1) return;
+	let getWeightedGrade = function (date, grade) {
+		if (date < NEW_GRADES_REGULATION_DATE) {
+			return WEIGHTED_GRADES[grade];
+		} else {
+			return grade;
+		}
+	};
+
+	let getScheduleFromString = function (str) {
+		if (str.indexOf("(") === -1 || str.indexOf(":") === -1) return;
 
 		return {
 			day: str.split("(")[0].replace("á", "a"),
-			turn: str.match(/\(([^)]+)\)/)[1],
+			shift: str.match(/\(([^)]+)\)/)[1],
 			firstHour: str.split(")")[1].split(":")[0],
 			lastHour: str.split(")")[1].split(":")[1],
 		};
 	};
 
-	var getSchedulesFromString = function(str) {
+	let getSchedulesFromString = function (str) {
 		if (!str) return [];
-
-		return str.split(" ").map(getScheduleFromString).filter(function(el) { return !!el; });
+		return str.split(" ").map(getScheduleFromString).filter(el => !!el);
 	};
 
-	var getTimeInfoStringFromSchedules = function(schedules) {
-		var getStringForSchedule = function(schedule) {
-			return DAYS[schedule.day] + " (" + TIME_SHIFTS[schedule.turn] + ") " + HOURS[schedule.turn][schedule.firstHour].start + "hs a " + HOURS[schedule.turn][schedule.lastHour].end + "hs";
-		};
-
-		return schedules.map(getStringForSchedule).join(" y ");
+	let getTimeInfoStringFromSchedules = function (schedules) {
+		return schedules
+			.map(schedule => DAYS[schedule.day] + " (" + TIME_SHIFTS[schedule.shift] + ") " + HOURS[schedule.shift][schedule.firstHour].start + "hs a " + HOURS[schedule.shift][schedule.lastHour].end + "hs")
+			.join(" y ");
 	};
 
-	var getTextNodes = function($item) {
-		var arr = $item.contents().filter(function() {
+	let getTextNodes = function ($item) {
+		let arr = $item.contents().filter(function () {
 			return this.nodeType !== 1;
 		});
-		var strArr = [];
-		$(arr).each(function() {
+		let strArr = [];
+		$(arr).each(function () {
 			strArr.push($(this).text());
 		});
 		return strArr;
 	};
 
-	var cutSubjectName = function(name) {
+	let trimCourseName = function (name) {
 		name = name.trim();
 		if (name.length > 20) {
 			return name.substr(0, 20) + "...";
@@ -157,8 +175,8 @@ var Utils = function(pagesDataParser) {
 	};
 
 	// Parses a date with format DD/MM/YYYY
-	var parseDate = function(dateStr) {
-		var dateParts = dateStr.split("/");
+	let parseDate = function (dateStr) {
+		let dateParts = dateStr.split("/");
 		return new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);
 	};
 
@@ -168,14 +186,15 @@ var Utils = function(pagesDataParser) {
 		DAYS: DAYS,
 		TIME_SHIFTS: TIME_SHIFTS,
 		BRANCHES: BRANCHES,
-		NEW_NOTES_REGULATION_DATE: NEW_NOTES_REGULATION_DATE,
+
+		getWeightedGrade: getWeightedGrade,
 
 		getSchedulesFromString: getSchedulesFromString,
 		getTimeInfoStringFromSchedules: getTimeInfoStringFromSchedules,
 
 		getTextNodes: getTextNodes,
-		
-		cutSubjectName: cutSubjectName,
-		parseDate: parseDate
+
+		trimCourseName: trimCourseName,
+		parseDate: parseDate,
 	};
 };

@@ -1,24 +1,8 @@
-a.helper {
-	cursor: pointer;
-	text-transform: initial;
-	font-size: 14px;
-}
-
-a.helper:hover {
-	border-bottom: none !important;
-}
-
-.year-change {
-	display: none;
-	font-size: 14px;
-}
-
-
 .powered-by-siga-helper {
 	float: right;
 	text-transform: uppercase;
 	font-size: 10px;
-	letter-spacing: 0.5px;
+	letter-spacing: 0.05em;
 	cursor: pointer;
 }
 
@@ -26,7 +10,7 @@ a.helper:hover {
 	content: "POWERED BY SIGA HELPER";
 }
 
-/* Shows subject name on table */
+/* Shows course name on table */
 table .name-container {
 	max-width: 0;
 	white-space: nowrap;
