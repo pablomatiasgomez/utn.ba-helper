@@ -40,8 +40,8 @@ Extensión para Chrome que agrega una serie de features sobre el <a href="http:/
 ## Screenshots:
 
 <p align="center"><img src="https://github.com/pablomatiasgomez/siga-helper-chrome/blob/master/prints/ActasDeFinales.jpg" alt="screenshot"></p>
-<p align="center"><img src="https://github.com/pablomatiasgomez/siga-helper-chrome/blob/master/prints/PreInscripcion.jpg" alt="screenshot"></p>
-<p align="center"><img src="https://github.com/pablomatiasgomez/siga-helper-chrome/blob/master/prints/Horarios.jpg" alt="screenshot"></p>
+<p align="center"><img src="https://github.com/pablomatiasgomez/siga-helper-chrome/blob/master/prints/PreInscripcion.png" alt="screenshot"></p>
+<p align="center"><img src="https://github.com/pablomatiasgomez/siga-helper-chrome/blob/master/prints/Horarios.png" alt="screenshot"></p>
 
 ## TODO list
 
