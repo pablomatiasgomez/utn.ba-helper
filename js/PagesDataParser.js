@@ -1,8 +1,14 @@
 let PagesDataParser = function (utils, apiConnector) {
 
+	let stringifyError = function (error) {
+		if (error instanceof Error) return error.toString();
+		if (typeof error === 'object') return JSON.stringify(error);
+		return error;
+	};
+
 	let trackError = function (error, methodName) {
 		console.error("Error at " + methodName, error);
-		return apiConnector.logError(methodName, typeof error === 'object' ? JSON.stringify(error) : error);
+		return apiConnector.logError(methodName, stringifyError(error));
 	};
 
 	let getPageContents = function (url) {
@@ -85,15 +91,21 @@ let PagesDataParser = function (utils, apiConnector) {
 				.map(tr => {
 					let $tds = $(tr).find("td");
 
-					let time = $tds.eq(1).text().split("(")[1].split(")")[0].trim(); // e.g. "2019 Cuat 2/2", "2019 Anual"
+					// Possible values for time could be:
+					// - "2019 Cuat 2/2"
+					// - "2019 Anual"
+					// - "2019      1/1"
+					// - "Opcional"  (not mapping this one because it's useless..)
+					let time = $tds.eq(1).text().split("(")[1].split(")")[0].trim();
+					if (time === "Opcional") return null;
 					let groups = /^(\d{4}) (Cuat (1|2)\/2|Anual)$/.exec(time);
 					if (!groups) throw "Class time couldn't be parsed: " + time;
 
 					let year = parseInt(groups[1]); // 2018, 2019, ...
-					let quarter = groups[2] === "Anual" ? "A" : (groups[3] + "C"); // A, 1C, 2C
+					let quarter = (groups[2] === "Anual" || groups[2] === "     1/1") ? "A" : (groups[3] + "C"); // A, 1C, 2C
 					let classCode = $tds.eq(2).text().trim();
 					let courseCode = $tds.eq(0).text().trim();
-					let branch = $tds.eq(3).text().trim();
+					let branch = $tds.eq(3).text().trim().toUpperCase().replace(" ", "_"); // CAMPUS, MEDRANO, AULA_VIRTUAL
 					let schedules = utils.getSchedulesFromString($tds.eq(5).text());
 
 					return {
@@ -104,7 +116,8 @@ let PagesDataParser = function (utils, apiConnector) {
 						branch: branch,
 						schedules: schedules
 					};
-				});
+				})
+				.filter(obj => !!obj);
 		}).catch(e => {
 			trackError(e, "getClassSchedules");
 			throw e;
@@ -158,7 +171,7 @@ let PagesDataParser = function (utils, apiConnector) {
 						});
 				});
 		}).catch(e => {
-			trackError(e, "parseMetadataFromSurveyRow");
+			trackError(e, "parseMetadataFromSurveyRows");
 			throw e;
 		});
 	};
@@ -210,6 +223,7 @@ let PagesDataParser = function (utils, apiConnector) {
 						let answer = {
 							question: question,
 						};
+						// TODO "No opina" puede ser percentage.
 						if (["Rta Libre", "Libre", "No opina"].indexOf(comboValue) !== -1) {
 							answer.type = "TEXT";
 							answer.value = $tr.next().find("textarea").val() || null;
