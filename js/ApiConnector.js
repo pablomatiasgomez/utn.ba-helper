@@ -65,16 +65,37 @@ let ApiConnector = function () {
 	};
 
 	let postData = function (url, data) {
+		return makeRequest({
+			url: url,
+			method: 'POST',
+			headers: {
+				"X-Client": CLIENT,
+				"Content-type": "application/json; charset=utf-8"
+			},
+			body: JSON.stringify(data)
+		});
+	};
+
+
+	// ------
+
+	let searchProfessors = function (query) {
+		return getData(BASE_API_URL + "/professors?q=" + encodeURIComponent(query));
+	};
+
+	let getData = function (url) {
+		return makeRequest({
+			url: url,
+			method: 'GET',
+			headers: {
+				"X-Client": CLIENT
+			}
+		});
+	};
+
+	let makeRequest = function (options) {
 		return new Promise((resolve, reject) => {
-			chrome.runtime.sendMessage({
-				url: url,
-				method: 'POST',
-				headers: {
-					"X-Client": CLIENT,
-					"Content-type": "application/json; charset=utf-8"
-				},
-				body: JSON.stringify(data)
-			}, response => (response && response.error) ? reject(response.error) : resolve(response));
+			chrome.runtime.sendMessage(options, response => (response && response.error) ? reject(response.error) : resolve(response));
 		}).catch(e => {
 			console.error("Error while making request", e);
 			throw e;
@@ -83,10 +104,14 @@ let ApiConnector = function () {
 
 	// Public
 	return {
+		// POSTs:
+		logError: logError,
 		logUserStat: logUserStat,
 		postClassSchedules: postClassSchedules,
 		postProfessorClasses: postProfessorClasses,
 		postProfessorSurveys: postProfessorSurveys,
-		logError: logError,
+
+		// GETs:
+		searchProfessors: searchProfessors,
 	};
 };

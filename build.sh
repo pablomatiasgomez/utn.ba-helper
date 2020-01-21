@@ -13,6 +13,7 @@ js/pages/ActasDeFinalesPage.js \
 js/pages/ListadoMateriasPage.js \
 js/pages/PreInscripcionPopUpPage.js \
 js/pages/PreInscripcionPage.js \
+js/pages/ProfessorSurveysCustomPage.js \
 js/functions.js"
 cat $JS_FILES > js/siga-helper.min.js
 
