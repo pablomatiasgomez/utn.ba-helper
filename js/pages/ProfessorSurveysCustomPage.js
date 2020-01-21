@@ -2,7 +2,7 @@ let ProfessorSurveysCustomPage = function ($container, utils, apiConnector) {
 
 	let $searchTxt;
 	let $resultsTable;
-	let $surveyResultDiv;
+	let $surveyResultTable;
 
 	let createPage = function () {
 		let $divFilters = $("<div</div>");
@@ -27,13 +27,11 @@ let ProfessorSurveysCustomPage = function ($container, utils, apiConnector) {
 		});
 
 		$container.append("<hr><p>Puntaje:</p>");
-		$surveyResultDiv = $(`<div></div>`);
-		$container.append($surveyResultDiv);
+		$surveyResultTable = $(`<table></table>`).append("<tbody></tbody>");
+		$container.append($surveyResultTable);
 	};
 
 	let search = function (query) {
-		console.log("Searching for ", query);
-
 		return apiConnector.searchProfessors(query).then(results => {
 			let trs = results.map(item => {
 				return `<tr><td><a>${item.professorName}</a></td><td>${item.surveysCount}</td></tr>`;
@@ -45,7 +43,14 @@ let ProfessorSurveysCustomPage = function ($container, utils, apiConnector) {
 	};
 
 	let retrieveSurveyResults = function (professorName) {
-		console.log("retrieveSurveyResults", professorName);
+		return apiConnector.getProfessorSurveysAggregate(professorName).then(results => {
+			let trs = results.map(item => {
+				return `<tr><td>${item.question}</td><td>${item.average}</td><td>${item.count}</td></tr>`;
+			}).join("");
+			$surveyResultTable.find("tbody")
+				.html(trs)
+				.prepend("<tr><th>Pregunta</th><th>Average</th><th>Sample size</th></tr>");
+		});
 	};
 
 	// Init

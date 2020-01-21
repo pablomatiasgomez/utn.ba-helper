@@ -83,6 +83,10 @@ let ApiConnector = function () {
 		return getData(BASE_API_URL + "/professors?q=" + encodeURIComponent(query));
 	};
 
+	let getProfessorSurveysAggregate = function (professorName) {
+		return getData(BASE_API_URL + "/professor-surveys-aggregate?professorName=" + encodeURIComponent(professorName));
+	};
+
 	let getData = function (url) {
 		return makeRequest({
 			url: url,
@@ -113,5 +117,6 @@ let ApiConnector = function () {
 
 		// GETs:
 		searchProfessors: searchProfessors,
+		getProfessorSurveysAggregate: getProfessorSurveysAggregate,
 	};
 };
