@@ -3,7 +3,7 @@
 
     "name": "Siga Helper",
     "short_name": "SigaHelper",
-    "version": "3.0.2",
+    "version": "3.0.3",
 
     "description": "Extensión que agrega features sobre el SIGA de la UTN - FRBA, como por ejemplo el peso academico y el promedio de finales rendidos.",
     "author": "Pablo Matías Gomez",
