@@ -223,13 +223,17 @@ let PagesDataParser = function (utils, apiConnector) {
 						let answer = {
 							question: question,
 						};
-						// TODO "No opina" puede ser percentage.
-						if (["Rta Libre", "Libre", "No opina"].indexOf(comboValue) !== -1) {
+
+						let secondOption = $tr.find("td:eq(1) select option[value='2']").text().toLowerCase().trim();
+						if (secondOption === "no opina") {
 							answer.type = "TEXT";
 							answer.value = $tr.next().find("textarea").val() || null;
-						} else {
+						} else if (secondOption === "10%") {
+							comboValue = parseInt(comboValue);
 							answer.type = "PERCENTAGE";
-							answer.value = parseInt(comboValue);
+							answer.value = isNaN(comboValue) ? null : comboValue;
+						} else {
+							throw "Couldn't parse second option: " + secondOption;
 						}
 						return answer;
 					})
@@ -255,7 +259,7 @@ let PagesDataParser = function (utils, apiConnector) {
 				});
 			}));
 		}).catch(e => {
-			trackError(e, "getSentSurveys");
+			trackError(e, "getTakenSurveys");
 			throw e;
 		});
 	};
