@@ -1,6 +1,6 @@
 (function () {
 	// We will only handle student pages, this avoids other kinds, and avoids logged out errors.
-	if (!location.pathname.startsWith("/alu")) return;
+	if (!location.pathname.startsWith("/alu") && !$("#page-alu.selected").length) return;
 	let pageHandled = false;
 
 	let $sigaHelperCustomMenusContainer;

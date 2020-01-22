@@ -1,53 +1,81 @@
 let ProfessorSurveysCustomPage = function ($container, utils, apiConnector) {
 
-	let $searchTxt;
-	let $resultsTable;
-	let $surveyResultTable;
+	let $searchDiv;
+	let $searchResultsDiv;
+	let $surveyResultDiv;
 
-	let createPage = function () {
-		let $divFilters = $("<div</div>");
-		$divFilters.append(`<span class="bold">Buscar docente: </span>`);
-		$searchTxt = $(`<input type="text" class="professor-search" />`);
-		$divFilters.append($searchTxt);
-		let $searchBtn = $(`<a href="">Buscar</a>`);
+	let createPage = function (withSearch) {
+		$searchDiv = $("<div></div>");
+		$searchDiv.append(`<span class="bold">Buscar docente: </span>`);
+		let $searchTxt = $(`<input type="text" class="professor-search" placeholder="Minimo 3 caracteres..." />`);
+		$searchTxt.on("keydown", function (e) {
+			if (e.key === "Enter") {
+				search($searchTxt.val());
+				return false;
+			}
+		});
+		$searchDiv.append($searchTxt);
+		let $searchBtn = $(`<a href="#">Buscar</a>`);
 		$searchBtn.on("click", function () {
 			search($searchTxt.val());
 			return false;
 		});
-		$divFilters.append($searchBtn);
-		$container.append($divFilters);
+		$searchDiv.append($searchBtn);
+		$container.append($searchDiv);
 
-		$container.append("<hr><p>Resultados:</p>");
-		$resultsTable = $(`<table></table>`).append("<tbody></tbody>");
-		$container.append($resultsTable);
-		$resultsTable.on("click", "a", function () {
+		$searchResultsDiv = $(`<div></div>`);
+		$searchResultsDiv.hide();
+		$searchResultsDiv.append("<hr><p>Resultados de busqueda:</p>");
+		let $searchResultsTable = $(`<table></table>`).append("<tbody></tbody>");
+		$searchResultsDiv.append($searchResultsTable);
+		$searchResultsTable.on("click", "a", function () {
 			let professorName = $(this).text();
 			retrieveSurveyResults(professorName);
 			return false;
 		});
+		$container.append($searchResultsDiv);
 
-		$container.append("<hr><p>Puntaje:</p>");
-		$surveyResultTable = $(`<table></table>`).append("<tbody></tbody>");
-		$container.append($surveyResultTable);
+		$surveyResultDiv = $(`<div></div>`);
+		$surveyResultDiv.hide();
+		$surveyResultDiv.append("<hr><p>Resultados de las encuestas:</p>");
+		let $surveyResultTable = $(`<table></table>`).append("<tbody></tbody>");
+		$surveyResultDiv.append($surveyResultTable);
+		$container.append($surveyResultDiv);
 	};
 
 	let search = function (query) {
+		$searchResultsDiv.hide();
+		$surveyResultDiv.hide();
 		return apiConnector.searchProfessors(query).then(results => {
 			let trs = results.map(item => {
-				return `<tr><td><a>${item.professorName}</a></td><td>${item.surveysCount}</td></tr>`;
+				return `<tr><td><a href="#">${item.professorName}</a></td><td>${item.surveysCount}</td></tr>`;
 			}).join("");
-			$resultsTable.find("tbody")
+			$searchResultsDiv.show();
+			$searchResultsDiv.find("table tbody")
 				.html(trs)
 				.prepend("<tr><th>Profesor</th><th>Cantidad de encuestas</th></tr>");
 		});
 	};
 
+	let getColor = avg => {
+		if (avg < 60) {
+			return "#D51C26";
+		} else if (avg >= 80) {
+			return "#19B135";
+		} else {
+			return "#F4D224";
+		}
+	};
+
 	let retrieveSurveyResults = function (professorName) {
+		$surveyResultDiv.hide();
 		return apiConnector.getProfessorSurveysAggregate(professorName).then(results => {
 			let trs = results.map(item => {
-				return `<tr><td>${item.question}</td><td>${item.average}</td><td>${item.count}</td></tr>`;
+				return `<tr><td>${item.question}</td><td style="background-color: ${getColor(item.average)}">${item.average}</td><td>${item.count}</td></tr>`;
 			}).join("");
-			$surveyResultTable.find("tbody")
+			$surveyResultDiv.find("p").text(`Resultados para ${professorName}:`);
+			$surveyResultDiv.show();
+			$surveyResultDiv.find("table tbody")
 				.html(trs)
 				.prepend("<tr><th>Pregunta</th><th>Average</th><th>Sample size</th></tr>");
 		});
@@ -56,6 +84,15 @@ let ProfessorSurveysCustomPage = function ($container, utils, apiConnector) {
 	// Init
 	(function () {
 		createPage();
+		let professorName = new URLSearchParams(window.location.search).get("professorName");
+		if (professorName) {
+			$searchDiv.hide();
+			retrieveSurveyResults(professorName);
+		}
+		// TODO this could be used with:
+		// let redirectToProfessorSurveyResults = function(professorName) {
+		// 	return `/?professorName=${encodeURIComponent(professorName)}#${encodeURIComponent("Encuesta Docente")}`;
+		// };
 	})();
 
 	// Public
