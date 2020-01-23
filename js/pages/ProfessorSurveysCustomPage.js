@@ -41,6 +41,7 @@ let ProfessorSurveysCustomPage = function ($container, utils, apiConnector) {
 		let $surveyResultTable = $(`<table></table>`).append("<tbody></tbody>");
 		$surveyResultDiv.append($surveyResultTable);
 		$container.append($surveyResultDiv);
+		$container.append("<div><span class='powered-by-siga-helper'></span></div>");
 	};
 
 	let search = function (query) {
