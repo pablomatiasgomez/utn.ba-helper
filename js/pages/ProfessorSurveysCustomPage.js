@@ -44,6 +44,7 @@ let ProfessorSurveysCustomPage = function ($container, utils, apiConnector) {
 	};
 
 	let search = function (query) {
+		if (query.length < 3) return;
 		$searchResultsDiv.hide();
 		$surveyResultDiv.hide();
 		return apiConnector.searchProfessors(query).then(results => {
@@ -89,10 +90,6 @@ let ProfessorSurveysCustomPage = function ($container, utils, apiConnector) {
 			$searchDiv.hide();
 			retrieveSurveyResults(professorName);
 		}
-		// TODO this could be used with:
-		// let redirectToProfessorSurveyResults = function(professorName) {
-		// 	return `/?professorName=${encodeURIComponent(professorName)}#${encodeURIComponent("Encuesta Docente")}`;
-		// };
 	})();
 
 	// Public

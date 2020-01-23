@@ -87,6 +87,17 @@ let ApiConnector = function () {
 		return getData(BASE_API_URL + "/professor-surveys-aggregate?professorName=" + encodeURIComponent(professorName));
 	};
 
+	let getPreviousProfessors = function (classSchedule) {
+		return postData(BASE_API_URL + "/previous-professors", {
+			year: classSchedule.year,
+			quarter: classSchedule.quarter,
+			classCode: classSchedule.classCode,
+			courseCode: classSchedule.courseCode,
+			branch: classSchedule.branch,
+			schedules: classSchedule.schedules.map(mapSchedule)
+		});
+	};
+
 	let getData = function (url) {
 		return makeRequest({
 			url: url,
@@ -118,5 +129,6 @@ let ApiConnector = function () {
 		// GETs:
 		searchProfessors: searchProfessors,
 		getProfessorSurveysAggregate: getProfessorSurveysAggregate,
+		getPreviousProfessors: getPreviousProfessors
 	};
 };
