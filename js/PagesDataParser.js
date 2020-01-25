@@ -8,7 +8,11 @@ let PagesDataParser = function (utils, apiConnector) {
 
 	let trackError = function (error, methodName) {
 		console.error("Error at " + methodName, error);
-		return apiConnector.logError(methodName, stringifyError(error));
+		return apiConnector.logMessage(methodName, true, stringifyError(error));
+	};
+
+	let logInfo = function (message, methodName) {
+		return apiConnector.logMessage(methodName, false, message);
 	};
 
 	let getPageContents = function (url) {
@@ -264,6 +268,24 @@ let PagesDataParser = function (utils, apiConnector) {
 		});
 	};
 
+	let logPlanIds = function () {
+		return getPageContents("/alu/mat.do").then(responseText => {
+			let plans = $(responseText).find(".std-canvas > div select option").toArray()
+				.map(option => {
+					let $option = $(option);
+					let planId = $option.attr("value").trim();
+					let planCode = $option.text().trim();
+					if (!planId || planCode === "-nada-") return;
+					return {
+						planId: planId,
+						planCode: planCode
+					}
+				})
+				.filter(plan => !!plan);
+
+			return logInfo(JSON.stringify(plans), "PlanIds");
+		});
+	};
 
 	// Public
 	return {
@@ -276,5 +298,7 @@ let PagesDataParser = function (utils, apiConnector) {
 		getProfessorClassesFromSurveys: getProfessorClassesFromSurveys,
 
 		getTakenSurveys: getTakenSurveys,
+
+		logPlanIds: logPlanIds, // TODO delete once we know all the ids.
 	};
 };

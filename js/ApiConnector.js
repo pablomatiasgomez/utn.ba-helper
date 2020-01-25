@@ -3,10 +3,11 @@ let ApiConnector = function () {
 	const CLIENT = "CHROME@" + chrome.runtime.getManifest().version;
 	const BASE_API_URL = "http://www.pablomatiasgomez.com.ar/sigahelper/v1";
 
-	let logError = function (methodName, error) {
-		return postData(BASE_API_URL + "/errors", {
-			method: methodName,
-			error: error,
+	let logMessage = function (method, isError, message) {
+		return postData(BASE_API_URL + "/log", {
+			method: method,
+			error: isError,
+			message: message
 		});
 	};
 
@@ -120,7 +121,7 @@ let ApiConnector = function () {
 	// Public
 	return {
 		// POSTs:
-		logError: logError,
+		logMessage: logMessage,
 		logUserStat: logUserStat,
 		postClassSchedules: postClassSchedules,
 		postProfessorClasses: postProfessorClasses,
