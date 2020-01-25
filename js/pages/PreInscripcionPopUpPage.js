@@ -80,6 +80,7 @@ let PreInscripcionPopUpPage = function (utils) {
 						professorsByClass[1].forEach(professor => {
 							let professorName = professor.professorName;
 							let professorRole = professor.professorRole;
+							let overallScore = professor.overallScore;
 							// TODO use this data.
 							console.log(year, classCode, professorName, professorRole);
 							let getProfessorSurveyResultsUrl = function (professorName) {
