@@ -100,9 +100,9 @@ let PagesDataParser = function (utils, apiConnector) {
 					// - "2019 Anual"
 					// - "2019      1/1"
 					// - "Opcional"  (not mapping this one because it's useless..)
-					let time = $tds.eq(1).text().split("(")[1].split(")")[0].trim();
+					let time = $tds.eq(1).find("span").text().replace("(", "").replace(")", "").trim();
 					if (time === "Opcional") return null;
-					let groups = /^(\d{4}) (Cuat (1|2)\/2|Anual)$/.exec(time);
+					let groups = /^(\d{4}) (Cuat (1|2)\/2|Anual|     1\/1)$/.exec(time);
 					if (!groups) throw "Class time couldn't be parsed: " + time;
 
 					let year = parseInt(groups[1]); // 2018, 2019, ...
