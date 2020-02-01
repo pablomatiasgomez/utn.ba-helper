@@ -228,11 +228,12 @@ let PagesDataParser = function (utils, apiConnector) {
 							question: question,
 						};
 
+						// The way to know if the field is TEXT or PERCENTAGE is analyzing the second option of the select...
 						let secondOption = $tr.find("td:eq(1) select option[value='2']").text().toLowerCase().trim();
 						if (secondOption === "no opina") {
 							answer.type = "TEXT";
 							answer.value = $tr.next().find("textarea").val() || null;
-						} else if (secondOption === "10%") {
+						} else if (secondOption.endsWith("%")) {
 							comboValue = parseInt(comboValue);
 							answer.type = "PERCENTAGE";
 							answer.value = isNaN(comboValue) ? null : comboValue;

@@ -33,9 +33,9 @@ Extensión para Chrome que agrega una serie de features sobre el <a href="http:/
     - Filtros en el popup de inscripción de cursos por día/turno/sede.
     - Horario de cursada con detalle explícito en el popup de inscripción de cursos. Ej: "Ma(n)1:3 Ju(n)1:5" -> "Martes (Noche) 19:00hs a 21:30hs y Jueves (Noche) 19:00hs a 23:00hs".
 
-- Tracking anónimo de las encuestas docentes para poder publicar esta información y que sea de libre acceso para todos.
+- Colecta anónimamente las encuestas docentes para poder publicar esta información y que sea de libre acceso para todos.
 
-- Tracking anónimo de las cursadas para poder predecir qué profesores van a estar en un curso al momento de inscribirse.
+- Colecta anónimamente los horarios de las cursadas para poder predecir qué profesores van a estar en un curso al momento de inscribirse.
 
 ## Screenshots:
 

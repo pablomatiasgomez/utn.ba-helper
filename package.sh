@@ -5,6 +5,7 @@
 echo "Starting packaging.."
 
 minifyJs () {
+  # npm package "babel-minify" needs to be installed globally.
   echo "Minifying $1"
   mv "$1" "$1.bk"
   minify "$1.bk" --out-file "$1" --builtIns false
