@@ -1,7 +1,7 @@
 (function () {
 	// We will only handle student pages, this avoids other kinds, and avoids logged out errors.
 	if (!location.pathname.startsWith("/alu") && !$("#page-alu.selected").length) return;
-	let pageHandled = false;
+	let handler = null;
 
 	let $sigaHelperCustomMenusContainer;
 	let sigaHelperCustomMenuAppended = false;
@@ -13,16 +13,15 @@
 				.append($sigaHelperCustomMenusContainer);
 		}
 	};
-	let addCustomPage = (name, handler) => {
+	let addCustomPage = (name, customPageHandler) => {
 		appendSigaHelperCustomMenu();
 		let hash = `#${encodeURIComponent(name)}`;
 		let $a = $(`<a href="${hash}">${name}</a>`);
-		let clickHandler = () => handler($(".std-desktop-desktop").html(`<div class="std-canvas"><p>${name}</p></div>`).find(".std-canvas"));
+		let clickHandler = () => customPageHandler($(".std-desktop-desktop").html(`<div class="std-canvas"><p>${name}</p></div>`).find(".std-canvas"));
 		$a.on("click", clickHandler);
 		$sigaHelperCustomMenusContainer.append($a);
 		if (location.hash === hash) {
-			pageHandled = true;
-			clickHandler();
+			handler = clickHandler;
 		}
 	};
 
@@ -41,13 +40,19 @@
 		"/alu/preinscolas.do": () => PreInscripcionPopUpPage(utils),
 	};
 
-	let handler = PAGE_HANDLERS[location.pathname];
-	if (!pageHandled && handler) {
-		pageHandled = true;
-		handler();
+	handler = handler || PAGE_HANDLERS[location.pathname];
+
+	try {
+		if (handler) handler();
+	} catch (e) {
+		console.error("Error when handling page " + location.href, e);
+		apiConnector.logMessage("Handle page " + location.href, true, utils.stringifyError(e));
 	}
 
-	dataCollector.collectBackgroundDataIfNeeded();
+	dataCollector.collectBackgroundDataIfNeeded().catch(e => {
+		console.error("Error while collecting background data", e);
+		apiConnector.logMessage("collectBackgroundDataIfNeeded", true, utils.stringifyError(e));
+	});
 
 	$("body").on("click", ".powered-by-siga-helper", function () {
 		window.open("https://chrome.google.com/webstore/detail/siga-helper/jdgdheoeghamkhfppapjchbojhehimpe", "_blank");

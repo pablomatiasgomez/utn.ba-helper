@@ -181,6 +181,12 @@ let Utils = function () {
 		return new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);
 	};
 
+	let stringifyError = function (error) {
+		if (error instanceof Error) return error.toString();
+		if (typeof error === 'object') return JSON.stringify(error);
+		return error;
+	};
+
 	// Public
 	return {
 		HOURS: HOURS,
@@ -197,5 +203,7 @@ let Utils = function () {
 
 		trimCourseName: trimCourseName,
 		parseDate: parseDate,
+
+		stringifyError: stringifyError,
 	};
 };
