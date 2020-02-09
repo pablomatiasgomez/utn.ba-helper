@@ -16,11 +16,18 @@
 	};
 
 	let handler = PAGE_HANDLERS[location.pathname];
-	if (handler) {
-		handler();
+
+	try {
+		if (handler) handler();
+	} catch (e) {
+		console.error("Error when handling page " + location.pathname, e);
+		apiConnector.logMessage("Handle page " + location.pathname, true, utils.stringifyError(e));
 	}
 
-	dataCollector.collectBackgroundDataIfNeeded();
+	dataCollector.collectBackgroundDataIfNeeded().catch(e => {
+		console.error("Error while collecting background data", e);
+		apiConnector.logMessage("collectBackgroundDataIfNeeded", true, utils.stringifyError(e));
+	});
 
 	$("body").on("click", ".powered-by-siga-helper", function () {
 		window.open("https://chrome.google.com/webstore/detail/siga-helper/jdgdheoeghamkhfppapjchbojhehimpe", "_blank");

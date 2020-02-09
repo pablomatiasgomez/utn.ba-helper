@@ -1,14 +1,8 @@
 let PagesDataParser = function (utils, apiConnector) {
 
-	let stringifyError = function (error) {
-		if (error instanceof Error) return error.toString();
-		if (typeof error === 'object') return JSON.stringify(error);
-		return error;
-	};
-
 	let trackError = function (error, methodName) {
 		console.error("Error at " + methodName, error);
-		return apiConnector.logMessage(methodName, true, stringifyError(error));
+		return apiConnector.logMessage(methodName, true, utils.stringifyError(error));
 	};
 
 	let logInfo = function (message, methodName) {
