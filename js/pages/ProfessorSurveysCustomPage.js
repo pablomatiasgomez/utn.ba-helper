@@ -50,7 +50,7 @@ let ProfessorSurveysCustomPage = function ($container, utils, apiConnector) {
 		$surveyResultDiv.hide();
 		return apiConnector.searchProfessors(query).then(results => {
 			let trs = results.map(item => {
-				return `<tr><td><a href="#">${item.professorName}</a></td><td>${item.surveysCount}</td></tr>`;
+				return `<tr><td><a href="#">${item.value}</a></td><td>${item.data}</td></tr>`;
 			}).join("");
 			$searchResultsDiv.show();
 			$searchResultsDiv.find("table tbody")

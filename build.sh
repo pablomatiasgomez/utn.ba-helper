@@ -14,6 +14,7 @@ js/pages/ListadoMateriasPage.js \
 js/pages/PreInscripcionPopUpPage.js \
 js/pages/PreInscripcionPage.js \
 js/pages/ProfessorSurveysCustomPage.js \
+js/pages/CoursesCustomPage.js \
 js/functions.js"
 cat $JS_FILES > js/siga-helper.min.js
 

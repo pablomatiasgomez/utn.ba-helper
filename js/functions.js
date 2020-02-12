@@ -3,10 +3,9 @@
 	if (!location.pathname.startsWith("/alu") && !$("#page-alu.selected").length) return;
 	let handler = null;
 
-	let $sigaHelperCustomMenusContainer;
-	let sigaHelperCustomMenuAppended = false;
+	let $sigaHelperCustomMenusContainer = $();
 	let appendSigaHelperCustomMenu = () => {
-		if (!sigaHelperCustomMenuAppended) {
+		if (!$sigaHelperCustomMenusContainer.length) {
 			$sigaHelperCustomMenusContainer = $("<p></p>");
 			$("#menu-page-alu")
 				.append("<div>Siga Helper</div>")
@@ -31,6 +30,7 @@
 	let dataCollector = new DataCollector(pagesDataParser, apiConnector);
 
 	addCustomPage("Encuesta Docente", ($container) => ProfessorSurveysCustomPage($container, utils, apiConnector));
+	addCustomPage("Buscar cursos", ($container) => CoursesCustomPage($container, utils, apiConnector));
 
 	const PAGE_HANDLERS = {
 		"/alu/horarios.do": () => HorariosPage(utils),

@@ -3,6 +3,20 @@ let ApiConnector = function () {
 	const CLIENT = "CHROME@" + chrome.runtime.getManifest().version;
 	const BASE_API_URL = "http://www.pablomatiasgomez.com.ar/sigahelper/v1";
 
+	const DAYS_MAPPING = {
+		"Lu": "MONDAY",
+		"Ma": "TUESDAY",
+		"Mi": "WEDNESDAY",
+		"Ju": "THURSDAY",
+		"Vi": "FRIDAY",
+		"Sa": "SATURDAY",
+	};
+	const SHIFTS_MAPPING = {
+		"m": "MORNING",
+		"t": "AFTERNOON",
+		"n": "NIGHT",
+	};
+
 	let logMessage = function (method, isError, message) {
 		return postData(BASE_API_URL + "/log", {
 			method: method,
@@ -30,7 +44,7 @@ let ApiConnector = function () {
 				classCode: classSchedule.classCode,
 				courseCode: classSchedule.courseCode,
 				branch: classSchedule.branch,
-				schedules: classSchedule.schedules.map(mapSchedule)
+				schedules: classSchedule.schedules.map(mapScheduleToApi)
 			};
 		}));
 	};
@@ -43,20 +57,7 @@ let ApiConnector = function () {
 		return postData(BASE_API_URL + "/professor-surveys", surveys);
 	};
 
-	const DAYS_MAPPING = {
-		"Lu": "MONDAY",
-		"Ma": "TUESDAY",
-		"Mi": "WEDNESDAY",
-		"Ju": "THURSDAY",
-		"Vi": "FRIDAY",
-		"Sa": "SATURDAY",
-	};
-	const SHIFTS_MAPPING = {
-		"m": "MORNING",
-		"t": "AFTERNOON",
-		"n": "NIGHT",
-	};
-	let mapSchedule = function (schedule) {
+	let mapScheduleToApi = function (schedule) {
 		return {
 			day: DAYS_MAPPING[schedule.day],
 			shift: SHIFTS_MAPPING[schedule.shift],
@@ -95,7 +96,21 @@ let ApiConnector = function () {
 			classCode: classSchedule.classCode,
 			courseCode: classSchedule.courseCode,
 			branch: classSchedule.branch,
-			schedules: classSchedule.schedules.map(mapSchedule)
+			schedules: classSchedule.schedules.map(mapScheduleToApi)
+		});
+	};
+
+	let searchCourses = function (query) {
+		return getData(BASE_API_URL + "/courses?q=" + encodeURIComponent(query));
+	};
+
+	let getClassesForCourse = function (courseCode) {
+		// TODO handle limit
+		return getData(BASE_API_URL + "/classes?courseCode=" + encodeURIComponent(courseCode) + "&offset=0&limit=10").then(response => {
+			response.forEach(classWithProfessor => {
+				classWithProfessor.classSchedule.schedules = classWithProfessor.classSchedule.schedules.map(mapScheduleFromApi);
+			});
+			return response;
 		});
 	};
 
@@ -109,6 +124,17 @@ let ApiConnector = function () {
 		});
 	};
 
+	let mapScheduleFromApi = function (schedule) {
+		return {
+			day: Object.entries(DAYS_MAPPING).filter(entry => entry[1] === schedule.day)[0][0],
+			shift: Object.entries(SHIFTS_MAPPING).filter(entry => entry[1] === schedule.shift)[0][0],
+			firstHour: schedule.firstHour.toString(),
+			lastHour: schedule.lastHour.toString()
+		};
+	};
+
+	// ---
+
 	let makeRequest = function (options) {
 		return new Promise((resolve, reject) => {
 			chrome.runtime.sendMessage(options, response => (response && response.error) ? reject(response.error) : resolve(response));
@@ -117,6 +143,7 @@ let ApiConnector = function () {
 			throw e;
 		});
 	};
+
 
 	// Public
 	return {
@@ -130,6 +157,8 @@ let ApiConnector = function () {
 		// GETs:
 		searchProfessors: searchProfessors,
 		getProfessorSurveysAggregate: getProfessorSurveysAggregate,
-		getPreviousProfessors: getPreviousProfessors
+		getPreviousProfessors: getPreviousProfessors,
+		searchCourses: searchCourses,
+		getClassesForCourse: getClassesForCourse,
 	};
 };
