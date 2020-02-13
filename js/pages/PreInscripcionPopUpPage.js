@@ -84,7 +84,7 @@ let PreInscripcionPopUpPage = function (utils) {
 							// TODO use this data.
 							console.log(year, classCode, professorName, professorRole);
 							let getProfessorSurveyResultsUrl = function (professorName) {
-								return `/?professorName=${encodeURIComponent(professorName)}#${encodeURIComponent("Encuesta Docente")}`;
+								return `/?professorName=${encodeURIComponent(professorName)}#${encodeURIComponent("Buscar docentes")}`;
 							};
 							window.open(getProfessorSurveyResultsUrl(professorName), '_blank');
 						});

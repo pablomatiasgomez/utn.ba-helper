@@ -60,6 +60,7 @@ let CoursesSearchCustomPage = function ($container, utils, apiConnector) {
 	};
 
 	let retrieveClassesForCourse = function (courseCode, offset, limit) {
+		if (offset === 0) $courseDataDiv.hide();
 		return apiConnector.getClassesForCourse(courseCode, offset, limit).then(results => {
 			if (offset === 0) {
 				$courseDataDiv.find("p").text(`Resultados para ${courseCode}:`);
@@ -84,7 +85,7 @@ let CoursesSearchCustomPage = function ($container, utils, apiConnector) {
 		let trs = classes.map(item => {
 			let classSchedule = item.classSchedule;
 			let professorLis = item.professors.map(professor => {
-				let getProfessorSurveyResultsUrl = professorName => `/?professorName=${encodeURIComponent(professorName)}#${encodeURIComponent("Encuesta Docente")}`;
+				let getProfessorSurveyResultsUrl = professorName => `/?professorName=${encodeURIComponent(professorName)}#${encodeURIComponent("Buscar docentes")}`;
 				return `<li>
 					<span style="border: 1px solid grey; background-color: ${utils.getColorForAvg(professor.overallScore)}">${professor.overallScore}</span>
 					<a href="${getProfessorSurveyResultsUrl(professor.professorName)}">${professor.professorName}</a>
