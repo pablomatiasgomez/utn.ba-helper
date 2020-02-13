@@ -187,6 +187,16 @@ let Utils = function () {
 		return error;
 	};
 
+	let getColorForAvg = function (avg) {
+		if (avg < 60) {
+			return "#D51C26";
+		} else if (avg >= 80) {
+			return "#19B135";
+		} else {
+			return "#F4D224";
+		}
+	};
+
 	// Public
 	return {
 		HOURS: HOURS,
@@ -205,5 +215,6 @@ let Utils = function () {
 		parseDate: parseDate,
 
 		stringifyError: stringifyError,
+		getColorForAvg: getColorForAvg,
 	};
 };

@@ -104,9 +104,13 @@ let ApiConnector = function () {
 		return getData(BASE_API_URL + "/courses?q=" + encodeURIComponent(query));
 	};
 
-	let getClassesForCourse = function (courseCode) {
-		// TODO handle limit
-		return getData(BASE_API_URL + "/classes?courseCode=" + encodeURIComponent(courseCode) + "&offset=0&limit=10").then(response => {
+	let getClassesForCourse = function (courseCode, offset, limit) {
+		let queryParams = buildQueryParams({
+			courseCode: courseCode,
+			offset: offset,
+			limit: limit
+		});
+		return getData(BASE_API_URL + "/classes?" + queryParams).then(response => {
 			response.forEach(classWithProfessor => {
 				classWithProfessor.classSchedule.schedules = classWithProfessor.classSchedule.schedules.map(mapScheduleFromApi);
 			});
@@ -142,6 +146,12 @@ let ApiConnector = function () {
 			console.error("Error while making request", e);
 			throw e;
 		});
+	};
+
+	let buildQueryParams = function (params) {
+		return Object.entries(params)
+			.map(entry => `${encodeURIComponent(entry[0])}=${encodeURIComponent(entry[1])}`)
+			.join("&")
 	};
 
 

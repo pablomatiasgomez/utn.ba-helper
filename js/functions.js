@@ -29,8 +29,8 @@
 	let pagesDataParser = new PagesDataParser(utils, apiConnector);
 	let dataCollector = new DataCollector(pagesDataParser, apiConnector);
 
-	addCustomPage("Encuesta Docente", ($container) => ProfessorSurveysCustomPage($container, utils, apiConnector));
-	addCustomPage("Buscar cursos", ($container) => CoursesCustomPage($container, utils, apiConnector));
+	addCustomPage("Buscar cursos", ($container) => CoursesSearchCustomPage($container, utils, apiConnector));
+	addCustomPage("Buscar docentes", ($container) => ProfessorsSearchCustomPage($container, utils, apiConnector));
 
 	const PAGE_HANDLERS = {
 		"/alu/horarios.do": () => HorariosPage(utils),
@@ -51,7 +51,7 @@
 
 	dataCollector.collectBackgroundDataIfNeeded().catch(e => {
 		console.error("Error while collecting background data", e);
-		apiConnector.logMessage("collectBackgroundDataIfNeeded", true, utils.stringifyError(e));
+		return apiConnector.logMessage("collectBackgroundDataIfNeeded", true, utils.stringifyError(e));
 	});
 
 	$("body").on("click", ".powered-by-siga-helper", function () {

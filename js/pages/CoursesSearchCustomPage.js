@@ -1,4 +1,4 @@
-let CoursesCustomPage = function ($container, utils, apiConnector) {
+let CoursesSearchCustomPage = function ($container, utils, apiConnector) {
 
 	let $searchDiv;
 	let $searchResultsDiv;
@@ -6,7 +6,7 @@ let CoursesCustomPage = function ($container, utils, apiConnector) {
 
 	let createPage = function (withSearch) {
 		$searchDiv = $("<div></div>");
-		$searchDiv.append(`<span class="bold">Buscar curso: </span>`);
+		$searchDiv.append(`<span class="bold">Buscar por nombre de materia: </span>`);
 		let $searchTxt = $(`<input type="text" class="course-search" placeholder="Minimo 3 caracteres..." />`);
 		$searchTxt.on("keydown", function (e) {
 			if (e.key === "Enter") {
@@ -30,7 +30,7 @@ let CoursesCustomPage = function ($container, utils, apiConnector) {
 		$searchResultsDiv.append($searchResultsTable);
 		$searchResultsTable.on("click", "a", function () {
 			let courseCode = $(this).text();
-			retrieveCourse(courseCode);
+			retrieveClassesForCourse(courseCode, 0, 10);
 			return false;
 		});
 		$container.append($searchResultsDiv);
@@ -59,17 +59,38 @@ let CoursesCustomPage = function ($container, utils, apiConnector) {
 		});
 	};
 
-	let retrieveCourse = function (courseCode) {
-		$courseDataDiv.hide();
-		return apiConnector.getClassesForCourse(courseCode).then(results => {
-			let trs = results.map(item => {
-				let classSchedule = item.classSchedule;
-				let professorLis = item.professors.map(professor => {
-					return `<li>${professor.professorName} (${professor.professorRole}) ${professor.overallScore}</li>`
-				}).join("");
-				// TODO add link to professor
-				// TODO add avg color
-				return `<tr>
+	let retrieveClassesForCourse = function (courseCode, offset, limit) {
+		return apiConnector.getClassesForCourse(courseCode, offset, limit).then(results => {
+			if (offset === 0) {
+				$courseDataDiv.find("p").text(`Resultados para ${courseCode}:`);
+				$courseDataDiv.show();
+				$courseDataDiv.find("table tbody")
+					.html(`
+					<tr><th>Año</th><th>Cuatr.</th><th>Curso</th><th>Anexo</th><th>Horario</th><th>Profesores</th></tr>
+					<tr><td colspan="6"><a href="#">Ver mas resultados...</a></td></tr>`);
+				$courseDataDiv.find("table tbody tr:last a").on("click", function () {
+					retrieveClassesForCourse(courseCode, offset += limit, limit);
+					return false;
+				});
+			}
+			if (results.length < limit) {
+				$courseDataDiv.find("table tbody tr:last").hide();
+			}
+			appendClassesToTable(results);
+		});
+	};
+
+	let appendClassesToTable = function (classes) {
+		let trs = classes.map(item => {
+			let classSchedule = item.classSchedule;
+			let professorLis = item.professors.map(professor => {
+				let getProfessorSurveyResultsUrl = professorName => `/?professorName=${encodeURIComponent(professorName)}#${encodeURIComponent("Encuesta Docente")}`;
+				return `<li>
+					<span style="border: 1px solid grey; background-color: ${utils.getColorForAvg(professor.overallScore)}">${professor.overallScore}</span>
+					<a href="${getProfessorSurveyResultsUrl(professor.professorName)}">${professor.professorName}</a>
+				</li>`;
+			}).join("");
+			return `<tr>
 					<td>${classSchedule.year}</td>
 					<td>${classSchedule.quarter}</td>
 					<td>${classSchedule.classCode}</td>
@@ -77,13 +98,8 @@ let CoursesCustomPage = function ($container, utils, apiConnector) {
 					<td>${utils.getTimeInfoStringFromSchedules(classSchedule.schedules)}</td>
 					<td><ul style="padding-inline-start: 15px; margin-block-end: 0; margin-block-start: 0;">${professorLis}</ul></td>
 				</tr>`;
-			}).join("");
-			$courseDataDiv.find("p").text(`Resultados para ${courseCode}:`);
-			$courseDataDiv.show();
-			$courseDataDiv.find("table tbody")
-				.html(trs)
-				.prepend("<tr><th>Año</th><th>Cuatr.</th><th>Curso</th><th>Anexo</th><th>Horario</th><th>Profesores</th></tr>");
-		});
+		}).join("");
+		$courseDataDiv.find("table tbody tr:last").before(trs);
 	};
 
 	// Init

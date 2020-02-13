@@ -1,4 +1,4 @@
-let ProfessorSurveysCustomPage = function ($container, utils, apiConnector) {
+let ProfessorsSearchCustomPage = function ($container, utils, apiConnector) {
 
 	let $searchDiv;
 	let $searchResultsDiv;
@@ -59,21 +59,11 @@ let ProfessorSurveysCustomPage = function ($container, utils, apiConnector) {
 		});
 	};
 
-	let getColor = avg => {
-		if (avg < 60) {
-			return "#D51C26";
-		} else if (avg >= 80) {
-			return "#19B135";
-		} else {
-			return "#F4D224";
-		}
-	};
-
 	let retrieveSurveyResults = function (professorName) {
 		$surveyResultDiv.hide();
 		return apiConnector.getProfessorSurveysAggregate(professorName).then(results => {
 			let trs = results.map(item => {
-				return `<tr><td>${item.question}</td><td style="background-color: ${getColor(item.average)}">${item.average}</td><td>${item.count}</td></tr>`;
+				return `<tr><td>${item.question}</td><td style="background-color: ${utils.getColorForAvg(item.average)}">${item.average}</td><td>${item.count}</td></tr>`;
 			}).join("");
 			$surveyResultDiv.find("p").text(`Resultados para ${professorName}:`);
 			$surveyResultDiv.show();
