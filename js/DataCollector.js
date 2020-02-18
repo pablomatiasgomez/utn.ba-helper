@@ -31,9 +31,6 @@ let DataCollector = function (pagesDataParser, apiConnector) {
 			}).then(() => {
 				return collectTakenSurveys(studentId);
 			}).then(() => {
-				// TODO delete once we know all the ids.
-				return pagesDataParser.logPlanIds();
-			}).then(() => {
 				saveLastTimeCollected(studentId);
 			});
 		});
