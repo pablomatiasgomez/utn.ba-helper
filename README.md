@@ -57,5 +57,6 @@ Extensión para Chrome que agrega una serie de features sobre el <a href="http:/
 | Course | Materia |
 | Class | Cursada |
 | Grade | Nota |
-| Pass | Aprobado |
-| Fail | Desaprobado |
+| Signed | Firmada |
+| Passed | Aprobada |
+| Failed | Desaprobada |
