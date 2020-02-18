@@ -41,7 +41,7 @@ let HorariosPage = function (utils) {
 			let $schedulesTd = $(this).find("td:nth-child(6)");
 			if (!$schedulesTd.length) return;
 
-			let schedules = utils.getSchedulesFromString($schedulesTd.text());
+			let schedules = utils.getSchedulesFromString($schedulesTd.text().trim());
 			$schedulesTd.append("<br><b>" + utils.getTimeInfoStringFromSchedules(schedules) + "</b>");
 		});
 	};
@@ -51,12 +51,9 @@ let HorariosPage = function (utils) {
 	};
 
 	// Init
-	(function () {
+	return Promise.resolve().then(() => {
 		addTimeInfo();
 		setClassNamesInTable();
 		addPoweredBy();
-	})();
-
-	// Public
-	return {};
+	});
 };

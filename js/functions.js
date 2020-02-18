@@ -42,14 +42,19 @@ if (!Array.prototype.hasOwnProperty("flatMap")) {
 		"/alu/horarios.do": () => HorariosPage(utils),
 		"/alu/acfin.do": () => ActasDeFinalesPage(pagesDataParser, dataCollector, utils),
 		"/alu/mat.do": () => ListadoMateriasPage(pagesDataParser),
-		"/alu/preins.do": () => PreInscripcionPage(utils),
+		"/alu/preins.do": () => PreInscripcionPage(pagesDataParser, utils),
 		"/alu/preinscolas.do": () => PreInscripcionPopUpPage(utils),
 	};
 
 	handler = handler || PAGE_HANDLERS[location.pathname];
 
 	try {
-		if (handler) handler();
+		if (handler) {
+			handler().catch(e => {
+				console.error("Error when handling page " + location.pathname, e);
+				return apiConnector.logMessage("Handle page " + location.pathname, true, utils.stringifyError(e));
+			});
+		}
 	} catch (e) {
 		console.error("Error when handling page " + location.href, e);
 		apiConnector.logMessage("Handle page " + location.href, true, utils.stringifyError(e));

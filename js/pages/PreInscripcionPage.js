@@ -1,60 +1,103 @@
-let PreInscripcionPage = function (utils) {
+let PreInscripcionPage = function (pagesDataParser, utils) {
 
-	let getAllUsedHours = function ($table) {
-		let getShiftIndex = function (shift) {
-			if (shift === "m") {
-				return 0;
-			} else if (shift === "t") {
-				return 1;
-			} else if (shift === "n") {
-				return 2;
-			}
-			return 0;
-		};
+	/**
+	 * Combines both {@link getAllCurrentClasses} and {@link getAllSelectedCoursesInAlternatives}
+	 * and reutnrs a single map with all the used hours
+	 * @return an object from: alternativeIndex -> scheduleDay -> hour (from 0 to 19 to consier all shifts) -> selectedCourse
+	 */
+	let getAllUsedHours = function ($alternativesTable) {
+		let usedHours = getAllSelectedCoursesInAlternatives($alternativesTable);
+		return getAllCurrentClasses().then(currentClasses => {
+			// We will add this for every alternative that has a value:
+			currentClasses.forEach(classSchedule => {
+				Object.keys(usedHours).forEach(alternativeIndex => {
+					// TODO we are not having the course name here because the pagesDataParser is not returning it. Eventualy we could return it only for this use case.
+					addCourseToUsedHours(usedHours, alternativeIndex, classSchedule.courseCode, "", classSchedule.schedules);
+				});
+			});
+			return usedHours;
+		});
+	};
 
+	/**
+	 * Gets all the current classes that the student is having in order to merge them with the alternatives, and show them in one single table.
+	 * @return a list of the current classes.
+	 */
+	let getAllCurrentClasses = function () {
+		// We assumes that older classes are not returned because at the moment of registering to a new course they should be already removed.
+		// That is why we simply should get the class schedules and do no filtering here.
+		return pagesDataParser.getClassSchedules();
+	};
+
+	/**
+	 * Gets and returns all the used hours in all the alternative that the stundent is registering
+	 * @return an object from: alternativeIndex -> scheduleDay -> hour (from 0 to 19 to consier all shifts) -> selectedCourse
+	 */
+	let getAllSelectedCoursesInAlternatives = function ($table) {
 		let usedHours = {};
 
 		$table.find("tbody tr").each(function () {
-			let $tdAlternates = $(this).find("td:not(:first)");
+			let $tdAlternatives = $(this).find("td:not(:first)");
 
-			if ($tdAlternates.length) {
-				let tdClass = $(this).find("td:first").text();
-				let selectedClass = {
-					classCode: tdClass.match(/\[(.*?)\]/)[1],
-					courseName: tdClass.split(" ").slice(1).join(" ")
-				};
+			// Filter out rows that do not correspond to a course (i.e. header and add new courses rows)
+			if (!$tdAlternatives.length) return;
 
-				$tdAlternates.each(function (alternateIndex) {
-					if (!$(this).hasClass("soft-back")) {
-						let strArray = utils.getTextNodes($(this));
-						if (!strArray.length) {
-							strArray = utils.getTextNodes($(this).find("a"));
-						}
+			// Now given that this row contains alternatives for a course, we first figure out what course is:
+			let courseStr = $(this).find("td:first").text().trim();
+			let groups = /^\[(\d{6})\] (.*)$/.exec(courseStr);
+			if (!groups) throw `courseStr couldn't be parsed: '${courseStr}'`;
+			let courseCode = groups[1];
+			let courseName = groups[2].trim();
 
-						if (strArray.length) {
-							let str = strArray[0].replace("CAMPUS", "").replace("MEDRANO", ""); // This is not needed, but just in case.
+			$tdAlternatives.each(function (alternativeIndex) {
+				// Filter out the alternatives that are not yet filled:
+				if ($(this).hasClass("soft-back")) return;
 
-							utils.getSchedulesFromString(str).forEach(function (schedule) {
-								let firstHour = parseInt(schedule.firstHour) + (getShiftIndex(schedule.shift) * 7);
-								let lastHour = parseInt(schedule.lastHour) + (getShiftIndex(schedule.shift) * 7);
+				let strArray = utils.getTextNodes($(this));
+				if (!strArray.length) {
+					strArray = utils.getTextNodes($(this).find("a"));
+				}
+				if (!strArray.length) return;
 
-								if (!usedHours[alternateIndex]) {
-									usedHours[alternateIndex] = {};
-								}
-								if (!usedHours[alternateIndex][schedule.day]) {
-									usedHours[alternateIndex][schedule.day] = {};
-								}
-								for (let i = firstHour; i <= lastHour; i++) {
-									usedHours[alternateIndex][schedule.day][i] = selectedClass;
-								}
-							});
-						}
-					}
-				});
-			}
+				// This is not needed, because we are grabbing the first text node, but just in case something changes..
+				let schedulesStr = strArray[0].trim().replace("CAMPUS", "").replace("MEDRANO", "");
+				addCourseToUsedHours(usedHours, alternativeIndex, courseCode, courseName, utils.getSchedulesFromString(schedulesStr));
+			});
 		});
 
 		return usedHours;
+	};
+
+	let getShiftIndex = function (shift) {
+		if (shift === "m") {
+			return 0;
+		} else if (shift === "t") {
+			return 1;
+		} else if (shift === "n") {
+			return 2;
+		}
+		return 0;
+	};
+
+	let addCourseToUsedHours = function (usedHours, alternativeIndex, courseCode, courseName, schedules) {
+		let selectedCourse = {
+			courseCode: courseCode,
+			courseName: courseName
+		};
+		schedules.forEach(schedule => {
+			let firstHour = parseInt(schedule.firstHour) + (getShiftIndex(schedule.shift) * 7);
+			let lastHour = parseInt(schedule.lastHour) + (getShiftIndex(schedule.shift) * 7);
+
+			if (!usedHours[alternativeIndex]) {
+				usedHours[alternativeIndex] = {};
+			}
+			if (!usedHours[alternativeIndex][schedule.day]) {
+				usedHours[alternativeIndex][schedule.day] = {};
+			}
+			for (let hour = firstHour; hour <= lastHour; hour++) {
+				usedHours[alternativeIndex][schedule.day][hour] = selectedCourse;
+			}
+		});
 	};
 
 	let getRandomRGBByCode = function (code) {
@@ -74,7 +117,7 @@ let PreInscripcionPage = function (utils) {
 	let setPreviewTable = function (usedHours) {
 		let $divContainer = $("<div style='display: inline-block;'>");
 
-		Object.keys(usedHours).forEach(alternateIndex => {
+		Object.keys(usedHours).forEach(alternativeIndex => {
 			let $table = $("<table>");
 			let $tbody = $("<tbody>");
 
@@ -87,13 +130,13 @@ let PreInscripcionPage = function (utils) {
 
 				let lastColor = "";
 				for (let i = 0; i <= 19; i++) {
-					let selectedClass = usedHours[alternateIndex][day] ? usedHours[alternateIndex][day][i] : null;
+					let selectedCourse = usedHours[alternativeIndex][day] ? usedHours[alternativeIndex][day][i] : null;
 
 					let color = "transparent";
 					let text = "&nbsp;";
-					if (selectedClass) {
-						color = getRandomRGBByCode(selectedClass.classCode);
-						if (lastColor !== color) text = utils.trimCourseName(selectedClass.courseName);
+					if (selectedCourse) {
+						color = getRandomRGBByCode(selectedCourse.courseCode);
+						if (lastColor !== color) text = utils.trimCourseName(selectedCourse.courseName);
 					}
 					lastColor = color;
 
@@ -102,7 +145,7 @@ let PreInscripcionPage = function (utils) {
 				$tbody.append($tr);
 			}
 
-			let $p = $("<p>", {html: "Preview de cursada (Alt " + (parseInt(alternateIndex) + 1) + ")"});
+			let $p = $("<p>", {html: "Preview de cursada (Alt " + (parseInt(alternativeIndex) + 1) + ")"});
 			let $divTable = $("<div>").append($table);
 			$divContainer.append($p);
 			$divContainer.append($divTable);
@@ -111,16 +154,17 @@ let PreInscripcionPage = function (utils) {
 		$(".std-canvas table:last").parent().after($divContainer);
 	};
 
-	(function () {
-		let $table = $(".std-canvas table:last");
-		let $th = $table.find("tr:first > th:first");
+	// Init
+	return Promise.resolve().then(() => {
+		let $alternativesTable = $(".std-canvas table:last");
+		let $th = $alternativesTable.find("tr:first > th:first");
 
-		// Check used to be sure that the given table is the one that has the used hours
+		// Check used to be sure that the given table is the one that has the used hours.
+		// This is because this page is loaded without this table too.
 		if ($th.length && $th.text() === "") {
-			setPreviewTable(getAllUsedHours($table));
+			return getAllUsedHours($alternativesTable).then(usedHours => {
+				setPreviewTable(usedHours);
+			});
 		}
-	})();
-
-	// Public
-	return {};
+	});
 };

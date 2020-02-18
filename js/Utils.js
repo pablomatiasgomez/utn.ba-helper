@@ -134,19 +134,25 @@ let Utils = function () {
 	};
 
 	let getScheduleFromString = function (str) {
-		if (str.indexOf("(") === -1 || str.indexOf(":") === -1) return;
-
+		str = str.replace("á", "a"); // This is for day Sá
+		let groups = /^(Lu|Ma|Mi|Ju|Vi|Sa)\(([mtn])\)([0-6]):([0-6])$/.exec(str.replace("á", "a"));
+		if (!groups) throw `Schedule string couldn't be parsed: '${str}'`;
 		return {
-			day: str.split("(")[0].replace("á", "a"),
-			shift: str.match(/\(([^)]+)\)/)[1],
-			firstHour: str.split(")")[1].split(":")[0],
-			lastHour: str.split(")")[1].split(":")[1],
+			day: groups[1],
+			shift: groups[2],
+			firstHour: groups[3],
+			lastHour: groups[4],
 		};
 	};
 
 	let getSchedulesFromString = function (str) {
 		if (!str) return [];
-		return str.split(" ").map(getScheduleFromString).filter(el => !!el);
+		try {
+			return str.split(" ").map(getScheduleFromString).filter(el => !!el);
+		} catch (e) {
+			// Log the entire string if it couldn't be parsed:
+			throw `Schedules string couldn't be parsed: '${str}' because of: ${e}`;
+		}
 	};
 
 	let getTimeInfoStringFromSchedules = function (schedules) {

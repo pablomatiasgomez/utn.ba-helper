@@ -44,7 +44,7 @@ let PreInscripcionPopUpPage = function (utils) {
 		$table.find("tbody tr").each(function () {
 			let $tr = $(this);
 			let $schedulesTd = $tr.find("td:eq(2)");
-			let schedules = utils.getSchedulesFromString($schedulesTd.text());
+			let schedules = utils.getSchedulesFromString($schedulesTd.text().trim());
 
 			$tr.attr("days", schedules.map(schedule => schedule.day).join(","));
 			$tr.attr("time-shifts", schedules.map(schedule => schedule.shift).join(","));
@@ -91,14 +91,10 @@ let PreInscripcionPopUpPage = function (utils) {
 		});
 	};
 
-	// Init
-	(function () {
+	return Promise.resolve().then(() => {
 		$table = $(".std-canvas table");
 		addTimeInfoToRows();
 		addFilters();
 		bindSearchPreviousProfessors();
-	})();
-
-	// Public
-	return {};
+	});
 };

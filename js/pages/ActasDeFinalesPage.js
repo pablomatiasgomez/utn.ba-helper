@@ -90,17 +90,17 @@ let ActasDeFinalesPage = function (pagesDataParser, dataCollector, utils) {
 	};
 
 	// Init
-	(function () {
+	return Promise.resolve().then(() => {
 		appendTable();
 		addWeightedGradeColumn();
 		calculateAndAppendAverages();
-		getStartYear()
-			.then(startYear => setPesoAcademico(startYear))
-			.then(() => logUserStat());
 		addPoweredBy();
 		addWeightedGradeExplanation();
-	})();
 
-	// Public
-	return {};
+		return getStartYear();
+	}).then(startYear => {
+		return setPesoAcademico(startYear);
+	}).then(() => {
+		return logUserStat();
+	});
 };
