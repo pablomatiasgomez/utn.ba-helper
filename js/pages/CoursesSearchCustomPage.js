@@ -85,10 +85,9 @@ let CoursesSearchCustomPage = function ($container, utils, apiConnector) {
 		let trs = classes.map(item => {
 			let classSchedule = item.classSchedule;
 			let professorLis = item.professors.map(professor => {
-				let getProfessorSurveyResultsUrl = professorName => `/?professorName=${encodeURIComponent(professorName)}#${encodeURIComponent("Buscar docentes")}`;
 				return `<li>
 					<span style="border: 1px solid grey; background-color: ${utils.getColorForAvg(professor.overallScore)}">${professor.overallScore}</span>
-					<a href="${getProfessorSurveyResultsUrl(professor.professorName)}">${professor.professorName}</a>
+					<a href="${utils.getProfessorSurveyResultsUrl(professor.professorName)}">${professor.professorName}</a>
 				</li>`;
 			}).join("");
 			return `<tr>

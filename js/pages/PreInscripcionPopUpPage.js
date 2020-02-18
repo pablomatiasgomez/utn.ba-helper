@@ -83,10 +83,7 @@ let PreInscripcionPopUpPage = function (utils) {
 							let overallScore = professor.overallScore;
 							// TODO use this data.
 							console.log(year, classCode, professorName, professorRole);
-							let getProfessorSurveyResultsUrl = function (professorName) {
-								return `/?professorName=${encodeURIComponent(professorName)}#${encodeURIComponent("Buscar docentes")}`;
-							};
-							window.open(getProfessorSurveyResultsUrl(professorName), '_blank');
+							window.open(utils.getProfessorSurveyResultsUrl(professorName), '_blank');
 						});
 					});
 				});

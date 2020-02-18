@@ -197,6 +197,10 @@ let Utils = function () {
 		}
 	};
 
+	let getProfessorSurveyResultsUrl = function (professorName) {
+		return `/?professorName=${encodeURIComponent(professorName)}#${encodeURIComponent("Buscar docentes")}`;
+	};
+
 	// Public
 	return {
 		HOURS: HOURS,
@@ -216,5 +220,6 @@ let Utils = function () {
 
 		stringifyError: stringifyError,
 		getColorForAvg: getColorForAvg,
+		getProfessorSurveyResultsUrl: getProfessorSurveyResultsUrl,
 	};
 };
