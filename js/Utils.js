@@ -181,7 +181,7 @@ let Utils = function () {
 	};
 
 	let stringifyError = function (error) {
-		if (error instanceof Error) return error.toString();
+		if (error instanceof Error) return error.toString() + "\n" + error.stack;
 		if (typeof error === 'object') return JSON.stringify(error);
 		return error;
 	};

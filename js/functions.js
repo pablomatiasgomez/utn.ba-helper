@@ -1,3 +1,9 @@
+if (!Array.prototype.hasOwnProperty("flatMap")) {
+	Array.prototype.flatMap = function (fn) {
+		return Array.prototype.concat.apply([], this.map(fn));
+	};
+}
+
 (function () {
 	// We will only handle student pages, this avoids other kinds, and avoids logged out errors.
 	if (!location.pathname.startsWith("/alu")) return;
