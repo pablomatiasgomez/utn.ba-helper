@@ -263,25 +263,6 @@ let PagesDataParser = function (utils, apiConnector) {
 		});
 	};
 
-	let logPlanIds = function () {
-		return getPageContents("/alu/mat.do").then(responseText => {
-			let plans = $(responseText).find(".std-canvas > div select option").toArray()
-				.map(option => {
-					let $option = $(option);
-					let planId = $option.attr("value").trim();
-					let planCode = $option.text().trim();
-					if (!planId || planCode === "-nada-") return;
-					return {
-						planId: planId,
-						planCode: planCode
-					}
-				})
-				.filter(plan => !!plan);
-
-			return logInfo(JSON.stringify(plans), "PlanIds");
-		});
-	};
-
 	// Public
 	return {
 		getStartYear: getStartYear,
@@ -293,7 +274,5 @@ let PagesDataParser = function (utils, apiConnector) {
 		getProfessorClassesFromSurveys: getProfessorClassesFromSurveys,
 
 		getTakenSurveys: getTakenSurveys,
-
-		logPlanIds: logPlanIds, // TODO delete once we know all the ids.
 	};
 };
