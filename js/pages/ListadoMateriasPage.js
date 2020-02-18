@@ -9,11 +9,9 @@ let ListadoMateriasPage = function (pagesDataParser) {
 		});
 	};
 
-	(function () {
+	// Init
+	return Promise.resolve().then(() => {
 		// Commented until materiasutn.com is back up again.
 		// setIframe();
-	})();
-
-	// Public
-	return {};
+	});
 };

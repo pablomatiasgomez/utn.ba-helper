@@ -24,7 +24,12 @@ if (!Array.prototype.hasOwnProperty("flatMap")) {
 	let handler = PAGE_HANDLERS[location.pathname];
 
 	try {
-		if (handler) handler();
+		if (handler) {
+			handler().catch(e => {
+				console.error("Error when handling page " + location.pathname, e);
+				return apiConnector.logMessage("Handle page " + location.pathname, true, utils.stringifyError(e));
+			});
+		}
 	} catch (e) {
 		console.error("Error when handling page " + location.pathname, e);
 		apiConnector.logMessage("Handle page " + location.pathname, true, utils.stringifyError(e));

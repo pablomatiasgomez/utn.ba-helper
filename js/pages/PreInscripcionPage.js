@@ -154,23 +154,17 @@ let PreInscripcionPage = function (pagesDataParser, utils) {
 		$(".std-canvas table:last").parent().after($divContainer);
 	};
 
-	(function () {
+	// Init
+	return Promise.resolve().then(() => {
 		let $alternativesTable = $(".std-canvas table:last");
 		let $th = $alternativesTable.find("tr:first > th:first");
 
 		// Check used to be sure that the given table is the one that has the used hours.
 		// This is because this page is loaded without this table too.
 		if ($th.length && $th.text() === "") {
-			getAllUsedHours($alternativesTable).then(usedHours => {
-				console.log(usedHours);
+			return getAllUsedHours($alternativesTable).then(usedHours => {
 				setPreviewTable(usedHours);
-			}).catch(e => {
-				console.error(e);
-				// TODO return a promise in all pages so that we can catch errors.
 			});
 		}
-	})();
-
-	// Public
-	return {};
+	});
 };

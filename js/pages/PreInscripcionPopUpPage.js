@@ -58,8 +58,7 @@ let PreInscripcionPopUpPage = function (utils) {
 		$td.html($td.text() + "<br /><b>" + utils.getTimeInfoStringFromSchedules(schedules) + "</b>");
 	};
 
-	// Init
-	(function () {
+	return Promise.resolve().then(() => {
 		$table = $(".std-canvas table");
 		$table.find("tbody tr").each(function () {
 			addTimeInfo($(this));
@@ -68,9 +67,5 @@ let PreInscripcionPopUpPage = function (utils) {
 		let $divFilters = getHtmlFilters();
 		$table.parent().before($divFilters);
 		bindFilterEvents($divFilters);
-	})();
-
-
-	// Public
-	return {};
+	});
 };

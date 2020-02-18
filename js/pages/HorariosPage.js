@@ -50,13 +50,11 @@ let HorariosPage = function (utils) {
 		$(".std-canvas table").parent().css("display", "inline-block").append("<span class='powered-by-siga-helper'></span>");
 	};
 
+
 	// Init
-	(function () {
+	return Promise.resolve().then(() => {
 		addTimeInfo();
 		setClassNamesInTable();
 		addPoweredBy();
-	})();
-
-	// Public
-	return {};
+	});
 };
