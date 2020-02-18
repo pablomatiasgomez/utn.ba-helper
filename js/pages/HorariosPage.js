@@ -41,7 +41,7 @@ let HorariosPage = function (utils) {
 			let $td = $(this).find("td:nth-child(6)");
 			if (!$td.length) return;
 
-			let schedules = utils.getSchedulesFromString($td.text());
+			let schedules = utils.getSchedulesFromString($td.text().trim());
 			$td.html($td.text() + "<br /><b>" + utils.getTimeInfoStringFromSchedules(schedules) + "</b>");
 		});
 	};

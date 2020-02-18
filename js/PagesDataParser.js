@@ -79,7 +79,8 @@ let PagesDataParser = function (utils, apiConnector) {
 	};
 
 	/**
-	 * Fetches the current classes that the student is having in order to know the schedules of them
+	 * Fetches the current classes that the student is having in order to know the schedules of them.
+	 * Also used to complete the grid when registering to new classes
 	 * @return an array of objects for each class, that contains the schedule for it.
 	 */
 	let getClassSchedules = function () {
@@ -88,6 +89,10 @@ let PagesDataParser = function (utils, apiConnector) {
 				.toArray()
 				.map(tr => {
 					let $tds = $(tr).find("td");
+
+					let classCode = $tds.eq(2).text().trim();
+					let schedulesStr = $tds.eq(5).text().trim();
+					if (classCode === "RECH" || schedulesStr === "INSCRIPCIÓN RECHAZADA") return null; // Inscripcion rechazada
 
 					// Possible values for time could be:
 					// - "2019 Cuat 2/2"
@@ -101,10 +106,9 @@ let PagesDataParser = function (utils, apiConnector) {
 
 					let year = parseInt(groups[1]); // 2018, 2019, ...
 					let quarter = (groups[2] === "Anual" || groups[2] === "     1/1") ? "A" : (groups[3] + "C"); // A, 1C, 2C
-					let classCode = $tds.eq(2).text().trim();
 					let courseCode = $tds.eq(0).text().trim();
 					let branch = $tds.eq(3).text().trim().toUpperCase().replace(" ", "_"); // CAMPUS, MEDRANO, AULA_VIRTUAL
-					let schedules = utils.getSchedulesFromString($tds.eq(5).text());
+					let schedules = utils.getSchedulesFromString(schedulesStr);
 
 					return {
 						year: year,

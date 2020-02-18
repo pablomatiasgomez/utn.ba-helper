@@ -45,7 +45,7 @@ let PreInscripcionPopUpPage = function (utils) {
 
 	let addTimeInfo = function ($tr) {
 		let $td = $tr.find("td:eq(2)");
-		let schedules = utils.getSchedulesFromString($td.text());
+		let schedules = utils.getSchedulesFromString($td.text().trim());
 
 		$tr.attr("days", schedules.map(function (schedule) {
 			return schedule.day;

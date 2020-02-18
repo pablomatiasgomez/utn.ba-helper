@@ -17,7 +17,7 @@ if (!Array.prototype.hasOwnProperty("flatMap")) {
 		"/alu/horarios.do": () => HorariosPage(utils),
 		"/alu/acfin.do": () => ActasDeFinalesPage(pagesDataParser, dataCollector, utils),
 		"/alu/mat.do": () => ListadoMateriasPage(pagesDataParser),
-		"/alu/preins.do": () => PreInscripcionPage(utils),
+		"/alu/preins.do": () => PreInscripcionPage(pagesDataParser, utils),
 		"/alu/preinscolas.do": () => PreInscripcionPopUpPage(utils),
 	};
 
