@@ -103,10 +103,7 @@ let CoursesSearchCustomPage = function ($container, utils, apiConnector) {
 	};
 
 	// Init
-	(function () {
+	return Promise.resolve().then(() => {
 		createPage();
-	})();
-
-	// Public
-	return {};
+	});
 };

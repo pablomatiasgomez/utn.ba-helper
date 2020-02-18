@@ -74,15 +74,12 @@ let ProfessorsSearchCustomPage = function ($container, utils, apiConnector) {
 	};
 
 	// Init
-	(function () {
+	return Promise.resolve().then(() => {
 		createPage();
 		let professorName = new URLSearchParams(window.location.search).get("professorName");
 		if (professorName) {
 			$searchDiv.hide();
-			retrieveSurveyResults(professorName);
+			return retrieveSurveyResults(professorName);
 		}
-	})();
-
-	// Public
-	return {};
+	});
 };
