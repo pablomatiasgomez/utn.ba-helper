@@ -80,7 +80,7 @@ let PreInscripcionPopUpPage = function (utils, apiConnector) {
 			$tr.append($previousProfessorsTdByClassCode[classCode]);
 		});
 
-		$table.find("tbody").prepend(`<tr><th></th><th>Curso</th><th>Horario</th><th>Anexo</th><th>Profesores en años anteriores <span title="En base a datos colectados por el SigaHelper, se intenta poder saber que profesor va a estar en cada cursada, basandonos en los profesores que estuvieron en cursadas anteriores. El matching se hace por horario y anexo, y no por curso dado que este podria cambiar.">[?]</span></th></tr>`);
+		$table.find("tbody").prepend(`<tr><th></th><th>Curso</th><th>Horario</th><th>Anexo</th><th>Profesores en años anteriores <span title="En base a datos colectados por el SigaHelper, se intenta poder saber que profesor va a estar en cada cursada, basandonos en los profesores que estuvieron en cursadas anteriores. El matching se hace por horario y anexo, a menos que no este esa informacion, y entonces se hace por por codigo de curso, pero en esos casos no se puede asegurar que sea tan correcto dado que cambian seguido (Un mismo codigo de curso, en años distintos, puede estar en distintos horarios y por ende con distintos profesores).">[?]</span></th></tr>`);
 
 		// Returns a map from classCode (the one we sent) -> year -> classCode (the new one) -> List of professors
 		return apiConnector.getPreviousProfessors(previousProfessorsRequest).then(response => {
@@ -89,22 +89,26 @@ let PreInscripcionPopUpPage = function (utils, apiConnector) {
 				let $td = $previousProfessorsTdByClassCode[ownClassCode];
 				let content = "";
 				content += `<ul class="no-margin">`;
-				Object.entries(previousProfessorsByClassCode[1]).forEach(classesByYear => {
-					let year = classesByYear[0];
-					content += `<li>${year}<ul class="no-margin">`;
-					Object.entries(classesByYear[1]).forEach(professorsByClass => {
-						let newClassCode = professorsByClass[0];
-						content += `<li>${newClassCode}<ul class="no-margin">`;
-						professorsByClass[1].forEach(professor => {
-							content += `<li>
-								<span style="border: 1px solid grey; background-color: ${utils.getColorForAvg(professor.overallScore)}">${professor.overallScore}</span>
-								<a href="${utils.getProfessorSurveyResultsUrl(professor.professorName)}">${professor.professorName}</a>
-							</li>`;
-						});
+				Object.entries(previousProfessorsByClassCode[1])
+					.sort((a, b) => (a[0] < b[0] ? 1 : a[0] > b[0] ? -1 : 0))
+					.forEach(classesByYear => {
+						let year = classesByYear[0];
+						content += `<li>${year}<ul class="no-margin">`;
+						Object.entries(classesByYear[1])
+							.sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0))
+							.forEach(professorsByClass => {
+								let newClassCode = professorsByClass[0];
+								content += `<li>${newClassCode}<ul class="no-margin">`;
+								professorsByClass[1].forEach(professor => {
+									content += `<li>
+										<span style="border: 1px solid grey; background-color: ${utils.getColorForAvg(professor.overallScore)}">${professor.overallScore}</span>
+										<a href="${utils.getProfessorSurveyResultsUrl(professor.professorName)}" target="_blank">${professor.professorName}</a>
+									</li>`;
+								});
+								content += `</ul></li>`;
+							});
 						content += `</ul></li>`;
 					});
-					content += `</ul></li>`;
-				});
 				content += `</ul>`;
 				$td.html(content);
 			});
@@ -115,8 +119,18 @@ let PreInscripcionPopUpPage = function (utils, apiConnector) {
 		$table.parent().css("display", "inline-block").append("<span class='powered-by-siga-helper'></span>");
 	};
 
+	let resizeWindow = function () {
+		try {
+			// Make it wider so that professorNames fit in the screen. Also catch any error as we don't know if browsers support this or not.
+			window.resizeTo(1280, 800);
+		} catch (e) {
+			return apiConnector.logMessage("resizeWindow", true, utils.stringifyError(e));
+		}
+	};
+
 	return Promise.resolve().then(() => {
 		$table = $(".std-canvas table");
+		resizeWindow();
 		setCourseCode();
 		addFilters();
 		addPoweredBy();
