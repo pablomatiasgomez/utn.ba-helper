@@ -89,15 +89,11 @@ let ApiConnector = function () {
 		return getData(BASE_API_URL + "/professor-surveys-aggregate?professorName=" + encodeURIComponent(professorName));
 	};
 
-	let getPreviousProfessors = function (classSchedule) {
-		return postData(BASE_API_URL + "/previous-professors", {
-			year: classSchedule.year,
-			quarter: classSchedule.quarter,
-			classCode: classSchedule.classCode,
-			courseCode: classSchedule.courseCode,
-			branch: classSchedule.branch,
-			schedules: classSchedule.schedules.map(mapScheduleToApi)
+	let getPreviousProfessors = function (previousProfessorsRequest) {
+		Object.values(previousProfessorsRequest.futureClassSchedules).forEach(branchWithSchedule => {
+			return branchWithSchedule.schedules = branchWithSchedule.schedules.map(mapScheduleToApi);
 		});
+		return postData(BASE_API_URL + "/previous-professors", previousProfessorsRequest);
 	};
 
 	let searchCourses = function (query) {
