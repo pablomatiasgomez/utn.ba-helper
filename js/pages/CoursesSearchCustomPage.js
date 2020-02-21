@@ -98,7 +98,7 @@ let CoursesSearchCustomPage = function ($container, utils, apiConnector) {
 					<td>${classSchedule.classCode}</td>
 					<td>${classSchedule.branch}</td>
 					<td>${utils.getTimeInfoStringFromSchedules(classSchedule.schedules)}</td>
-					<td><ul style="padding-inline-start: 15px; margin-block-end: 0; margin-block-start: 0;">${professorLis}</ul></td>
+					<td><ul class="no-margin">${professorLis}</ul></td>
 				</tr>`;
 		}).join("");
 		$courseDataDiv.find("table tbody tr:last").before(trs);
