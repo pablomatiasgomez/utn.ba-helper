@@ -7,7 +7,7 @@ let ProfessorsSearchCustomPage = function ($container, utils, apiConnector) {
 	let createPage = function (withSearch) {
 		$searchDiv = $("<div></div>");
 		$searchDiv.append(`<span class="bold">Buscar docente: </span>`);
-		let $searchTxt = $(`<input type="text" class="professor-search" placeholder="Minimo 3 caracteres..." />`);
+		let $searchTxt = $(`<input type="text" placeholder="Minimo 3 caracteres..." />`);
 		$searchTxt.on("keydown", function (e) {
 			if (e.key === "Enter") {
 				search($searchTxt.val());

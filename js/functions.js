@@ -48,17 +48,10 @@ if (!Array.prototype.hasOwnProperty("flatMap")) {
 
 	handler = handler || PAGE_HANDLERS[location.pathname];
 
-	try {
-		if (handler) {
-			handler().catch(e => {
-				console.error("Error when handling page " + location.pathname, e);
-				return apiConnector.logMessage("Handle page " + location.pathname, true, utils.stringifyError(e));
-			});
-		}
-	} catch (e) {
-		console.error("Error when handling page " + location.href, e);
-		apiConnector.logMessage("Handle page " + location.href, true, utils.stringifyError(e));
-	}
+	handler && handler().catch(e => {
+		console.error("Error when handling page " + location.pathname, e);
+		return apiConnector.logMessage("Handle page " + location.pathname, true, utils.stringifyError(e));
+	});
 
 	dataCollector.collectBackgroundDataIfNeeded().catch(e => {
 		console.error("Error while collecting background data", e);

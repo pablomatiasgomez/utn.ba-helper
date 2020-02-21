@@ -7,7 +7,7 @@ let CoursesSearchCustomPage = function ($container, utils, apiConnector) {
 	let createPage = function (withSearch) {
 		$searchDiv = $("<div></div>");
 		$searchDiv.append(`<span class="bold">Buscar por nombre de materia: </span>`);
-		let $searchTxt = $(`<input type="text" class="course-search" placeholder="Minimo 3 caracteres..." />`);
+		let $searchTxt = $(`<input type="text" placeholder="Minimo 3 caracteres..." />`);
 		$searchTxt.on("keydown", function (e) {
 			if (e.key === "Enter") {
 				search($searchTxt.val());
@@ -81,16 +81,18 @@ let CoursesSearchCustomPage = function ($container, utils, apiConnector) {
 		});
 	};
 
+	/** Used to add a separator between rows that change year and quarter */
+	let lastYearAndQuarter = null;
+
 	let appendClassesToTable = function (classes) {
 		let trs = classes.map(item => {
 			let classSchedule = item.classSchedule;
 			let professorLis = item.professors.map(professor => {
-				return `<li>
-					<span style="border: 1px solid grey; background-color: ${utils.getColorForAvg(professor.overallScore)}">${professor.overallScore}</span>
-					<a href="${utils.getProfessorSurveyResultsUrl(professor.professorName)}">${professor.professorName}</a>
-				</li>`;
+				return utils.getProfessorLi(professor);
 			}).join("");
-			return `<tr>
+			let trStyle = lastYearAndQuarter && lastYearAndQuarter !== classSchedule.year + classSchedule.quarter ? "border-top: 2px solid black;" : "";
+			lastYearAndQuarter = classSchedule.year + classSchedule.quarter;
+			return `<tr style="${trStyle}">
 					<td>${classSchedule.year}</td>
 					<td>${classSchedule.quarter}</td>
 					<td>${classSchedule.classCode}</td>

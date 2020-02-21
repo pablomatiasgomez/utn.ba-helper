@@ -207,6 +207,17 @@ let Utils = function () {
 		return `/?professorName=${encodeURIComponent(professorName)}#${encodeURIComponent("Buscar docentes")}`;
 	};
 
+	let getProfessorLi = function (professor) {
+		// If we do not have surveys we do not show the score nor the link.
+		if (typeof professor.overallScore === "undefined") {
+			return `<li>${professor.professorName}</li>`;
+		}
+		return `<li>
+			<span style="border: 1px solid grey; background-color: ${getColorForAvg(professor.overallScore)}">${professor.overallScore}</span>
+			<a href="${getProfessorSurveyResultsUrl(professor.professorName)}" target="_blank">${professor.professorName}</a>
+		</li>`;
+	};
+
 	// Public
 	return {
 		HOURS: HOURS,
@@ -226,6 +237,6 @@ let Utils = function () {
 
 		stringifyError: stringifyError,
 		getColorForAvg: getColorForAvg,
-		getProfessorSurveyResultsUrl: getProfessorSurveyResultsUrl,
+		getProfessorLi: getProfessorLi,
 	};
 };

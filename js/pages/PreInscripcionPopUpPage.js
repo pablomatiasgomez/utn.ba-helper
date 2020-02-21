@@ -100,10 +100,7 @@ let PreInscripcionPopUpPage = function (utils, apiConnector) {
 								let newClassCode = professorsByClass[0];
 								content += `<li>${newClassCode}<ul class="no-margin">`;
 								professorsByClass[1].forEach(professor => {
-									content += `<li>
-										<span style="border: 1px solid grey; background-color: ${utils.getColorForAvg(professor.overallScore)}">${professor.overallScore}</span>
-										<a href="${utils.getProfessorSurveyResultsUrl(professor.professorName)}" target="_blank">${professor.professorName}</a>
-									</li>`;
+									content += utils.getProfessorLi(professor);
 								});
 								content += `</ul></li>`;
 							});
