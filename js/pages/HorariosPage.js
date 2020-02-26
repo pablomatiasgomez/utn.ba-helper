@@ -38,18 +38,17 @@ let HorariosPage = function (utils) {
 
 	let addTimeInfo = function () {
 		$(".std-canvas table:first tr:not(:first)").each(function () {
-			let $td = $(this).find("td:nth-child(6)");
-			if (!$td.length) return;
+			let $schedulesTd = $(this).find("td:nth-child(6)");
+			if (!$schedulesTd.length) return;
 
-			let schedules = utils.getSchedulesFromString($td.text().trim());
-			$td.html($td.text() + "<br /><b>" + utils.getTimeInfoStringFromSchedules(schedules) + "</b>");
+			let schedules = utils.getSchedulesFromString($schedulesTd.text().trim());
+			$schedulesTd.append("<br><b>" + utils.getTimeInfoStringFromSchedules(schedules) + "</b>");
 		});
 	};
 
 	let addPoweredBy = function () {
 		$(".std-canvas table").parent().css("display", "inline-block").append("<span class='powered-by-siga-helper'></span>");
 	};
-
 
 	// Init
 	return Promise.resolve().then(() => {

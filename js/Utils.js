@@ -107,7 +107,8 @@ let Utils = function () {
 	};
 	const BRANCHES = {
 		CAMPUS: "CAMPUS",
-		MEDRANO: "MEDRANO"
+		MEDRANO: "MEDRANO",
+		AULA_VIRTUAL: "AULA_VIRTUAL"
 	};
 	const NEW_GRADES_REGULATION_DATE = new Date(2017, 2, 10); // Doesn't have to be exact.. just using March 10th.
 	const WEIGHTED_GRADES = {
@@ -192,6 +193,31 @@ let Utils = function () {
 		return error;
 	};
 
+	let getColorForAvg = function (avg) {
+		if (avg < 60) {
+			return "#D51C26";
+		} else if (avg >= 80) {
+			return "#19B135";
+		} else {
+			return "#F4D224";
+		}
+	};
+
+	let getProfessorSurveyResultsUrl = function (professorName) {
+		return `/?professorName=${encodeURIComponent(professorName)}#${encodeURIComponent("Buscar docentes")}`;
+	};
+
+	let getProfessorLi = function (professor) {
+		// If we do not have surveys we do not show the score nor the link.
+		if (typeof professor.overallScore === "undefined") {
+			return `<li>${professor.professorName}</li>`;
+		}
+		return `<li>
+			<span style="border: 1px solid grey; background-color: ${getColorForAvg(professor.overallScore)}">${professor.overallScore}</span>
+			<a href="${getProfessorSurveyResultsUrl(professor.professorName)}" target="_blank">${professor.professorName}</a>
+		</li>`;
+	};
+
 	// Public
 	return {
 		HOURS: HOURS,
@@ -210,5 +236,7 @@ let Utils = function () {
 		parseDate: parseDate,
 
 		stringifyError: stringifyError,
+		getColorForAvg: getColorForAvg,
+		getProfessorLi: getProfessorLi,
 	};
 };

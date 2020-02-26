@@ -17,3 +17,9 @@ table .name-container {
 	font-size: 13px;
 	padding: 5px;
 }
+
+ul.no-margin {
+	padding-inline-start: 15px;
+	margin-block-end: 0;
+	margin-block-start: 0;
+}
