@@ -59,10 +59,14 @@ let CoursesSearchCustomPage = function ($container, utils, apiConnector) {
 		});
 	};
 
+	/** Used to add a separator between rows that change year and quarter */
+	let lastYearAndQuarter;
+
 	let retrieveClassesForCourse = function (courseCode, offset, limit) {
 		if (offset === 0) $courseDataDiv.hide();
 		return apiConnector.getClassesForCourse(courseCode, offset, limit).then(results => {
 			if (offset === 0) {
+				lastYearAndQuarter = null;
 				$courseDataDiv.find("p").text(`Resultados para ${courseCode}:`);
 				$courseDataDiv.show();
 				$courseDataDiv.find("table tbody")
@@ -80,9 +84,6 @@ let CoursesSearchCustomPage = function ($container, utils, apiConnector) {
 			appendClassesToTable(results);
 		});
 	};
-
-	/** Used to add a separator between rows that change year and quarter */
-	let lastYearAndQuarter = null;
 
 	let appendClassesToTable = function (classes) {
 		let trs = classes.map(item => {

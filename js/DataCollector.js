@@ -42,8 +42,10 @@ let DataCollector = function (pagesDataParser, apiConnector) {
 		return Promise.resolve().then(() => {
 			return pagesDataParser.getTakenSurveys();
 		}).then(takenSurveys => {
-			takenSurveys.forEach(survey => survey.surveyTaker = hashedStudentId);
-			return apiConnector.postProfessorSurveys(takenSurveys);
+			if (takenSurveys.length) {
+				takenSurveys.forEach(survey => survey.surveyTaker = hashedStudentId);
+				return apiConnector.postProfessorSurveys(takenSurveys);
+			}
 		});
 	};
 
@@ -51,11 +53,15 @@ let DataCollector = function (pagesDataParser, apiConnector) {
 		return Promise.resolve().then(() => {
 			return pagesDataParser.getProfessorClassesFromSurveys();
 		}).then(professorClasses => {
-			return apiConnector.postProfessorClasses(professorClasses);
+			if (professorClasses.length) {
+				return apiConnector.postProfessorClasses(professorClasses);
+			}
 		}).then(() => {
 			return pagesDataParser.getClassSchedules();
 		}).then(classSchedules => {
-			return apiConnector.postClassSchedules(classSchedules);
+			if (classSchedules.length) {
+				return apiConnector.postClassSchedules(classSchedules);
+			}
 		});
 	};
 

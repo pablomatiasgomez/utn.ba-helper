@@ -57,6 +57,7 @@ let PreInscripcionPopUpPage = function (utils, apiConnector) {
 			futureClassSchedules: {} // Map from classCode to branchWithSchedule
 		};
 		let $previousProfessorsTdByClassCode = {};
+		let tableHtml = $(".std-canvas").html(); // Used for logging in case of errors, reading it here before we modify it.
 		$table.find("tbody tr").each(function () {
 			let $tr = $(this);
 			let $schedulesTd = $tr.find("td:eq(2)");
@@ -65,13 +66,15 @@ let PreInscripcionPopUpPage = function (utils, apiConnector) {
 			let branch = $tr.find("td:eq(3)").text().trim().toUpperCase().replace(" ", "_");
 			let schedules = utils.getSchedulesFromString($schedulesTd.text().trim());
 
+			if (!classCode) throw `Blank rows were found in course ${courseCode}. tableHtml: ${tableHtml}`;
+
 			$tr.attr("days", schedules.map(schedule => schedule.day).join(","));
 			$tr.attr("time-shifts", schedules.map(schedule => schedule.shift).join(","));
 			$tr.attr("branches", branch);
 			$schedulesTd.append("<br><b>" + utils.getTimeInfoStringFromSchedules(schedules) + "</b>");
 
 			// Handle previous professors request and cell:
-			if (previousProfessorsRequest.futureClassSchedules[classCode]) throw "Multiple classes in course " + courseCode + " were found with the same code: " + classCode;
+			if (previousProfessorsRequest.futureClassSchedules[classCode]) throw `Multiple classes in course ${courseCode} were found with the same code: ${classCode}. tableHtml: ${tableHtml}`;
 			previousProfessorsRequest.futureClassSchedules[classCode] = {
 				branch: branch,
 				schedules: schedules

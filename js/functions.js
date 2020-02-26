@@ -5,8 +5,12 @@ if (!Array.prototype.hasOwnProperty("flatMap")) {
 }
 
 (function () {
-	// We will only handle student pages, this avoids other kinds, and avoids logged out errors.
-	if (!location.pathname.startsWith("/alu") && !$("#page-alu.selected").length) return;
+	// If the url starts with /alu, the student is already logged, and the Alu tab is selected.
+	// If not, we could be in the home page, which will be only handled if the studend name is present, which means is logged, and the alu tab is selected.
+	if (!(
+		location.pathname.startsWith("/alu") ||
+		(location.pathname === "/" && $("#page-alu.selected").length === 1 && $(".pfx-user").length === 1))) return;
+
 	let handler = null;
 
 	let $sigaHelperCustomMenusContainer = $();
