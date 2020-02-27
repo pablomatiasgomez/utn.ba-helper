@@ -25,6 +25,7 @@ let ActasDeFinalesPage = function (pagesDataParser, dataCollector, utils) {
 	};
 
 	let getAvgFromArray = function (arr) {
+		if (!arr.length) return null;
 		let sum = arr.reduce((a, b) => a + b);
 		return Math.round(sum / arr.length * 100) / 100;
 	};
@@ -36,7 +37,7 @@ let ActasDeFinalesPage = function (pagesDataParser, dataCollector, utils) {
 		allGradesAverage = getAvgFromArray(passingGrades.concat(failingGrades));
 		passingGradesAverage = getAvgFromArray(passingGrades);
 
-		let appendTableRow = (description, value) => $helperTable.find("tbody").append("<tr><td>" + description + "</td><td><b>" + value + "</b></td></tr>");
+		let appendTableRow = (description, value) => $helperTable.find("tbody").append("<tr><td>" + description + "</td><td><b>" + (value !== null ? value : "n/a") + "</b></td></tr>");
 
 		appendTableRow("Cantidad de materias aprobadas", passingGrades.length);
 		appendTableRow("Cantidad de materias desaprobadas", failingGrades.length);
