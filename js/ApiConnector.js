@@ -86,7 +86,7 @@ let ApiConnector = function () {
 	};
 
 	let getProfessorSurveysAggregate = function (professorName) {
-		return getData(BASE_API_URL + "/professor-surveys-aggregate?professorName=" + encodeURIComponent(professorName));
+		return getData(BASE_API_URL + "/aggregated-professor-surveys?professorName=" + encodeURIComponent(professorName));
 	};
 
 	let getPreviousProfessors = function (previousProfessorsRequest) {
