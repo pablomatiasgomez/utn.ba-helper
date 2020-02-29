@@ -2,18 +2,14 @@ let PreInscripcionPopUpPage = function (utils, apiConnector) {
 
 	let year = new Date().getFullYear(); // We know that registering happens in the same year calendar. (March and July)
 	let quarters = (new Date().getMonth() + 1) < 5 ? ["A", "1C"] : ["2C"];
-	let courseCode;
 
-	let $table = $();
-
-	let setCourseCode = function () {
-		courseCode = $(".std-canvas .tab > p > span > span").text().trim();
-	};
+	// Used for logging in case of errors, reading it before we modify it.
+	let stdCanvasHtml = "";
 
 	/**
 	 * Adds the filter combos, and binds them so that they filter rows when the selection changes.
 	 */
-	let addFilters = function () {
+	let addFilters = function ($table) {
 		let createCombo = function (clazz, map) {
 			let $select = $("<select class='" + clazz + "'></select>");
 			$select.append("<option value=''>- Sin filtro -</option>");
@@ -33,13 +29,13 @@ let PreInscripcionPopUpPage = function (utils, apiConnector) {
 			["time-shifts", "days", "branches"].forEach(filter => filterValues[filter] = $divFilters.find("select." + filter).val());
 			$table.find("tr:not(:first)").show().each(function () {
 				for (let filter in filterValues) {
-					if (filterValues[filter] && $(this).attr(filter).indexOf(filterValues[filter]) === -1) {
+					if (filterValues[filter] && (!$(this).attr(filter) || $(this).attr(filter).indexOf(filterValues[filter]) === -1)) {
 						$(this).hide();
 					}
 				}
 			});
 		});
-		$table.parent().before($divFilters);
+		$table.before($divFilters);
 	};
 
 	/**
@@ -49,7 +45,7 @@ let PreInscripcionPopUpPage = function (utils, apiConnector) {
 	 * - the column with the previous professor information.
 	 * @return the promise that handles the add of the previous professors.
 	 */
-	let addTimeInfoToRowsAndRequestForPreviousProfessors = function () {
+	let addTimeInfoToRowsAndRequestForPreviousProfessors = function (courseCode, $table) {
 		let previousProfessorsRequest = {
 			year: year,
 			quarters: quarters,
@@ -57,16 +53,22 @@ let PreInscripcionPopUpPage = function (utils, apiConnector) {
 			futureClassSchedules: {} // Map from classCode to branchWithSchedule
 		};
 		let $previousProfessorsTdByClassCode = {};
-		let tableHtml = $(".std-canvas").html(); // Used for logging in case of errors, reading it here before we modify it.
+		let skipRows = 0;
 		$table.find("tbody tr").each(function () {
+			if (skipRows-- > 0) return;
 			let $tr = $(this);
-			let $schedulesTd = $tr.find("td:eq(2)");
 
+			// This is because some rows like AULA_VIRTUAL use two rows to show other information.
+			// We care about the first one only, so we need to skip the others in order to avoid errors.
+			let classRows = parseInt($tr.find("td:eq(0)").attr("rowspan")) || 1;
+			skipRows = classRows - 1;
+
+			let $schedulesTd = $tr.find("td:eq(2)");
 			let classCode = $tr.find("td:eq(1)").text().trim();
 			let branch = $tr.find("td:eq(3)").text().trim().toUpperCase().replace(" ", "_");
 			let schedules = utils.getSchedulesFromString($schedulesTd.text().trim());
 
-			if (!classCode) throw `Blank rows were found in course ${courseCode}. tableHtml: ${tableHtml}`;
+			if (!classCode) throw `Blank rows were found in course ${courseCode}. stdCanvasHtml: ${stdCanvasHtml}`;
 
 			$tr.attr("days", schedules.map(schedule => schedule.day).join(","));
 			$tr.attr("time-shifts", schedules.map(schedule => schedule.shift).join(","));
@@ -74,12 +76,12 @@ let PreInscripcionPopUpPage = function (utils, apiConnector) {
 			$schedulesTd.append("<br><b>" + utils.getTimeInfoStringFromSchedules(schedules) + "</b>");
 
 			// Handle previous professors request and cell:
-			if (previousProfessorsRequest.futureClassSchedules[classCode]) throw `Multiple classes in course ${courseCode} were found with the same code: ${classCode}. tableHtml: ${tableHtml}`;
+			if (previousProfessorsRequest.futureClassSchedules[classCode]) throw `Multiple classes in course ${courseCode} were found with the same code: ${classCode}. stdCanvasHtml: ${stdCanvasHtml}`;
 			previousProfessorsRequest.futureClassSchedules[classCode] = {
 				branch: branch,
 				schedules: schedules
 			};
-			$previousProfessorsTdByClassCode[classCode] = $(`<td></td>`);
+			$previousProfessorsTdByClassCode[classCode] = $(`<td rowspan="${classRows}"></td>`);
 			$tr.append($previousProfessorsTdByClassCode[classCode]);
 		});
 
@@ -115,25 +117,29 @@ let PreInscripcionPopUpPage = function (utils, apiConnector) {
 		});
 	};
 
-	let addPoweredBy = function () {
+	let addPoweredBy = function ($table) {
 		$table.parent().css("display", "inline-block").append("<span class='powered-by-siga-helper'></span>");
 	};
 
 	let resizeWindow = function () {
-		try {
-			// Make it wider so that professorNames fit in the screen. Also catch any error as we don't know if browsers support this or not.
-			window.resizeTo(1280, 800);
-		} catch (e) {
-			return apiConnector.logMessage("resizeWindow", true, utils.stringifyError(e));
-		}
+		// Make it wider so that professorNames fit in the screen.
+		window.resizeTo(1280, 800);
 	};
 
 	return Promise.resolve().then(() => {
-		$table = $(".std-canvas table");
+		// Reading it before we modify anything, to be used for error logging.
+		stdCanvasHtml = $(".std-canvas").html();
+
 		resizeWindow();
-		setCourseCode();
-		addFilters();
-		addPoweredBy();
-		return addTimeInfoToRowsAndRequestForPreviousProfessors();
+		// Grab only the tabs that contains the table for each plan
+		let promises = $(".std-canvas > div > .tab").toArray().map(tab => {
+			let $tab = $(tab);
+			let courseCode = $tab.find("> p > span > span").text().trim();
+			let $table = $tab.find("table");
+			addFilters($table);
+			addPoweredBy($table);
+			return addTimeInfoToRowsAndRequestForPreviousProfessors(courseCode, $table);
+		});
+		return Promise.all(promises);
 	});
 };
