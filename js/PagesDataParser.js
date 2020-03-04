@@ -93,6 +93,7 @@ let PagesDataParser = function (utils, apiConnector) {
 					let classCode = $tds.eq(2).text().trim();
 					let schedulesStr = $tds.eq(5).text().trim();
 					if (classCode === "RECH" || schedulesStr === "INSCRIPCIÓN RECHAZADA") return null; // Inscripcion rechazada
+					if (schedulesStr === "INSCRIPCIÓN ACEPTADA") return null; // Inscripcion aceptada -> we don't know in which cases this happenes, but ignoring for now.
 
 					// Possible values for time could be:
 					// - "2019 Cuat 2/2"
