@@ -9,8 +9,16 @@ let PagesDataParser = function (utils, apiConnector) {
 		return apiConnector.logMessage(methodName, false, message);
 	};
 
+	// We want to fetch only once each page.
+	let CACHED_PAGE_CONTENTS = {};
 	let getPageContents = function (url) {
-		return $.ajax(url);
+		if (CACHED_PAGE_CONTENTS[url]) {
+			return Promise.resolve(CACHED_PAGE_CONTENTS[url]);
+		}
+		return $.ajax(url).then(responseText => {
+			CACHED_PAGE_CONTENTS[url] = responseText;
+			return responseText;
+		});
 	};
 
 	/**

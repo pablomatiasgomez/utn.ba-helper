@@ -48,6 +48,7 @@ if (!Array.prototype.hasOwnProperty("flatMap")) {
 		"/alu/mat.do": () => ListadoMateriasPage(pagesDataParser),
 		"/alu/preins.do": () => PreInscripcionPage(pagesDataParser, utils),
 		"/alu/preinscolas.do": () => PreInscripcionPopUpPage(utils, apiConnector),
+		"/alu/encdocpop.do": () => EncuestaDocentePopUpPage(dataCollector),
 	};
 
 	handler = handler || PAGE_HANDLERS[location.pathname];
