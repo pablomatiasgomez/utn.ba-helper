@@ -91,7 +91,7 @@ let CoursesSearchCustomPage = function ($container, utils, apiConnector) {
 			let professorLis = (classSchedule.professors || []).map(professor => {
 				return utils.getProfessorLi(professor);
 			}).join("");
-			let trClass = lastYear !== classSchedule.year ? "top-border" : lastQuarter !== classSchedule.quarter ? "top-border-without-first-cell" : "";
+			let trClass = (lastYear && lastYear !== classSchedule.year) ? "top-border" : (lastQuarter && lastQuarter !== classSchedule.quarter) ? "top-border-without-first-cell" : "";
 			lastYear = classSchedule.year;
 			lastQuarter = classSchedule.quarter;
 			return `<tr class="${trClass}">
