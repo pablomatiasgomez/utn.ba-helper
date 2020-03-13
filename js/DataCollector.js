@@ -80,15 +80,11 @@ let DataCollector = function (pagesDataParser, apiConnector) {
 	};
 
 	let collectClassSchedulesWithProfessors = function () {
-		return Promise.resolve().then(() => {
-			return pagesDataParser.getProfessorClassesFromSurveys();
-		}).then(professorClasses => {
-			if (professorClasses.length) {
-				return apiConnector.postProfessorClasses(professorClasses);
-			}
-		}).then(() => {
-			return pagesDataParser.getClassSchedules();
-		}).then(classSchedules => {
+		return Promise.all([
+			pagesDataParser.getProfessorClassesFromSurveys(),
+			pagesDataParser.getClassSchedules(),
+		]).then(results => {
+			let classSchedules = results[0].concat(results[1]);
 			if (classSchedules.length) {
 				return apiConnector.postClassSchedules(classSchedules);
 			}

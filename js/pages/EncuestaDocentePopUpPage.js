@@ -9,5 +9,6 @@ let EncuestaDocentePopUpPage = function (dataCollector) {
 
 	return Promise.resolve().then(() => {
 		changeAnchorAction();
+		// TODO add label stating that data will be collected.
 	});
 };

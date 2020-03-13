@@ -150,7 +150,7 @@ let PagesDataParser = function (utils, apiConnector) {
 					let groups = /^(docente|auxiliares) (\d{4}) (a|1|2)(nual|er c|do c)$/g.exec(typeStr);
 					if (!groups || groups.length !== 5) throw "Type couldn't be parsed: " + typeStr;
 
-					let surveyKind = groups[1].toUpperCase(); // DOCENTE, AUXILIARES
+					let surveyKind = groups[1].toUpperCase().replace("ARES", "AR"); // DOCENTE, AUXILIARES -> AUXILIAR
 					let year = parseInt(groups[2]); // 2018, 2019, ...
 					let quarter = groups[3] === "a" ? "A" : (groups[3] + "C"); // A, 1C, 2C
 
@@ -190,13 +190,26 @@ let PagesDataParser = function (utils, apiConnector) {
 	/**
 	 * Fetches all the current surveys that the user has to take o has taken.
 	 * For each of them resolves the current professor name, class, course, quarter, etc.
-	 * @return an array of objects for each combination of professor and class
+	 * @return an array of class schedules for each combination of professor and class
 	 */
 	let getProfessorClassesFromSurveys = function () {
-		return parseMetadataFromSurveyRows(false).then(professorClasses => {
-			// For professor classes we don't want to grab any other information so we just remove the $tr
-			professorClasses.forEach(professorClass => delete professorClass["$tr"]);
-			return professorClasses;
+		return parseMetadataFromSurveyRows(true).then(surveysMetadata => {
+			// We could eventually merge same class professors, but the backend still accepts this:
+			return surveysMetadata.map(surveyMetadata => {
+				return {
+					year: surveyMetadata.year,
+					quarter: surveyMetadata.quarter,
+					classCode: surveyMetadata.classCode,
+					courseCode: surveyMetadata.courseCode,
+					professors: [
+						{
+							name: surveyMetadata.professorName,
+							kind: surveyMetadata.surveyKind,
+							role: surveyMetadata.professorRole,
+						}
+					]
+				};
+			});
 		});
 	};
 
