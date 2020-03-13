@@ -212,16 +212,16 @@ let Utils = function () {
 		return "/?" + Object.entries(params).map(entry => entry.map(encodeURIComponent).join("=")).join("&");
 	};
 
-	let getOverallScoreSpan = function(overallScore) {
+	let getOverallScoreSpan = function (overallScore) {
 		return `<span style="border: 1px solid grey; background-color: ${getColorForAvg(overallScore)}">${overallScore}</span>`;
 	};
 
 	let getProfessorLi = function (professor) {
-		// If we do not have surveys we do not show the score nor the link.
-		if (typeof professor.overallScore === "undefined") {
-			return `<li>${professor.name}</li>`;
-		}
 		let fontSize = professor.kind === "DOCENTE" ? "15px" : "13px";
+		if (typeof professor.overallScore === "undefined") {
+			// If we do not have surveys we do not show the score nor the link.
+			return `<li style="font-size: ${fontSize}">${professor.name} (${professor.role})</li>`;
+		}
 		return `<li style="font-size: ${fontSize}">
 			${getOverallScoreSpan(professor.overallScore)}
 			<a href="${getProfessorSurveyResultsUrl(professor.name)}" target="_blank">${professor.name}</a> (${professor.role})</a>
