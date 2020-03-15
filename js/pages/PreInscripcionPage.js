@@ -11,7 +11,9 @@ let PreInscripcionPage = function (pagesDataParser, utils) {
 			// We will add this for every alternative that has a value:
 			currentClasses.forEach(classSchedule => {
 				Object.keys(usedHours).forEach(alternativeIndex => {
-					// TODO we are not having the course name here because the pagesDataParser is not returning it. Eventualy we could return it only for this use case.
+					// TODO we are not having the course name here because the pagesDataParser is not returning it.
+					//  Eventualy we could return it only for this use case.
+					//  To be fixed in Aug 2020.
 					addCourseToUsedHours(usedHours, alternativeIndex, classSchedule.courseCode, "", classSchedule.schedules);
 				});
 			});
@@ -24,7 +26,7 @@ let PreInscripcionPage = function (pagesDataParser, utils) {
 	 * @return a list of the current classes.
 	 */
 	let getAllCurrentClasses = function () {
-		// We assumes that older classes are not returned because at the moment of registering to a new course they should be already removed.
+		// We assume that older classes are not returned because at the moment of registering to a new course they should be already removed.
 		// That is why we simply should get the class schedules and do no filtering here.
 		return pagesDataParser.getClassSchedules();
 	};

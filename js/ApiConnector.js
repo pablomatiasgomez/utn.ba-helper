@@ -1,7 +1,7 @@
 let ApiConnector = function () {
 
 	const CLIENT = "CHROME@" + chrome.runtime.getManifest().version;
-	const BASE_API_URL = "http://www.pablomatiasgomez.com.ar/sigahelper/v1";
+	const BASE_API_URL = "http://www.pablomatiasgomez.com.ar/sigahelper/v2";
 
 	const DAYS_MAPPING = {
 		"Lu": "MONDAY",
@@ -49,10 +49,6 @@ let ApiConnector = function () {
 		}));
 	};
 
-	let postProfessorClasses = function (professorClasses) {
-		return postData(BASE_API_URL + "/professor-classes", professorClasses);
-	};
-
 	let postProfessorSurveys = function (surveys) {
 		return postData(BASE_API_URL + "/professor-surveys", surveys);
 	};
@@ -81,6 +77,13 @@ let ApiConnector = function () {
 
 	// ------
 
+	let getPreviousProfessors = function (previousProfessorsRequest) {
+		Object.values(previousProfessorsRequest.futureClassSchedules).forEach(branchWithSchedule => {
+			return branchWithSchedule.schedules = branchWithSchedule.schedules.map(mapScheduleToApi);
+		});
+		return postData(BASE_API_URL + "/previous-professors", previousProfessorsRequest);
+	};
+
 	let searchProfessors = function (query) {
 		return getData(BASE_API_URL + "/professors?q=" + encodeURIComponent(query));
 	};
@@ -89,11 +92,8 @@ let ApiConnector = function () {
 		return getData(BASE_API_URL + "/aggregated-professor-surveys?professorName=" + encodeURIComponent(professorName));
 	};
 
-	let getPreviousProfessors = function (previousProfessorsRequest) {
-		Object.values(previousProfessorsRequest.futureClassSchedules).forEach(branchWithSchedule => {
-			return branchWithSchedule.schedules = branchWithSchedule.schedules.map(mapScheduleToApi);
-		});
-		return postData(BASE_API_URL + "/previous-professors", previousProfessorsRequest);
+	let getClassesForProfessor = function (professorName, offset, limit) {
+		return getClassesSchedules(null, professorName, offset, limit);
 	};
 
 	let searchCourses = function (query) {
@@ -101,16 +101,21 @@ let ApiConnector = function () {
 	};
 
 	let getClassesForCourse = function (courseCode, offset, limit) {
-		let queryParams = buildQueryParams({
-			courseCode: courseCode,
+		return getClassesSchedules(courseCode, null, offset, limit);
+	};
+
+	let getClassesSchedules = function (courseCode, professorName, offset, limit) {
+		let params = {
 			offset: offset,
 			limit: limit
-		});
-		return getData(BASE_API_URL + "/classes?" + queryParams).then(response => {
-			response.forEach(classWithProfessor => {
-				classWithProfessor.classSchedule.schedules = classWithProfessor.classSchedule.schedules.map(mapScheduleFromApi);
+		};
+		if (courseCode) params.courseCode = courseCode;
+		if (professorName) params.professorName = professorName;
+		return getData(BASE_API_URL + "/class-schedules?" + buildQueryParams(params)).then(classSchedules => {
+			classSchedules.filter(classSchedule => classSchedule.schedules).forEach(classSchedule => {
+				classSchedule.schedules = classSchedule.schedules.map(mapScheduleFromApi);
 			});
-			return response;
+			return classSchedules;
 		});
 	};
 
@@ -157,13 +162,13 @@ let ApiConnector = function () {
 		logMessage: logMessage,
 		logUserStat: logUserStat,
 		postClassSchedules: postClassSchedules,
-		postProfessorClasses: postProfessorClasses,
 		postProfessorSurveys: postProfessorSurveys,
 
 		// GETs:
+		getPreviousProfessors: getPreviousProfessors,
 		searchProfessors: searchProfessors,
 		getProfessorSurveysAggregate: getProfessorSurveysAggregate,
-		getPreviousProfessors: getPreviousProfessors,
+		getClassesForProfessor: getClassesForProfessor,
 		searchCourses: searchCourses,
 		getClassesForCourse: getClassesForCourse,
 	};

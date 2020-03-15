@@ -48,12 +48,6 @@ let ProfessorsSearchCustomPage = function ($container, utils, apiConnector) {
 		$container.append($searchResultsDiv);
 
 		$surveyResultDiv = $(`<div></div>`);
-		$surveyResultDiv.hide();
-		$surveyResultDiv.append(`<hr><div class="tit1">Resultados de las encuestas:</div>`);
-		$surveyResultDiv.append(`<p>Puntajes:</p>`);
-		$surveyResultDiv.append(`<table class="percentage-questions"><tbody></tbody></table>`);
-		$surveyResultDiv.append(`<p>Comentarios:</p>`);
-		$surveyResultDiv.append(`<table class="text-questions" style="table-layout: fixed; width: 100%;"><tbody></tbody></table>`);
 		$container.append($surveyResultDiv);
 
 		$container.append("<div><span class='powered-by-siga-helper'></span></div>");
@@ -77,27 +71,52 @@ let ProfessorsSearchCustomPage = function ($container, utils, apiConnector) {
 	let retrieveSurveyResults = function (professorName) {
 		$surveyResultDiv.hide();
 		return apiConnector.getProfessorSurveysAggregate(professorName).then(response => {
-			$surveyResultDiv.find(".tit1").text(`Resultados para ${professorName}:`);
-
-			// Handle percentage questions:
-			let trs = response.percentageFields.map(item => {
-				return `<tr><td>${item.question}</td><td style="background-color: ${utils.getColorForAvg(item.average)}">${item.average}</td><td>${item.count}</td></tr>`;
-			}).join("");
-			$surveyResultDiv.find("table.percentage-questions tbody")
-				.html(trs)
-				.prepend("<tr><th>Pregunta</th><th>Average</th><th>Sample size</th></tr>");
-
-			// Handle text questions:
-			let textQuestions = Object.keys(TEXT_QUESTSIONS).filter(question => response.textFields[question] && response.textFields[question].length);
-			let columns = textQuestions
-				.map(question => `<td style="color: ${TEXT_QUESTSIONS[question]}">${response.textFields[question].map(answer => `<i>"${answer}"</i>`).join(`<hr style="margin: 8px 0;">`)}</td>`)
-				.join();
-			$surveyResultDiv.find("table.text-questions tbody")
-				.html(`<tr>${columns}</tr>`)
-				.prepend("<tr>" + textQuestions.map(question => `<th>${question}</th>`).join() + "</tr>");
-
+			$surveyResultDiv.html("");
+			$surveyResultDiv.append(`<hr><div class="tit1" style="text-align: center;">Resultados para ${professorName}:</div><hr>`);
+			Object.entries(response)
+				// Put DOCENTE before AUXILIAR
+				.sort((a, b) => (a[0] > b[0] ? -1 : 1))
+				.forEach(entry => appendSurveyResults(entry[0], entry[1]));
 			$surveyResultDiv.show();
 		});
+	};
+
+	let appendSurveyResults = function (surveyKind, results) {
+		$surveyResultDiv.append(`<p>Encuesta de tipo: ${surveyKind}</p>`);
+
+		if (results.percentageFields.length) {
+			let percetangeRows = results.percentageFields.map(item => {
+				return `<tr><td>${item.question}</td><td style="background-color: ${utils.getColorForAvg(item.average)}">${item.average}</td><td>${item.count}</td></tr>`;
+			}).join("");
+			$surveyResultDiv.append(`
+				<p>Puntaje general: ${utils.getOverallScoreSpan(results.overallScore)}</p>
+				<table class="percentage-questions">
+					<tbody>
+						<tr><th>Pregunta</th><th>Average</th><th>Sample size</th></tr>
+						${percetangeRows}
+					</tbody>
+				</table>
+			`);
+		}
+
+		let textQuestions = Object.keys(TEXT_QUESTSIONS).filter(question => results.textFields[question] && results.textFields[question].length);
+		if (textQuestions.length) {
+			let textColumns = textQuestions.map(question => {
+				let answers = results.textFields[question].map(answer => `<i>"${answer}"</i>`).join(`<hr style="margin: 8px 0;">`);
+				return `<td style="color: ${TEXT_QUESTSIONS[question]}">${answers}</td>`;
+			}).join("");
+			$surveyResultDiv.append(`
+				<p>Comentarios:</p>
+				<table class="text-questions" style="table-layout: fixed; width: 100%;">
+					<tbody>
+						<tr>${textQuestions.map(question => `<th>${question}</th>`).join("")}</tr>
+						<tr>${textColumns}</tr>
+					</tbody>
+				</table>
+			`);
+		}
+
+		$surveyResultDiv.append(`<hr>`);
 	};
 
 	// Init
@@ -105,7 +124,6 @@ let ProfessorsSearchCustomPage = function ($container, utils, apiConnector) {
 		createPage();
 		let professorName = new URLSearchParams(window.location.search).get("professorName");
 		if (professorName) {
-			$searchDiv.hide();
 			return retrieveSurveyResults(professorName);
 		}
 	});

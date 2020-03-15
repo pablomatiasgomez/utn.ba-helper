@@ -156,6 +156,7 @@ let Utils = function () {
 	};
 
 	let getTimeInfoStringFromSchedules = function (schedules) {
+		if (!schedules) return "-";
 		return schedules
 			.map(schedule => DAYS[schedule.day] + " (" + TIME_SHIFTS[schedule.shift] + ") " + HOURS[schedule.shift][schedule.firstHour].start + "hs a " + HOURS[schedule.shift][schedule.lastHour].end + "hs")
 			.join(" y ");
@@ -204,17 +205,26 @@ let Utils = function () {
 	};
 
 	let getProfessorSurveyResultsUrl = function (professorName) {
-		return `/?professorName=${encodeURIComponent(professorName)}#${encodeURIComponent("Buscar docentes")}`;
+		let params = {
+			customPage: "Buscar docentes",
+			professorName: professorName
+		};
+		return "/?" + Object.entries(params).map(entry => entry.map(encodeURIComponent).join("=")).join("&");
+	};
+
+	let getOverallScoreSpan = function (overallScore) {
+		return `<span style="border: 1px solid grey; background-color: ${getColorForAvg(overallScore)}">${overallScore}</span>`;
 	};
 
 	let getProfessorLi = function (professor) {
-		// If we do not have surveys we do not show the score nor the link.
+		let fontSize = professor.kind === "DOCENTE" ? "15px" : "13px";
 		if (typeof professor.overallScore === "undefined") {
-			return `<li>${professor.professorName}</li>`;
+			// If we do not have surveys we do not show the score nor the link.
+			return `<li style="font-size: ${fontSize}">${professor.name} (${professor.role})</li>`;
 		}
-		return `<li>
-			<span style="border: 1px solid grey; background-color: ${getColorForAvg(professor.overallScore)}">${professor.overallScore}</span>
-			<a href="${getProfessorSurveyResultsUrl(professor.professorName)}" target="_blank">${professor.professorName}</a>
+		return `<li style="font-size: ${fontSize}">
+			${getOverallScoreSpan(professor.overallScore)}
+			<a href="${getProfessorSurveyResultsUrl(professor.name)}" target="_blank">${professor.name}</a> (${professor.role})</a>
 		</li>`;
 	};
 
@@ -237,6 +247,7 @@ let Utils = function () {
 
 		stringifyError: stringifyError,
 		getColorForAvg: getColorForAvg,
+		getOverallScoreSpan: getOverallScoreSpan,
 		getProfessorLi: getProfessorLi,
 	};
 };

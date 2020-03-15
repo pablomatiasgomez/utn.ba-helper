@@ -19,7 +19,19 @@ table .name-container {
 }
 
 ul.no-margin {
-	padding-inline-start: 15px;
+	padding-inline-start: 10px;
 	margin-block-end: 0;
 	margin-block-start: 0;
+}
+
+ul.no-margin li {
+	margin: 1px 0;
+}
+
+tr.top-border {
+	border-top: 2px solid black;
+}
+
+tr.top-border-without-first-cell td:not(:first-child) {
+	border-top: 2px solid black;
 }

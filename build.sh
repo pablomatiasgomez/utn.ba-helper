@@ -13,6 +13,7 @@ js/pages/ActasDeFinalesPage.js \
 js/pages/ListadoMateriasPage.js \
 js/pages/PreInscripcionPopUpPage.js \
 js/pages/PreInscripcionPage.js \
+js/pages/EncuestaDocentePopUpPage.js \
 js/pages/ProfessorsSearchCustomPage.js \
 js/pages/CoursesSearchCustomPage.js \
 js/functions.js"

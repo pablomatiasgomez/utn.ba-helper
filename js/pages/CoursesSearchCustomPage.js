@@ -60,44 +60,45 @@ let CoursesSearchCustomPage = function ($container, utils, apiConnector) {
 	};
 
 	/** Used to add a separator between rows that change year and quarter */
-	let lastYearAndQuarter;
+	let lastYear;
+	let lastQuarter;
 
 	let retrieveClassesForCourse = function (courseCode, offset, limit) {
 		if (offset === 0) $courseDataDiv.hide();
-		return apiConnector.getClassesForCourse(courseCode, offset, limit).then(results => {
+		return apiConnector.getClassesForCourse(courseCode, offset, limit).then(classSchedules => {
 			if (offset === 0) {
-				lastYearAndQuarter = null;
+				lastYear = lastQuarter = null;
 				$courseDataDiv.find("p").text(`Resultados para ${courseCode}:`);
 				$courseDataDiv.show();
 				$courseDataDiv.find("table tbody")
 					.html(`
-					<tr><th>Año</th><th>Cuatr.</th><th>Curso</th><th>Anexo</th><th>Horario</th><th>Profesores</th></tr>
+					<tr><th colspan="2">Cuatr.</th><th>Curso</th><th>Anexo</th><th>Horario</th><th>Profesores</th></tr>
 					<tr><td colspan="6"><a href="#">Ver mas resultados...</a></td></tr>`);
 				$courseDataDiv.find("table tbody tr:last a").on("click", function () {
 					retrieveClassesForCourse(courseCode, offset += limit, limit);
 					return false;
 				});
 			}
-			if (results.length < limit) {
+			if (classSchedules.length < limit) {
 				$courseDataDiv.find("table tbody tr:last").hide();
 			}
-			appendClassesToTable(results);
+			appendClassesToTable(classSchedules);
 		});
 	};
 
-	let appendClassesToTable = function (classes) {
-		let trs = classes.map(item => {
-			let classSchedule = item.classSchedule;
-			let professorLis = item.professors.map(professor => {
+	let appendClassesToTable = function (classSchedules) {
+		let trs = classSchedules.map(classSchedule => {
+			let professorLis = (classSchedule.professors || []).map(professor => {
 				return utils.getProfessorLi(professor);
 			}).join("");
-			let trStyle = lastYearAndQuarter && lastYearAndQuarter !== classSchedule.year + classSchedule.quarter ? "border-top: 2px solid black;" : "";
-			lastYearAndQuarter = classSchedule.year + classSchedule.quarter;
-			return `<tr style="${trStyle}">
+			let trClass = (lastYear && lastYear !== classSchedule.year) ? "top-border" : (lastQuarter && lastQuarter !== classSchedule.quarter) ? "top-border-without-first-cell" : "";
+			lastYear = classSchedule.year;
+			lastQuarter = classSchedule.quarter;
+			return `<tr class="${trClass}">
 					<td>${classSchedule.year}</td>
 					<td>${classSchedule.quarter}</td>
 					<td>${classSchedule.classCode}</td>
-					<td>${classSchedule.branch}</td>
+					<td>${classSchedule.branch || "-"}</td>
 					<td>${utils.getTimeInfoStringFromSchedules(classSchedule.schedules)}</td>
 					<td><ul class="no-margin">${professorLis}</ul></td>
 				</tr>`;
