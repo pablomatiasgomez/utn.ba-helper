@@ -30,7 +30,7 @@ let CoursesSearchCustomPage = function ($container, utils, apiConnector) {
 		$searchResultsDiv.append($searchResultsTable);
 		$searchResultsTable.on("click", "a", function () {
 			let courseCode = $(this).text();
-			retrieveClassesForCourse(courseCode, 0, 10);
+			retrieveClassesForCourse(courseCode, 0, 15);
 			return false;
 		});
 		$container.append($searchResultsDiv);

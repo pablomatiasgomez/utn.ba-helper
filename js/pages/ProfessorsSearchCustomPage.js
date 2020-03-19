@@ -14,7 +14,8 @@ let ProfessorsSearchCustomPage = function ($container, utils, apiConnector) {
 
 	let $searchDiv;
 	let $searchResultsDiv;
-	let $surveyResultDiv;
+	let $coursesResultDiv; // Shows the last courses in which the professor was present
+	let $surveyResultDiv; // Shows the survey results of the given professor
 
 	let createPage = function (withSearch) {
 		$searchDiv = $("<div></div>");
@@ -42,11 +43,14 @@ let ProfessorsSearchCustomPage = function ($container, utils, apiConnector) {
 		$searchResultsDiv.append($searchResultsTable);
 		$searchResultsTable.on("click", "a", function () {
 			let professorName = $(this).text();
+			retrieveProfessorCourses(professorName);
 			retrieveSurveyResults(professorName);
 			return false;
 		});
 		$container.append($searchResultsDiv);
 
+		$coursesResultDiv = $(`<div></div>`);
+		$container.append($coursesResultDiv);
 		$surveyResultDiv = $(`<div></div>`);
 		$container.append($surveyResultDiv);
 
@@ -68,11 +72,44 @@ let ProfessorsSearchCustomPage = function ($container, utils, apiConnector) {
 		});
 	};
 
+	let retrieveProfessorCourses = function(professorName) {
+		$coursesResultDiv.hide();
+		// TODO handle offset & limit...
+		return apiConnector.getClassesForProfessor(professorName, 0, 20).then(classSchedules => {
+			$coursesResultDiv.html("");
+			$coursesResultDiv.append(`<hr><div class="tit1" style="text-align: center;">Resultados para ${professorName}:</div><hr>`);
+			let trs = classSchedules.map(classSchedule => {
+				let professorLis = (classSchedule.professors || []).map(professor => {
+					return utils.getProfessorLi(professor);
+				}).join("");
+				return `<tr>
+					<td>${classSchedule.year}</td>
+					<td>${classSchedule.quarter}</td>
+					<td>${classSchedule.courseName}</td>
+					<td>${classSchedule.classCode}</td>
+					<td>${classSchedule.branch || "-"}</td>
+					<td>${utils.getTimeInfoStringFromSchedules(classSchedule.schedules)}</td>
+					<td><ul class="no-margin">${professorLis}</ul></td>
+				</tr>`;
+			}).join("");
+			$coursesResultDiv.append(`
+				<p>Ultimos cursos en los que estuvo presente:</p>
+				<table>
+					<tbody>
+						<tr><th colspan="2">Cuatr.</th><th>Materia</th><th>Curso</th><th>Anexo</th><th>Horario</th><th>Profesores</th></tr>
+						${trs}
+					</tbody>
+				</table>
+			`);
+			$coursesResultDiv.show();
+		});
+	};
+
 	let retrieveSurveyResults = function (professorName) {
 		$surveyResultDiv.hide();
 		return apiConnector.getProfessorSurveysAggregate(professorName).then(response => {
 			$surveyResultDiv.html("");
-			$surveyResultDiv.append(`<hr><div class="tit1" style="text-align: center;">Resultados para ${professorName}:</div><hr>`);
+			// $surveyResultDiv.append(`<hr><div class="tit1" style="text-align: center;">Resultados para ${professorName}:</div><hr>`);
 			Object.entries(response)
 				// Put DOCENTE before AUXILIAR
 				.sort((a, b) => (a[0] > b[0] ? -1 : 1))
