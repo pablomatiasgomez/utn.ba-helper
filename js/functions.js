@@ -7,11 +7,10 @@ if (!Array.prototype.hasOwnProperty("flatMap")) {
 (function () {
 	const CUSTOM_PAGE_QUERY_PARAM = "customPage";
 
-	// If the url starts with /alu, the student is already logged, and the Alu tab is selected.
-	// If not, we could be in the home page, which will be only handled if the studend name is present, which means is logged, and the alu tab is selected.
-	if (!(
-		window.location.pathname.startsWith("/alu") ||
-		(window.location.pathname === "/" && $("#page-alu.selected").length === 1 && $(".pfx-user").length === 1))) return;
+	// We only will handle pages if the user is logged in, and has acess to student's stuff, so we check:
+	//   - Student name is present, which means they are logged in.
+	//   - Alu tab exists, which means has access to student's stuff.
+	if (!$(".pfx-user").length || !$("#page-alu").length) return;
 
 	let handler = null;
 

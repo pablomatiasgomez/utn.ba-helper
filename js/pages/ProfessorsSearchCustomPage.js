@@ -92,7 +92,7 @@ let ProfessorsSearchCustomPage = function ($container, utils, apiConnector) {
 				<p>Puntaje general: ${utils.getOverallScoreSpan(results.overallScore)}</p>
 				<table class="percentage-questions">
 					<tbody>
-						<tr><th>Pregunta</th><th>Average</th><th>Sample size</th></tr>
+						<tr><th>Pregunta</th><th>Promedio</th><th>Muestra</th></tr>
 						${percetangeRows}
 					</tbody>
 				</table>
