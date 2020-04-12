@@ -106,9 +106,10 @@ let Utils = function () {
 		n: "Noche"
 	};
 	const BRANCHES = {
-		CAMPUS: "CAMPUS",
-		MEDRANO: "MEDRANO",
-		AULA_VIRTUAL: "AULA_VIRTUAL"
+		"CAMPUS": "CAMPUS",
+		"MEDRANO": "MEDRANO",
+		"AULA_VIRTUAL": "AULA VIRTUAL",
+		"PIÑERO": "PIÑERO",
 	};
 	const NEW_GRADES_REGULATION_DATE = new Date(2017, 2, 10); // Doesn't have to be exact.. just using March 10th.
 	const WEIGHTED_GRADES = {
