@@ -41,11 +41,11 @@ let CoursesSearchCustomPage = function ($container, utils, apiConnector) {
 		let $classesTable = $(`<table></table>`).append("<tbody></tbody>");
 		$courseDataDiv.append($classesTable);
 		$container.append($courseDataDiv);
-		$container.append("<div><span class='powered-by-siga-helper'></span></div>");
 	};
 
 	let search = function (query) {
 		if (query.length < 3) return;
+		$searchResultsDiv.show().get(0).scrollIntoView({behavior: "smooth"});
 		$searchResultsDiv.hide();
 		$courseDataDiv.hide();
 		return apiConnector.searchCourses(query).then(results => {
@@ -64,7 +64,10 @@ let CoursesSearchCustomPage = function ($container, utils, apiConnector) {
 	let lastQuarter;
 
 	let retrieveClassesForCourse = function (courseCode, offset, limit) {
-		if (offset === 0) $courseDataDiv.hide();
+		if (offset === 0) {
+			$courseDataDiv.show().get(0).scrollIntoView({behavior: "smooth"});
+			$courseDataDiv.hide();
+		}
 		return apiConnector.getClassesForCourse(courseCode, offset, limit).then(classSchedules => {
 			if (offset === 0) {
 				lastYear = lastQuarter = null;
