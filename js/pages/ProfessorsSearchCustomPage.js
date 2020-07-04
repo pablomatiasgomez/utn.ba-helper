@@ -14,6 +14,7 @@ let ProfessorsSearchCustomPage = function ($container, utils, apiConnector) {
 
 	let $searchDiv;
 	let $searchResultsDiv;
+	let $professorResultsTitleDiv; // Just the title with the professor name.
 	let $coursesResultDiv; // Shows the last courses in which the professor was present
 	let $surveyResultDiv; // Shows the survey results of the given professor
 
@@ -34,21 +35,24 @@ let ProfessorsSearchCustomPage = function ($container, utils, apiConnector) {
 			return false;
 		});
 		$searchDiv.append($searchBtn);
+		$searchDiv.append("<hr>");
 		$container.append($searchDiv);
 
 		$searchResultsDiv = $(`<div></div>`);
 		$searchResultsDiv.hide();
-		$searchResultsDiv.append("<hr><p>Resultados de busqueda:</p>");
+		$searchResultsDiv.append("<p>Resultados de busqueda:</p>");
 		let $searchResultsTable = $(`<table></table>`).append("<tbody></tbody>");
-		$searchResultsDiv.append($searchResultsTable);
 		$searchResultsTable.on("click", "a", function () {
 			let professorName = $(this).text();
-			retrieveProfessorCourses(professorName);
-			retrieveSurveyResults(professorName);
+			retrieveProfessorData(professorName);
 			return false;
 		});
+		$searchResultsDiv.append($searchResultsTable);
+		$searchResultsDiv.append("<hr>");
 		$container.append($searchResultsDiv);
 
+		$professorResultsTitleDiv = $(`<div></div>`);
+		$container.append($professorResultsTitleDiv);
 		$coursesResultDiv = $(`<div></div>`);
 		$container.append($coursesResultDiv);
 		$surveyResultDiv = $(`<div></div>`);
@@ -57,9 +61,9 @@ let ProfessorsSearchCustomPage = function ($container, utils, apiConnector) {
 
 	let search = function (query) {
 		if (query.length < 3) return;
+		hideProfessorData();
 		$searchResultsDiv.show().get(0).scrollIntoView({behavior: "smooth"});
 		$searchResultsDiv.hide();
-		$surveyResultDiv.hide();
 		return apiConnector.searchProfessors(query).then(results => {
 			let trs = results.map(item => {
 				return `<tr><td><a href="#">${item.value}</a></td><td>${item.data}</td></tr>`;
@@ -71,12 +75,24 @@ let ProfessorsSearchCustomPage = function ($container, utils, apiConnector) {
 		});
 	};
 
-	let retrieveProfessorCourses = function(professorName) {
+	let hideProfessorData = function () {
+		$professorResultsTitleDiv.hide();
 		$coursesResultDiv.hide();
-		// TODO handle offset & limit...
+		$surveyResultDiv.hide();
+	}
+
+	let retrieveProfessorData = function (professorName) {
+		$professorResultsTitleDiv.show().get(0).scrollIntoView({behavior: "smooth"});
+		$professorResultsTitleDiv.html(`<div class="tit1" style="text-align: center;">Resultados para ${professorName}:</div><hr>`);
+		retrieveProfessorCourses(professorName);
+		retrieveSurveyResults(professorName);
+	}
+
+	let retrieveProfessorCourses = function (professorName) {
+		$coursesResultDiv.hide();
+		// For now we are showing just the latest 20 classes.
 		return apiConnector.getClassesForProfessor(professorName, 0, 20).then(classSchedules => {
 			$coursesResultDiv.html("");
-			$coursesResultDiv.append(`<hr><div class="tit1" style="text-align: center;">Resultados para ${professorName}:</div><hr>`);
 			let trs = classSchedules.map(classSchedule => {
 				let professorLis = (classSchedule.professors || []).map(professor => {
 					return utils.getProfessorLi(professor);
@@ -100,16 +116,15 @@ let ProfessorsSearchCustomPage = function ($container, utils, apiConnector) {
 					</tbody>
 				</table>
 			`);
+			$coursesResultDiv.append(`<hr>`);
 			$coursesResultDiv.show();
 		});
 	};
 
 	let retrieveSurveyResults = function (professorName) {
-		$surveyResultDiv.show().get(0).scrollIntoView({behavior: "smooth"});
 		$surveyResultDiv.hide();
 		return apiConnector.getProfessorSurveysAggregate(professorName).then(response => {
 			$surveyResultDiv.html("");
-			// $surveyResultDiv.append(`<hr><div class="tit1" style="text-align: center;">Resultados para ${professorName}:</div><hr>`);
 			Object.entries(response)
 				// Put DOCENTE before AUXILIAR
 				.sort((a, b) => (a[0] > b[0] ? -1 : 1))
@@ -152,7 +167,6 @@ let ProfessorsSearchCustomPage = function ($container, utils, apiConnector) {
 				</table>
 			`);
 		}
-
 		$surveyResultDiv.append(`<hr>`);
 	};
 
@@ -161,7 +175,7 @@ let ProfessorsSearchCustomPage = function ($container, utils, apiConnector) {
 		createPage();
 		let professorName = new URLSearchParams(window.location.search).get("professorName");
 		if (professorName) {
-			return retrieveSurveyResults(professorName);
+			return retrieveProfessorData(professorName);
 		}
 	});
 };

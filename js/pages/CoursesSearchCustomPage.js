@@ -21,25 +21,28 @@ let CoursesSearchCustomPage = function ($container, utils, apiConnector) {
 			return false;
 		});
 		$searchDiv.append($searchBtn);
+		$searchDiv.append("<hr>");
 		$container.append($searchDiv);
 
 		$searchResultsDiv = $(`<div></div>`);
 		$searchResultsDiv.hide();
-		$searchResultsDiv.append("<hr><p>Resultados de busqueda:</p>");
+		$searchResultsDiv.append("<p>Resultados de busqueda:</p>");
 		let $searchResultsTable = $(`<table></table>`).append("<tbody></tbody>");
-		$searchResultsDiv.append($searchResultsTable);
 		$searchResultsTable.on("click", "a", function () {
 			let courseCode = $(this).text();
 			retrieveClassesForCourse(courseCode, 0, 15);
 			return false;
 		});
+		$searchResultsDiv.append($searchResultsTable);
+		$searchResultsDiv.append("<hr>");
 		$container.append($searchResultsDiv);
 
 		$courseDataDiv = $(`<div></div>`);
 		$courseDataDiv.hide();
-		$courseDataDiv.append("<hr><p>Cursadas:</p>");
+		$courseDataDiv.append("<p>Cursadas:</p>");
 		let $classesTable = $(`<table></table>`).append("<tbody></tbody>");
 		$courseDataDiv.append($classesTable);
+		$courseDataDiv.append("<hr>");
 		$container.append($courseDataDiv);
 	};
 
