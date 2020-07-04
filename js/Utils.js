@@ -148,8 +148,6 @@ let Utils = function () {
 
 	let getSchedulesFromString = function (str) {
 		if (!str) return [];
-		// Special hack for some specific class schedules that have their schedule cut of at 30 chars...
-		if (str === "Ma(m)6:6 Ma(t)0:0 Ju(m)6:6 Ju(") str = "Ma(m)6:6 Ma(t)0:0 Ju(m)6:6";
 		try {
 			return str.split(" ").map(getScheduleFromString).filter(el => !!el);
 		} catch (e) {

@@ -49,12 +49,11 @@ let ProfessorsSearchCustomPage = function ($container, utils, apiConnector) {
 
 		$surveyResultDiv = $(`<div></div>`);
 		$container.append($surveyResultDiv);
-
-		$container.append("<div><span class='powered-by-siga-helper'></span></div>");
 	};
 
 	let search = function (query) {
 		if (query.length < 3) return;
+		$searchResultsDiv.show().get(0).scrollIntoView({behavior: "smooth"});
 		$searchResultsDiv.hide();
 		$surveyResultDiv.hide();
 		return apiConnector.searchProfessors(query).then(results => {
@@ -69,6 +68,7 @@ let ProfessorsSearchCustomPage = function ($container, utils, apiConnector) {
 	};
 
 	let retrieveSurveyResults = function (professorName) {
+		$surveyResultDiv.show().get(0).scrollIntoView({behavior: "smooth"});
 		$surveyResultDiv.hide();
 		return apiConnector.getProfessorSurveysAggregate(professorName).then(response => {
 			$surveyResultDiv.html("");
