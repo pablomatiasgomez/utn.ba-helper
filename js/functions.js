@@ -8,9 +8,14 @@ if (!Array.prototype.hasOwnProperty("flatMap")) {
 	const CUSTOM_PAGE_QUERY_PARAM = "customPage";
 
 	// We only will handle pages if the user is logged in, and has acess to student's stuff, so we check:
+	// - For normal pages:
 	//   - Student name is present, which means they are logged in.
 	//   - Alu tab exists, which means has access to student's stuff.
-	if (!$(".pfx-user").length || !$("#page-alu").length) return;
+	// - For popups:
+	//   - The url starts with /alu
+	let isInNormalPage = $(".pfx-user").length && $("#page-alu").length;
+	let isInAluPage = window.location.pathname.startsWith("/alu");
+	if (!isInNormalPage && !isInAluPage) return;
 
 	let handler = null;
 
@@ -54,8 +59,10 @@ if (!Array.prototype.hasOwnProperty("flatMap")) {
 	let pagesDataParser = new PagesDataParser(utils, apiConnector);
 	let dataCollector = new DataCollector(pagesDataParser, apiConnector);
 
-	addCustomPage("Buscar cursos", ($container) => CoursesSearchCustomPage($container, utils, apiConnector));
-	addCustomPage("Buscar docentes", ($container) => ProfessorsSearchCustomPage($container, utils, apiConnector));
+	if (isInNormalPage) {
+		addCustomPage("Buscar cursos", ($container) => CoursesSearchCustomPage($container, utils, apiConnector));
+		addCustomPage("Buscar docentes", ($container) => ProfessorsSearchCustomPage($container, utils, apiConnector));
+	}
 
 	const PAGE_HANDLERS = {
 		"/alu/horarios.do": () => HorariosPage(utils),
@@ -73,10 +80,13 @@ if (!Array.prototype.hasOwnProperty("flatMap")) {
 		return apiConnector.logMessage("Handle page " + window.location.pathname, true, utils.stringifyError(e));
 	});
 
-	dataCollector.collectBackgroundDataIfNeeded().catch(e => {
-		console.error("Error while collecting background data", e);
-		return apiConnector.logMessage("collectBackgroundDataIfNeeded", true, utils.stringifyError(e));
-	});
+	// Do not collect data if it is not in normal page because that is the only one be can be sure the user is logged in
+	if (isInNormalPage) {
+		dataCollector.collectBackgroundDataIfNeeded().catch(e => {
+			console.error("Error while collecting background data", e);
+			return apiConnector.logMessage("collectBackgroundDataIfNeeded", true, utils.stringifyError(e));
+		});
+	}
 
 	$("body").on("click", ".powered-by-siga-helper", function () {
 		window.open("https://chrome.google.com/webstore/detail/siga-helper/jdgdheoeghamkhfppapjchbojhehimpe", "_blank");
