@@ -2,7 +2,7 @@ let PreInscripcionPage = function (pagesDataParser, utils) {
 
 	/**
 	 * Combines both {@link getAllCurrentClasses} and {@link getAllSelectedCoursesInAlternatives}
-	 * and reutnrs a single map with all the used hours
+	 * and returns a single map with all the used hours
 	 * @return an object from: alternativeIndex -> scheduleDay -> hour (from 0 to 19 to consier all shifts) -> selectedCourse
 	 */
 	let getAllUsedHours = function ($alternativesTable) {
@@ -11,10 +11,7 @@ let PreInscripcionPage = function (pagesDataParser, utils) {
 			// We will add this for every alternative that has a value:
 			currentClasses.forEach(classSchedule => {
 				Object.keys(usedHours).forEach(alternativeIndex => {
-					// TODO we are not having the course name here because the pagesDataParser is not returning it.
-					//  Eventualy we could return it only for this use case.
-					//  To be fixed in Aug 2020.
-					addCourseToUsedHours(usedHours, alternativeIndex, classSchedule.courseCode, "", classSchedule.schedules);
+					addCourseToUsedHours(usedHours, alternativeIndex, classSchedule.courseCode, classSchedule.courseName, classSchedule.schedules);
 				});
 			});
 			return usedHours;
@@ -26,9 +23,10 @@ let PreInscripcionPage = function (pagesDataParser, utils) {
 	 * @return a list of the current classes.
 	 */
 	let getAllCurrentClasses = function () {
-		// We assume that older classes are not returned because at the moment of registering to a new course they should be already removed.
-		// That is why we simply should get the class schedules and do no filtering here.
-		return pagesDataParser.getClassSchedules();
+		// Current (old) quarter classes are returned too, so we will only include annual classes.
+		return pagesDataParser.getClassSchedules().then(currentClasses => {
+			return currentClasses.filter(classSchedule => classSchedule.quarter === "A");
+		});
 	};
 
 	/**

@@ -110,6 +110,7 @@ let PagesDataParser = function (utils, apiConnector) {
 					// - "Opcional"  (not mapping this one because it's useless..)
 					let time = $tds.eq(1).find("span").text().replace("(", "").replace(")", "").trim();
 					if (time === "Opcional") return null;
+					let courseName = $tds.eq(1)[0].childNodes[0].nodeValue.trim();
 					let groups = /^(\d{4}) (Cuat (1|2)\/2|Anual|     1\/1)$/.exec(time);
 					if (!groups) throw "Class time couldn't be parsed: " + time;
 
@@ -122,6 +123,7 @@ let PagesDataParser = function (utils, apiConnector) {
 					return {
 						year: year,
 						quarter: quarter,
+						courseName: courseName,
 						classCode: classCode,
 						courseCode: courseCode,
 						branch: branch,
@@ -193,7 +195,7 @@ let PagesDataParser = function (utils, apiConnector) {
 	 * @return an array of class schedules for each combination of professor and class
 	 */
 	let getProfessorClassesFromSurveys = function () {
-		return parseMetadataFromSurveyRows(true).then(surveysMetadata => {
+		return parseMetadataFromSurveyRows(false).then(surveysMetadata => {
 			// We could eventually merge same class professors, but the backend still accepts this:
 			return surveysMetadata.map(surveyMetadata => {
 				return {
