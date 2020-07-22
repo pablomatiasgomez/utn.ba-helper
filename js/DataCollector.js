@@ -5,7 +5,6 @@ let DataCollector = function (pagesDataParser, apiConnector) {
 	const COLLECT_SURVEYS_KEY = "surveys";
 
 	const ONE_DAY_MS = 24 * 60 * 60 * 1000;
-	const ONE_WEEK_MS = ONE_DAY_MS * 7; // Surveys are collected when the user saves so we don't need to collect every day.
 
 	let hashedStudentId;
 	let getHashedStudentId = function () {
@@ -45,7 +44,7 @@ let DataCollector = function (pagesDataParser, apiConnector) {
 				},
 				{
 					key: COLLECT_SURVEYS_KEY,
-					minTime: ONE_WEEK_MS,
+					minTime: ONE_DAY_MS,
 					method: () => collectTakenSurveys(hashedStudentId),
 				}
 			];

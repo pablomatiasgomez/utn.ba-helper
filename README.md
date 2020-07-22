@@ -75,8 +75,7 @@ Extensión para Chrome que agrega una serie de features sobre el <a href="http:/
 
 ## TODO list
 
-* Mostrar el nombre de materias anuales en el preview de cursada al momento de inscribirse.
-* En la encuesta docente mostrar en que cursos estuvo ese profesor.
+
 
 ## Glossary
 

@@ -44,7 +44,8 @@ let ApiConnector = function () {
 				classCode: classSchedule.classCode,
 				courseCode: classSchedule.courseCode,
 				branch: classSchedule.branch,
-				schedules: classSchedule.schedules.map(mapScheduleToApi)
+				schedules: classSchedule.schedules ? classSchedule.schedules.map(mapScheduleToApi) : null,
+				professors: classSchedule.professors
 			};
 		}));
 	};
