@@ -75,6 +75,7 @@ Extensión para Chrome que agrega una serie de features sobre el <a href="http:/
 
 ## TODO list
 
+- Mostrar el legajo en el header del SIGA (hoy es muy dificil encontrar eso para el usuario)
 
 
 ## Glossary
