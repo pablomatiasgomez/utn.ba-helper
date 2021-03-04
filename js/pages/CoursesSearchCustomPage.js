@@ -115,5 +115,9 @@ let CoursesSearchCustomPage = function ($container, utils, apiConnector) {
 	// Init
 	return Promise.resolve().then(() => {
 		createPage();
+		let courseCode = new URLSearchParams(window.location.search).get("courseCode");
+		if (courseCode) {
+			return retrieveClassesForCourse(courseCode, 0, 15);
+		}
 	});
 };

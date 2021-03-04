@@ -100,7 +100,7 @@ let ProfessorsSearchCustomPage = function ($container, utils, apiConnector) {
 				return `<tr>
 					<td>${classSchedule.year}</td>
 					<td>${classSchedule.quarter}</td>
-					<td>${classSchedule.courseName}</td>
+					<td><a href="${utils.getCourseResultsUrl(classSchedule.courseCode)}" target="_blank">${classSchedule.courseName}</a></td>
 					<td>${classSchedule.classCode}</td>
 					<td>${classSchedule.branch || "-"}</td>
 					<td>${utils.getTimeInfoStringFromSchedules(classSchedule.schedules)}</td>
