@@ -111,7 +111,11 @@ let PreInscripcionPage = function (pagesDataParser, utils) {
 			g = Math.ceil(Math.min(255, g * 1.1));
 			b = Math.ceil(Math.min(255, b * 1.1));
 		}
-		return "#" + r.toString(16) + g.toString(16) + b.toString(16);
+		let color = "#";
+                color += (r < 16) ? "0" + r.toString(16) : r.toString(16);
+                color += (g < 16) ? "0" + g.toString(16) : g.toString(16);
+                color += (b < 16) ? "0" + b.toString(16) : b.toString(16);
+		return color;
 	};
 
 	let setPreviewTable = function (usedHours) {
