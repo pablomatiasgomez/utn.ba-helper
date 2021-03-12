@@ -1,6 +1,10 @@
 let CustomPages = function (utils, apiConnector) {
 
 	const CUSTOM_PAGE_QUERY_PARAM = "customPage";
+	const CUSTOM_PAGES = [
+		CoursesSearchCustomPage,
+		ProfessorsSearchCustomPage,
+	];
 
 	let $sigaHelperCustomMenusContainer = $();
 	let appendSigaHelperCustomMenu = function () {
@@ -24,10 +28,10 @@ let CustomPages = function (utils, apiConnector) {
 
 	let appendMenu = function () {
 		let selectedCustomPage = new URLSearchParams(window.location.search).get(CUSTOM_PAGE_QUERY_PARAM);
-		CustomPages.CUSTOM_PAGES.forEach(customPage => {
-			addCustomPageMenu(customPage.name);
+		CUSTOM_PAGES.forEach(customPage => {
+			addCustomPageMenu(customPage.menuName);
 
-			if (selectedCustomPage === customPage.name) {
+			if (selectedCustomPage === customPage.menuName) {
 				$(".std-desktop-desktop").html(`
 					<div id="pretexto">
 						<div>
@@ -38,14 +42,14 @@ let CustomPages = function (utils, apiConnector) {
 							<p>Tener en cuenta que la data colectada es una muestra parcial del total real, y por ende en casos donde la muestra es muy baja, puede implicar que los resultados estén alejados de la realidad.</p>
 						</div>
 					</div>
-					<div class="std-canvas"><p>${name}</p></div>
+					<div class="std-canvas"><p>${customPage.menuName}</p></div>
 					<div id="postexto">
 						<div>
 							<h3 style="text-align: center;">Esta sección es provista por el SIGA Helper y no es parte del SIGA.</h3>
 						</div>
 					</div>
 				`);
-				selectedPageHandler = () => customPage.handler($(".std-desktop-desktop .std-canvas"), utils, apiConnector);
+				selectedPageHandler = () => customPage($(".std-desktop-desktop .std-canvas"), utils, apiConnector);
 			}
 		});
 	};
@@ -58,32 +62,18 @@ let CustomPages = function (utils, apiConnector) {
 	};
 };
 
-CustomPages.CUSTOM_PAGES = [
-	// If index (order) is changed, getCustomPageUrl should be revisited...
-	{
-		name: "Buscar cursos",
-		handler: ($container, utils, apiConnector) => CoursesSearchCustomPage($container, utils, apiConnector),
-		customParamKey: "courseCode",
-	},
-	{
-		name: "Buscar docentes",
-		handler: ($container, utils, apiConnector) => ProfessorsSearchCustomPage($container, utils, apiConnector),
-		customParamKey: "professorName",
-	}
-];
-
 CustomPages.getCustomPageUrl = function (customPage, customParamValue) {
 	let params = {
-		customPage: customPage.name,
+		customPage: customPage.menuName,
 		[customPage.customParamKey]: customParamValue,
 	};
 	return "/?" + Object.entries(params).map(entry => entry.map(encodeURIComponent).join("=")).join("&");
 }
 
 CustomPages.getCourseResultsUrl = function (courseCode) {
-	return CustomPages.getCustomPageUrl(CustomPages.CUSTOM_PAGES[0], courseCode);
+	return CustomPages.getCustomPageUrl(CoursesSearchCustomPage, courseCode);
 };
 
 CustomPages.getProfessorSurveyResultsUrl = function (professorName) {
-	return CustomPages.getCustomPageUrl(CustomPages.CUSTOM_PAGES[1], professorName);
+	return CustomPages.getCustomPageUrl(ProfessorsSearchCustomPage, professorName);
 };

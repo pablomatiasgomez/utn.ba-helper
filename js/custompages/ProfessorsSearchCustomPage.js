@@ -174,9 +174,12 @@ let ProfessorsSearchCustomPage = function ($container, utils, apiConnector) {
 	// Init
 	return Promise.resolve().then(() => {
 		createPage();
-		let professorName = new URLSearchParams(window.location.search).get("professorName");
+		let professorName = new URLSearchParams(window.location.search).get(ProfessorsSearchCustomPage.customParamKey);
 		if (professorName) {
 			return retrieveProfessorData(professorName);
 		}
 	});
 };
+
+ProfessorsSearchCustomPage.menuName = "Buscar docentes";
+ProfessorsSearchCustomPage.customParamKey = "professorName";
