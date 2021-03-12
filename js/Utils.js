@@ -205,14 +205,6 @@ let Utils = function () {
 		}
 	};
 
-	let getProfessorSurveyResultsUrl = function (professorName) {
-		let params = {
-			customPage: "Buscar docentes",
-			professorName: professorName
-		};
-		return "/?" + Object.entries(params).map(entry => entry.map(encodeURIComponent).join("=")).join("&");
-	};
-
 	let getOverallScoreSpan = function (overallScore) {
 		return `<span style="border: 1px solid grey; background-color: ${getColorForAvg(overallScore)}">${overallScore}</span>`;
 	};
@@ -225,7 +217,7 @@ let Utils = function () {
 		}
 		return `<li style="font-size: ${fontSize}">
 			${getOverallScoreSpan(professor.overallScore)}
-			<a href="${getProfessorSurveyResultsUrl(professor.name)}" target="_blank">${professor.name}</a> (${professor.role})</a>
+			<a href="${CustomPages.getProfessorSurveyResultsUrl(professor.name)}" target="_blank">${professor.name}</a> (${professor.role})
 		</li>`;
 	};
 
