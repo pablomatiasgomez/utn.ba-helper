@@ -5,9 +5,7 @@ if (!Array.prototype.hasOwnProperty("flatMap")) {
 }
 
 (function () {
-	const CUSTOM_PAGE_QUERY_PARAM = "customPage";
-
-	// We only will handle pages if the user is logged in, and has acess to student's stuff, so we check:
+	// We only will handle pages if the user is logged in, and has access to student's stuff, so we check:
 	// - For normal pages:
 	//   - Student name is present, which means they are logged in.
 	//   - Alu tab exists, which means has access to student's stuff.
@@ -19,49 +17,20 @@ if (!Array.prototype.hasOwnProperty("flatMap")) {
 
 	let handler = null;
 
-	let $sigaHelperCustomMenusContainer = $();
-	let appendSigaHelperCustomMenu = () => {
-		if (!$sigaHelperCustomMenusContainer.length) {
-			$sigaHelperCustomMenusContainer = $("<p></p>");
-			$("#menu-page-alu")
-				.append("<div>Siga Helper</div>")
-				.append($sigaHelperCustomMenusContainer);
-		}
-	};
-
-	let selectedCustomPage = new URLSearchParams(window.location.search).get(CUSTOM_PAGE_QUERY_PARAM);
-	let addCustomPage = (name, customPageHandler) => {
-		appendSigaHelperCustomMenu();
-		$sigaHelperCustomMenusContainer.append(`<a href="/?${CUSTOM_PAGE_QUERY_PARAM}=${encodeURIComponent(name)}">${name}</a>`);
-		if (selectedCustomPage === name) {
-			handler = () => customPageHandler($(".std-desktop-desktop").html(`
-				<div id="pretexto">
-					<div>
-						<h3 style="text-align: center;">SIGA HELPER - Información importante</h3>
-						<p><b>Esta sección es provista por el SIGA Helper y no es parte del SIGA.</b></p>
-						<p>Toda la información presentada en esta sección proviene de datos colectados de los usuarios que poseen la extensión, por lo cual puede estar incompleta y/o errónea. <br>
-						Ninguno de los datos presentados en esta sección proviene del SIGA, por lo que debe ser usada bajo su propia interpretación.</p>
-						<p>Tener en cuenta que la data colectada es una muestra parcial del total real, y por ende en casos donde la muestra es muy baja, puede implicar que los resultados estén alejados de la realidad.</p>
-					</div>
-				</div>
-				<div class="std-canvas"><p>${name}</p></div>
-				<div id="postexto">
-					<div>
-						<h3 style="text-align: center;">Esta sección es provista por el SIGA Helper y no es parte del SIGA.</h3>
-					</div>
-				</div>
-			`).find(".std-canvas"));
-		}
-	};
-
 	let utils = new Utils();
 	let apiConnector = new ApiConnector();
 	let pagesDataParser = new PagesDataParser(utils, apiConnector);
 	let dataCollector = new DataCollector(pagesDataParser, apiConnector);
 
+	let customPages = new CustomPages(utils, apiConnector);
+
 	if (isInNormalPage) {
-		addCustomPage("Buscar cursos", ($container) => CoursesSearchCustomPage($container, utils, apiConnector));
-		addCustomPage("Buscar docentes", ($container) => ProfessorsSearchCustomPage($container, utils, apiConnector));
+		customPages.appendMenu();
+		let customPageHandler = customPages.getSelectedPageHandler();
+		if (customPageHandler) {
+			// The user is in a custom page, so we assign the handler
+			handler = customPageHandler;
+		}
 	}
 
 	const PAGE_HANDLERS = {

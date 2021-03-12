@@ -1,6 +1,7 @@
 let ProfessorsSearchCustomPage = function ($container, utils, apiConnector) {
 
-	const TEXT_QUESTSIONS = {
+	// noinspection JSNonASCIINames,SpellCheckingInspection,NonAsciiCharacters
+	const TEXT_QUESTIONS = {
 		// Good:
 		"Mencione las características del docente que ayudaron en su  aprendizaje": "#19B135",
 		"Mencione las características del auxiliar docente que ayudaron en su aprendizaje": "#19B135",
@@ -18,7 +19,7 @@ let ProfessorsSearchCustomPage = function ($container, utils, apiConnector) {
 	let $coursesResultDiv; // Shows the last courses in which the professor was present
 	let $surveyResultDiv; // Shows the survey results of the given professor
 
-	let createPage = function (withSearch) {
+	let createPage = function () {
 		$searchDiv = $("<div></div>");
 		$searchDiv.append(`<span class="bold">Buscar docente: </span>`);
 		let $searchTxt = $(`<input type="text" placeholder="Minimo 3 caracteres..." />`);
@@ -100,7 +101,7 @@ let ProfessorsSearchCustomPage = function ($container, utils, apiConnector) {
 				return `<tr>
 					<td>${classSchedule.year}</td>
 					<td>${classSchedule.quarter}</td>
-					<td><a href="${utils.getCourseResultsUrl(classSchedule.courseCode)}" target="_blank">${classSchedule.courseName}</a></td>
+					<td><a href="${CustomPages.getCourseResultsUrl(classSchedule.courseCode)}" target="_blank">${classSchedule.courseName}</a></td>
 					<td>${classSchedule.classCode}</td>
 					<td>${classSchedule.branch || "-"}</td>
 					<td>${utils.getTimeInfoStringFromSchedules(classSchedule.schedules)}</td>
@@ -151,11 +152,11 @@ let ProfessorsSearchCustomPage = function ($container, utils, apiConnector) {
 			`);
 		}
 
-		let textQuestions = Object.keys(TEXT_QUESTSIONS).filter(question => results.textFields[question] && results.textFields[question].length);
+		let textQuestions = Object.keys(TEXT_QUESTIONS).filter(question => results.textFields[question] && results.textFields[question].length);
 		if (textQuestions.length) {
 			let textColumns = textQuestions.map(question => {
 				let answers = results.textFields[question].map(answer => `<i>"${answer}"</i>`).join(`<hr style="margin: 8px 0;">`);
-				return `<td style="color: ${TEXT_QUESTSIONS[question]}">${answers}</td>`;
+				return `<td style="color: ${TEXT_QUESTIONS[question]}">${answers}</td>`;
 			}).join("");
 			$surveyResultDiv.append(`
 				<p>Comentarios:</p>
