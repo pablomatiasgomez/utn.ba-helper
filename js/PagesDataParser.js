@@ -40,6 +40,7 @@ let PagesDataParser = function (utils, apiConnector) {
 	 * @return {Promise<String>}
 	 */
 	let getStudentId = function () {
+		let stack = new Error();
 		return getPageContents("/alu/inscurcomp.do").then(responseText => {
 			let studentId = $(responseText).find("div.center p.mask1 span").text();
 			if (!studentId) {
@@ -49,9 +50,9 @@ let PagesDataParser = function (utils, apiConnector) {
 				}
 				throw "Couldn't get studentId from responseText: " + responseText;
 			}
-			return studentId;
+			return studentId.toString();
 		}).catch(e => {
-			trackError(e, "getStudentId");
+			trackError(e, stack.stack);
 			throw e;
 		});
 	};

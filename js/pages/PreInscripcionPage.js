@@ -101,21 +101,25 @@ let PreInscripcionPage = function (pagesDataParser, utils) {
 	};
 
 	let getRandomRGBByCode = function (code) {
+		// First we create a random rgb color from the code.
 		let arr = ((parseInt(code.toString().replace(/0/g, "2")) * 31)).toString().slice(-6);
 		let r = Math.floor(arr.slice(0, 2) / 100 * 255);
 		let g = Math.floor(arr.slice(2, 4) / 100 * 255);
 		let b = Math.floor(arr.slice(4, 6) / 100 * 255);
 
+		const maxIterations = 100;
+		let iterations = 0;
+		// Now we make it have good luminance
 		while (((0.2126 * r) + (0.7152 * g) + (0.0722 * b)) < 128) {
-			r = Math.ceil(Math.min(255, r * 1.1));
-			g = Math.ceil(Math.min(255, g * 1.1));
-			b = Math.ceil(Math.min(255, b * 1.1));
+			if (iterations++ > maxIterations) {
+				console.error(`Max iterations reached for code ${code} !!!`);
+				break; // Prevent any infinite loop.
+			}
+			r = Math.ceil(Math.min(255, (r + 1) * 1.1));
+			g = Math.ceil(Math.min(255, (g + 1) * 1.1));
+			b = Math.ceil(Math.min(255, (b + 1) * 1.1));
 		}
-		let color = "#";
-                color += (r < 16) ? "0" + r.toString(16) : r.toString(16);
-                color += (g < 16) ? "0" + g.toString(16) : g.toString(16);
-                color += (b < 16) ? "0" + b.toString(16) : b.toString(16);
-		return color;
+		return "#" + r.toString(16).padStart(2, "0") + g.toString(16).padStart(2, "0") + b.toString(16).padStart(2, "0");
 	};
 
 	let setPreviewTable = function (usedHours) {
