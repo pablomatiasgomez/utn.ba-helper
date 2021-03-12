@@ -34,6 +34,8 @@ Extensión para Chrome que agrega una serie de features sobre el <a href="http:/
     - Horario de cursada con detalle explícito en el popup de inscripción de cursos. Ej: "Ma(n)1:3 Ju(n)1:5" -> "Martes (Noche) 19:00hs a 21:30hs y Jueves (Noche) 19:00hs a 23:00hs".
     - Profesores que estuvieron en cada cursada, basándose en data colectada.
 
+- Muestra el numero de legajo en la parte superior de la pagina.
+
 - Colecta anonimamente distintos datos, como:
     - Las encuestas docentes para poder publicar esta información en la sección de "Buscar Docentes" e incluso mostrarla al momento de inscribirse a un curso.
     - Los horarios de las cursadas para mostrar esta información al momento de inscribirse a un nuevo curso, y poder intentar predecir cuál va a ser el profesor que va a estar en cada cursada.
@@ -75,7 +77,6 @@ Extensión para Chrome que agrega una serie de features sobre el <a href="http:/
 
 ## TODO list
 
-- Mostrar el legajo en el header del SIGA (hoy es muy dificil encontrar eso para el usuario)
 
 
 ## Glossary

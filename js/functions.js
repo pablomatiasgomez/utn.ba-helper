@@ -57,6 +57,14 @@ if (!Array.prototype.hasOwnProperty("flatMap")) {
 		});
 	}
 
+	if (isInNormalPage) {
+		pagesDataParser.getStudentId().then(studentId => {
+			$(".pfx-user")
+				.append(`<div style="font-size: 13px;">Legajo: ${studentId}</div>`)
+				.append("<span class='powered-by-siga-helper'></span>");
+		});
+	}
+
 	$("body").on("click", ".powered-by-siga-helper", function () {
 		window.open("https://chrome.google.com/webstore/detail/siga-helper/jdgdheoeghamkhfppapjchbojhehimpe", "_blank");
 	});
