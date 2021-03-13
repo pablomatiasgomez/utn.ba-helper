@@ -5,15 +5,16 @@
 echo "Starting packaging.."
 
 minifyJs () {
-  # npm package "babel-minify" needs to be installed globally.
+  # npm package "minify" needs to be installed globally.
+  # sudo npm i minify -g
   echo "Minifying $1"
-  mv "$1" "$1.bk"
-  minify "$1.bk" --out-file "$1" --builtIns false
+  mv "$1" "$1.bk.js"
+  minify "$1.bk.js" > "$1"
 }
 restoreJs () {
   echo "Restoring $1"
   rm "$1"
-  mv "$1.bk" "$1"
+  mv "$1.bk.js" "$1"
 }
 
 rm out.zip
