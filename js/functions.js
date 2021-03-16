@@ -21,7 +21,6 @@ if (!Array.prototype.hasOwnProperty("flatMap")) {
 	let apiConnector = new ApiConnector();
 	let pagesDataParser = new PagesDataParser(utils, apiConnector);
 	let dataCollector = new DataCollector(pagesDataParser, apiConnector);
-
 	let customPages = new CustomPages(utils, apiConnector);
 
 	if (isInNormalPage) {
@@ -49,19 +48,24 @@ if (!Array.prototype.hasOwnProperty("flatMap")) {
 		return apiConnector.logMessage("Handle page " + window.location.pathname, true, utils.stringifyError(e));
 	});
 
-	// Do not collect data if it is not in normal page because that is the only one be can be sure the user is logged in
 	if (isInNormalPage) {
-		dataCollector.collectBackgroundDataIfNeeded().catch(e => {
-			console.error("Error while collecting background data", e);
-			return apiConnector.logMessage("collectBackgroundDataIfNeeded", true, utils.stringifyError(e));
-		});
-	}
-
-	if (isInNormalPage) {
+		// At this point the user should be logged in so we can proceed with data collection.
 		pagesDataParser.getStudentId().then(studentId => {
 			$(".pfx-user")
 				.append(`<div style="font-size: 13px;">Legajo: ${studentId}</div>`)
 				.append("<span class='powered-by-siga-helper'></span>");
+		}).catch(e => {
+			console.error("Error while adding studentId to header", e);
+			if (!(e instanceof LoggedOutError)) {
+				return apiConnector.logMessage("addStudentIdToHeader", true, utils.stringifyError(e));
+			}
+		}).then(() => {
+			return dataCollector.collectBackgroundDataIfNeeded();
+		}).catch(e => {
+			console.error("Error while collecting background data", e);
+			if (!(e instanceof LoggedOutError)) {
+				return apiConnector.logMessage("collectBackgroundDataIfNeeded", true, utils.stringifyError(e));
+			}
 		});
 	}
 
