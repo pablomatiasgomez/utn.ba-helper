@@ -61,9 +61,14 @@ let PagesDataParser = function (utils, apiConnector) {
 	/**
 	 * Gets all the courses that the student has taken, not including the failed ones.
 	 * The returned object contains the signed courses, which does not include the passed ones. The passed courses are included in a different proeprty.
+	 * This is currently not used. It was used to show an iframe pointing to materiasutn.com
+	 * This function is beeing keept in case we want to show the student's passed courses
 	 * @return {Promise<{signed: Array<String>, passed: Array<String>}>}
 	 */
 	let getPassedCourses = function () {
+		/**
+		 * @returns {Promise<Array<String>>}
+		 */
 		let getCoursesFromPage = page => {
 			return getPageContents(page).then(responseText => {
 				return $(responseText).find(".std-canvas table:first tbody tr:not(:first)")
