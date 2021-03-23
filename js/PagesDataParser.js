@@ -40,19 +40,20 @@ let PagesDataParser = function (utils, apiConnector) {
 	 * @return {Promise<String>}
 	 */
 	let getStudentId = function () {
-		let stack = new Error();
 		return getPageContents("/alu/inscurcomp.do").then(responseText => {
 			let studentId = $(responseText).find("div.center p.mask1 span").text();
 			if (!studentId) {
 				// Check if the user has been logged out..
 				if ($(responseText).find("div.std-canvas div").text().trim() === "La sesión ha expirado") {
-					throw "Couldn't get studentId because the user has been logged out.";
+					throw new LoggedOutError("Couldn't get studentId because the user has been logged out.");
 				}
-				throw "Couldn't get studentId from responseText: " + responseText;
+				throw new Error("Couldn't get studentId from responseText: " + responseText);
 			}
 			return studentId.toString();
 		}).catch(e => {
-			trackError(e, stack.stack);
+			if (!(e instanceof LoggedOutError)) {
+				trackError(e, "getStudentId");
+			}
 			throw e;
 		});
 	};
@@ -60,9 +61,14 @@ let PagesDataParser = function (utils, apiConnector) {
 	/**
 	 * Gets all the courses that the student has taken, not including the failed ones.
 	 * The returned object contains the signed courses, which does not include the passed ones. The passed courses are included in a different proeprty.
+	 * This is currently not used. It was used to show an iframe pointing to materiasutn.com
+	 * This function is beeing keept in case we want to show the student's passed courses
 	 * @return {Promise<{signed: Array<String>, passed: Array<String>}>}
 	 */
 	let getPassedCourses = function () {
+		/**
+		 * @returns {Promise<Array<String>>}
+		 */
 		let getCoursesFromPage = page => {
 			return getPageContents(page).then(responseText => {
 				return $(responseText).find(".std-canvas table:first tbody tr:not(:first)")
