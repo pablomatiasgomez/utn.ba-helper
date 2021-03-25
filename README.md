@@ -43,6 +43,7 @@ Extensión para Chrome que agrega una serie de features sobre el <a href="http:/
 - Agrega nuevas secciones:
     - "Buscar Docentes", donde se puede ver información colectada, entre ello, la encuesta docente.
     - "Buscar Cursos", donde se puede ver información de cursos pasados, como horarios, profesores que estuvieron en cada uno, etc.
+    - "Seguimiento de Plan", donde se puede ver el estado actual del plan, viendo materias aprobadas, habilitadas para rendir final, por cursar, etc.
 
 
 ## Screenshots:
