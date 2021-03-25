@@ -101,6 +101,10 @@ let ApiConnector = function () {
 		return getData(BASE_API_URL + "/courses?q=" + encodeURIComponent(query));
 	};
 
+	let getPlanCourses = function (planCode) {
+		return getData(BASE_API_URL + "/courses?planCode=" + encodeURIComponent(planCode));
+	};
+
 	let getClassesForCourse = function (courseCode, offset, limit) {
 		return getClassesSchedules(courseCode, null, offset, limit);
 	};
@@ -171,6 +175,7 @@ let ApiConnector = function () {
 		getProfessorSurveysAggregate: getProfessorSurveysAggregate,
 		getClassesForProfessor: getClassesForProfessor,
 		searchCourses: searchCourses,
+		getPlanCourses: getPlanCourses,
 		getClassesForCourse: getClassesForCourse,
 	};
 };

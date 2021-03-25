@@ -5,10 +5,6 @@ let PagesDataParser = function (utils, apiConnector) {
 		return apiConnector.logMessage(methodName, true, utils.stringifyError(error));
 	};
 
-	let logInfo = function (message, methodName) {
-		return apiConnector.logMessage(methodName, false, message);
-	};
-
 	// We want to fetch only once each page.
 	let CACHED_PAGE_CONTENTS = {};
 	let getPageContents = function (url) {
@@ -59,10 +55,30 @@ let PagesDataParser = function (utils, apiConnector) {
 	};
 
 	/**
+	 * All the student's plan codes as shown in the /alu/mat.do page.
+	 * @return {Promise<Array<{planId: String, planCode: String}>>}
+	 */
+	let getStudentPlans = function () {
+		return getPageContents("/alu/mat.do").then(responseText => {
+			return $(responseText).find(".std-canvas > div select option").toArray()
+				.map(option => {
+					let $option = $(option);
+					let planId = $option.attr("value").trim();
+					let planCode = $option.text().trim();
+					if (!planId || planCode === "-nada-") return;
+					return {
+						planId: planId,
+						planCode: planCode
+					}
+				})
+				.filter(plan => !!plan);
+		});
+	};
+
+	/**
 	 * Gets all the courses that the student has taken, not including the failed ones.
-	 * The returned object contains the signed courses, which does not include the passed ones. The passed courses are included in a different proeprty.
-	 * This is currently not used. It was used to show an iframe pointing to materiasutn.com
-	 * This function is beeing keept in case we want to show the student's passed courses
+	 * The returned object contains the signed courses, which includes the ones that have also been passed.
+	 * All the passed courses are also included in a different proeprty.
 	 * @return {Promise<{signed: Array<String>, passed: Array<String>}>}
 	 */
 	let getPassedCourses = function () {
@@ -82,7 +98,7 @@ let PagesDataParser = function (utils, apiConnector) {
 			getCoursesFromPage("/alu/actp.do")
 		]).then(results => {
 			let passedCourses = results[0];
-			let signedCourses = results[1].filter(course => passedCourses.indexOf(course) === -1);
+			let signedCourses = [...new Set([...results[1], ...results[0]])];
 			return {
 				passed: passedCourses,
 				signed: signedCourses
@@ -303,6 +319,7 @@ let PagesDataParser = function (utils, apiConnector) {
 		getStartYear: getStartYear,
 		getStudentId: getStudentId,
 
+		getStudentPlans: getStudentPlans,
 		getPassedCourses: getPassedCourses,
 
 		getClassSchedules: getClassSchedules,

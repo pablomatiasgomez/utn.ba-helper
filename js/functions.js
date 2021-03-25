@@ -21,7 +21,7 @@ if (!Array.prototype.hasOwnProperty("flatMap")) {
 	let apiConnector = new ApiConnector();
 	let pagesDataParser = new PagesDataParser(utils, apiConnector);
 	let dataCollector = new DataCollector(pagesDataParser, apiConnector);
-	let customPages = new CustomPages(utils, apiConnector);
+	let customPages = new CustomPages(pagesDataParser, utils, apiConnector);
 
 	if (isInNormalPage) {
 		customPages.appendMenu();
