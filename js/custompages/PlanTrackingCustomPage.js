@@ -60,7 +60,7 @@ let PlanTrackingCustomPage = function ($container, services) {
 						w -= 5;
 					}
 					return w;
-				}
+				};
 				return courseWeight(c2) - courseWeight(c1);
 			}).map(course => {
 				let status;
@@ -90,7 +90,7 @@ let PlanTrackingCustomPage = function ($container, services) {
 				if (course.elective && !course.isPassed && !course.canTakeFinalExam && !course.isSigned) {
 					divClass = "hidden";
 					if (!showExtraElectivesButtonAdded) {
-						showExtraElectivesButtonAdded = true
+						showExtraElectivesButtonAdded = true;
 						showExtraElectivesButton = `<a href="#" class="show-electives" data-level="${level}">> Mostrar todas</a>`;
 					}
 				}
