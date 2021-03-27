@@ -1,4 +1,4 @@
-let CoursesSearchCustomPage = function ($container, utils, apiConnector) {
+let CoursesSearchCustomPage = function ($container, services) {
 
 	let $searchDiv;
 	let $searchResultsDiv;
@@ -51,7 +51,7 @@ let CoursesSearchCustomPage = function ($container, utils, apiConnector) {
 		$searchResultsDiv.show().get(0).scrollIntoView({behavior: "smooth"});
 		$searchResultsDiv.hide();
 		$courseDataDiv.hide();
-		return apiConnector.searchCourses(query).then(results => {
+		return services.apiConnector.searchCourses(query).then(results => {
 			let trs = results.map(item => {
 				return `<tr><td>${item.value}</td><td><a href="#">${item.data}</a></td></tr>`;
 			}).join("");
@@ -71,7 +71,7 @@ let CoursesSearchCustomPage = function ($container, utils, apiConnector) {
 			$courseDataDiv.show().get(0).scrollIntoView({behavior: "smooth"});
 			$courseDataDiv.hide();
 		}
-		return apiConnector.getClassesForCourse(courseCode, offset, limit).then(classSchedules => {
+		return services.apiConnector.getClassesForCourse(courseCode, offset, limit).then(classSchedules => {
 			if (offset === 0) {
 				lastYear = lastQuarter = null;
 				$courseDataDiv.find("p").text(`Resultados para ${courseCode}:`);
@@ -95,7 +95,7 @@ let CoursesSearchCustomPage = function ($container, utils, apiConnector) {
 	let appendClassesToTable = function (classSchedules) {
 		let trs = classSchedules.map(classSchedule => {
 			let professorLis = (classSchedule.professors || []).map(professor => {
-				return utils.getProfessorLi(professor);
+				return services.utils.getProfessorLi(professor);
 			}).join("");
 			let trClass = (lastYear && lastYear !== classSchedule.year) ? "top-border" : (lastQuarter && lastQuarter !== classSchedule.quarter) ? "top-border-without-first-cell" : "";
 			lastYear = classSchedule.year;
@@ -105,7 +105,7 @@ let CoursesSearchCustomPage = function ($container, utils, apiConnector) {
 					<td>${classSchedule.quarter}</td>
 					<td>${classSchedule.classCode}</td>
 					<td>${classSchedule.branch || "-"}</td>
-					<td>${utils.getTimeInfoStringFromSchedules(classSchedule.schedules)}</td>
+					<td>${services.utils.getTimeInfoStringFromSchedules(classSchedule.schedules)}</td>
 					<td><ul class="no-margin">${professorLis}</ul></td>
 				</tr>`;
 		}).join("");

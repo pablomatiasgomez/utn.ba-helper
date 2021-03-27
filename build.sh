@@ -16,6 +16,7 @@ js/pages/PreInscripcionPage.js \
 js/pages/EncuestaDocentePopUpPage.js \
 js/custompages/ProfessorsSearchCustomPage.js \
 js/custompages/CoursesSearchCustomPage.js \
+js/custompages/PlanTrackingCustomPage.js \
 js/custompages/CustomPages.js \
 js/functions.js"
 cat $JS_FILES > js/siga-helper.min.js

@@ -1,4 +1,4 @@
-let ProfessorsSearchCustomPage = function ($container, utils, apiConnector) {
+let ProfessorsSearchCustomPage = function ($container, services) {
 
 	// noinspection JSNonASCIINames,SpellCheckingInspection,NonAsciiCharacters
 	const TEXT_QUESTIONS = {
@@ -65,7 +65,7 @@ let ProfessorsSearchCustomPage = function ($container, utils, apiConnector) {
 		hideProfessorData();
 		$searchResultsDiv.show().get(0).scrollIntoView({behavior: "smooth"});
 		$searchResultsDiv.hide();
-		return apiConnector.searchProfessors(query).then(results => {
+		return services.apiConnector.searchProfessors(query).then(results => {
 			let trs = results.map(item => {
 				return `<tr><td><a href="#">${item.value}</a></td><td>${item.data}</td></tr>`;
 			}).join("");
@@ -92,11 +92,11 @@ let ProfessorsSearchCustomPage = function ($container, utils, apiConnector) {
 	let retrieveProfessorCourses = function (professorName) {
 		$coursesResultDiv.hide();
 		// For now we are showing just the latest 20 classes.
-		return apiConnector.getClassesForProfessor(professorName, 0, 20).then(classSchedules => {
+		return services.apiConnector.getClassesForProfessor(professorName, 0, 20).then(classSchedules => {
 			$coursesResultDiv.html("");
 			let trs = classSchedules.map(classSchedule => {
 				let professorLis = (classSchedule.professors || []).map(professor => {
-					return utils.getProfessorLi(professor);
+					return services.utils.getProfessorLi(professor);
 				}).join("");
 				return `<tr>
 					<td>${classSchedule.year}</td>
@@ -104,7 +104,7 @@ let ProfessorsSearchCustomPage = function ($container, utils, apiConnector) {
 					<td><a href="${CustomPages.getCourseResultsUrl(classSchedule.courseCode)}" target="_blank">${classSchedule.courseName}</a></td>
 					<td>${classSchedule.classCode}</td>
 					<td>${classSchedule.branch || "-"}</td>
-					<td>${utils.getTimeInfoStringFromSchedules(classSchedule.schedules)}</td>
+					<td>${services.utils.getTimeInfoStringFromSchedules(classSchedule.schedules)}</td>
 					<td><ul class="no-margin">${professorLis}</ul></td>
 				</tr>`;
 			}).join("");
@@ -124,7 +124,7 @@ let ProfessorsSearchCustomPage = function ($container, utils, apiConnector) {
 
 	let retrieveSurveyResults = function (professorName) {
 		$surveyResultDiv.hide();
-		return apiConnector.getProfessorSurveysAggregate(professorName).then(response => {
+		return services.apiConnector.getProfessorSurveysAggregate(professorName).then(response => {
 			$surveyResultDiv.html("");
 			Object.entries(response)
 				// Put DOCENTE before AUXILIAR
@@ -139,10 +139,10 @@ let ProfessorsSearchCustomPage = function ($container, utils, apiConnector) {
 
 		if (results.percentageFields.length) {
 			let percetangeRows = results.percentageFields.map(item => {
-				return `<tr><td>${item.question}</td><td style="background-color: ${utils.getColorForAvg(item.average)}">${item.average}</td><td>${item.count}</td></tr>`;
+				return `<tr><td>${item.question}</td><td style="background-color: ${services.utils.getColorForAvg(item.average)}">${item.average}</td><td>${item.count}</td></tr>`;
 			}).join("");
 			$surveyResultDiv.append(`
-				<p>Puntaje general: ${utils.getOverallScoreSpan(results.overallScore)}</p>
+				<p>Puntaje general: ${services.utils.getOverallScoreSpan(results.overallScore)}</p>
 				<table class="percentage-questions">
 					<tbody>
 						<tr><th>Pregunta</th><th>Promedio</th><th>Muestra</th></tr>

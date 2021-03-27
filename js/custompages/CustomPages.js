@@ -1,9 +1,10 @@
-let CustomPages = function (utils, apiConnector) {
+let CustomPages = function (pagesDataParser, utils, apiConnector) {
 
 	const CUSTOM_PAGE_QUERY_PARAM = "customPage";
 	const CUSTOM_PAGES = [
 		CoursesSearchCustomPage,
 		ProfessorsSearchCustomPage,
+		PlanTrackingCustomPage,
 	];
 
 	let $sigaHelperCustomMenusContainer = $();
@@ -49,7 +50,11 @@ let CustomPages = function (utils, apiConnector) {
 						</div>
 					</div>
 				`);
-				selectedPageHandler = () => customPage($(".std-desktop-desktop .std-canvas"), utils, apiConnector);
+				selectedPageHandler = () => customPage($(".std-desktop-desktop .std-canvas"), {
+					pagesDataParser,
+					utils,
+					apiConnector
+				});
 			}
 		});
 	};
@@ -68,7 +73,7 @@ CustomPages.getCustomPageUrl = function (customPage, customParamValue) {
 		[customPage.customParamKey]: customParamValue,
 	};
 	return "/?" + Object.entries(params).map(entry => entry.map(encodeURIComponent).join("=")).join("&");
-}
+};
 
 CustomPages.getCourseResultsUrl = function (courseCode) {
 	return CustomPages.getCustomPageUrl(CoursesSearchCustomPage, courseCode);
