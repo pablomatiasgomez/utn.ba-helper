@@ -3,7 +3,7 @@ let PlanTrackingCustomPage = function ($container, services) {
 	let $plan;
 
 	let createPage = function (planCodes, passedCourses) {
-		let $planSelect = $(`<select><option>Seleccionar plan</option></select>`);
+		let $planSelect = $(`<select><option value="">Seleccionar plan</option></select>`);
 		planCodes.forEach(planCode => $planSelect.append(`<option value="${planCode}">${planCode}</option>`));
 		$planSelect.on("change", function () {
 			loadPlan($planSelect.val(), passedCourses);
