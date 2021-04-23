@@ -60,7 +60,7 @@ let PreInscripcionPage = function (pagesDataParser, utils) {
 				if (!strArray.length) return;
 
 				// This is always needed, because we are grabbing the first text node, but in some cases like AULA VIRTUAL it can happen that it is needed.
-				let schedulesStr = strArray[0].trim().replace("CAMPUS", "").replace("MEDRANO", "").replace("AULA VIRTUAL", "");
+				let schedulesStr = strArray[0].replace("CAMPUS", "").replace("MEDRANO", "").replace("AULA VIRTUAL", "").trim();
 				addCourseToUsedHours(usedHours, alternativeIndex, courseCode, courseName, utils.getSchedulesFromString(schedulesStr));
 			});
 		});

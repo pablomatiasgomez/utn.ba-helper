@@ -1,95 +1,42 @@
 let Utils = function () {
 
+	// Some schedules are not typed and seem to be special cases.. so we handle them this way.
+	const SCHEDULE_FIXES = {
+		"Miércoles 13.30 a 15.45 hs.": "Mi(t)0:2",
+		"VIERNES: 14:00 A 16:30 HS. / I": "Vi(t)1:3",
+		"MIÉRCOLES: 19 A 21 HS. / ARQ.": "Mi(n)1:3",
+		"SÁBADOS: 8 A 13 HS. / ING. DE": "Sa(m)0:6",
+		"MARTES: 14:00 A 16.30 HS.": "Ma(t)1:3",
+		"JUEVES: 19 A 21 HS. / ARQ. DAB": "Ju(n)1:3",
+		"JUEVES: 16:00 A 19:00 HS.": "Ju(t)3:6",
+		"Jueves de 18.15 a 20.15 hs.": "Ju(n)0:2",
+	};
 	const HOURS = {
 		m: {
-			0: {
-				start: "7:45",
-				end: "8:30"
-			},
-			1: {
-				start: "8:30",
-				end: "9:15"
-			},
-			2: {
-				start: "9:15",
-				end: "10:00"
-			},
-			3: {
-				start: "10:15",
-				end: "11:00"
-			},
-			4: {
-				start: "11:00",
-				end: "11:45"
-			},
-			5: {
-				start: "11:45",
-				end: "12:30"
-			},
-			6: {
-				start: "12:30",
-				end: "13:15"
-			}
+			0: {start: "7:45", end: "8:30"},
+			1: {start: "8:30", end: "9:15"},
+			2: {start: "9:15", end: "10:00"},
+			3: {start: "10:15", end: "11:00"},
+			4: {start: "11:00", end: "11:45"},
+			5: {start: "11:45", end: "12:30"},
+			6: {start: "12:30", end: "13:15"}
 		},
 		t: {
-			0: {
-				start: "13:30",
-				end: "14:15"
-			},
-			1: {
-				start: "14:15",
-				end: "15:00"
-			},
-			2: {
-				start: "15:00",
-				end: "15:45"
-			},
-			3: {
-				start: "16:00",
-				end: "16:45"
-			},
-			4: {
-				start: "16:45",
-				end: "17:30"
-			},
-			5: {
-				start: "17:30",
-				end: "18:15"
-			},
-			6: {
-				start: "18:15",
-				end: "19:00"
-			},
+			0: {start: "13:30", end: "14:15"},
+			1: {start: "14:15", end: "15:00"},
+			2: {start: "15:00", end: "15:45"},
+			3: {start: "16:00", end: "16:45"},
+			4: {start: "16:45", end: "17:30"},
+			5: {start: "17:30", end: "18:15"},
+			6: {start: "18:15", end: "19:00"},
 		},
 		n: {
-			0: {
-				start: "18:15",
-				end: "19:00"
-			},
-			1: {
-				start: "19:00",
-				end: "19:45"
-			},
-			2: {
-				start: "19:45",
-				end: "20:30"
-			},
-			3: {
-				start: "20:45",
-				end: "21:30"
-			},
-			4: {
-				start: "21:30",
-				end: "22:15"
-			},
-			5: {
-				start: "22:15",
-				end: "23:00"
-			},
-			6: {
-				start: "6", //Should never go through here.
-				end: "6"
-			}
+			0: {start: "18:15", end: "19:00"},
+			1: {start: "19:00", end: "19:45"},
+			2: {start: "19:45", end: "20:30"},
+			3: {start: "20:45", end: "21:30"},
+			4: {start: "21:30", end: "22:15"},
+			5: {start: "22:15", end: "23:00"},
 		}
 	};
 	const DAYS = {
@@ -136,7 +83,7 @@ let Utils = function () {
 
 	let getScheduleFromString = function (str) {
 		str = str.replace("á", "a"); // This is for day Sá
-		let groups = /^(Lu|Ma|Mi|Ju|Vi|Sa)\(([mtn])\)([0-6]):([0-6])$/.exec(str.replace("á", "a"));
+		let groups = /^(Lu|Ma|Mi|Ju|Vi|Sa)\(([mtn])\)([0-6]):([0-6])$/.exec(str);
 		if (!groups) throw `Schedule string couldn't be parsed: '${str}'`;
 		return {
 			day: groups[1],
@@ -148,8 +95,10 @@ let Utils = function () {
 
 	let getSchedulesFromString = function (str) {
 		if (!str) return [];
+
+		str = SCHEDULE_FIXES[str] || str;
 		try {
-			return str.split(" ").map(getScheduleFromString).filter(el => !!el);
+			return str.split(" ").filter(el => !!el).map(getScheduleFromString);
 		} catch (e) {
 			// Log the entire string if it couldn't be parsed:
 			throw `Schedules string couldn't be parsed: '${str}' because of: ${e}`;
