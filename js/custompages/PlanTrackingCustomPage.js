@@ -1,5 +1,12 @@
 let PlanTrackingCustomPage = function ($container, services) {
 
+	const TRANSLATIONS = {
+		"SIGNED": "Firmada",
+		"PASSED": "Aprobada",
+		"REGISTER": "Cursar",
+		"TAKE_FINAL_EXAM": "Rendir final",
+	};
+
 	let $plan;
 
 	let createPage = function (planCodes, passedCourses) {
@@ -25,6 +32,11 @@ let PlanTrackingCustomPage = function ($container, services) {
 	};
 
 	let loadPlanCourses = function (planCode, planCourses, passedCourses) {
+		let courseNamesByCode = planCourses.reduce(function (courseNamesByCode, course) {
+			courseNamesByCode[course.courseCode] = course.courseName;
+			return courseNamesByCode;
+		}, {});
+
 		let courseRequirementToArray = {
 			// We will always use the last 4 chars, removing the first 2 that identify the specific plan.
 			// This is done in order to connect passed courses that are transitive from a previous plan.
@@ -66,16 +78,16 @@ let PlanTrackingCustomPage = function ($container, services) {
 				let status;
 				let color = "#7e7e7e";
 				if (course.isPassed) {
-					status = "Aprobada";
+					status = TRANSLATIONS["PASSED"];
 					color = "#55bb55";
 				} else if (course.canTakeFinalExam) {
-					status = "Puede rendir final";
+					status = "Puede " + TRANSLATIONS["TAKE_FINAL_EXAM"].toLowerCase();
 					color = "#ffcc00";
 				} else if (course.isSigned) {
-					status = "Firmada";
+					status = TRANSLATIONS["SIGNED"];
 					color = "#ffcc00";
 				} else if (course.canRegister) {
-					status = "Puede cursar";
+					status = "Puede " + TRANSLATIONS["REGISTER"].toLowerCase();
 					color = "#5555bb";
 				}
 
@@ -94,10 +106,30 @@ let PlanTrackingCustomPage = function ($container, services) {
 						showExtraElectivesButton = `<a href="#" class="show-electives" data-level="${level}">> Mostrar todas</a>`;
 					}
 				}
+
+				let getDependenciesLines = dependencyKind => course.dependencies
+					.filter(dependency => dependency.kind === dependencyKind)
+					.map(dependency => {
+						let line = `${TRANSLATIONS[dependency.requirement]} [${dependency.courseCode}] ${courseNamesByCode[dependency.courseCode] || ""}`;
+						if (hasCourse(dependency.requirement, dependency.courseCode)) line = `<s>${line}</s>`;
+						return line;
+					})
+					.join("<br>");
+
 				return `
 					${hr}
 					${showExtraElectivesButton}
 					<div class="course level-${level} ${divClass}" style="background-color:${color};">
+						<a href="" onclick="return false" style="float: right;">
+							<img src="/imag/help3.png" alt="" />
+							<span class="tooltip" style="text-shadow: none; white-space: nowrap;">
+								<u>Para ${TRANSLATIONS["REGISTER"].toLowerCase()}</u>:<br>
+								${getDependenciesLines("REGISTER")}
+								<br><br>
+								<u>Para ${TRANSLATIONS["TAKE_FINAL_EXAM"].toLowerCase()}</u>:<br>
+								${getDependenciesLines("TAKE_FINAL_EXAM")}
+							</span>
+						</a>
 						<div class="text-small">[${course.courseCode}] ${status ? " - " + status : ""}</div>
 						<div class="text-medium">${course.courseName}</div>
 					</div>`;
