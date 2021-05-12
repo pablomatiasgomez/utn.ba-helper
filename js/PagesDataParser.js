@@ -69,7 +69,7 @@ let PagesDataParser = function (utils, apiConnector) {
 					return {
 						planId: planId,
 						planCode: planCode
-					}
+					};
 				})
 				.filter(plan => !!plan);
 		});
@@ -82,23 +82,14 @@ let PagesDataParser = function (utils, apiConnector) {
 	 * @return {Promise<{signed: Array<String>, passed: Array<String>}>}
 	 */
 	let getPassedCourses = function () {
-		/**
-		 * @returns {Promise<Array<String>>}
-		 */
-		let getCoursesFromPage = page => {
-			return getPageContents(page).then(responseText => {
-				return $(responseText).find(".std-canvas table:first tbody tr:not(:first)")
-					.map((i, elem) => $(elem).find("td:eq(1)").text())
-					.toArray();
-			});
-		};
-
-		return Promise.all([
-			getCoursesFromPage("/alu/acfin.do"),
-			getCoursesFromPage("/alu/actp.do")
-		]).then(results => {
-			let passedCourses = results[0];
-			let signedCourses = [...new Set([...results[1], ...results[0]])];
+		return getPageContents("/alu/hist.do").then(responseText => {
+			let filterByKind = kind => $(responseText).find(".std-canvas table:first tbody tr:not(:first)")
+				.toArray()
+				.filter(tr => $(tr).find("td:eq(0)").text().trim() === kind)
+				.filter(tr => $(tr).find("td:eq(1)").text().trim() === "Aprob")
+				.map(tr => $(tr).find("td:eq(3)").text().trim());
+			let passedCourses = filterByKind("Final");
+			let signedCourses = [...new Set([...passedCourses, ...filterByKind("Cursada")])];
 			return {
 				passed: passedCourses,
 				signed: signedCourses
