@@ -23,7 +23,18 @@
                 "js/siga-helper.min.js"
             ],
             "css": [
-                "css/styles.css"
+                "css/siga-helper.css"
+            ]
+        },
+        {
+            "matches": [
+                "*://*.guarani.frba.utn.edu.ar/*"
+            ],
+            "js": [
+                "js/guarani-helper.min.js"
+            ],
+            "css": [
+                "css/guarani-helper.css"
             ]
         }
     ],

@@ -2,23 +2,33 @@
 
 echo "Building app.."
 
-JS_FILES="\
+BASE_JS_FILES="\
 js/jquery-3.4.1.min.js \
-js/Errors.js \
-js/Utils.js \
-js/ApiConnector.js \
-js/DataCollector.js \
-js/PagesDataParser.js \
-js/pages/HorariosPage.js \
-js/pages/ActasDeFinalesPage.js \
-js/pages/PreInscripcionPopUpPage.js \
-js/pages/PreInscripcionPage.js \
-js/pages/EncuestaDocentePopUpPage.js \
-js/custompages/ProfessorsSearchCustomPage.js \
-js/custompages/CoursesSearchCustomPage.js \
-js/custompages/PlanTrackingCustomPage.js \
-js/custompages/CustomPages.js \
-js/functions.js"
-cat $JS_FILES > js/siga-helper.min.js
+js/ApiConnector.js"
+
+JS_FILES="\
+js/siga/Errors.js \
+js/siga/Utils.js \
+js/siga/DataCollector.js \
+js/siga/PagesDataParser.js \
+js/siga/pages/HorariosPage.js \
+js/siga/pages/ActasDeFinalesPage.js \
+js/siga/pages/PreInscripcionPopUpPage.js \
+js/siga/pages/PreInscripcionPage.js \
+js/siga/pages/EncuestaDocentePopUpPage.js \
+js/siga/custompages/ProfessorsSearchCustomPage.js \
+js/siga/custompages/CoursesSearchCustomPage.js \
+js/siga/custompages/PlanTrackingCustomPage.js \
+js/siga/custompages/CustomPages.js \
+js/siga/main.js"
+cat $BASE_JS_FILES $JS_FILES > js/siga-helper.min.js
+
+JS_FILES="\
+js/guarani/custompages/ProfessorsSearchCustomPage.js \
+js/guarani/custompages/CoursesSearchCustomPage.js \
+js/guarani/custompages/PlanTrackingCustomPage.js \
+js/guarani/custompages/CustomPages.js \
+js/guarani/main.js"
+cat $BASE_JS_FILES $JS_FILES > js/guarani-helper.min.js
 
 echo "Build finished."
