@@ -1,8 +1,12 @@
 (function () {
-	// We only will handle pages if the user is in the /autogestion/grado pages and is logged in
+	// We only will handle pages if:
+	// - the user is in the /autogestion/grado pages
+	// - the user is logged in (they have the name in the navbar)
+	// - there is a profile selector with "Alumno" selected.
 	let isInGradoPage = window.location.pathname.startsWith("/autogestion/grado");
 	let isLoggedIn = $(".user-navbar").length;
-	if (!isInGradoPage || !isLoggedIn) return;
+	let isStudentProfile = $("#js-selector-perfiles .js-texto-perfil").text() === "Perfil: Alumno";
+	if (!isInGradoPage || !isLoggedIn || !isStudentProfile) return;
 
 	// Init pdf.js
 	pdfjsLib.GlobalWorkerOptions.workerSrc = chrome.runtime.getURL("js/pdf.worker.min.js");

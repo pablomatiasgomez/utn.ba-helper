@@ -23,13 +23,15 @@ let PagesDataParser = function (utils, apiConnector) {
 	 */
 	let getAjaxPageContents = function (url, infoId) {
 		return getPageContents(url).then(responseText => {
-			let contents = $(JSON.parse(responseText).cont).filter("script").toArray()
+			let response = JSON.parse(responseText);
+			if (response.cod !== "1") throw `Invalid ajax contents ${responseText}`;
+			let contents = $(response.cont).filter("script").toArray()
 				.map(script => $(script).html())
 				.filter(script => script.startsWith("kernel.renderer.on_arrival"))
 				.map(script => JSON.parse(script.replace("kernel.renderer.on_arrival(", "").replace(");", "")))
 				.filter(data => data.info.id === infoId)
 				.map(data => data.content);
-			if (contents.length !== 1) throw `Found unexpected number of page contents: ${contents.length}. responseText: ${responseText};`;
+			if (contents.length !== 1) throw `Found unexpected number of page contents: ${contents.length}. responseText: ${responseText}`;
 			return contents[0];
 		});
 	};
@@ -58,20 +60,18 @@ let PagesDataParser = function (utils, apiConnector) {
 				.then(contents => {
 					// We will iterate pdf contents one by one, validating the structure.
 					let i = 0;
-					let expectedContents = ["", "COMPROBANTE DE INSCRIPCIÓN A CURSADA"];
-					expectedContents.forEach(expectedContent => {
-						if (contents[i++] !== expectedContent) throw `Invalid pdf contents (${i}): ${contents}`;
+					let validateExpectedContents = expectedContents => expectedContents.forEach(expectedContent => {
+						if (contents[i++] !== expectedContent) throw `Invalid pdf contents (${i - 1}): ${JSON.stringify(contents)}`;
 					});
 
+					validateExpectedContents(["", "COMPROBANTE DE INSCRIPCIÓN A CURSADA"]);
+
 					let studentIdAndName = contents[i++];
-					let groups = /^(\d{3}\.\d{3}-\d) ([\w, ]+)$/.exec(studentIdAndName);
+					let groups = /^(\d{3}\.\d{3}-\d) ([\w, À-ú]+)$/.exec(studentIdAndName);
 					if (!groups) throw `Couldn't parse studentIdAndName: ${studentIdAndName}`;
 					let studentId = groups[1];
 
-					expectedContents = ["Código", "Actividad", "Período", "Comisión", "Ubicación", "Aula", "Horario"];
-					expectedContents.forEach(expectedContent => {
-						if (contents[i++] !== expectedContent) throw `Invalid pdf contents (${i}): ${contents}`;
-					});
+					validateExpectedContents(["Código", "Actividad", "Período", "Comisión", "Ubicación", "Aula", "Horario"]);
 
 					// After class schedules row, the this is the following text so we know where to stop.
 					let classSchedules = [];
@@ -82,12 +82,14 @@ let PagesDataParser = function (utils, apiConnector) {
 						let classCode = contents[i++];
 						let branch = contents[i++].toUpperCase().replace(" ", "_");  // CAMPUS, MEDRANO, AULA_VIRTUAL
 						i++; // ClassRoomnumber
-						let schedules = utils.getSchedulesFromString(contents[i++]);
+						let schedulesStr = contents[i++];
 
 						groups = /^((1|2)(?:er|do) Cuat|Anual) (\d{4})$/.exec(yearAndQuarter);
 						if (!groups) throw "Class time couldn't be parsed: " + yearAndQuarter;
 						let quarter = (groups[1] === "Anual") ? "A" : (groups[2] + "C"); // A, 1C, 2C
 						let year = parseInt(groups[3]);
+
+						let schedules = schedulesStr === "Sin definir" ? null : utils.getSchedulesFromString(schedulesStr);
 
 						classSchedules.push({
 							year: year,
@@ -120,9 +122,9 @@ let PagesDataParser = function (utils, apiConnector) {
 		return getAjaxPageContents("/autogestion/grado/historia_academica/?checks=PromocionA,RegularidadA,RegularidadR,RegularidadU,EnCurso,ExamenA,ExamenR,ExamenU,EquivalenciaA,EquivalenciaR,AprobResA,CreditosA,&modo=anio&param_modo=&e_cu=A&e_ex=A&e_re=A", "info_historia").then(responseText => {
 			let dates = $(responseText).find(".catedra_nombre span").toArray()
 				.map(span => {
-					let rowText = $(span).text().trim();
-					let groups = /^(En curso|Regularidad|Promoción|Examen)  - (Inicio de dictado|\d{1,2} \(\w+\) (?:Promocionado|Aprobado|Reprobado)|No aprobad \(No aprobada\) Reprobado|Aprobada \(Aprobada\) Aprobado) (\d{2}\/\d{2}\/\d{4})/.exec(rowText);
-					if (!groups) throw "History row couldn't be parsed: " + rowText;
+					let historyRow = $(span).text().trim();
+					let groups = /^(En curso|Regularidad|Promoción|Examen)  - (Inicio de dictado|\d{1,2} \(\w+\) (?:Promocionado|Aprobado|Reprobado)|No aprobad \(No aprobada\) Reprobado|Aprobada \(Aprobada\) Aprobado|Ausente) (\d{2}\/\d{2}\/\d{4})/.exec(historyRow);
+					if (!groups) throw `historyRow couldn't be parsed: ${historyRow}`;
 					return utils.parseDate(groups[3]);
 				})
 				.sort((a, b) => a - b);
@@ -177,20 +179,19 @@ let PagesDataParser = function (utils, apiConnector) {
 			let passedCourses = [];
 			let signedCourses = [];
 
-			$(responseText).find(".catedra_nombre ").toArray()
+			$(responseText).find(".catedra_nombre").toArray()
 				.forEach(item => {
 					let courseText = $(item).find("h4").text();
 					let groups = /\((\d{6})\)/.exec(courseText);
 					if (!groups) throw "courseText couldn't be parsed: " + courseText;
 					let courseCode = groups[1];
 
-					let rowText = $(item).find("span").text().trim();
-					groups = /^(En curso|Regularidad|Promoción|Examen)  - (Inicio de dictado|\d{1,2} \(\w+\) (?:Promocionado|Aprobado|Reprobado)|No aprobad \(No aprobada\) Reprobado|Aprobada \(Aprobada\) Aprobado) (\d{2}\/\d{2}\/\d{4})/.exec(rowText);
-					if (!groups) throw "rowText couldn't be parsed: " + rowText;
-
+					let historyRow = $(item).find("span").text().trim();
+					groups = /^(En curso|Regularidad|Promoción|Examen)  - (Inicio de dictado|\d{1,2} \(\w+\) (?:Promocionado|Aprobado|Reprobado)|No aprobad \(No aprobada\) Reprobado|Aprobada \(Aprobada\) Aprobado|Ausente) (\d{2}\/\d{2}\/\d{4})/.exec(historyRow);
+					if (!groups) throw `historyRow couldn't be parsed: ${historyRow}`;
 					let type = groups[1]; // (En curso|Regularidad|Promoción|Examen)
-					let grade = groups[2]; // (Inicio de dictado|\d{1,2} \(\w+\) (?:Promocionado|Aprobado|Reprobado)|No aprobad \(No aprobada\) Reprobado|Aprobada \(Aprobada\) Aprobado)
-					let isPassedGrade = grade.includes("Promocionado") || grade.includes("Aprobado");
+					let grade = groups[2]; // (Inicio de dictado|\d{1,2} \(\w+\) (?:Promocionado|Aprobado|Reprobado)|No aprobad \(No aprobada\) Reprobado|Aprobada \(Aprobada\) Aprobado|Ausente)
+					let isPassedGrade = (grade.includes("Promocionado") || grade.includes("Aprobado")) && !grade.includes("No aprobad");
 
 					if (isPassedGrade) {
 						if (type === "Promoción" || type === "Examen") {
