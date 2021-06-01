@@ -12,7 +12,7 @@
 	let handler = null;
 
 	let utils = new Utils();
-	let apiConnector = new ApiConnector();
+	let apiConnector = new ApiConnector("siga");
 	let pagesDataParser = new PagesDataParser(utils, apiConnector);
 	let dataCollector = new DataCollector(pagesDataParser, apiConnector);
 	let customPages = new CustomPages(pagesDataParser, utils, apiConnector);
