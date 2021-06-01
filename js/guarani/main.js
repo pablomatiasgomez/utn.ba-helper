@@ -23,11 +23,7 @@
 	}
 
 	const PAGE_HANDLERS = {
-		"/alu/horarios.do": () => HorariosPage(utils),
-		"/alu/acfin.do": () => ActasDeFinalesPage(pagesDataParser, dataCollector, utils),
-		"/alu/preins.do": () => PreInscripcionPage(pagesDataParser, utils),
-		"/alu/preinscolas.do": () => PreInscripcionPopUpPage(utils, apiConnector),
-		"/alu/encdocpop.do": () => EncuestaDocentePopUpPage(dataCollector),
+		// TODO
 	};
 
 	handler = handler || PAGE_HANDLERS[window.location.pathname];
