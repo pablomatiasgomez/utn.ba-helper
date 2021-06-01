@@ -76,20 +76,21 @@ let PagesDataParser = function (utils, apiConnector) {
 					// After class schedules row, the this is the following text so we know where to stop.
 					let classSchedules = [];
 					while (contents[i] !== "Firma y Sello Departamento") {
-						let courseCode = contents[i++];
-						let courseName = contents[i++];
-						let yearAndQuarter = contents[i++]; // e.g.: 1er Cuat 2021
-						let classCode = contents[i++];
-						let branch = contents[i++].toUpperCase().replace(" ", "_");  // CAMPUS, MEDRANO, AULA_VIRTUAL
-						i++; // ClassRoomnumber
-						let schedulesStr = contents[i++];
+						let courseCode = contents[i++];									// e.g.: 950701
+						let courseName = contents[i++];									// e.g.: Fisica I
+						let yearAndQuarter = contents[i++]; 							// e.g.: 1er Cuat 2021
+						let classCode = contents[i++].toUpperCase();					// e.g.: Z1154
+						let branch = contents[i++].toUpperCase().replace(" ", "_");  	// e.g.: CAMPUS, MEDRANO, AULA_VIRTUAL
+						i++; 															// (ClassRoomnumber) e.g.: "Sin definir"
+						let schedulesStr = contents[i++];								// e.g.: Lu(n)1:5 Mi(n)0:2
 
 						groups = /^((1|2)(?:er|do) Cuat|Anual) (\d{4})$/.exec(yearAndQuarter);
-						if (!groups) throw "Class time couldn't be parsed: " + yearAndQuarter;
+						if (!groups) throw `Class time couldn't be parsed: ${yearAndQuarter}. PdfContents: ${JSON.stringify(contents)}`;
 						let quarter = (groups[1] === "Anual") ? "A" : (groups[2] + "C"); // A, 1C, 2C
 						let year = parseInt(groups[3]);
 
-						let schedules = schedulesStr === "Sin definir" ? null : utils.getSchedulesFromString(schedulesStr);
+						// Sundays is not a valid day, not sure why this is happening, but ignoring..
+						let schedules = schedulesStr === "Do(m)0:0" ? null : utils.getSchedulesFromString(schedulesStr);
 
 						classSchedules.push({
 							year: year,

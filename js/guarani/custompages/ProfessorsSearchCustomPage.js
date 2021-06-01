@@ -22,7 +22,7 @@ let ProfessorsSearchCustomPage = function ($container, services) {
 	let createPage = function () {
 		$searchDiv = $("<div></div>");
 		$searchDiv.append(`<span class="bold">Buscar docente: </span>`);
-		let $searchTxt = $(`<input type="text" placeholder="Minimo 3 caracteres..." />`);
+		let $searchTxt = $(`<input type="text" style="margin: 0 5px 0 0;" placeholder="Minimo 3 caracteres..." />`);
 		$searchTxt.on("keydown", function (e) {
 			if (e.key === "Enter") {
 				search($searchTxt.val());
@@ -30,7 +30,7 @@ let ProfessorsSearchCustomPage = function ($container, services) {
 			}
 		});
 		$searchDiv.append($searchTxt);
-		let $searchBtn = $(`<a href="#">Buscar</a>`);
+		let $searchBtn = $(`<a href="#" class="btn btn-info btn-small">Buscar</a>`);
 		$searchBtn.on("click", function () {
 			search($searchTxt.val());
 			return false;
