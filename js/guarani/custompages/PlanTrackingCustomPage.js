@@ -136,7 +136,7 @@ let PlanTrackingCustomPage = function ($container, services) {
 		let tds = levels.map(level => `<td>${getCoursesHtml(level)}</td>`).join("");
 		$plan.html(`
 			<h3>Plan ${planCode}</h3>
-			<table class="plan-tracking table table-bordered table-condensed">
+			<table class="plan-tracking table table-bordered table-condensed table-hover">
 				<tbody>
 					<tr>${ths}</tr>
 					<tr>${tds}</tr>

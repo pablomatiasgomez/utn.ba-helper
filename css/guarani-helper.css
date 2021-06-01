@@ -20,9 +20,9 @@
 	vertical-align: middle;
 }
 
-.utnba-helper table tr:first-child {
-	background-color: #707070;
-	color: #fff;
+.utnba-helper table tr:first-child > th {
+	background-color: #707070 !important;
+	color: #fff !important;
 }
 
 .utnba-helper ul.no-margin {
