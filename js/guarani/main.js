@@ -1,14 +1,18 @@
 (function () {
-	// We only will handle pages if the user is in the /grado pages
+	// We only will handle pages if the user is in the /autogestion/grado pages and is logged in
 	let isInGradoPage = window.location.pathname.startsWith("/autogestion/grado");
-	if (!isInGradoPage) return;
+	let isLoggedIn = $(".user-navbar").length;
+	if (!isInGradoPage || !isLoggedIn) return;
+
+	// Init pdf.js
+	pdfjsLib.GlobalWorkerOptions.workerSrc = chrome.runtime.getURL("js/pdf.worker.min.js");
 
 	let handler = null;
 
-	let utils = null; // TODO new Utils();
+	let utils = new Utils();
 	let apiConnector = new ApiConnector();
-	let pagesDataParser = null;// TODO new PagesDataParser(utils, apiConnector);
-	let dataCollector = null;// TODO new DataCollector(pagesDataParser, apiConnector);
+	let pagesDataParser = new PagesDataParser(utils, apiConnector);
+	let dataCollector = new DataCollector(pagesDataParser, apiConnector);
 	let customPages = new CustomPages(pagesDataParser, utils, apiConnector);
 
 	customPages.appendMenu();
@@ -33,7 +37,24 @@
 		return apiConnector.logMessage("Handle page " + window.location.pathname, true, utils.stringifyError(e));
 	});
 
+	pagesDataParser.getStudentId().then(studentId => {
+		$(".user-navbar").append(`
+			<div style="margin: -10px 10px 0px 0; float: right; clear: right;">
+				Legajo: ${studentId}<br>
+				<span class="powered-by-utnba-helper"></span>
+			</div>`);
+	}).catch(e => {
+		console.error("Error while adding studentId to header", e);
+		return apiConnector.logMessage("addStudentIdToHeader", true, utils.stringifyError(e));
+	}).then(() => {
+		return dataCollector.collectBackgroundDataIfNeeded();
+	}).catch(e => {
+		console.error("Error while collecting background data", e);
+		return apiConnector.logMessage("collectBackgroundDataIfNeeded", true, utils.stringifyError(e));
+	});
 
-	// TODO add powered by.
+	$("body").on("click", ".powered-by-utnba-helper", function () {
+		window.open("https://chrome.google.com/webstore/detail/siga-helper/jdgdheoeghamkhfppapjchbojhehimpe", "_blank");
+	});
 
 })();

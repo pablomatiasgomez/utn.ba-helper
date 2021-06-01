@@ -9,19 +9,10 @@ let PlanTrackingCustomPage = function ($container, services) {
 
 	let $plan;
 
-	let createPage = function (planCodes, passedCourses) {
-		let $planSelect = $(`<select><option value="">Seleccionar plan</option></select>`);
-		planCodes.forEach(planCode => $planSelect.append(`<option value="${planCode}">${planCode}</option>`));
-		$planSelect.on("change", function () {
-			loadPlan($planSelect.val(), passedCourses);
-			return false;
-		});
-
-		$container.append($(`<div>Plan de estudios </div>`).append($planSelect));
-		$container.append("<hr>");
-
+	let createPage = function (planCode, passedCourses) {
 		$plan = $("<div></div>");
 		$container.append($plan);
+		loadPlan(planCode, passedCourses);
 	};
 
 	let loadPlan = function (planCode, passedCourses) {
@@ -121,8 +112,8 @@ let PlanTrackingCustomPage = function ($container, services) {
 					${showExtraElectivesButton}
 					<div class="course level-${level} ${divClass}" style="background-color:${color};">
 						<a href="" onclick="return false" style="float: right;">
-							<img src="/imag/help3.png" alt="" />
-							<span class="tooltip" style="text-shadow: none; white-space: nowrap;">
+							<i class="icon-info-sign"></i>
+							<span class="dependency-tooltip">
 								<u>Para ${TRANSLATIONS["REGISTER"].toLowerCase()}</u>:<br>
 								${getDependenciesLines("REGISTER")}
 								<br><br>
@@ -144,8 +135,8 @@ let PlanTrackingCustomPage = function ($container, services) {
 		let ths = levels.map(level => `<th>Nivel ${level}</th>`).join("");
 		let tds = levels.map(level => `<td>${getCoursesHtml(level)}</td>`).join("");
 		$plan.html(`
-			<p>Plan ${planCode}</p>
-			<table class="siga-helper-plan">
+			<h3>Plan ${planCode}</h3>
+			<table class="plan-tracking table table-bordered table-condensed">
 				<tbody>
 					<tr>${ths}</tr>
 					<tr>${tds}</tr>
@@ -164,13 +155,13 @@ let PlanTrackingCustomPage = function ($container, services) {
 	// Init
 	return Promise.resolve().then(() => {
 		return Promise.all([
-			services.pagesDataParser.getStudentPlans(),
+			services.pagesDataParser.getStudentPlanCode(),
 			services.pagesDataParser.getPassedCourses(),
 		]);
 	}).then(result => {
-		let planCodes = result[0].map(plan => plan.planCode);
+		let planCode = result[0];
 		let passedCourses = result[1];
-		return createPage(planCodes, passedCourses);
+		return createPage(planCode, passedCourses);
 	});
 };
 

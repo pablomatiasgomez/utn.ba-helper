@@ -41,8 +41,8 @@ let ProfessorsSearchCustomPage = function ($container, services) {
 
 		$searchResultsDiv = $(`<div></div>`);
 		$searchResultsDiv.hide();
-		$searchResultsDiv.append("<p>Resultados de busqueda:</p>");
-		let $searchResultsTable = $(`<table></table>`).append("<tbody></tbody>");
+		$searchResultsDiv.append("<h2>Resultados de busqueda</h2>");
+		let $searchResultsTable = $(`<table class="table table-bordered table-condensed"></table>`).append("<tbody></tbody>");
 		$searchResultsTable.on("click", "a", function () {
 			let professorName = $(this).text();
 			retrieveProfessorData(professorName);
@@ -80,14 +80,14 @@ let ProfessorsSearchCustomPage = function ($container, services) {
 		$professorResultsTitleDiv.hide();
 		$coursesResultDiv.hide();
 		$surveyResultDiv.hide();
-	}
+	};
 
 	let retrieveProfessorData = function (professorName) {
 		$professorResultsTitleDiv.show().get(0).scrollIntoView({behavior: "smooth"});
-		$professorResultsTitleDiv.html(`<div class="tit1" style="text-align: center;">Resultados para ${professorName}:</div><hr>`);
+		$professorResultsTitleDiv.html(`<h2 style="text-align: center;">Resultados para ${professorName}:</h2><hr>`);
 		retrieveProfessorCourses(professorName);
 		retrieveSurveyResults(professorName);
-	}
+	};
 
 	let retrieveProfessorCourses = function (professorName) {
 		$coursesResultDiv.hide();
@@ -101,7 +101,7 @@ let ProfessorsSearchCustomPage = function ($container, services) {
 				return `<tr>
 					<td>${classSchedule.year}</td>
 					<td>${classSchedule.quarter}</td>
-					<td><a href="${CustomPages.getCourseResultsUrl(classSchedule.courseCode)}" target="_blank">${classSchedule.courseName}</a></td>
+					<td><a class="no-ajax" href="${CustomPages.getCourseResultsUrl(classSchedule.courseCode)}" target="_blank">${classSchedule.courseName}</a></td>
 					<td>${classSchedule.classCode}</td>
 					<td>${classSchedule.branch || "-"}</td>
 					<td>${services.utils.getTimeInfoStringFromSchedules(classSchedule.schedules)}</td>
@@ -109,8 +109,8 @@ let ProfessorsSearchCustomPage = function ($container, services) {
 				</tr>`;
 			}).join("");
 			$coursesResultDiv.append(`
-				<p>Ultimos cursos en los que estuvo presente:</p>
-				<table>
+				<h3>Ultimos cursos en los que estuvo presente:</h3>
+				<table class="table table-bordered table-condensed">
 					<tbody>
 						<tr><th colspan="2">Cuatr.</th><th>Materia</th><th>Curso</th><th>Anexo</th><th>Horario</th><th>Profesores</th></tr>
 						${trs}
@@ -135,15 +135,15 @@ let ProfessorsSearchCustomPage = function ($container, services) {
 	};
 
 	let appendSurveyResults = function (surveyKind, results) {
-		$surveyResultDiv.append(`<p>Encuesta de tipo: ${surveyKind}</p>`);
+		$surveyResultDiv.append(`<h3>Encuesta de tipo: ${surveyKind}</h3>`);
 
 		if (results.percentageFields.length) {
 			let percetangeRows = results.percentageFields.map(item => {
 				return `<tr><td>${item.question}</td><td style="background-color: ${services.utils.getColorForAvg(item.average)}">${item.average}</td><td>${item.count}</td></tr>`;
 			}).join("");
 			$surveyResultDiv.append(`
-				<p>Puntaje general: ${services.utils.getOverallScoreSpan(results.overallScore)}</p>
-				<table class="percentage-questions">
+				<h4>Puntaje general: ${services.utils.getOverallScoreSpan(results.overallScore)}</h4>
+				<table class="percentage-questions table table-bordered table-condensed">
 					<tbody>
 						<tr><th>Pregunta</th><th>Promedio</th><th>Muestra</th></tr>
 						${percetangeRows}
@@ -159,8 +159,8 @@ let ProfessorsSearchCustomPage = function ($container, services) {
 				return `<td style="color: ${TEXT_QUESTIONS[question]}">${answers}</td>`;
 			}).join("");
 			$surveyResultDiv.append(`
-				<p>Comentarios:</p>
-				<table class="text-questions" style="table-layout: fixed; width: 100%;">
+				<h4>Comentarios:</h4>
+				<table class="text-questions table table-bordered table-condensed" style="table-layout: fixed; width: 100%;">
 					<tbody>
 						<tr>${textQuestions.map(question => `<th>${question}</th>`).join("")}</tr>
 						<tr>${textColumns}</tr>
