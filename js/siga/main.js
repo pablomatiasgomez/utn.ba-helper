@@ -1,9 +1,3 @@
-if (!Array.prototype.hasOwnProperty("flatMap")) {
-	Array.prototype.flatMap = function (fn) {
-		return Array.prototype.concat.apply([], this.map(fn));
-	};
-}
-
 (function () {
 	// We only will handle pages if the user is logged in, and has access to student's stuff, so we check:
 	// - For normal pages:
@@ -18,7 +12,7 @@ if (!Array.prototype.hasOwnProperty("flatMap")) {
 	let handler = null;
 
 	let utils = new Utils();
-	let apiConnector = new ApiConnector();
+	let apiConnector = new ApiConnector("siga");
 	let pagesDataParser = new PagesDataParser(utils, apiConnector);
 	let dataCollector = new DataCollector(pagesDataParser, apiConnector);
 	let customPages = new CustomPages(pagesDataParser, utils, apiConnector);

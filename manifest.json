@@ -3,9 +3,9 @@
 
     "name": "Siga Helper",
     "short_name": "SigaHelper",
-    "version": "4.4.2",
+    "version": "5.0.1",
 
-    "description": "Extensión que agrega features sobre el SIGA de la UTN - FRBA, como por ejemplo el peso academico y el promedio de finales rendidos.",
+    "description": "Extensión que agrega una serie de features sobre la web de la UTN - FRBA.",
     "author": "Pablo Matías Gomez",
 
     "icons": {
@@ -23,9 +23,23 @@
                 "js/siga-helper.min.js"
             ],
             "css": [
-                "css/styles.css"
+                "css/siga-helper.css"
+            ]
+        },
+        {
+            "matches": [
+                "*://*.guarani.frba.utn.edu.ar/*"
+            ],
+            "js": [
+                "js/guarani-helper.min.js"
+            ],
+            "css": [
+                "css/guarani-helper.css"
             ]
         }
+    ],
+    "web_accessible_resources": [
+        "js/pdf.worker.min.js"
     ],
 
     "background": {
