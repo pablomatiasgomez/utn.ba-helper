@@ -111,7 +111,7 @@ let PlanTrackingCustomPage = function ($container, services) {
 					${hr}
 					${showExtraElectivesButton}
 					<div class="course level-${level} ${divClass}" style="background-color:${color};">
-						<a href="" onclick="return false" style="float: right;">
+						<a href="#" onclick="return false" style="float: right;">
 							<i class="icon-info-sign"></i>
 							<span class="dependency-tooltip">
 								<u>Para ${TRANSLATIONS["REGISTER"].toLowerCase()}</u>:<br>

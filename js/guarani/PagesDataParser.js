@@ -67,7 +67,7 @@ let PagesDataParser = function (utils, apiConnector) {
 					validateExpectedContents(["", "COMPROBANTE DE INSCRIPCIÓN A CURSADA"]);
 
 					let studentIdAndName = contents[i++];
-					let groups = /^(\d{3}\.\d{3}-\d) ([\w, À-ú]+)$/.exec(studentIdAndName);
+					let groups = /^(\d{3}\.\d{3}-\d) (.*)$/.exec(studentIdAndName);
 					if (!groups) throw `Couldn't parse studentIdAndName: ${studentIdAndName}`;
 					let studentId = groups[1];
 
@@ -76,20 +76,21 @@ let PagesDataParser = function (utils, apiConnector) {
 					// After class schedules row, the this is the following text so we know where to stop.
 					let classSchedules = [];
 					while (contents[i] !== "Firma y Sello Departamento") {
-						let courseCode = contents[i++];
-						let courseName = contents[i++];
-						let yearAndQuarter = contents[i++]; // e.g.: 1er Cuat 2021
-						let classCode = contents[i++];
-						let branch = contents[i++].toUpperCase().replace(" ", "_");  // CAMPUS, MEDRANO, AULA_VIRTUAL
-						i++; // ClassRoomnumber
-						let schedulesStr = contents[i++];
+						let courseCode = contents[i++];									// e.g.: 950701
+						let courseName = contents[i++];									// e.g.: Fisica I
+						let yearAndQuarter = contents[i++]; 							// e.g.: 1er Cuat 2021
+						let classCode = contents[i++].toUpperCase();					// e.g.: Z1154
+						let branch = contents[i++].toUpperCase().replace(" ", "_");  	// e.g.: CAMPUS, MEDRANO, AULA_VIRTUAL
+						i++; // (ClassRoomnumber)										// e.g.: "Sin definir", "2"
+						let schedulesStr = contents[i++];								// e.g.: Lu(n)1:5 Mi(n)0:2
 
 						groups = /^((1|2)(?:er|do) Cuat|Anual) (\d{4})$/.exec(yearAndQuarter);
-						if (!groups) throw "Class time couldn't be parsed: " + yearAndQuarter;
+						if (!groups) throw `Class time couldn't be parsed: ${yearAndQuarter}. PdfContents: ${JSON.stringify(contents)}`;
 						let quarter = (groups[1] === "Anual") ? "A" : (groups[2] + "C"); // A, 1C, 2C
 						let year = parseInt(groups[3]);
 
-						let schedules = schedulesStr === "Sin definir" ? null : utils.getSchedulesFromString(schedulesStr);
+						// Sundays is not a valid day, not sure why this is happening, but ignoring..
+						let schedules = schedulesStr === "Do(m)0:0" ? null : utils.getSchedulesFromString(schedulesStr);
 
 						classSchedules.push({
 							year: year,
@@ -115,29 +116,8 @@ let PagesDataParser = function (utils, apiConnector) {
 	};
 
 	/**
-	 * Tries to resolve the starting year in the university for the current student.
-	 * @return {Promise<String>}
-	 */
-	let getStartYear = function () {
-		return getAjaxPageContents("/autogestion/grado/historia_academica/?checks=PromocionA,RegularidadA,RegularidadR,RegularidadU,EnCurso,ExamenA,ExamenR,ExamenU,EquivalenciaA,EquivalenciaR,AprobResA,CreditosA,&modo=anio&param_modo=&e_cu=A&e_ex=A&e_re=A", "info_historia").then(responseText => {
-			let dates = $(responseText).find(".catedra_nombre span").toArray()
-				.map(span => {
-					let historyRow = $(span).text().trim();
-					let groups = /^(En curso|Regularidad|Promoción|Examen)  - (Inicio de dictado|\d{1,2} \(\w+\) (?:Promocionado|Aprobado|Reprobado)|No aprobad \(No aprobada\) Reprobado|Aprobada \(Aprobada\) Aprobado|Ausente) (\d{2}\/\d{2}\/\d{4})/.exec(historyRow);
-					if (!groups) throw `historyRow couldn't be parsed: ${historyRow}`;
-					return utils.parseDate(groups[3]);
-				})
-				.sort((a, b) => a - b);
-			return dates[0].getFullYear();
-		}).catch(e => {
-			trackError(e, "getStartYear");
-			return null;
-		});
-	};
-
-	/**
 	 * Tries to resolve and return the student id for the current logged in user.
-	 * @return {Promise<String>}
+	 * @returns {Promise<String>}
 	 */
 	let getStudentId = function () {
 		return parseCurrentClassSchedules().then(response => response.studentId);
@@ -146,7 +126,7 @@ let PagesDataParser = function (utils, apiConnector) {
 	/**
 	 * Fetches the current classes that the student is having in order to know the schedules of them.
 	 * Also used to complete the grid when registering to new classes
-	 * @return an array of objects for each class, that contains the schedule for it.
+	 * @returns {Promise<Array<{}>>} array of objects for each class, that contains the schedule for it.
 	 */
 	let getClassSchedules = function () {
 		return parseCurrentClassSchedules().then(response => response.classSchedules);
@@ -154,7 +134,7 @@ let PagesDataParser = function (utils, apiConnector) {
 
 	/**
 	 * The student's current plan code as shown in the /autogestion/grado/plan_estudio page.
-	 * @return {Promise<String>}
+	 * @returns {Promise<string>}
 	 */
 	let getStudentPlanCode = function () {
 		return getAjaxPageContents("/autogestion/grado/plan_estudio", "info_plan").then(responseText => {
@@ -169,42 +149,87 @@ let PagesDataParser = function (utils, apiConnector) {
 	};
 
 	/**
-	 * Gets all the courses that the student has taken, not including the failed ones.
-	 * The returned object contains the signed courses, which includes the ones that have also been passed.
-	 * All the passed courses are also included in a different proeprty.
-	 * @return {Promise<{signed: Array<String>, passed: Array<String>}>}
+	 * Parses all the student's academic history. Only includes approved courses, either signed or passed.
+	 * @returns {Promise<{courseCode: String, type: String, date: Date }[]>}
 	 */
-	let getPassedCourses = function () {
-		return getAjaxPageContents("/autogestion/grado/historia_academica/?checks=PromocionA,RegularidadA,RegularidadR,RegularidadU,EnCurso,ExamenA,ExamenR,ExamenU,EquivalenciaA,EquivalenciaR,AprobResA,CreditosA,&modo=anio&param_modo=&e_cu=A&e_ex=A&e_re=A", "info_historia").then(responseText => {
-			let passedCourses = [];
-			let signedCourses = [];
+	let parseAcademicHistory = function () {
+		const typesMap = {
+			"En curso": null,
+			"Regularidad": "SIGNED",
+			"Promoción": "PASSED",
+			"Examen": "PASSED",
+			"Equivalencia Parcial": "SIGNED",
+			"Equivalencia Total": "PASSED",
+		};
+		const gradesRegex = [
+			/Inicio de dictado/,
+			/\d{1,2} \(\w+\) (?:Promocionado|Aprobado|Reprobado)/,
+			/No aprobad \(No aprobada\) Reprobado/,
+			/Aprobada \(Aprobada\) Aprobado/,
+			/Ausente/,
+		];
+		const dateRegex = /\d{2}\/\d{2}\/\d{4}/;
+		const historyRowRegex = new RegExp(`^(${Object.keys(typesMap).join("|")}) {1,2}- (${gradesRegex.map(i => i.source).join("|")}) (${dateRegex.source}) - .*Detalle$`);
 
-			$(responseText).find(".catedra_nombre").toArray()
-				.forEach(item => {
+		return getAjaxPageContents("/autogestion/grado/historia_academica/?checks=PromocionA,RegularidadA,RegularidadR,RegularidadU,EnCurso,ExamenA,ExamenR,ExamenU,EquivalenciaA,EquivalenciaR,AprobResA,CreditosA,&modo=anio&param_modo=&e_cu=A&e_ex=A&e_re=A", "info_historia").then(responseText => {
+			return $(responseText).find(".catedra_nombre").toArray()
+				.map(item => {
 					let courseText = $(item).find("h4").text();
 					let groups = /\((\d{6})\)/.exec(courseText);
 					if (!groups) throw "courseText couldn't be parsed: " + courseText;
 					let courseCode = groups[1];
 
 					let historyRow = $(item).find("span").text().trim();
-					groups = /^(En curso|Regularidad|Promoción|Examen)  - (Inicio de dictado|\d{1,2} \(\w+\) (?:Promocionado|Aprobado|Reprobado)|No aprobad \(No aprobada\) Reprobado|Aprobada \(Aprobada\) Aprobado|Ausente) (\d{2}\/\d{2}\/\d{4})/.exec(historyRow);
+					groups = historyRowRegex.exec(historyRow);
 					if (!groups) throw `historyRow couldn't be parsed: ${historyRow}`;
-					let type = groups[1]; // (En curso|Regularidad|Promoción|Examen)
-					let grade = groups[2]; // (Inicio de dictado|\d{1,2} \(\w+\) (?:Promocionado|Aprobado|Reprobado)|No aprobad \(No aprobada\) Reprobado|Aprobada \(Aprobada\) Aprobado|Ausente)
-					let isPassedGrade = (grade.includes("Promocionado") || grade.includes("Aprobado")) && !grade.includes("No aprobad");
+					let type = typesMap[groups[1]];
+					let grade = groups[2];
+					let isApprovedGrade = (grade.includes("Promocionado") || grade.includes("Aprobad")) && !grade.includes("No aprobad");
+					let date = utils.parseDate(groups[3]);
 
-					if (isPassedGrade) {
-						if (type === "Promoción" || type === "Examen") {
-							passedCourses.push(courseCode);
-							signedCourses.push(courseCode);
-						} else if (type === "Regularidad") {
-							signedCourses.push(courseCode);
-						}
-					}
-				});
+					// Not considering non approved grades for now..
+					if (!isApprovedGrade) return null;
+					return {
+						courseCode: courseCode,
+						type: type,
+						date: date,
+					};
+				})
+				.filter(course => !!course);
+		}).catch(e => {
+			trackError(e, "parseAcademicHistory");
+			throw e;
+		});
+	};
 
-			// Remove duplicates
-			signedCourses = [...new Set(signedCourses)];
+	/**
+	 * Tries to resolve the starting year in the university for the current student.
+	 * @returns {Promise<String>}
+	 */
+	let getStartYear = function () {
+		return parseAcademicHistory().then(courseHistory => {
+			return courseHistory
+				.map(course => course.date)
+				.sort((a, b) => a - b)
+				.map(date => date.getFullYear())
+				[0];
+		}).catch(e => {
+			trackError(e, "getStartYear");
+			return null;
+		});
+	};
+
+	/**
+	 * Gets all the courses that the student has taken, not including the failed ones.
+	 * The returned object contains the signed courses, which includes the ones that have also been passed.
+	 * All the passed courses are also included in a different proeprty.
+	 * @returns {Promise<{signed: String[], passed: String[]}>}
+	 */
+	let getPassedCourses = function () {
+		return parseAcademicHistory().then(coursesHistory => {
+			// For signed courses we condier both passed and signed, and remove duplicates.
+			let signedCourses = [...new Set(coursesHistory.map(course => course.courseCode))];
+			let passedCourses = coursesHistory.filter(course => course.type === "PASSED").map(course => course.courseCode);
 			return {
 				passed: passedCourses,
 				signed: signedCourses
@@ -218,13 +243,16 @@ let PagesDataParser = function (utils, apiConnector) {
 	/**
 	 * Fetches all the current surveys that the user has to take o has taken.
 	 * For each of them resolves the current professor name, class, course, quarter, etc.
-	 * @return an array of class schedules for each combination of professor and class
+	 * @returns {Promise<*[]>} an array of class schedules for each combination of professor and class
 	 */
 	let getProfessorClassesFromSurveys = function () {
 		// TODO parse this information once we know where it is.
 		return Promise.resolve([]);
 	};
 
+	/**
+	 * @returns {Promise<*[]>} an array of taken surveys
+	 */
 	let getTakenSurveys = function () {
 		// TODO parse this information once we know where it is.
 		return Promise.resolve([]);
