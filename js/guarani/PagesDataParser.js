@@ -67,7 +67,7 @@ let PagesDataParser = function (utils, apiConnector) {
 					validateExpectedContents(["", "COMPROBANTE DE INSCRIPCIÓN A CURSADA"]);
 
 					let studentIdAndName = contents[i++];
-					let groups = /^(\d{3}\.\d{3}-\d) ([\w, À-ú]+)$/.exec(studentIdAndName);
+					let groups = /^(\d{3}\.\d{3}-\d) (.*)$/.exec(studentIdAndName);
 					if (!groups) throw `Couldn't parse studentIdAndName: ${studentIdAndName}`;
 					let studentId = groups[1];
 
