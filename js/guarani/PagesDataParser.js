@@ -184,10 +184,11 @@ let PagesDataParser = function (utils, apiConnector) {
 					if (!groups) throw `historyRow couldn't be parsed: ${historyRow}`;
 					let type = typesMap[groups[1]];
 					let grade = groups[2];
-					let isPassedGrade = (grade.includes("Promocionado") || grade.includes("Aprobad")) && !grade.includes("No aprobad");
+					let isApprovedGrade = (grade.includes("Promocionado") || grade.includes("Aprobad")) && !grade.includes("No aprobad");
 					let date = utils.parseDate(groups[3]);
 
-					if (!isPassedGrade) return null;
+					// Not considering non approved grades for now..
+					if (!isApprovedGrade) return null;
 					return {
 						courseCode: courseCode,
 						type: type,
