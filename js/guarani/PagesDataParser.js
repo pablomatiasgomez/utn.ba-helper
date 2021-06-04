@@ -110,7 +110,7 @@ let PagesDataParser = function (utils, apiConnector) {
 
 				let schedulesStr = contents[i++];								// e.g.: Lu(n)1:5 Mi(n)0:2
 				// Sundays is not a valid day, not sure why this is happening, but ignoring..
-				let schedules = schedulesStr === "Do(m)0:0" ? null : utils.getSchedulesFromString(schedulesStr);
+				let schedules = ["Do(m)0:0", "Do(t)0:0", "Do(n)0:0"].includes(schedulesStr) ? null : utils.getSchedulesFromString(schedulesStr);
 
 				classSchedules.push({
 					year: year,
