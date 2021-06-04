@@ -39,7 +39,7 @@ let PagesDataParser = function (utils, apiConnector) {
 	/**
 	 * Fetches a url that returns a pdf and parses the content into an array of strings.
 	 * @param url url that returns a pdf.
-	 * @returns {Promise<String[]>}
+	 * @returns {Promise<string[]>}
 	 */
 	let fetchPdfContents = function (url) {
 		if (CACHED_PAGE_CONTENTS[url]) {
@@ -64,7 +64,7 @@ let PagesDataParser = function (utils, apiConnector) {
 	 * - Know the studentId
 	 * - Collect classSchedules
 	 * - Complete the grid when registering to new classes
-	 * @return {Promise<{studentId: String, classSchedules: Array<{}>}>}
+	 * @returns {Promise<{studentId: string, classSchedules: *[]}>}
 	 */
 	let parseCurrentClassSchedules = function () {
 		return fetchPdfContents("/autogestion/grado/calendario/descargar_comprobante").then(contents => {
@@ -171,7 +171,7 @@ let PagesDataParser = function (utils, apiConnector) {
 
 	/**
 	 * Parses all the student's academic history. Only includes approved courses, either signed or passed.
-	 * @returns {Promise<{courseCode: String, type: String, date: Date }[]>}
+	 * @returns {Promise<{courseCode: string, type: string, date: Date}[]>}
 	 */
 	let parseAcademicHistory = function () {
 		const typesMap = {
@@ -245,7 +245,7 @@ let PagesDataParser = function (utils, apiConnector) {
 	 * Gets all the courses that the student has taken, not including the failed ones.
 	 * The returned object contains the signed courses, which includes the ones that have also been passed.
 	 * All the passed courses are also included in a different proeprty.
-	 * @returns {Promise<{signed: String[], passed: String[]}>}
+	 * @returns {Promise<{signed: string[], passed: string[]}>}
 	 */
 	let getPassedCourses = function () {
 		return parseAcademicHistory().then(coursesHistory => {
