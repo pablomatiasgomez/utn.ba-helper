@@ -75,20 +75,31 @@ let PagesDataParser = function (utils, apiConnector) {
 
 					// After class schedules row, the this is the following text so we know where to stop.
 					let classSchedules = [];
+					const yearAndQuarterRegex = /^((1|2)(?:er|do) Cuat|Anual) (\d{4})$/;
+
 					while (contents[i] !== "Firma y Sello Departamento") {
 						let courseCode = contents[i++];									// e.g.: 950701
 						let courseName = contents[i++];									// e.g.: Fisica I
-						let yearAndQuarter = contents[i++]; 							// e.g.: 1er Cuat 2021
-						let classCode = contents[i++].toUpperCase();					// e.g.: Z1154
-						let branch = contents[i++].toUpperCase().replace(" ", "_");  	// e.g.: CAMPUS, MEDRANO, AULA_VIRTUAL
-						i++; // (ClassRoomnumber)										// e.g.: "Sin definir", "2"
-						let schedulesStr = contents[i++];								// e.g.: Lu(n)1:5 Mi(n)0:2
 
-						groups = /^((1|2)(?:er|do) Cuat|Anual) (\d{4})$/.exec(yearAndQuarter);
+						let yearAndQuarter = contents[i++]; 							// e.g.: 1er Cuat 2021
+						groups = yearAndQuarterRegex.exec(yearAndQuarter);
+						if (!groups) {
+							// Sometimes it can happen that the courseName was long enough that was split into two rows..
+							courseName = `${courseName} ${yearAndQuarter}`;
+							yearAndQuarter = contents[i++];
+							groups = yearAndQuarterRegex.exec(yearAndQuarter);
+						}
 						if (!groups) throw `Class time couldn't be parsed: ${yearAndQuarter}. PdfContents: ${JSON.stringify(contents)}`;
 						let quarter = (groups[1] === "Anual") ? "A" : (groups[2] + "C"); // A, 1C, 2C
 						let year = parseInt(groups[3]);
 
+						let classCode = contents[i++].toUpperCase();					// e.g.: Z1154
+						let branch = contents[i++].toUpperCase()
+							.replace(" ", "_")
+							.replace("CAMPUS_VIRTUAL", "AULA_VIRTUAL"); 				// e.g.: CAMPUS, MEDRANO, AULA_VIRTUAL
+						i++; // (ClassRoomnumber)										// e.g.: "Sin definir", "2"
+
+						let schedulesStr = contents[i++];								// e.g.: Lu(n)1:5 Mi(n)0:2
 						// Sundays is not a valid day, not sure why this is happening, but ignoring..
 						let schedules = schedulesStr === "Do(m)0:0" ? null : utils.getSchedulesFromString(schedulesStr);
 
