@@ -7,7 +7,7 @@ let PagesDataParser = function (utils, apiConnector) {
 
 	// We want to fetch only once each page.
 	let CACHED_PAGE_CONTENTS = {};
-	let getPageContents = function (url) {
+	let fetchPageContents = function (url) {
 		if (CACHED_PAGE_CONTENTS[url]) {
 			return Promise.resolve(CACHED_PAGE_CONTENTS[url]);
 		}
@@ -21,8 +21,8 @@ let PagesDataParser = function (utils, apiConnector) {
 	 * Fetches and parses the way guarani's page ajax contents are loaded.
 	 * Returned contexts are different script tags that contain the html so they need to be parsed.
 	 */
-	let getAjaxPageContents = function (url, infoId) {
-		return getPageContents(url).then(responseText => {
+	let fetchAjaxPageContents = function (url, infoId) {
+		return fetchPageContents(url).then(responseText => {
 			let response = JSON.parse(responseText);
 			if (response.cod !== "1") throw `Invalid ajax contents ${responseText}`;
 			let contents = $(response.cont).filter("script").toArray()
@@ -37,6 +37,28 @@ let PagesDataParser = function (utils, apiConnector) {
 	};
 
 	/**
+	 * Fetches a url that returns a pdf and parses the content into an array of strings.
+	 * @param url url that returns a pdf.
+	 * @returns {Promise<String[]>}
+	 */
+	let fetchPdfContents = function (url) {
+		if (CACHED_PAGE_CONTENTS[url]) {
+			return Promise.resolve(CACHED_PAGE_CONTENTS[url]);
+		}
+		return pdfjsLib.getDocument(url).promise.then(pdf => {
+			let promises = Array.from(Array(pdf.numPages).keys())
+				.map(i => pdf.getPage(i + 1)
+					.then(page => page.getTextContent())
+					.then(text => text.items.map(s => s.str)));
+			return Promise.all(promises)
+				.then(contents => contents.flat());
+		}).then(contents => {
+			CACHED_PAGE_CONTENTS[url] = contents;
+			return contents;
+		});
+	};
+
+	/**
 	 * Fetches, from the register pdf, the current classes that the student is having, along with the studentId.
 	 * Used for different puprposes:
 	 * - Know the studentId
@@ -45,81 +67,66 @@ let PagesDataParser = function (utils, apiConnector) {
 	 * @return {Promise<{studentId: String, classSchedules: Array<{}>}>}
 	 */
 	let parseCurrentClassSchedules = function () {
-		let url = "https://guarani.frba.utn.edu.ar/autogestion/grado/calendario/descargar_comprobante";
-		if (CACHED_PAGE_CONTENTS[url]) {
-			return Promise.resolve(CACHED_PAGE_CONTENTS[url]);
-		}
-		// noinspection JSValidateTypes
-		return pdfjsLib.getDocument(url).promise.then(pdf => {
-			let promises = Array.from(Array(pdf.numPages).keys())
-				.map(i => pdf.getPage(i + 1)
-					.then(page => page.getTextContent())
-					.then(text => text.items.map(s => s.str)));
-			return Promise.all(promises)
-				.then(contents => contents.flat())
-				.then(contents => {
-					// We will iterate pdf contents one by one, validating the structure.
-					let i = 0;
-					let validateExpectedContents = expectedContents => expectedContents.forEach(expectedContent => {
-						if (contents[i++] !== expectedContent) throw `Invalid pdf contents (${i - 1}): ${JSON.stringify(contents)}`;
-					});
+		return fetchPdfContents("/autogestion/grado/calendario/descargar_comprobante").then(contents => {
+			// We will iterate pdf contents one by one, validating the structure.
+			let i = 0;
+			let validateExpectedContents = expectedContents => expectedContents.forEach(expectedContent => {
+				if (contents[i++] !== expectedContent) throw `Invalid pdf contents (${i - 1}): ${JSON.stringify(contents)}`;
+			});
 
-					validateExpectedContents(["", "COMPROBANTE DE INSCRIPCIÓN A CURSADA"]);
+			validateExpectedContents(["", "COMPROBANTE DE INSCRIPCIÓN A CURSADA"]);
 
-					let studentIdAndName = contents[i++];
-					let groups = /^(\d{3}\.\d{3}-\d) (.*)$/.exec(studentIdAndName);
-					if (!groups) throw `Couldn't parse studentIdAndName: ${studentIdAndName}`;
-					let studentId = groups[1];
+			let studentIdAndName = contents[i++];
+			let groups = /^(\d{3}\.\d{3}-\d) (.*)$/.exec(studentIdAndName);
+			if (!groups) throw `Couldn't parse studentIdAndName: ${studentIdAndName}`;
+			let studentId = groups[1];
 
-					validateExpectedContents(["Código", "Actividad", "Período", "Comisión", "Ubicación", "Aula", "Horario"]);
+			validateExpectedContents(["Código", "Actividad", "Período", "Comisión", "Ubicación", "Aula", "Horario"]);
 
-					// After class schedules row, the this is the following text so we know where to stop.
-					let classSchedules = [];
-					const yearAndQuarterRegex = /^((1|2)(?:er|do) Cuat|Anual) (\d{4})$/;
+			let classSchedules = [];
+			const yearAndQuarterRegex = /^((1|2)(?:er|do) Cuat|Anual) (\d{4})$/;
+			// After all the class schedules rows, this is the following text so we know where to stop..
+			while (contents[i] !== "Firma y Sello Departamento") {
+				let courseCode = contents[i++];									// e.g.: 950701
+				let courseName = contents[i++];									// e.g.: Fisica I
 
-					while (contents[i] !== "Firma y Sello Departamento") {
-						let courseCode = contents[i++];									// e.g.: 950701
-						let courseName = contents[i++];									// e.g.: Fisica I
+				let yearAndQuarter = contents[i++]; 							// e.g.: 1er Cuat 2021
+				groups = yearAndQuarterRegex.exec(yearAndQuarter);
+				if (!groups) {
+					// Sometimes it can happen that the courseName was long enough that was split into two rows..
+					courseName = `${courseName} ${yearAndQuarter}`;
+					yearAndQuarter = contents[i++];
+					groups = yearAndQuarterRegex.exec(yearAndQuarter);
+				}
+				if (!groups) throw `Class time couldn't be parsed: ${yearAndQuarter}. PdfContents: ${JSON.stringify(contents)}`;
+				let quarter = (groups[1] === "Anual") ? "A" : (groups[2] + "C"); // A, 1C, 2C
+				let year = parseInt(groups[3]);
 
-						let yearAndQuarter = contents[i++]; 							// e.g.: 1er Cuat 2021
-						groups = yearAndQuarterRegex.exec(yearAndQuarter);
-						if (!groups) {
-							// Sometimes it can happen that the courseName was long enough that was split into two rows..
-							courseName = `${courseName} ${yearAndQuarter}`;
-							yearAndQuarter = contents[i++];
-							groups = yearAndQuarterRegex.exec(yearAndQuarter);
-						}
-						if (!groups) throw `Class time couldn't be parsed: ${yearAndQuarter}. PdfContents: ${JSON.stringify(contents)}`;
-						let quarter = (groups[1] === "Anual") ? "A" : (groups[2] + "C"); // A, 1C, 2C
-						let year = parseInt(groups[3]);
+				let classCode = contents[i++].toUpperCase();					// e.g.: Z1154
+				let branch = contents[i++].toUpperCase()
+					.replace(" ", "_")
+					.replace("CAMPUS_VIRTUAL", "AULA_VIRTUAL"); 				// e.g.: CAMPUS, MEDRANO, AULA_VIRTUAL
+				i++; // (ClassRoomnumber)										// e.g.: "Sin definir", "2"
 
-						let classCode = contents[i++].toUpperCase();					// e.g.: Z1154
-						let branch = contents[i++].toUpperCase()
-							.replace(" ", "_")
-							.replace("CAMPUS_VIRTUAL", "AULA_VIRTUAL"); 				// e.g.: CAMPUS, MEDRANO, AULA_VIRTUAL
-						i++; // (ClassRoomnumber)										// e.g.: "Sin definir", "2"
+				let schedulesStr = contents[i++];								// e.g.: Lu(n)1:5 Mi(n)0:2
+				// Sundays is not a valid day, not sure why this is happening, but ignoring..
+				let schedules = schedulesStr === "Do(m)0:0" ? null : utils.getSchedulesFromString(schedulesStr);
 
-						let schedulesStr = contents[i++];								// e.g.: Lu(n)1:5 Mi(n)0:2
-						// Sundays is not a valid day, not sure why this is happening, but ignoring..
-						let schedules = schedulesStr === "Do(m)0:0" ? null : utils.getSchedulesFromString(schedulesStr);
-
-						classSchedules.push({
-							year: year,
-							quarter: quarter,
-							courseName: courseName,
-							classCode: classCode,
-							courseCode: courseCode,
-							branch: branch,
-							schedules: schedules,
-						});
-					}
-
-					CACHED_PAGE_CONTENTS[url] = {
-						studentId: studentId,
-						classSchedules: classSchedules,
-					};
-					return CACHED_PAGE_CONTENTS[url];
+				classSchedules.push({
+					year: year,
+					quarter: quarter,
+					courseName: courseName,
+					classCode: classCode,
+					courseCode: courseCode,
+					branch: branch,
+					schedules: schedules,
 				});
+			}
+
+			return {
+				studentId: studentId,
+				classSchedules: classSchedules,
+			};
 		}).catch(e => {
 			trackError(e, "parseCurrentClassSchedules");
 			throw e;
@@ -148,7 +155,7 @@ let PagesDataParser = function (utils, apiConnector) {
 	 * @returns {Promise<string>}
 	 */
 	let getStudentPlanCode = function () {
-		return getAjaxPageContents("/autogestion/grado/plan_estudio", "info_plan").then(responseText => {
+		return fetchAjaxPageContents("/autogestion/grado/plan_estudio", "info_plan").then(responseText => {
 			let planText = $(responseText).filter(".encabezado").find("td:eq(1)").text();
 			let groups = /^Plan: \((\w+)\)/.exec(planText);
 			if (!groups) throw "planText couldn't be parsed: " + planText;
@@ -182,7 +189,7 @@ let PagesDataParser = function (utils, apiConnector) {
 		const dateRegex = /\d{2}\/\d{2}\/\d{4}/;
 		const historyRowRegex = new RegExp(`^(${Object.keys(typesMap).join("|")}) {1,2}- (${gradesRegex.map(i => i.source).join("|")}) (${dateRegex.source}) - .*Detalle$`);
 
-		return getAjaxPageContents("/autogestion/grado/historia_academica/?checks=PromocionA,RegularidadA,RegularidadR,RegularidadU,EnCurso,ExamenA,ExamenR,ExamenU,EquivalenciaA,EquivalenciaR,AprobResA,CreditosA,&modo=anio&param_modo=&e_cu=A&e_ex=A&e_re=A", "info_historia").then(responseText => {
+		return fetchAjaxPageContents("/autogestion/grado/historia_academica/?checks=PromocionA,RegularidadA,RegularidadR,RegularidadU,EnCurso,ExamenA,ExamenR,ExamenU,EquivalenciaA,EquivalenciaR,AprobResA,CreditosA,&modo=anio&param_modo=&e_cu=A&e_ex=A&e_re=A", "info_historia").then(responseText => {
 			return $(responseText).find(".catedra_nombre").toArray()
 				.map(item => {
 					let courseText = $(item).find("h4").text();
