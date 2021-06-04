@@ -187,6 +187,7 @@ let PagesDataParser = function (utils, apiConnector) {
 			/\d{1,2} \(\w+\) (?:Promocionado|Aprobado|Reprobado)/,
 			/No aprobad \(No aprobada\) Reprobado/,
 			/Aprobada \(Aprobada\) Aprobado/,
+			/Reprobado/,
 			/Ausente/,
 		];
 		const dateRegex = /\d{2}\/\d{2}\/\d{4}/;
