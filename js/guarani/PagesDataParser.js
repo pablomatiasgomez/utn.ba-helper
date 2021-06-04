@@ -87,10 +87,10 @@ let PagesDataParser = function (utils, apiConnector) {
 			const yearAndQuarterRegex = /^((1|2)(?:er|do) Cuat|Anual) (\d{4})$/;
 			// After all the class schedules rows, this is the following text so we know where to stop..
 			while (contents[i] !== "Firma y Sello Departamento") {
-				let courseCode = contents[i++];									// e.g.: 950701
-				let courseName = contents[i++];									// e.g.: Fisica I
+				let courseCode = contents[i++];	// e.g.: 950701
+				let courseName = contents[i++]; // e.g.: Fisica I
 
-				let yearAndQuarter = contents[i++]; 							// e.g.: 1er Cuat 2021
+				let yearAndQuarter = contents[i++]; // e.g.: 1er Cuat 2021
 				groups = yearAndQuarterRegex.exec(yearAndQuarter);
 				if (!groups) {
 					// Sometimes it can happen that the courseName was long enough that was split into two rows..
@@ -102,13 +102,16 @@ let PagesDataParser = function (utils, apiConnector) {
 				let quarter = (groups[1] === "Anual") ? "A" : (groups[2] + "C"); // A, 1C, 2C
 				let year = parseInt(groups[3]);
 
-				let classCode = contents[i++].toUpperCase();					// e.g.: Z1154
+				let classCode = contents[i++].toUpperCase(); // e.g.: Z1154
+
 				let branch = contents[i++].toUpperCase()
 					.replace(" ", "_")
-					.replace("CAMPUS_VIRTUAL", "AULA_VIRTUAL"); 				// e.g.: CAMPUS, MEDRANO, AULA_VIRTUAL
-				i++; // (ClassRoomnumber)										// e.g.: "Sin definir", "2"
+					.replace("CAMPUS_VIRTUAL", "AULA_VIRTUAL"); // e.g.: CAMPUS, MEDRANO, AULA_VIRTUAL
+				if (branch === "SIN_DESIGNAR") branch = null;
 
-				let schedulesStr = contents[i++];								// e.g.: Lu(n)1:5 Mi(n)0:2
+				i++; // (ClassRoomnumber) e.g.: "Sin definir", "2"
+
+				let schedulesStr = contents[i++]; // e.g.: Lu(n)1:5 Mi(n)0:2
 				// Sundays is not a valid day, not sure why this is happening, but ignoring..
 				let schedules = ["Do(m)0:0", "Do(t)0:0", "Do(n)0:0"].includes(schedulesStr) ? null : utils.getSchedulesFromString(schedulesStr);
 
