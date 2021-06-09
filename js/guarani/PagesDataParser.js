@@ -175,7 +175,7 @@ let PagesDataParser = function (utils, apiConnector) {
 	 */
 	let parseAcademicHistory = function () {
 		const typesMap = {
-			"En curso": null,
+			"En curso": "SIGNED",
 			"Regularidad": "SIGNED",
 			"Promoción": "PASSED",
 			"Examen": "PASSED",
@@ -185,8 +185,9 @@ let PagesDataParser = function (utils, apiConnector) {
 		const gradesRegex = [
 			/Inicio de dictado/,
 			/\d{1,2} \(\w+\) (?:Promocionado|Aprobado|Reprobado)/,
-			/No aprobad \(No aprobada\) Reprobado/,
 			/Aprobada \(Aprobada\) Aprobado/,
+			/No aprobad \(No aprobada\) Reprobado/,
+			/Aprobado/,
 			/Reprobado/,
 			/Ausente/,
 		];
@@ -206,7 +207,7 @@ let PagesDataParser = function (utils, apiConnector) {
 					if (!groups) throw `historyRow couldn't be parsed: ${historyRow}`;
 					let type = typesMap[groups[1]];
 					let grade = groups[2];
-					let isApprovedGrade = (grade.includes("Promocionado") || grade.includes("Aprobad")) && !grade.includes("No aprobad");
+					let isApprovedGrade = (grade.includes("Promocionado") || grade.includes("Aprobado")) && !grade.includes("Reprobado");
 					let date = utils.parseDate(groups[3]);
 
 					// Not considering non approved grades for now..
