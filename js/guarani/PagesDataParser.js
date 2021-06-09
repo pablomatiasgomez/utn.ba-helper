@@ -106,7 +106,8 @@ let PagesDataParser = function (utils, apiConnector) {
 
 				let branch = contents[i++].toUpperCase()
 					.replace(" ", "_")
-					.replace("CAMPUS_VIRTUAL", "AULA_VIRTUAL"); // e.g.: CAMPUS, MEDRANO, AULA_VIRTUAL
+					.replace("CAMPUS_VIRTUAL", "AULA_VIRTUAL")
+					.replace("ESCUELA", "PIÑERO");	// e.g.: CAMPUS, MEDRANO, AULA_VIRTUAL, PIÑERO
 				if (branch === "SIN_DESIGNAR") branch = null;
 
 				i++; // (ClassRoomnumber) e.g.: "Sin definir", "2"
@@ -208,7 +209,7 @@ let PagesDataParser = function (utils, apiConnector) {
 					if (!groups) throw `historyRow couldn't be parsed: ${historyRow}`;
 					let type = typesMap[groups[1]];
 					let grade = groups[2];
-					let isApprovedGrade = (grade.includes("Promocionado") || grade.includes("Aprobado")) &&  !grade.includes("No aprobada");
+					let isApprovedGrade = (grade.includes("Promocionado") || grade.includes("Aprobado")) && !grade.includes("No aprobad");
 					let date = utils.parseDate(groups[3]);
 
 					// Not considering non approved grades for now..
