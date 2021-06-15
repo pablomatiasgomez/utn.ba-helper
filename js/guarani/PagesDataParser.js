@@ -111,6 +111,8 @@ let PagesDataParser = function (utils, apiConnector) {
 			// After all the class schedules rows, this is the following text so we know where to stop..
 			while (contents[i] !== "Firma y Sello Departamento") {
 				let courseCode = contents[i++];	// e.g.: 950701
+				if (!/^\d{6}$/.test(courseCode)) throw `courseCode couldn't be parsed: ${courseCode}. PdfContents: ${JSON.stringify(contents)}`;
+
 				let courseName = contents[i++]; // e.g.: Fisica I
 
 				let yearAndQuarter = contents[i++]; // e.g.: 1er Cuat 2021
