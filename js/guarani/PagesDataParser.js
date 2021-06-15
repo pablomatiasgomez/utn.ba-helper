@@ -59,15 +59,38 @@ let PagesDataParser = function (utils, apiConnector) {
 	};
 
 	/**
-	 * Fetches, from the register pdf, the current classes that the student is having, along with the studentId.
+	 * Tries to resolve and return the student id for the current logged in user.
+	 * @returns {Promise<String>}
+	 */
+	let getStudentId = function () {
+		return fetchPdfContents("/autogestion/grado/plan_estudio/generar_pdf").then(contents => {
+			let index = contents.indexOf("Legajo:");
+			if (index === -1) throw `Couldn't find studentId in pdfContents: ${JSON.stringify(contents)}`;
+
+			let studentId = contents[index + 1].trim();
+			// Split the checkdigit, add the thousands separator, and join the checkdigit again..
+			// This is because we have been parsing studentIds in the form of "xxx.xxx-x"
+			return parseInt(studentId.slice(0, -1)).toLocaleString().replaceAll(",", ".") + "-" + studentId.slice(-1);
+		}).catch(e => {
+			trackError(e, "getStudentId");
+			throw e;
+		});
+	};
+
+	/**
+	 * Fetches, from the register pdf, the current classes that the student is having.
 	 * Used for different puprposes:
-	 * - Know the studentId
 	 * - Collect classSchedules
 	 * - Complete the grid when registering to new classes
-	 * @returns {Promise<{studentId: string, classSchedules: *[]}>}
+	 * @returns {Promise<Array<{}>>} array of objects for each class, that contains the schedule for it.
 	 */
-	let parseCurrentClassSchedules = function () {
+	let getClassSchedules = function () {
 		return fetchPdfContents("/autogestion/grado/calendario/descargar_comprobante").then(contents => {
+			if (contents.length === 1 && contents[0] === "") {
+				// If we get an empty pdf it means the student does not have any current class schedules.
+				return [];
+			}
+
 			// We will iterate pdf contents one by one, validating the structure.
 			let i = 0;
 			let validateExpectedContents = expectedContents => expectedContents.forEach(expectedContent => {
@@ -76,10 +99,10 @@ let PagesDataParser = function (utils, apiConnector) {
 
 			validateExpectedContents(["", "COMPROBANTE DE INSCRIPCIÓN A CURSADA"]);
 
+			// This is not being used right now, but keeping it to validate the contents format.
 			let studentIdAndName = contents[i++];
 			let groups = /^(\d{3}\.\d{3}-\d) (.*)$/.exec(studentIdAndName);
 			if (!groups) throw `Couldn't parse studentIdAndName: ${studentIdAndName}`;
-			let studentId = groups[1];
 
 			validateExpectedContents(["Código", "Actividad", "Período", "Comisión", "Ubicación", "Aula", "Horario"]);
 
@@ -106,7 +129,8 @@ let PagesDataParser = function (utils, apiConnector) {
 
 				let branch = contents[i++].toUpperCase()
 					.replace(" ", "_")
-					.replace("CAMPUS_VIRTUAL", "AULA_VIRTUAL"); // e.g.: CAMPUS, MEDRANO, AULA_VIRTUAL
+					.replace("CAMPUS_VIRTUAL", "AULA_VIRTUAL")
+					.replace("ESCUELA", "PIÑERO");	// e.g.: CAMPUS, MEDRANO, AULA_VIRTUAL, PIÑERO
 				if (branch === "SIN_DESIGNAR") branch = null;
 
 				i++; // (ClassRoomnumber) e.g.: "Sin definir", "2"
@@ -125,32 +149,11 @@ let PagesDataParser = function (utils, apiConnector) {
 					schedules: schedules,
 				});
 			}
-
-			return {
-				studentId: studentId,
-				classSchedules: classSchedules,
-			};
+			return classSchedules;
 		}).catch(e => {
-			trackError(e, "parseCurrentClassSchedules");
+			trackError(e, "getClassSchedules");
 			throw e;
 		});
-	};
-
-	/**
-	 * Tries to resolve and return the student id for the current logged in user.
-	 * @returns {Promise<String>}
-	 */
-	let getStudentId = function () {
-		return parseCurrentClassSchedules().then(response => response.studentId);
-	};
-
-	/**
-	 * Fetches the current classes that the student is having in order to know the schedules of them.
-	 * Also used to complete the grid when registering to new classes
-	 * @returns {Promise<Array<{}>>} array of objects for each class, that contains the schedule for it.
-	 */
-	let getClassSchedules = function () {
-		return parseCurrentClassSchedules().then(response => response.classSchedules);
 	};
 
 	/**
@@ -175,7 +178,7 @@ let PagesDataParser = function (utils, apiConnector) {
 	 */
 	let parseAcademicHistory = function () {
 		const typesMap = {
-			"En curso": null,
+			"En curso": "SIGNED",
 			"Regularidad": "SIGNED",
 			"Promoción": "PASSED",
 			"Examen": "PASSED",
@@ -185,8 +188,10 @@ let PagesDataParser = function (utils, apiConnector) {
 		const gradesRegex = [
 			/Inicio de dictado/,
 			/\d{1,2} \(\w+\) (?:Promocionado|Aprobado|Reprobado)/,
-			/No aprobad \(No aprobada\) Reprobado/,
 			/Aprobada \(Aprobada\) Aprobado/,
+			/No aprobad \(No aprobada\) Reprobado/,
+			/No aprobad \(No aprobada\) Ausente/,
+			/Aprobado/,
 			/Reprobado/,
 			/Ausente/,
 		];
@@ -206,7 +211,7 @@ let PagesDataParser = function (utils, apiConnector) {
 					if (!groups) throw `historyRow couldn't be parsed: ${historyRow}`;
 					let type = typesMap[groups[1]];
 					let grade = groups[2];
-					let isApprovedGrade = (grade.includes("Promocionado") || grade.includes("Aprobad")) && !grade.includes("No aprobad");
+					let isApprovedGrade = (grade.includes("Promocionado") || grade.includes("Aprobado")) && !grade.includes("No aprobad");
 					let date = utils.parseDate(groups[3]);
 
 					// Not considering non approved grades for now..
@@ -218,9 +223,6 @@ let PagesDataParser = function (utils, apiConnector) {
 					};
 				})
 				.filter(course => !!course);
-		}).catch(e => {
-			trackError(e, "parseAcademicHistory");
-			throw e;
 		});
 	};
 
@@ -269,7 +271,10 @@ let PagesDataParser = function (utils, apiConnector) {
 	 */
 	let getProfessorClassesFromSurveys = function () {
 		// TODO parse this information once we know where it is.
-		return Promise.resolve([]);
+		return Promise.resolve([]).catch(e => {
+			trackError(e, "getProfessorClassesFromSurveys");
+			throw e;
+		});
 	};
 
 	/**
@@ -277,7 +282,10 @@ let PagesDataParser = function (utils, apiConnector) {
 	 */
 	let getTakenSurveys = function () {
 		// TODO parse this information once we know where it is.
-		return Promise.resolve([]);
+		return Promise.resolve([]).catch(e => {
+			trackError(e, "getTakenSurveys");
+			throw e;
+		});
 	};
 
 	// Public

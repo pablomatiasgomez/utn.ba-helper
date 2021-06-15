@@ -11,6 +11,14 @@
 	content: "POWERED BY UTN.BA HELPER";
 }
 
+/* Allows space in the header to add the student id */
+.brand-nav .user-navbar li > a {
+	padding-top: 5px !important;
+}
+.brand-nav .row-fluid .span12 {
+    min-height: initial !important;
+}
+
 .utnba-helper table {
 	width: initial;
 	background-color: #eee;
