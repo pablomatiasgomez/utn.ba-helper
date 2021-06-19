@@ -70,7 +70,7 @@ let PagesDataParser = function (utils, apiConnector) {
 			let studentId = contents[index + 1].trim();
 			// Split the checkdigit, add the thousands separator, and join the checkdigit again..
 			// This is because we have been parsing studentIds in the form of "xxx.xxx-x"
-			return parseInt(studentId.slice(0, -1)).toLocaleString().replaceAll(",", ".") + "-" + studentId.slice(-1);
+			return parseInt(studentId.slice(0, -1)).toLocaleString("es-AR") + "-" + studentId.slice(-1);
 		}).catch(e => {
 			trackError(e, "getStudentId");
 			throw e;
@@ -100,9 +100,12 @@ let PagesDataParser = function (utils, apiConnector) {
 			validateExpectedContents(["", "COMPROBANTE DE INSCRIPCIÓN A CURSADA"]);
 
 			// This is not being used right now, but keeping it to validate the contents format.
+			// WARN: the studentId is not properly formatted in the pdf, that is why we are considering the check digit as optional.
+			// For example, it could be shown as  "123.456-" instead of "12.345-6"
+			// If we need to use its value, we need to sanitize to the correct format.
 			let studentIdAndName = contents[i++];
-			let groups = /^(\d{3}\.\d{3}-\d) (.*)$/.exec(studentIdAndName);
-			if (!groups) throw `Couldn't parse studentIdAndName: ${studentIdAndName}`;
+			let groups = /^(\d{2,3}\.\d{3}-\d?) (.*)$/.exec(studentIdAndName);
+			if (!groups) throw `Couldn't parse studentIdAndName: ${studentIdAndName}. PdfContents: ${JSON.stringify(contents)}`;
 
 			validateExpectedContents(["Código", "Actividad", "Período", "Comisión", "Ubicación", "Aula", "Horario"]);
 
