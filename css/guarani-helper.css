@@ -43,7 +43,7 @@
 	margin: 1px 0;
 }
 
-.utnba-helper table tr.top-border {
+.utnba-helper table tr.top-border td {
 	border-top: 2px solid black;
 }
 
