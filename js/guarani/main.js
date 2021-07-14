@@ -11,8 +11,6 @@
 	// Init pdf.js
 	pdfjsLib.GlobalWorkerOptions.workerSrc = chrome.runtime.getURL("js/pdf.worker.min.js");
 
-	let handler = null;
-
 	let utils = new Utils();
 	let apiConnector = new ApiConnector("guarani");
 	let pagesDataParser = new PagesDataParser(utils, apiConnector);
@@ -20,26 +18,32 @@
 	let customPages = new CustomPages(pagesDataParser, utils, apiConnector);
 
 	customPages.appendMenu();
-	let customPageHandler = customPages.getSelectedPageHandler();
-	if (customPageHandler) {
-		// The user is in a custom page, so we assign the handler
-		handler = customPageHandler;
-	}
 
 	const PAGE_HANDLERS = {
-		// TODO
+		"/autogestion/grado/calendario": () => waitForElementToHide("#loading_top").then(() => HorariosPage(utils)),
+	};
+	// When loading from document, the content is rendered async so we need to wait for the loading div to hide...
+	Object.entries(PAGE_HANDLERS).forEach(entry => PAGE_HANDLERS[entry[0]] = () => waitForElementToHide("#loading_top").then(entry[1]));
+
+	let handleCurrentPage = () => {
+		let handler = customPages.getSelectedPageHandler() || PAGE_HANDLERS[window.location.pathname];
+		if (!handler) return;
+		handler().catch(e => {
+			console.error("Error when handling page " + window.location.pathname, e);
+			return apiConnector.logMessage("Handle page " + window.location.pathname, true, utils.stringifyError(e));
+		});
 	};
 
-	handler = handler || PAGE_HANDLERS[window.location.pathname];
+	handleCurrentPage();
 
-	handler && handler().catch(e => {
-		console.error("Error when handling page " + window.location.pathname, e);
-		return apiConnector.logMessage("Handle page " + window.location.pathname, true, utils.stringifyError(e));
-	});
+	// Append a script to capture ajax page changes.
+	window.addEventListener('page_changed', () => handleCurrentPage());
+	injectScript(`kernel.evts.escuchar("operacion_cambiada", e => window.dispatchEvent(new Event('page_changed')), true);`);
 
+	// Background stuff...
 	pagesDataParser.getStudentId().then(studentId => {
 		$(".user-navbar").append(`
-			<div style="margin: -10px 10px 0px 0; float: right; clear: right;">
+			<div style="margin: -10px 10px 0 0; float: right; clear: right;">
 				Legajo: ${studentId}<br>
 				<span class="powered-by-utnba-helper"></span>
 			</div>`);
@@ -57,4 +61,25 @@
 		window.open("https://chrome.google.com/webstore/detail/siga-helper/jdgdheoeghamkhfppapjchbojhehimpe", "_blank");
 	});
 
+	//----
+
+	function waitForElementToHide(selector) {
+		return new Promise((resolve) => {
+			let check = () => {
+				if (!$(selector).is(":visible")) {
+					resolve();
+				} else {
+					setTimeout(check, 100);
+				}
+			};
+			check();
+		});
+	}
+
+	function injectScript(content) {
+		let script = document.createElement('script');
+		script.type = 'text/javascript';
+		script.innerHTML = content;
+		document.head.appendChild(script);
+	}
 })();

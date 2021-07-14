@@ -11,6 +11,11 @@
     content: "POWERED BY UTN.BA HELPER";
 }
 
+.name-container {
+    z-index: 5;
+    white-space: nowrap;
+}
+
 /* Allows space in the header to add the student id */
 .brand-nav .user-navbar li > a {
     padding-top: 5px !important;
