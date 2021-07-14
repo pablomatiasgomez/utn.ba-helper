@@ -42,7 +42,7 @@ let ProfessorsSearchCustomPage = function ($container, services) {
 		$searchResultsDiv = $(`<div></div>`);
 		$searchResultsDiv.hide();
 		$searchResultsDiv.append("<h2>Resultados de busqueda</h2>");
-		let $searchResultsTable = $(`<table class="table table-bordered table-condensed table-hover"></table>`).append("<tbody></tbody>");
+		let $searchResultsTable = $(`<table></table>`).append("<tbody></tbody>");
 		$searchResultsTable.on("click", "a", function () {
 			let professorName = $(this).text();
 			retrieveProfessorData(professorName);
@@ -84,7 +84,7 @@ let ProfessorsSearchCustomPage = function ($container, services) {
 
 	let retrieveProfessorData = function (professorName) {
 		$professorResultsTitleDiv.show().get(0).scrollIntoView({behavior: "smooth"});
-		$professorResultsTitleDiv.html(`<h2 style="text-align: center;">Resultados para ${professorName}:</h2><hr>`);
+		$professorResultsTitleDiv.html(`<h2 style="text-align: center;">Resultados para ${professorName}</h2><hr>`);
 		retrieveProfessorCourses(professorName);
 		retrieveSurveyResults(professorName);
 	};
@@ -109,8 +109,8 @@ let ProfessorsSearchCustomPage = function ($container, services) {
 				</tr>`;
 			}).join("");
 			$coursesResultDiv.append(`
-				<h3>Ultimos cursos en los que estuvo presente:</h3>
-				<table class="table table-bordered table-condensed table-hover">
+				<h3>Ultimos cursos en los que estuvo presente</h3>
+				<table>
 					<tbody>
 						<tr><th colspan="2">Cuatr.</th><th>Materia</th><th>Curso</th><th>Anexo</th><th>Horario</th><th>Profesores</th></tr>
 						${trs}
@@ -135,15 +135,16 @@ let ProfessorsSearchCustomPage = function ($container, services) {
 	};
 
 	let appendSurveyResults = function (surveyKind, results) {
-		$surveyResultDiv.append(`<h3>Encuesta de tipo: ${surveyKind}</h3>`);
+		$surveyResultDiv.append(`<h3>Encuesta de tipo ${surveyKind}</h3>`);
 
 		if (results.percentageFields.length) {
 			let percetangeRows = results.percentageFields.map(item => {
 				return `<tr><td>${item.question}</td><td style="background-color: ${services.utils.getColorForAvg(item.average)}">${item.average}</td><td>${item.count}</td></tr>`;
 			}).join("");
 			$surveyResultDiv.append(`
-				<h4>Puntaje general: ${services.utils.getOverallScoreSpan(results.overallScore)}</h4>
-				<table class="percentage-questions table table-bordered table-condensed table-hover">
+				<h4>Puntajes</h4>
+				<div style="font-weight: bold; margin-bottom: 12px;">General: ${services.utils.getOverallScoreSpan(results.overallScore)}</div>
+				<table class="percentage-questions">
 					<tbody>
 						<tr><th>Pregunta</th><th>Promedio</th><th>Muestra</th></tr>
 						${percetangeRows}
@@ -159,8 +160,8 @@ let ProfessorsSearchCustomPage = function ($container, services) {
 				return `<td style="color: ${TEXT_QUESTIONS[question]}">${answers}</td>`;
 			}).join("");
 			$surveyResultDiv.append(`
-				<h4>Comentarios:</h4>
-				<table class="text-questions table table-bordered table-condensed table-hover" style="table-layout: fixed; width: 100%;">
+				<h4>Comentarios</h4>
+				<table class="text-questions" style="table-layout: fixed; width: 100%;">
 					<tbody>
 						<tr>${textQuestions.map(question => `<th>${question}</th>`).join("")}</tr>
 						<tr>${textColumns}</tr>

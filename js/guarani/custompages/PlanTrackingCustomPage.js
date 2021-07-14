@@ -7,33 +7,76 @@ let PlanTrackingCustomPage = function ($container, services) {
 		"TAKE_FINAL_EXAM": "Rendir final",
 	};
 
+	let $gradesSummary;
 	let $plan;
 
-	let createPage = function (planCode, passedCourses) {
+	let createPage = function (planCode, coursesHistory) {
+		$container.append(`<h3>Plan ${planCode}</h3>`);
+
+		$gradesSummary = $("<div></div>");
+		$container.append($gradesSummary);
+		buildGradesSummary(coursesHistory);
+
+		$container.append("<hr>");
+
 		$plan = $("<div></div>");
 		$container.append($plan);
-		loadPlan(planCode, passedCourses);
+		loadPlan(planCode, coursesHistory);
 	};
 
-	let loadPlan = function (planCode, passedCourses) {
+	let buildGradesSummary = function (coursesHistory) {
+		let startYear = coursesHistory.courses.concat(coursesHistory.finalExams)
+			.map(course => course.date)
+			.sort((a, b) => a - b)
+			.map(date => date.getFullYear())
+			[0];
+		if (!startYear) return; // If no courses nor finalExams, there is nothing we can show.
+		let yearsCount = (new Date().getFullYear() - startYear + 1);
+
+		const arrayAverage = arr => Math.round(arr.reduce((a, b) => a + b, 0) / arr.length * 100) / 100;
+
+		let passedWeightedGrades = coursesHistory.finalExams.filter(course => course.isPassed && !isNaN(course.weightedGrade)).map(course => course.weightedGrade);
+		let failedWeightedGrades = coursesHistory.finalExams.filter(course => !course.isPassed && !isNaN(course.weightedGrade)).map(course => course.weightedGrade);
+		let passedNonWeightedGrades = coursesHistory.finalExams.filter(course => course.isPassed && !isNaN(course.grade)).map(course => course.grade);
+		let failedNonWeightedGrades = coursesHistory.finalExams.filter(course => !course.isPassed && !isNaN(course.grade)).map(course => course.grade);
+		let pesoAcademico = 11 * passedWeightedGrades.length - 5 * yearsCount - 3 * failedWeightedGrades.length;
+
+		$gradesSummary.html(`<table><tbody></tbody></table>(*) La nota ponderada es calculada por el "UTN.BA Helper" segun Ordenanza Nº 1549`);
+		const appendTableRow = (description, value) => $gradesSummary.find("tbody").append("<tr><td>" + description + "</td><td><b>" + (value || value === 0 ? value : "n/a") + "</b></td></tr>");
+
+		appendTableRow("Peso academico", `${pesoAcademico} <small>(11*${passedWeightedGrades.length} - 5*${yearsCount} - 3*${failedWeightedGrades.length})</small>`);
+		appendTableRow("Cantidad de finales aprobados", passedWeightedGrades.length);
+		appendTableRow("Cantidad de finales desaprobados", failedWeightedGrades.length);
+		appendTableRow("Promedio de notas ponderadas <sup>(*)</sup> con desaprobados", arrayAverage(passedWeightedGrades.concat(failedWeightedGrades)));
+		appendTableRow("Promedio de notas ponderadas <sup>(*)</sup> sin desaprobados", arrayAverage(passedWeightedGrades));
+		appendTableRow("Promedio de notas originales <sup>(*)</sup> con desaprobados", arrayAverage(passedNonWeightedGrades.concat(failedNonWeightedGrades)));
+		appendTableRow("Promedio de notas originales <sup>(*)</sup> sin desaprobados", arrayAverage(passedNonWeightedGrades));
+	};
+
+	//...
+
+	let loadPlan = function (planCode, coursesHistory) {
 		if (!planCode) return;
 		return services.apiConnector.getPlanCourses(planCode).then(planCourses => {
-			return loadPlanCourses(planCode, planCourses, passedCourses);
+			return loadPlanCourses(planCode, planCourses, coursesHistory);
 		});
 	};
 
-	let loadPlanCourses = function (planCode, planCourses, passedCourses) {
+	let loadPlanCourses = function (planCode, planCourses, coursesHistory) {
 		let courseNamesByCode = planCourses.reduce(function (courseNamesByCode, course) {
 			courseNamesByCode[course.courseCode] = course.courseName;
 			return courseNamesByCode;
 		}, {});
 
+		// For signed courses we condier both passed and signed, and remove duplicates.
+		let passedCourses = coursesHistory.finalExams.filter(course => course.isPassed).map(course => course.courseCode);
+		let signedCourses = [...new Set([...passedCourses, ...coursesHistory.courses.filter(course => course.isPassed).map(course => course.courseCode)])];
 		let courseRequirementToArray = {
 			// We will always use the last 4 chars, removing the first 2 that identify the specific plan.
 			// This is done in order to connect passed courses that are transitive from a previous plan.
 			// For example, a student passed 952021 (K95), which is 082021 (K08) in the new plan.
-			"SIGNED": passedCourses.signed.map(courseCode => courseCode.substring(2)),
-			"PASSED": passedCourses.passed.map(courseCode => courseCode.substring(2)),
+			"SIGNED": signedCourses.map(courseCode => courseCode.substring(2)),
+			"PASSED": passedCourses.map(courseCode => courseCode.substring(2)),
 		};
 		let hasCourse = (requirement, courseCode) => courseRequirementToArray[requirement].indexOf(courseCode.substring(2)) !== -1;
 
@@ -135,8 +178,7 @@ let PlanTrackingCustomPage = function ($container, services) {
 		let ths = levels.map(level => `<th>Nivel ${level}</th>`).join("");
 		let tds = levels.map(level => `<td>${getCoursesHtml(level)}</td>`).join("");
 		$plan.html(`
-			<h3>Plan ${planCode}</h3>
-			<table class="plan-tracking table table-bordered table-condensed table-hover">
+			<table class="plan-tracking">
 				<tbody>
 					<tr>${ths}</tr>
 					<tr>${tds}</tr>
@@ -156,12 +198,12 @@ let PlanTrackingCustomPage = function ($container, services) {
 	return Promise.resolve().then(() => {
 		return Promise.all([
 			services.pagesDataParser.getStudentPlanCode(),
-			services.pagesDataParser.getPassedCourses(),
+			services.pagesDataParser.getCoursesHistory(),
 		]);
 	}).then(result => {
 		let planCode = result[0];
-		let passedCourses = result[1];
-		return createPage(planCode, passedCourses);
+		let coursesHistory = result[1];
+		return createPage(planCode, coursesHistory);
 	});
 };
 

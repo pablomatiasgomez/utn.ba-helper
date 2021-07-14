@@ -27,7 +27,7 @@ let CoursesSearchCustomPage = function ($container, services) {
 		$searchResultsDiv = $(`<div></div>`);
 		$searchResultsDiv.hide();
 		$searchResultsDiv.append("<h2>Resultados de busqueda</h2>");
-		let $searchResultsTable = $(`<table class="table table-bordered table-condensed table-hover"></table>`).append("<tbody></tbody>");
+		let $searchResultsTable = $(`<table></table>`).append("<tbody></tbody>");
 		$searchResultsTable.on("click", "a", function () {
 			let courseCode = $(this).text();
 			retrieveClassesForCourse(courseCode, 0, 15);
@@ -39,8 +39,8 @@ let CoursesSearchCustomPage = function ($container, services) {
 
 		$courseDataDiv = $(`<div></div>`);
 		$courseDataDiv.hide();
-		$courseDataDiv.append("<h2>Resultados para :</h2>");
-		let $classesTable = $(`<table class="table table-bordered table-condensed table-hover"></table>`).append("<tbody></tbody>");
+		$courseDataDiv.append("<h2>Resultados para </h2>");
+		let $classesTable = $(`<table></table>`).append("<tbody></tbody>");
 		$courseDataDiv.append($classesTable);
 		$courseDataDiv.append("<hr>");
 		$container.append($courseDataDiv);
@@ -74,7 +74,7 @@ let CoursesSearchCustomPage = function ($container, services) {
 		return services.apiConnector.getClassesForCourse(courseCode, offset, limit).then(classSchedules => {
 			if (offset === 0) {
 				lastYear = lastQuarter = null;
-				$courseDataDiv.find("h2").text(`Resultados para ${courseCode}:`);
+				$courseDataDiv.find("h2").text(`Resultados para ${courseCode}`);
 				$courseDataDiv.show();
 				$courseDataDiv.find("table tbody")
 					.html(`

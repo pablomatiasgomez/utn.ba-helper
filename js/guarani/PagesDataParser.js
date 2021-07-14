@@ -182,21 +182,16 @@ let PagesDataParser = function (utils, apiConnector) {
 	};
 
 	/**
-	 * Parses all the student's academic history. Only includes approved courses, either signed or passed.
-	 * @returns {Promise<{courseCode: string, type: string, date: Date}[]>}
+	 * Parses and returns all the student's academic history. Includes courses and final exams (both passed and failed)
+	 * @returns {Promise<{courses: [{courseCode: string, isPassed: boolean, grade: number, weightedGrade: number, date: Date}], finalExams: [{courseCode: string, isPassed: boolean, grade: number, weightedGrade: number, date: Date}]}>}
 	 */
-	let parseAcademicHistory = function () {
-		const typesMap = {
-			"En curso": "SIGNED",
-			"Regularidad": "SIGNED",
-			"Promoción": "PASSED",
-			"Examen": "PASSED",
-			"Equivalencia Parcial": "SIGNED",
-			"Equivalencia Total": "PASSED",
-		};
+	let getCoursesHistory = function () {
+		const courseTypes = ["En curso", "Regularidad", "Equivalencia Parcial"];
+		const finalExamTypes = ["Promoción", "Examen", "Equivalencia Total"];
+		const allTypes = courseTypes.concat(finalExamTypes);
 		const gradesRegex = [
 			/Inicio de dictado/,
-			/\d{1,2} \(\w+\) (?:Promocionado|Aprobado|Reprobado)/,
+			/(\d{1,2}) \(\w+\) (?:Promocionado|Aprobado|Reprobado)/,
 			/Aprobada \(Aprobada\) Aprobado/,
 			/No aprobad \(No aprobada\) Reprobado/,
 			/No aprobad \(No aprobada\) Ausente/,
@@ -205,10 +200,12 @@ let PagesDataParser = function (utils, apiConnector) {
 			/Ausente/,
 		];
 		const dateRegex = /\d{2}\/\d{2}\/\d{4}/;
-		const historyRowRegex = new RegExp(`^(${Object.keys(typesMap).join("|")}) {1,2}- (${gradesRegex.map(i => i.source).join("|")}) (${dateRegex.source}) - .*Detalle$`);
+		const historyRowRegex = new RegExp(`^(${allTypes.join("|")}) {1,2}- (${gradesRegex.map(i => i.source).join("|")}) (${dateRegex.source}) - .*Detalle$`);
 
 		return fetchAjaxPageContents("/autogestion/grado/historia_academica/?checks=PromocionA,RegularidadA,RegularidadR,RegularidadU,EnCurso,ExamenA,ExamenR,ExamenU,EquivalenciaA,EquivalenciaR,AprobResA,CreditosA,&modo=anio&param_modo=&e_cu=A&e_ex=A&e_re=A", "info_historia").then(responseText => {
-			return $(responseText).find(".catedra_nombre").toArray()
+			let courses = [];
+			let finalExams = [];
+			$(responseText).find(".catedra_nombre").toArray()
 				.map(item => {
 					let courseText = $(item).find("h4").text();
 					let groups = /\((\d{6})\)/.exec(courseText);
@@ -218,57 +215,28 @@ let PagesDataParser = function (utils, apiConnector) {
 					let historyRow = $(item).find("span").text().trim();
 					groups = historyRowRegex.exec(historyRow);
 					if (!groups) throw `historyRow couldn't be parsed: ${historyRow}`;
-					let type = typesMap[groups[1]];
-					let grade = groups[2];
-					let isApprovedGrade = (grade.includes("Promocionado") || grade.includes("Aprobado")) && !grade.includes("No aprobad");
-					let date = utils.parseDate(groups[3]);
+					let arr = courseTypes.includes(groups[1]) ? courses : finalExams;
+					let gradeText = groups[2];
+					let isPassed = (gradeText.includes("Promocionado") || gradeText.includes("Aprobado")) && !gradeText.includes("No aprobad");
+					let date = utils.parseDate(groups[4]);
 
-					// Not considering non approved grades for now..
-					if (!isApprovedGrade) return null;
-					return {
+					let grade = parseInt(groups[3]) || null;
+					let weightedGrade = grade !== null ? utils.getWeightedGrade(date, grade) : null;
+
+					arr.push({
 						courseCode: courseCode,
-						type: type,
+						isPassed: isPassed,
+						grade: grade,
+						weightedGrade: weightedGrade,
 						date: date,
-					};
-				})
-				.filter(course => !!course);
-		});
-	};
-
-	/**
-	 * Tries to resolve the starting year in the university for the current student.
-	 * @returns {Promise<String>}
-	 */
-	let getStartYear = function () {
-		return parseAcademicHistory().then(courseHistory => {
-			return courseHistory
-				.map(course => course.date)
-				.sort((a, b) => a - b)
-				.map(date => date.getFullYear())
-				[0];
-		}).catch(e => {
-			trackError(e, "getStartYear");
-			return null;
-		});
-	};
-
-	/**
-	 * Gets all the courses that the student has taken, not including the failed ones.
-	 * The returned object contains the signed courses, which includes the ones that have also been passed.
-	 * All the passed courses are also included in a different proeprty.
-	 * @returns {Promise<{signed: string[], passed: string[]}>}
-	 */
-	let getPassedCourses = function () {
-		return parseAcademicHistory().then(coursesHistory => {
-			// For signed courses we condier both passed and signed, and remove duplicates.
-			let signedCourses = [...new Set(coursesHistory.map(course => course.courseCode))];
-			let passedCourses = coursesHistory.filter(course => course.type === "PASSED").map(course => course.courseCode);
+					});
+				});
 			return {
-				passed: passedCourses,
-				signed: signedCourses
+				courses: courses,
+				finalExams: finalExams,
 			};
 		}).catch(e => {
-			trackError(e, "getPassedCourses");
+			trackError(e, "getCoursesHistory");
 			throw e;
 		});
 	};
@@ -299,12 +267,11 @@ let PagesDataParser = function (utils, apiConnector) {
 
 	// Public
 	return {
-		getStartYear: getStartYear,
 		getStudentId: getStudentId,
 		getClassSchedules: getClassSchedules,
 
 		getStudentPlanCode: getStudentPlanCode,
-		getPassedCourses: getPassedCourses,
+		getCoursesHistory: getCoursesHistory,
 
 		getProfessorClassesFromSurveys: getProfessorClassesFromSurveys,
 		getTakenSurveys: getTakenSurveys,
