@@ -28,6 +28,7 @@ js/pdf.min.js \
 js/guarani/Utils.js \
 js/guarani/DataCollector.js \
 js/guarani/PagesDataParser.js \
+js/guarani/pages/HorariosPage.js \
 js/guarani/custompages/ProfessorsSearchCustomPage.js \
 js/guarani/custompages/CoursesSearchCustomPage.js \
 js/guarani/custompages/PlanTrackingCustomPage.js \

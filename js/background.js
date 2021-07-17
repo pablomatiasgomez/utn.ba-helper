@@ -4,7 +4,7 @@ chrome.runtime.onMessage.addListener(function (requestInfo, sender, resolve) {
 			return response.json();
 		} else {
 			return response.text().then(body => {
-				throw response.status + " - " + body
+				throw response.status + " - " + body;
 			});
 		}
 	}).then(json => {
