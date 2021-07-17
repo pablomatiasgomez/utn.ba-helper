@@ -20,7 +20,7 @@
 	customPages.appendMenu();
 
 	const PAGE_HANDLERS = {
-		"/autogestion/grado/calendario": () => waitForElementToHide("#loading_top").then(() => HorariosPage(utils)),
+		"/autogestion/grado/calendario": () => HorariosPage(utils),
 	};
 	// When loading from document, the content is rendered async so we need to wait for the loading div to hide...
 	Object.entries(PAGE_HANDLERS).forEach(entry => PAGE_HANDLERS[entry[0]] = () => waitForElementToHide("#loading_top").then(entry[1]));
