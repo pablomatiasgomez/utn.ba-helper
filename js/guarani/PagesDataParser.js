@@ -186,21 +186,27 @@ let PagesDataParser = function (utils, apiConnector) {
 	 * @returns {Promise<{courses: [{courseCode: string, isPassed: boolean, grade: number, weightedGrade: number, date: Date}], finalExams: [{courseCode: string, isPassed: boolean, grade: number, weightedGrade: number, date: Date}]}>}
 	 */
 	let getCoursesHistory = function () {
+		let escapeRegExp = str => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 		const courseTypes = ["En curso", "Regularidad", "Equivalencia Parcial"];
 		const finalExamTypes = ["Promoción", "Examen", "Equivalencia Total"];
 		const allTypes = courseTypes.concat(finalExamTypes);
+
+		const discardedGrades = [
+			"Inicio de dictado",
+			"Ausente",
+			"No aprobad (No aprobada) Ausente",
+		];
 		const gradesRegex = [
-			/Inicio de dictado/,
 			/(\d{1,2}) \(\w+\) (?:Promocionado|Aprobado|Reprobado)/,
 			/Aprobada \(Aprobada\) Aprobado/,
 			/No aprobad \(No aprobada\) Reprobado/,
-			/No aprobad \(No aprobada\) Ausente/,
 			/Aprobado/,
 			/Reprobado/,
-			/Ausente/,
+			...discardedGrades.map(grade => new RegExp(escapeRegExp(grade))),
 		];
 		const dateRegex = /\d{2}\/\d{2}\/\d{4}/;
-		const historyRowRegex = new RegExp(`^(${allTypes.join("|")}) {1,2}- (${gradesRegex.map(i => i.source).join("|")}) (${dateRegex.source}) - .*Detalle$`);
+		const historyRowRegex = new RegExp(`^(${allTypes.map(escapeRegExp).join("|")}) {1,2}- (${gradesRegex.map(i => i.source).join("|")}) (${dateRegex.source}) - .*Detalle$`);
 
 		return fetchAjaxPageContents("/autogestion/grado/historia_academica/?checks=PromocionA,RegularidadA,RegularidadR,RegularidadU,EnCurso,ExamenA,ExamenR,ExamenU,EquivalenciaA,EquivalenciaR,AprobResA,CreditosA,&modo=anio&param_modo=&e_cu=A&e_ex=A&e_re=A", "info_historia").then(responseText => {
 			let courses = [];
@@ -217,6 +223,10 @@ let PagesDataParser = function (utils, apiConnector) {
 					if (!groups) throw `historyRow couldn't be parsed: ${historyRow}`;
 					let arr = courseTypes.includes(groups[1]) ? courses : finalExams;
 					let gradeText = groups[2];
+
+					// Do not care about these type of grades so we ignore the entire row.
+					if (discardedGrades.includes(gradeText)) return;
+
 					let isPassed = (gradeText.includes("Promocionado") || gradeText.includes("Aprobado")) && !gradeText.includes("No aprobad");
 					let date = utils.parseDate(groups[4]);
 
