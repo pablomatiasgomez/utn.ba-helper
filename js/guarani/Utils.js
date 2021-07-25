@@ -1,5 +1,32 @@
-let Utils = function () {
+let Utils = function (apiConnector) {
 
+	let injectScript = function (content) {
+		let script = document.createElement('script');
+		script.type = 'text/javascript';
+		script.innerHTML = content;
+		document.head.appendChild(script);
+	};
+
+	/**
+	 * Attaches a handler to the utn ba events such as a changing a web page via ajax.
+	 * @param eventKey the utn.ba event key
+	 * @param handler the listener that will handle events
+	 */
+	let attachEvent = function (eventKey, handler) {
+		let windowEventKey = `__ce_${eventKey}`;
+		window.addEventListener(windowEventKey, e => {
+			Promise.resolve().then(() => {
+				return handler(e.detail);
+			}).catch(e => {
+				console.error(`Error while executing event handler for event ${eventKey}`, e);
+				return apiConnector.logMessage(`handle_${eventKey}`, true, stringifyError(e));
+			});
+		});
+		injectScript(`kernel.evts.escuchar("${eventKey}", e => window.dispatchEvent(new CustomEvent("${windowEventKey}", {detail: e})), true);`);
+	};
+
+	// ----
+	// TODO: move all constants to a separate file and unify data model with api?
 	const HOURS = {
 		m: {
 			0: {start: "7:45", end: "8:30"},
@@ -70,6 +97,9 @@ let Utils = function () {
 		}
 	};
 
+	/**
+	 * @returns {{shift: string, firstHour: string, lastHour: string, day: string}}
+	 */
 	let getScheduleFromString = function (str) {
 		str = str.replace("á", "a"); // This is for day Sá
 		let groups = /^(Lu|Ma|Mi|Ju|Vi|Sa)\(([mtn])\)([0-6]):([0-6])$/.exec(str);
@@ -82,6 +112,12 @@ let Utils = function () {
 		};
 	};
 
+	/**
+	 * Old (or at least legacy) version of the schedules, represented in the form of:
+	 * "Lu(m)0:6 Ma(t)1:5"
+	 * @param str
+	 * @returns {{shift: string, firstHour: string, lastHour: string, day: string}[]}
+	 */
 	let getSchedulesFromString = function (str) {
 		if (!str) return [];
 		try {
@@ -90,6 +126,34 @@ let Utils = function () {
 			// Log the entire string if it couldn't be parsed:
 			throw `Schedules string couldn't be parsed: '${str}' because of: ${e}`;
 		}
+	};
+
+	/**
+	 * New (or different) version of the schedules, represented in the form of:
+	 * [
+	 * 		{dia_semana: "Lunes", hora_catedra_inicio: "16", hora_catedra_fin: "19"},
+	 * 		{dia_semana: "Jueves", hora_catedra_inicio: "16", hora_catedra_fin: "19"}
+	 * ]
+	 * @param arr
+	 * @returns {{shift: string, firstHour: string, lastHour: string, day: string}[]}
+	 */
+	let getSchedulesFromArray = function (arr) {
+		return arr.map(schedule => {
+			// TODO: Not performant but not important right now (to be improved/unify schedules parsing.)
+			let day = Object.entries(DAYS).filter(entry => entry[1] === schedule.dia_semana).map(entry => entry[0])[0];
+			if (!day) throw `Couldn't parse day: ${day}`;
+
+			let shiftIdx = Math.floor((parseInt(schedule.hora_catedra_inicio) - 1) / 7); // 0:m, 1:t, 2:n
+			let shift = Object.keys(HOURS)[shiftIdx];
+			let firstHour = (parseInt(schedule.hora_catedra_inicio) - 1) % 7;
+			let lastHour = (parseInt(schedule.hora_catedra_fin) - 1) % 7;
+			return {
+				day: day,
+				shift: shift,
+				firstHour: firstHour,
+				lastHour: lastHour,
+			};
+		});
 	};
 
 	let getTimeInfoStringFromSchedules = function (schedules) {
@@ -148,6 +212,10 @@ let Utils = function () {
 
 	// Public
 	return {
+		injectScript: injectScript,
+		attachEvent: attachEvent,
+		//--
+
 		HOURS: HOURS,
 		DAYS: DAYS,
 		TIME_SHIFTS: TIME_SHIFTS,
@@ -156,6 +224,7 @@ let Utils = function () {
 		getWeightedGrade: getWeightedGrade,
 
 		getSchedulesFromString: getSchedulesFromString,
+		getSchedulesFromArray: getSchedulesFromArray,
 		getTimeInfoStringFromSchedules: getTimeInfoStringFromSchedules,
 
 		trimCourseName: trimCourseName,
