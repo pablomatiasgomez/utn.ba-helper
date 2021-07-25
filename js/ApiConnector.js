@@ -79,8 +79,8 @@ let ApiConnector = function (site) {
 	// ------
 
 	let getPreviousProfessors = function (previousProfessorsRequest) {
-		Object.values(previousProfessorsRequest.futureClassSchedules).forEach(branchWithSchedule => {
-			return branchWithSchedule.schedules = branchWithSchedule.schedules.map(mapScheduleToApi);
+		previousProfessorsRequest.forEach(request => {
+			request.schedules = request.schedules.map(mapScheduleToApi);
 		});
 		return postData(BASE_API_URL + "/previous-professors", previousProfessorsRequest);
 	};

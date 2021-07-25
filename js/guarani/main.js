@@ -11,8 +11,8 @@
 	// Init pdf.js
 	pdfjsLib.GlobalWorkerOptions.workerSrc = chrome.runtime.getURL("js/pdf.worker.min.js");
 
-	let utils = new Utils();
 	let apiConnector = new ApiConnector("guarani");
+	let utils = new Utils(apiConnector);
 	let pagesDataParser = new PagesDataParser(utils, apiConnector);
 	let dataCollector = new DataCollector(pagesDataParser, apiConnector);
 	let customPages = new CustomPages(pagesDataParser, utils, apiConnector);
@@ -20,13 +20,15 @@
 	customPages.appendMenu();
 
 	const PAGE_HANDLERS = {
+		// match is performed using startsWith and first one is used.
 		"/autogestion/grado/calendario": () => HorariosPage(utils),
+		"/autogestion/grado/cursada/elegir_materia/": () => PreInscripcionPage(utils, apiConnector),
 	};
-	// When loading from document, the content is rendered async so we need to wait for the loading div to hide...
+	// Wait for the loading div to hide... applies for both loading from document or ajax.
 	Object.entries(PAGE_HANDLERS).forEach(entry => PAGE_HANDLERS[entry[0]] = () => waitForElementToHide("#loading_top").then(entry[1]));
 
 	let handleCurrentPage = () => {
-		let handler = customPages.getSelectedPageHandler() || PAGE_HANDLERS[window.location.pathname];
+		let handler = customPages.getSelectedPageHandler() || Object.keys(PAGE_HANDLERS).filter(key => window.location.pathname.startsWith(key)).map(key => PAGE_HANDLERS[key])[0];
 		if (!handler) return;
 		handler().catch(e => {
 			console.error("Error when handling page " + window.location.pathname, e);
@@ -37,8 +39,23 @@
 	handleCurrentPage();
 
 	// Append a script to capture ajax page changes.
-	window.addEventListener('page_changed', () => handleCurrentPage());
-	injectScript(`kernel.evts.escuchar("operacion_cambiada", e => window.dispatchEvent(new Event('page_changed')), true);`);
+	utils.injectScript(`
+		window.history.pushState = (f => function pushState() {
+			f.apply(this, arguments); // pushState returns void so no need to return value.
+			window.dispatchEvent(new Event("locationchange"));
+		})(window.history.pushState);
+
+		window.history.replaceState = (f => function replaceState() {
+			f.apply(this, arguments); // replaceState returns void so no need to return value.
+			window.dispatchEvent(new Event("locationchange"));
+		})(window.history.replaceState);
+
+		window.addEventListener('popstate', () => {
+			window.dispatchEvent(new Event("locationchange"));
+		});
+	`);
+	window.addEventListener("locationchange", () => handleCurrentPage());
+
 
 	// Background stuff...
 	pagesDataParser.getStudentId().then(studentId => {
@@ -76,10 +93,4 @@
 		});
 	}
 
-	function injectScript(content) {
-		let script = document.createElement('script');
-		script.type = 'text/javascript';
-		script.innerHTML = content;
-		document.head.appendChild(script);
-	}
 })();
