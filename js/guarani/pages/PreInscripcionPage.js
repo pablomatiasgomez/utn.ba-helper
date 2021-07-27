@@ -21,6 +21,7 @@ let PreInscripcionPage = function (utils, apiConnector) {
 		const mapping = {
 			"Medrano": "MEDRANO",
 			"Campus": "CAMPUS",
+			"Campus Virtual": "AULA_VIRTUAL",
 		};
 		let branch = mapping[branchTxt];
 		if (!branch) throw `Branch txt couldn't be parsed: ${branchTxt}`;
@@ -41,17 +42,21 @@ let PreInscripcionPage = function (utils, apiConnector) {
 				optionDetails.push($option.text());
 				$option.text(`(${optionId})` + $option.text());
 
-				let period = parsePeriodTxt(classData.periodo_nombre); // TODO define a common place to parse things, and move all of that out of Utils? (and PagesDataParser)
-				let branch = parseBranch(classData.ubicacion_nombre);
-				let schedules = utils.getSchedulesFromArray(classData.horas_catedra);
-				return {
-					year: period.year,
-					quarter: period.quarter,
-					classCode: classData.comision_nombre,
-					courseCode: classData.actividad_codigo,
-					branch: branch,
-					schedules: schedules,
-				};
+				try {
+					let period = parsePeriodTxt(classData.periodo_nombre); // TODO define a common place to parse things, and move all of that out of Utils? (and PagesDataParser)
+					let branch = parseBranch(classData.ubicacion_nombre);
+					let schedules = utils.getSchedulesFromArray(classData.horas_catedra);
+					return {
+						year: period.year,
+						quarter: period.quarter,
+						classCode: classData.comision_nombre,
+						courseCode: classData.actividad_codigo,
+						branch: branch,
+						schedules: schedules,
+					};
+				} catch (e) {
+					throw `Couldn't parse classData: ${JSON.stringify(classData)}. Caused by: ${e}`;
+				}
 			})
 			.filter(req => !!req);
 
@@ -105,7 +110,7 @@ let PreInscripcionPage = function (utils, apiConnector) {
 		return $.ajax(location.href);
 	}).then(responseText => {
 		let response = JSON.parse(responseText);
-		if (response.cod !== "1") throw `Invalid ajax contents ${responseText}`;
+		if (response.cod !== "1" || !response.agenda) throw `Invalid ajax contents ${responseText}`;
 
 		let currentCourseOptionsData = response.agenda.comisiones;
 		addPreviousProfessorsInfo(currentCourseOptionsData);

@@ -15,14 +15,38 @@ let Utils = function (apiConnector) {
 	let attachEvent = function (eventKey, handler) {
 		let windowEventKey = `__ce_${eventKey}`;
 		window.addEventListener(windowEventKey, e => {
-			Promise.resolve().then(() => {
-				return handler(e.detail);
-			}).catch(e => {
-				console.error(`Error while executing event handler for event ${eventKey}`, e);
-				return apiConnector.logMessage(`handle_${eventKey}`, true, stringifyError(e));
-			});
+			wrapEventFunction(eventKey, () => handler(e.detail));
 		});
 		injectScript(`kernel.evts.escuchar("${eventKey}", e => window.dispatchEvent(new CustomEvent("${windowEventKey}", {detail: e})), true);`);
+	};
+
+	let stringifyError = function (error) {
+		if (error instanceof Error) return error.stack; // Stack includes the message
+		if (typeof error === 'object') return JSON.stringify(error);
+		return error;
+	};
+
+	let wrapError = function (message, error) {
+		let newError = new Error(message);
+		// Remove this function (wrapError) call from the stack..
+		let newStack = newError.stack.split("\n");
+		newStack.splice(1, 1);
+		newStack = newStack.join("\n");
+		newError.stack = `${newStack}\nCaused by: ${error.stack}`;
+		return newError;
+	};
+
+	/**
+	 * Wraps a function that is triggered from a separate event, and handles errors by logging them to the api.
+	 */
+	let wrapEventFunction = function (name, fn) {
+		// Start with Promise.resolve() as we don't know if fn returns promise or not.
+		Promise.resolve().then(() => {
+			return fn();
+		}).catch(e => {
+			console.error(`Error while executing event handler for event ${name}`, e);
+			return apiConnector.logMessage(`HandleEvent_${name}`, true, stringifyError(e));
+		});
 	};
 
 	// ----
@@ -178,12 +202,6 @@ let Utils = function (apiConnector) {
 		return new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);
 	};
 
-	let stringifyError = function (error) {
-		if (error instanceof Error) return error.toString() + "\n" + error.stack;
-		if (typeof error === 'object') return JSON.stringify(error);
-		return error;
-	};
-
 	let getColorForAvg = function (avg) {
 		if (avg < 60) {
 			return "#D51C26";
@@ -214,6 +232,10 @@ let Utils = function (apiConnector) {
 	return {
 		injectScript: injectScript,
 		attachEvent: attachEvent,
+		stringifyError: stringifyError,
+		wrapError: wrapError,
+		wrapEventFunction: wrapEventFunction,
+
 		//--
 
 		HOURS: HOURS,
@@ -230,7 +252,6 @@ let Utils = function (apiConnector) {
 		trimCourseName: trimCourseName,
 		parseDate: parseDate,
 
-		stringifyError: stringifyError,
 		getColorForAvg: getColorForAvg,
 		getOverallScoreSpan: getOverallScoreSpan,
 		getProfessorLi: getProfessorLi,

@@ -10,14 +10,14 @@ let CoursesSearchCustomPage = function ($container, services) {
 		let $searchTxt = $(`<input type="text" style="margin: 0 5px 0 0;" placeholder="Minimo 3 caracteres..." />`);
 		$searchTxt.on("keydown", function (e) {
 			if (e.key === "Enter") {
-				search($searchTxt.val());
+				services.utils.wrapEventFunction("CoursesSearch", () => search($searchTxt.val()));
 				return false;
 			}
 		});
 		$searchDiv.append($searchTxt);
 		let $searchBtn = $(`<a href="#" class="btn btn-info btn-small">Buscar</a>`);
 		$searchBtn.on("click", function () {
-			search($searchTxt.val());
+			services.utils.wrapEventFunction("CoursesSearch", () => search($searchTxt.val()));
 			return false;
 		});
 		$searchDiv.append($searchBtn);
@@ -30,7 +30,7 @@ let CoursesSearchCustomPage = function ($container, services) {
 		let $searchResultsTable = $(`<table></table>`).append("<tbody></tbody>");
 		$searchResultsTable.on("click", "a", function () {
 			let courseCode = $(this).text();
-			retrieveClassesForCourse(courseCode, 0, 15);
+			services.utils.wrapEventFunction("retrieveClassesForCourse", () => retrieveClassesForCourse(courseCode, 0, 15));
 			return false;
 		});
 		$searchResultsDiv.append($searchResultsTable);
@@ -81,7 +81,7 @@ let CoursesSearchCustomPage = function ($container, services) {
 					<tr><th colspan="2">Cuatr.</th><th>Curso</th><th>Anexo</th><th>Horario</th><th>Profesores</th></tr>
 					<tr><td colspan="6"><a href="#">Ver mas resultados...</a></td></tr>`);
 				$courseDataDiv.find("table tbody tr:last a").on("click", function () {
-					retrieveClassesForCourse(courseCode, offset += limit, limit);
+					services.utils.wrapEventFunction("retrieveClassesForCoursePage", () => retrieveClassesForCourse(courseCode, offset += limit, limit));
 					return false;
 				});
 			}

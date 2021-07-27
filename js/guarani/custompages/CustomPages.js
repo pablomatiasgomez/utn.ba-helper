@@ -1,4 +1,4 @@
-let CustomPages = function (pagesDataParser, utils, apiConnector) {
+let CustomPages = function (pagesDataParser, dataCollector, utils, apiConnector) {
 
 	const CUSTOM_PAGES = [
 		CoursesSearchCustomPage,
@@ -51,6 +51,7 @@ let CustomPages = function (pagesDataParser, utils, apiConnector) {
 			initCustomPage(selectedCustomPage);
 			return selectedCustomPage($("#kernel_contenido .main"), {
 				pagesDataParser,
+				dataCollector,
 				utils,
 				apiConnector
 			});

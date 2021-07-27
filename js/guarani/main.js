@@ -13,9 +13,9 @@
 
 	let apiConnector = new ApiConnector("guarani");
 	let utils = new Utils(apiConnector);
-	let pagesDataParser = new PagesDataParser(utils, apiConnector);
+	let pagesDataParser = new PagesDataParser(utils);
 	let dataCollector = new DataCollector(pagesDataParser, apiConnector);
-	let customPages = new CustomPages(pagesDataParser, utils, apiConnector);
+	let customPages = new CustomPages(pagesDataParser, dataCollector, utils, apiConnector);
 
 	customPages.appendMenu();
 
@@ -31,8 +31,8 @@
 		let handler = customPages.getSelectedPageHandler() || Object.keys(PAGE_HANDLERS).filter(key => window.location.pathname.startsWith(key)).map(key => PAGE_HANDLERS[key])[0];
 		if (!handler) return;
 		handler().catch(e => {
-			console.error("Error when handling page " + window.location.pathname, e);
-			return apiConnector.logMessage("Handle page " + window.location.pathname, true, utils.stringifyError(e));
+			console.error("Error when handling page " + window.location.pathname + window.location.search, e);
+			return apiConnector.logMessage("HandlePage " + window.location.pathname + window.location.search, true, utils.stringifyError(e));
 		});
 	};
 
