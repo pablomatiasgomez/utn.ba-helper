@@ -127,7 +127,7 @@ let Utils = function (apiConnector) {
 	let getScheduleFromString = function (str) {
 		str = str.replace("á", "a"); // This is for day Sá
 		let groups = /^(Lu|Ma|Mi|Ju|Vi|Sa)\(([mtn])\)([0-6]):([0-6])$/.exec(str);
-		if (!groups) throw `Schedule string couldn't be parsed: '${str}'`;
+		if (!groups) throw new Error(`Schedule string couldn't be parsed: '${str}'`);
 		return {
 			day: groups[1],
 			shift: groups[2],
@@ -147,8 +147,7 @@ let Utils = function (apiConnector) {
 		try {
 			return str.split(" ").filter(el => !!el).map(getScheduleFromString);
 		} catch (e) {
-			// Log the entire string if it couldn't be parsed:
-			throw `Schedules string couldn't be parsed: '${str}' because of: ${e}`;
+			throw wrapError(`Schedules string couldn't be parsed: '${str}'`, e);
 		}
 	};
 
@@ -165,7 +164,7 @@ let Utils = function (apiConnector) {
 		return arr.map(schedule => {
 			// TODO: Not performant but not important right now (to be improved/unify schedules parsing.)
 			let day = Object.entries(DAYS).filter(entry => entry[1] === schedule.dia_semana).map(entry => entry[0])[0];
-			if (!day) throw `Couldn't parse day: ${day}`;
+			if (!day) throw new Error(`Couldn't parse day: ${day}`);
 
 			let shiftIdx = Math.floor((parseInt(schedule.hora_catedra_inicio) - 1) / 7); // 0:m, 1:t, 2:n
 			let shift = Object.keys(HOURS)[shiftIdx];

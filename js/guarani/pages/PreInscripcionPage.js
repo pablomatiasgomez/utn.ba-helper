@@ -8,7 +8,7 @@ let PreInscripcionPage = function (utils, apiConnector) {
 		};
 		const yearAndQuarterRegex = new RegExp(`^Grado (${Object.keys(quarterMappings).join("|")}) (\\d{4})$`);
 		let groups = yearAndQuarterRegex.exec(periodTxt);
-		if (!groups) throw `Class period couldn't be parsed: ${periodTxt}`;
+		if (!groups) throw new Error(`Class period couldn't be parsed: ${periodTxt}`);
 		let quarter = quarterMappings[groups[1]];
 		let year = parseInt(groups[2]);
 		return {
@@ -24,7 +24,7 @@ let PreInscripcionPage = function (utils, apiConnector) {
 			"Campus Virtual": "AULA_VIRTUAL",
 		};
 		let branch = mapping[branchTxt];
-		if (!branch) throw `Branch txt couldn't be parsed: ${branchTxt}`;
+		if (!branch) throw new Error(`Branch txt couldn't be parsed: ${branchTxt}`);
 		return branch;
 	};
 
@@ -55,7 +55,7 @@ let PreInscripcionPage = function (utils, apiConnector) {
 						schedules: schedules,
 					};
 				} catch (e) {
-					throw `Couldn't parse classData: ${JSON.stringify(classData)}. Caused by: ${e}`;
+					throw utils.wrapError(`Couldn't parse classData: ${JSON.stringify(classData)}`, e);
 				}
 			})
 			.filter(req => !!req);
@@ -110,7 +110,7 @@ let PreInscripcionPage = function (utils, apiConnector) {
 		return $.ajax(location.href);
 	}).then(responseText => {
 		let response = JSON.parse(responseText);
-		if (response.cod !== "1" || !response.agenda) throw `Invalid ajax contents ${responseText}`;
+		if (response.cod !== "1" || !response.agenda) throw new Error(`Invalid ajax contents ${responseText}`);
 
 		let currentCourseOptionsData = response.agenda.comisiones;
 		addPreviousProfessorsInfo(currentCourseOptionsData);
