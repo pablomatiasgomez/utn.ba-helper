@@ -3,7 +3,7 @@
 echo "Building app.."
 
 BASE_JS_FILES="\
-js/jquery-3.4.1.min.js \
+js/jquery-3.6.0.min.js \
 js/ApiConnector.js"
 
 JS_FILES="\

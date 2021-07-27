@@ -148,16 +148,13 @@ let ApiConnector = function (site) {
 	let makeRequest = function (options) {
 		return new Promise((resolve, reject) => {
 			chrome.runtime.sendMessage(options, response => (response && response.error) ? reject(response.error) : resolve(response));
-		}).catch(e => {
-			console.error("Error while making request", e);
-			throw e;
 		});
 	};
 
 	let buildQueryParams = function (params) {
 		return Object.entries(params)
 			.map(entry => `${encodeURIComponent(entry[0])}=${encodeURIComponent(entry[1])}`)
-			.join("&")
+			.join("&");
 	};
 
 

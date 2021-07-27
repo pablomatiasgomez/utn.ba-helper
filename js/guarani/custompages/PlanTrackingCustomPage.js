@@ -11,17 +11,21 @@ let PlanTrackingCustomPage = function ($container, services) {
 	let $plan;
 
 	let createPage = function (planCode, coursesHistory) {
+		let promises = [];
+
 		$container.append(`<h3>Plan ${planCode}</h3>`);
 
 		$gradesSummary = $("<div></div>");
 		$container.append($gradesSummary);
-		buildGradesSummary(coursesHistory);
+		promises.push(buildGradesSummary(coursesHistory));
 
 		$container.append("<hr>");
 
 		$plan = $("<div></div>");
 		$container.append($plan);
-		loadPlan(planCode, coursesHistory);
+		promises.push(loadPlan(planCode, coursesHistory));
+
+		return Promise.all(promises);
 	};
 
 	let buildGradesSummary = function (coursesHistory) {
@@ -39,11 +43,16 @@ let PlanTrackingCustomPage = function ($container, services) {
 		let failedFinalExams = coursesHistory.finalExams.filter(course => !course.isPassed);
 		let pesoAcademico = 11 * passedFinalExams.length - 5 * yearsCount - 3 * failedFinalExams.length;
 
-		// Some finals do not have grade (e.g. "Equivalencia Total") so we ignore them for the average.
+		// Some final exams do not have grade (e.g. "Equivalencia Total") so we ignore them for the average.
 		let passedWeightedGrades = passedFinalExams.filter(course => typeof course.weightedGrade === "number").map(course => course.weightedGrade);
 		let failedWeightedGrades = failedFinalExams.filter(course => typeof course.weightedGrade === "number").map(course => course.weightedGrade);
 		let passedNonWeightedGrades = passedFinalExams.filter(course => typeof course.grade === "number").map(course => course.grade);
 		let failedNonWeightedGrades = failedFinalExams.filter(course => typeof course.grade === "number").map(course => course.grade);
+
+		let allWeightedGradesAverage = arrayAverage(passedWeightedGrades.concat(failedWeightedGrades));
+		let passedWeightedGradesAverage = arrayAverage(passedWeightedGrades);
+		let allNonWeightedGradesAverage = arrayAverage(passedNonWeightedGrades.concat(failedNonWeightedGrades));
+		let passedNonWeightedGradesAverage = arrayAverage(passedNonWeightedGrades);
 
 		$gradesSummary.html(`<table><tbody></tbody></table>(*) La nota ponderada es calculada por el "UTN.BA Helper" segun Ordenanza Nº 1549`);
 		const appendTableRow = (description, value) => $gradesSummary.find("tbody").append("<tr><td>" + description + "</td><td><b>" + (value || value === 0 ? value : "n/a") + "</b></td></tr>");
@@ -51,10 +60,12 @@ let PlanTrackingCustomPage = function ($container, services) {
 		appendTableRow("Peso academico", `${pesoAcademico} <small>(11*${passedFinalExams.length} - 5*${yearsCount} - 3*${failedFinalExams.length})</small>`);
 		appendTableRow("Cantidad de finales aprobados", passedFinalExams.length);
 		appendTableRow("Cantidad de finales desaprobados", failedFinalExams.length);
-		appendTableRow("Promedio de notas ponderadas <sup>(*)</sup> con desaprobados", arrayAverage(passedWeightedGrades.concat(failedWeightedGrades)));
-		appendTableRow("Promedio de notas ponderadas <sup>(*)</sup> sin desaprobados", arrayAverage(passedWeightedGrades));
-		appendTableRow("Promedio de notas originales <sup>(*)</sup> con desaprobados", arrayAverage(passedNonWeightedGrades.concat(failedNonWeightedGrades)));
-		appendTableRow("Promedio de notas originales <sup>(*)</sup> sin desaprobados", arrayAverage(passedNonWeightedGrades));
+		appendTableRow("Promedio de notas ponderadas <sup>(*)</sup> con desaprobados", allWeightedGradesAverage);
+		appendTableRow("Promedio de notas ponderadas <sup>(*)</sup> sin desaprobados", passedWeightedGradesAverage);
+		appendTableRow("Promedio de notas originales <sup>(*)</sup> con desaprobados", allNonWeightedGradesAverage);
+		appendTableRow("Promedio de notas originales <sup>(*)</sup> sin desaprobados", passedNonWeightedGradesAverage);
+
+		return services.dataCollector.logUserStat(pesoAcademico, passedWeightedGradesAverage, allWeightedGradesAverage, passedFinalExams.length, failedFinalExams.length);
 	};
 
 	//...

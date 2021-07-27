@@ -25,14 +25,14 @@ let ProfessorsSearchCustomPage = function ($container, services) {
 		let $searchTxt = $(`<input type="text" style="margin: 0 5px 0 0;" placeholder="Minimo 3 caracteres..." />`);
 		$searchTxt.on("keydown", function (e) {
 			if (e.key === "Enter") {
-				search($searchTxt.val());
+				services.utils.wrapEventFunction("ProfessorsSearch", () => search($searchTxt.val()));
 				return false;
 			}
 		});
 		$searchDiv.append($searchTxt);
 		let $searchBtn = $(`<a href="#" class="btn btn-info btn-small">Buscar</a>`);
 		$searchBtn.on("click", function () {
-			search($searchTxt.val());
+			services.utils.wrapEventFunction("ProfessorsSearch", () => search($searchTxt.val()));
 			return false;
 		});
 		$searchDiv.append($searchBtn);
@@ -45,7 +45,7 @@ let ProfessorsSearchCustomPage = function ($container, services) {
 		let $searchResultsTable = $(`<table></table>`).append("<tbody></tbody>");
 		$searchResultsTable.on("click", "a", function () {
 			let professorName = $(this).text();
-			retrieveProfessorData(professorName);
+			services.utils.wrapEventFunction("retrieveProfessorData", () => retrieveProfessorData(professorName));
 			return false;
 		});
 		$searchResultsDiv.append($searchResultsTable);
@@ -85,8 +85,10 @@ let ProfessorsSearchCustomPage = function ($container, services) {
 	let retrieveProfessorData = function (professorName) {
 		$professorResultsTitleDiv.show().get(0).scrollIntoView({behavior: "smooth"});
 		$professorResultsTitleDiv.html(`<h2 style="text-align: center;">Resultados para ${professorName}</h2><hr>`);
-		retrieveProfessorCourses(professorName);
-		retrieveSurveyResults(professorName);
+		return Promise.all([
+			retrieveProfessorCourses(professorName),
+			retrieveSurveyResults(professorName),
+		]);
 	};
 
 	let retrieveProfessorCourses = function (professorName) {

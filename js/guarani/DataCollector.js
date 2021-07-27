@@ -80,8 +80,8 @@ let DataCollector = function (pagesDataParser, apiConnector) {
 
 	let collectClassSchedulesWithProfessors = function () {
 		return Promise.all([
-			pagesDataParser.getProfessorClassesFromSurveys(),
 			pagesDataParser.getClassSchedules(),
+			pagesDataParser.getProfessorClassesFromSurveys(),
 		]).then(results => {
 			let classSchedules = results[0].concat(results[1]);
 			if (classSchedules.length) {

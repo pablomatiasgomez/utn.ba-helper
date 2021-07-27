@@ -1,38 +1,30 @@
-let PagesDataParser = function (utils, apiConnector) {
-
-	let trackError = function (error, methodName) {
-		console.error("Error at " + methodName, error);
-		return apiConnector.logMessage(methodName, true, utils.stringifyError(error));
-	};
+let PagesDataParser = function (utils) {
 
 	// We want to fetch only once each page.
 	let CACHED_PAGE_CONTENTS = {};
-	let fetchPageContents = function (url) {
+
+	/**
+	 * Fetches and parses the way guarani's page ajax contents are loaded.
+	 * Returned contents are different script tags that contain the html so they need to be parsed.
+	 */
+	let fetchAjaxPageContents = function (url, infoId) {
 		if (CACHED_PAGE_CONTENTS[url]) {
 			return Promise.resolve(CACHED_PAGE_CONTENTS[url]);
 		}
 		return $.ajax(url).then(responseText => {
-			CACHED_PAGE_CONTENTS[url] = responseText;
-			return responseText;
-		});
-	};
-
-	/**
-	 * Fetches and parses the way guarani's page ajax contents are loaded.
-	 * Returned contexts are different script tags that contain the html so they need to be parsed.
-	 */
-	let fetchAjaxPageContents = function (url, infoId) {
-		return fetchPageContents(url).then(responseText => {
 			let response = JSON.parse(responseText);
-			if (response.cod !== "1") throw `Invalid ajax contents ${responseText}`;
+			if (response.cod !== "1") throw new Error(`Invalid ajax contents ${responseText} for url ${url}`);
 			let contents = $(response.cont).filter("script").toArray()
 				.map(script => $(script).html())
 				.filter(script => script.startsWith("kernel.renderer.on_arrival"))
 				.map(script => JSON.parse(script.replace("kernel.renderer.on_arrival(", "").replace(");", "")))
 				.filter(data => data.info.id === infoId)
 				.map(data => data.content);
-			if (contents.length !== 1) throw `Found unexpected number of page contents: ${contents.length}. responseText: ${responseText}`;
+			if (contents.length !== 1) throw new Error(`Found unexpected number of page contents: ${contents.length} for url ${url}. responseText: ${responseText}.`);
 			return contents[0];
+		}).then(contents => {
+			CACHED_PAGE_CONTENTS[url] = contents;
+			return contents;
 		});
 	};
 
@@ -65,15 +57,12 @@ let PagesDataParser = function (utils, apiConnector) {
 	let getStudentId = function () {
 		return fetchPdfContents("/autogestion/grado/plan_estudio/generar_pdf").then(contents => {
 			let index = contents.indexOf("Legajo:");
-			if (index === -1) throw `Couldn't find studentId in pdfContents: ${JSON.stringify(contents)}`;
+			if (index === -1) throw new Error(`Couldn't find studentId in pdfContents: ${JSON.stringify(contents)}`);
 
 			let studentId = contents[index + 1].trim();
 			// Split the checkdigit, add the thousands separator, and join the checkdigit again..
 			// This is because we have been parsing studentIds in the form of "xxx.xxx-x"
 			return parseInt(studentId.slice(0, -1)).toLocaleString("es-AR") + "-" + studentId.slice(-1);
-		}).catch(e => {
-			trackError(e, "getStudentId");
-			throw e;
 		});
 	};
 
@@ -94,7 +83,7 @@ let PagesDataParser = function (utils, apiConnector) {
 			// We will iterate pdf contents one by one, validating the structure.
 			let i = 0;
 			let validateExpectedContents = expectedContents => expectedContents.forEach(expectedContent => {
-				if (contents[i++] !== expectedContent) throw `Invalid pdf contents (${i - 1}): ${JSON.stringify(contents)}`;
+				if (contents[i++] !== expectedContent) throw new Error(`Invalid pdf contents (${i - 1}): ${JSON.stringify(contents)}`);
 			});
 
 			validateExpectedContents(["", "COMPROBANTE DE INSCRIPCIÓN A CURSADA"]);
@@ -105,7 +94,7 @@ let PagesDataParser = function (utils, apiConnector) {
 			// If we need to use its value, we need to sanitize to the correct format.
 			let studentIdAndName = contents[i++];
 			let groups = /^(\d{2,3}\.\d{3}-\d?) (.*)$/.exec(studentIdAndName);
-			if (!groups) throw `Couldn't parse studentIdAndName: ${studentIdAndName}. PdfContents: ${JSON.stringify(contents)}`;
+			if (!groups) throw new Error(`Couldn't parse studentIdAndName: ${studentIdAndName}. PdfContents: ${JSON.stringify(contents)}`);
 
 			validateExpectedContents(["Código", "Actividad", "Período", "Comisión", "Ubicación", "Aula", "Horario"]);
 
@@ -114,7 +103,7 @@ let PagesDataParser = function (utils, apiConnector) {
 			// After all the class schedules rows, this is the following text so we know where to stop..
 			while (contents[i] !== "Firma y Sello Departamento") {
 				let courseCode = contents[i++]; // e.g.: 950701
-				if (!/^\d{6}$/.test(courseCode)) throw `courseCode couldn't be parsed: ${courseCode}. PdfContents: ${JSON.stringify(contents)}`;
+				if (!/^\d{6}$/.test(courseCode)) throw new Error(`courseCode couldn't be parsed: ${courseCode}. PdfContents: ${JSON.stringify(contents)}`);
 
 				let courseName = contents[i++]; // e.g.: Fisica I
 
@@ -126,7 +115,7 @@ let PagesDataParser = function (utils, apiConnector) {
 					yearAndQuarter = contents[i++];
 					groups = yearAndQuarterRegex.exec(yearAndQuarter);
 				}
-				if (!groups) throw `Class time couldn't be parsed: ${yearAndQuarter}. PdfContents: ${JSON.stringify(contents)}`;
+				if (!groups) throw new Error(`Class time couldn't be parsed: ${yearAndQuarter}. PdfContents: ${JSON.stringify(contents)}`);
 				let quarter = (groups[1] === "Anual") ? "A" : (groups[2] + "C"); // A, 1C, 2C
 				let year = parseInt(groups[3]);
 
@@ -159,9 +148,6 @@ let PagesDataParser = function (utils, apiConnector) {
 				});
 			}
 			return classSchedules;
-		}).catch(e => {
-			trackError(e, "getClassSchedules");
-			throw e;
 		});
 	};
 
@@ -173,11 +159,8 @@ let PagesDataParser = function (utils, apiConnector) {
 		return fetchAjaxPageContents("/autogestion/grado/plan_estudio", "info_plan").then(responseText => {
 			let planText = $(responseText).filter(".encabezado").find("td:eq(1)").text();
 			let groups = /^Plan: \((\w+)\)/.exec(planText);
-			if (!groups) throw "planText couldn't be parsed: " + planText;
+			if (!groups) throw new Error(`planText couldn't be parsed: ${planText}`);
 			return groups[1];
-		}).catch(e => {
-			trackError(e, "getStudentPlanCode");
-			throw e;
 		});
 	};
 
@@ -215,12 +198,12 @@ let PagesDataParser = function (utils, apiConnector) {
 				.map(item => {
 					let courseText = $(item).find("h4").text();
 					let groups = /\((\d{6})\)/.exec(courseText);
-					if (!groups) throw "courseText couldn't be parsed: " + courseText;
+					if (!groups) throw new Error(`courseText couldn't be parsed: ${courseText}`);
 					let courseCode = groups[1];
 
 					let historyRow = $(item).find("span").text().trim();
 					groups = historyRowRegex.exec(historyRow);
-					if (!groups) throw `historyRow couldn't be parsed: ${historyRow}`;
+					if (!groups) throw new Error(`historyRow couldn't be parsed: ${historyRow}`);
 					let arr = courseTypes.includes(groups[1]) ? courses : finalExams;
 					let gradeText = groups[2];
 
@@ -245,9 +228,6 @@ let PagesDataParser = function (utils, apiConnector) {
 				courses: courses,
 				finalExams: finalExams,
 			};
-		}).catch(e => {
-			trackError(e, "getCoursesHistory");
-			throw e;
 		});
 	};
 
@@ -258,10 +238,7 @@ let PagesDataParser = function (utils, apiConnector) {
 	 */
 	let getProfessorClassesFromSurveys = function () {
 		// TODO parse this information once we know where it is.
-		return Promise.resolve([]).catch(e => {
-			trackError(e, "getProfessorClassesFromSurveys");
-			throw e;
-		});
+		return Promise.resolve([]);
 	};
 
 	/**
@@ -269,11 +246,9 @@ let PagesDataParser = function (utils, apiConnector) {
 	 */
 	let getTakenSurveys = function () {
 		// TODO parse this information once we know where it is.
-		return Promise.resolve([]).catch(e => {
-			trackError(e, "getTakenSurveys");
-			throw e;
-		});
+		return Promise.resolve([]);
 	};
+
 
 	// Public
 	return {
