@@ -26,12 +26,7 @@ let Utils = function (apiConnector) {
 			return error.toString() + "\n" + error.stack;
 		}
 		if (typeof error === "object") {
-			let str = JSON.stringify(error);
-			if (str === "{}") {
-				// If no properties are exposed, at least try to grab first level properties:
-				str = JSON.stringify(error, Object.getOwnPropertyNames(error));
-			}
-			return str;
+			return JSON.stringify(error);
 		}
 		return error;
 	};
