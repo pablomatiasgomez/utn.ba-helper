@@ -113,8 +113,8 @@ let PreInscripcionPage = function (utils, apiConnector) {
 		if (response.cod !== "1" || !response.agenda) throw new Error(`Invalid ajax contents ${responseText}`);
 
 		let currentCourseOptionsData = response.agenda.comisiones;
-		addPreviousProfessorsInfo(currentCourseOptionsData);
-
+		return addPreviousProfessorsInfo(currentCourseOptionsData);
+	}).then(() => {
 		// Once the alternatives start to be assigned, the combo and everything is reloaded so we need to render it again.
 		// Given that handling this is somewhat difficult as the user may navigate many different courses, for now we reload the page :(
 		utils.attachEvent("comision_preinscripta", () => location.reload());
