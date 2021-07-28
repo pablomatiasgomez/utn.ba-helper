@@ -21,8 +21,18 @@ let Utils = function (apiConnector) {
 	};
 
 	let stringifyError = function (error) {
-		if (error instanceof Error) return error.stack; // Stack includes the message
-		if (typeof error === 'object') return JSON.stringify(error);
+		if (error instanceof Error) {
+			// Stack can indlue the message in some errors, but not in all cases.
+			return error.toString() + "\n" + error.stack;
+		}
+		if (typeof error === "object") {
+			let str = JSON.stringify(error);
+			if (str === "{}") {
+				// If no properties are exposed, at least try to grab first level properties:
+				str = JSON.stringify(error, Object.getOwnPropertyNames(error));
+			}
+			return str;
+		}
 		return error;
 	};
 
