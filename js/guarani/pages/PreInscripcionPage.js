@@ -110,7 +110,7 @@ let PreInscripcionPage = function (utils, apiConnector) {
 		return $.ajax(location.href);
 	}).then(responseText => {
 		let response = JSON.parse(responseText);
-		if (response.cod !== "1" || !response.agenda) throw new Error(`Invalid ajax contents ${responseText}`);
+		if (response.cod !== "1" || !response.agenda) throw new Error(`Invalid ajax contents getting courseOptionsData. responseText: ${responseText}`);
 
 		let currentCourseOptionsData = response.agenda.comisiones;
 		return addPreviousProfessorsInfo(currentCourseOptionsData);
