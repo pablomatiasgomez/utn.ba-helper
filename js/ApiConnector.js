@@ -147,7 +147,7 @@ let ApiConnector = function (site) {
 
 	let makeRequest = function (options) {
 		return new Promise((resolve, reject) => {
-			chrome.runtime.sendMessage(options, response => (response && response.error) ? reject(response.error) : resolve(response));
+			chrome.runtime.sendMessage(options, response => (response && response.errorStr) ? reject(new Error(response.errorStr)) : resolve(response));
 		});
 	};
 

@@ -21,8 +21,18 @@ let Utils = function (apiConnector) {
 	};
 
 	let stringifyError = function (error) {
-		if (error instanceof Error) return error.stack; // Stack includes the message
-		if (typeof error === 'object') return JSON.stringify(error);
+		if (error instanceof Error) {
+			// Stack can indlue the message in some errors, but not in all cases.
+			let message = error.toString();
+			if (error.stack.startsWith(message)) {
+				return error.stack;
+			} else {
+				return message + "\n" + error.stack;
+			}
+		}
+		if (typeof error === "object") {
+			return JSON.stringify(error);
+		}
 		return error;
 	};
 
@@ -37,15 +47,16 @@ let Utils = function (apiConnector) {
 	};
 
 	/**
-	 * Wraps a function that is triggered from a separate event, and handles errors by logging them to the api.
+	 * Wraps a function that is triggered from an async event, and handles errors by logging them to the api.
 	 */
 	let wrapEventFunction = function (name, fn) {
 		// Start with Promise.resolve() as we don't know if fn returns promise or not.
-		Promise.resolve().then(() => {
+		return Promise.resolve().then(() => {
 			return fn();
 		}).catch(e => {
-			console.error(`Error while executing event handler for event ${name}`, e);
-			return apiConnector.logMessage(`HandleEvent_${name}`, true, stringifyError(e));
+			console.error(`Error while executing event function ${name}`, e);
+			if (e instanceof LoggedOutError) return; // Not sending LoggedOutError.
+			return apiConnector.logMessage(name, true, stringifyError(e));
 		});
 	};
 

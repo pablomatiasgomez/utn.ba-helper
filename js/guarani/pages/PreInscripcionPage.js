@@ -5,6 +5,7 @@ let PreInscripcionPage = function (utils, apiConnector) {
 			"Anual": "A",
 			"Primer Cuatrimestre": "1C",
 			"Segundo Cuatrimestre": "2C",
+			"ASS": "A", // Weird case, was found in "Grado ASS 2022" (seems to be specific to courseCode: 950454)
 		};
 		const yearAndQuarterRegex = new RegExp(`^Grado (${Object.keys(quarterMappings).join("|")}) (\\d{4})$`);
 		let groups = yearAndQuarterRegex.exec(periodTxt);
@@ -110,11 +111,12 @@ let PreInscripcionPage = function (utils, apiConnector) {
 		return $.ajax(location.href);
 	}).then(responseText => {
 		let response = JSON.parse(responseText);
-		if (response.cod !== "1" || !response.agenda) throw new Error(`Invalid ajax contents ${responseText}`);
+		if (response.cod === "1" && response.titulo === "Grado - Acceso" && response.operacion === "acceso") throw new LoggedOutError();
+		if (response.cod !== "1" || !response.agenda) throw new Error(`Invalid ajax contents getting courseOptionsData. responseText: ${responseText}`);
 
 		let currentCourseOptionsData = response.agenda.comisiones;
-		addPreviousProfessorsInfo(currentCourseOptionsData);
-
+		return addPreviousProfessorsInfo(currentCourseOptionsData);
+	}).then(() => {
 		// Once the alternatives start to be assigned, the combo and everything is reloaded so we need to render it again.
 		// Given that handling this is somewhat difficult as the user may navigate many different courses, for now we reload the page :(
 		utils.attachEvent("comision_preinscripta", () => location.reload());

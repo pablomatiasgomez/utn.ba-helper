@@ -13,14 +13,15 @@ let PagesDataParser = function (utils) {
 		}
 		return $.ajax(url).then(responseText => {
 			let response = JSON.parse(responseText);
-			if (response.cod !== "1") throw new Error(`Invalid ajax contents ${responseText} for url ${url}`);
+			if (response.cod === "1" && response.titulo === "Grado - Acceso" && response.operacion === "acceso") throw new LoggedOutError();
+			if (response.cod !== "1") throw new Error(`Invalid ajax contents for url ${url} and infoId: ${infoId}. responseText: ${responseText}`);
 			let contents = $(response.cont).filter("script").toArray()
 				.map(script => $(script).html())
 				.filter(script => script.startsWith("kernel.renderer.on_arrival"))
 				.map(script => JSON.parse(script.replace("kernel.renderer.on_arrival(", "").replace(");", "")))
 				.filter(data => data.info.id === infoId)
 				.map(data => data.content);
-			if (contents.length !== 1) throw new Error(`Found unexpected number of page contents: ${contents.length} for url ${url}. responseText: ${responseText}.`);
+			if (contents.length !== 1) throw new Error(`Found unexpected number of page contents: ${contents.length} for url ${url} and infoId: ${infoId}. responseText: ${responseText}`);
 			return contents[0];
 		}).then(contents => {
 			CACHED_PAGE_CONTENTS[url] = contents;
@@ -237,8 +238,12 @@ let PagesDataParser = function (utils) {
 	 * @returns {Promise<*[]>} an array of class schedules for each combination of professor and class
 	 */
 	let getProfessorClassesFromSurveys = function () {
-		// TODO parse this information once we know where it is.
-		return Promise.resolve([]);
+		return fetchAjaxPageContents("/autogestion/grado/inicio_alumno", "lista_encuestas_pendientes").then(responseText => {
+			if ($(responseText).find(".alert").text() === "No hay encuestas pendientes para completar") {
+				return [];
+			}
+			throw new Error(`Unexpected html for getProfessorClassesFromSurveys: ${responseText}`);
+		});
 	};
 
 	/**

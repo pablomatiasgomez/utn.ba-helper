@@ -28,14 +28,13 @@
 	Object.entries(PAGE_HANDLERS).forEach(entry => PAGE_HANDLERS[entry[0]] = () => waitForElementToHide("#loading_top").then(entry[1]));
 
 	let handleCurrentPage = () => {
-		let handler = customPages.getSelectedPageHandler() || Object.keys(PAGE_HANDLERS).filter(key => window.location.pathname.startsWith(key)).map(key => PAGE_HANDLERS[key])[0];
-		if (!handler) return;
-		handler().catch(e => {
-			console.error("Error when handling page " + window.location.pathname + window.location.search, e);
-			return apiConnector.logMessage("HandlePage " + window.location.pathname + window.location.search, true, utils.stringifyError(e));
+		return utils.wrapEventFunction("HandlePage " + window.location.pathname + window.location.search, () => {
+			let handler = customPages.getSelectedPageHandler() || Object.keys(PAGE_HANDLERS).filter(key => window.location.pathname.startsWith(key)).map(key => PAGE_HANDLERS[key])[0];
+			return handler && handler();
 		});
 	};
 
+	// noinspection JSIgnoredPromiseFromCall
 	handleCurrentPage();
 
 	// Append a script to capture ajax page changes.
@@ -58,20 +57,10 @@
 
 
 	// Background stuff...
-	pagesDataParser.getStudentId().then(studentId => {
-		$(".user-navbar").append(`
-			<div style="margin: -10px 10px 0 0; float: right; clear: right;">
-				Legajo: ${studentId}<br>
-				<span class="powered-by-utnba-helper"></span>
-			</div>`);
-	}).catch(e => {
-		console.error("Error while adding studentId to header", e);
-		return apiConnector.logMessage("addStudentIdToHeader", true, utils.stringifyError(e));
-	}).then(() => {
-		return dataCollector.collectBackgroundDataIfNeeded();
-	}).catch(e => {
-		console.error("Error while collecting background data", e);
-		return apiConnector.logMessage("collectBackgroundDataIfNeeded", true, utils.stringifyError(e));
+	utils.wrapEventFunction("addStudentIdToHeader", () => pagesDataParser.getStudentId().then(studentId => {
+		$(".user-navbar").append(`<div style="margin: -10px 10px 0 0; float: right; clear: right;">Legajo: ${studentId}<br><span class="powered-by-utnba-helper"></span></div>`);
+	})).then(() => {
+		return utils.wrapEventFunction("collectBackgroundDataIfNeeded", () => dataCollector.collectBackgroundDataIfNeeded());
 	});
 
 	$("body").on("click", ".powered-by-utnba-helper", function () {
