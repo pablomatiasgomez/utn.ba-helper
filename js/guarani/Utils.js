@@ -23,7 +23,12 @@ let Utils = function (apiConnector) {
 	let stringifyError = function (error) {
 		if (error instanceof Error) {
 			// Stack can indlue the message in some errors, but not in all cases.
-			return error.toString() + "\n" + error.stack;
+			let message = error.toString();
+			if (error.stack.startsWith(message)) {
+				return error.stack;
+			} else {
+				return message + "\n" + error.stack;
+			}
 		}
 		if (typeof error === "object") {
 			return JSON.stringify(error);

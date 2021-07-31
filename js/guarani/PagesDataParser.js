@@ -237,8 +237,12 @@ let PagesDataParser = function (utils) {
 	 * @returns {Promise<*[]>} an array of class schedules for each combination of professor and class
 	 */
 	let getProfessorClassesFromSurveys = function () {
-		// TODO parse this information once we know where it is.
-		return Promise.resolve([]);
+		return fetchAjaxPageContents("/autogestion/grado/inicio_alumno", "lista_encuestas_pendientes").then(responseText => {
+			if ($(responseText).find(".alert").text() === "No hay encuestas pendientes para completar") {
+				return [];
+			}
+			throw new Error(`Unexpected html for getProfessorClassesFromSurveys: ${responseText}`);
+		});
 	};
 
 	/**
