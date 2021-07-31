@@ -5,6 +5,7 @@ let PreInscripcionPage = function (utils, apiConnector) {
 			"Anual": "A",
 			"Primer Cuatrimestre": "1C",
 			"Segundo Cuatrimestre": "2C",
+			"ASS": "A", // Weird case, was found in "Grado ASS 2022" (seems to be specific to courseCode: 950454)
 		};
 		const yearAndQuarterRegex = new RegExp(`^Grado (${Object.keys(quarterMappings).join("|")}) (\\d{4})$`);
 		let groups = yearAndQuarterRegex.exec(periodTxt);
