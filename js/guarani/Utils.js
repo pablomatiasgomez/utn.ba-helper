@@ -47,14 +47,14 @@ let Utils = function (apiConnector) {
 	};
 
 	/**
-	 * Wraps a function that is triggered from a separate event, and handles errors by logging them to the api.
+	 * Wraps a function that is triggered from an async event, and handles errors by logging them to the api.
 	 */
 	let wrapEventFunction = function (name, fn) {
 		// Start with Promise.resolve() as we don't know if fn returns promise or not.
 		return Promise.resolve().then(() => {
 			return fn();
 		}).catch(e => {
-			console.error(`Error while executing event handler for event ${name}`, e);
+			console.error(`Error while executing event function ${name}`, e);
 			if (e instanceof LoggedOutError) return; // Not sending LoggedOutError.
 			return apiConnector.logMessage(name, true, stringifyError(e));
 		});
