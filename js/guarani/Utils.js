@@ -51,11 +51,12 @@ let Utils = function (apiConnector) {
 	 */
 	let wrapEventFunction = function (name, fn) {
 		// Start with Promise.resolve() as we don't know if fn returns promise or not.
-		Promise.resolve().then(() => {
+		return Promise.resolve().then(() => {
 			return fn();
 		}).catch(e => {
 			console.error(`Error while executing event handler for event ${name}`, e);
-			return apiConnector.logMessage(`HandleEvent_${name}`, true, stringifyError(e));
+			if (e instanceof LoggedOutError) return; // Not sending LoggedOutError.
+			return apiConnector.logMessage(name, true, stringifyError(e));
 		});
 	};
 

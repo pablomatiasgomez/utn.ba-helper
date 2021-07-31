@@ -13,6 +13,7 @@ let PagesDataParser = function (utils) {
 		}
 		return $.ajax(url).then(responseText => {
 			let response = JSON.parse(responseText);
+			if (response.cod === "1" && response.titulo === "Grado - Acceso" && response.operacion === "acceso") throw new LoggedOutError();
 			if (response.cod !== "1") throw new Error(`Invalid ajax contents for url ${url} and infoId: ${infoId}. responseText: ${responseText}`);
 			let contents = $(response.cont).filter("script").toArray()
 				.map(script => $(script).html())
