@@ -11,17 +11,20 @@ let PagesDataParser = function (utils) {
 		if (CACHED_PAGE_CONTENTS[url]) {
 			return Promise.resolve(CACHED_PAGE_CONTENTS[url]);
 		}
-		return $.ajax(url).then(responseText => {
-			let response = JSON.parse(responseText);
+		return fetch(url, {
+			"headers": {
+				"X-Requested-With": "XMLHttpRequest", // This is needed so that guarani's server returns a json payload
+			}
+		}).then(response => response.json()).then(response => {
 			if (response.cod === "1" && response.titulo === "Grado - Acceso" && response.operacion === "acceso") throw new LoggedOutError();
-			if (response.cod !== "1") throw new Error(`Invalid ajax contents for url ${url} and infoId: ${infoId}. responseText: ${responseText}`);
+			if (response.cod !== "1") throw new Error(`Invalid ajax contents for url ${url} and infoId: ${infoId}. response: ${JSON.stringify(response)}`);
 			let contents = $(response.cont).filter("script").toArray()
 				.map(script => $(script).html())
 				.filter(script => script.startsWith("kernel.renderer.on_arrival"))
 				.map(script => JSON.parse(script.replace("kernel.renderer.on_arrival(", "").replace(");", "")))
 				.filter(data => data.info.id === infoId)
 				.map(data => data.content);
-			if (contents.length !== 1) throw new Error(`Found unexpected number of page contents: ${contents.length} for url ${url} and infoId: ${infoId}. responseText: ${responseText}`);
+			if (contents.length !== 1) throw new Error(`Found unexpected number of page contents: ${contents.length} for url ${url} and infoId: ${infoId}. response: ${JSON.stringify(response)}`);
 			return contents[0];
 		}).then(contents => {
 			CACHED_PAGE_CONTENTS[url] = contents;
@@ -45,6 +48,25 @@ let PagesDataParser = function (utils) {
 					.then(text => text.items.map(s => s.str)));
 			return Promise.all(promises)
 				.then(contents => contents.flat());
+		}).then(contents => {
+			CACHED_PAGE_CONTENTS[url] = contents;
+			return contents;
+		});
+	};
+
+	/**
+	 * Fetches a url that returns a XLS and returnes the parsed workbook
+	 * @param url url that returns a XLS.
+	 * @returns {Promise<{}>}
+	 */
+	let fetchXlsContents = function (url) {
+		if (CACHED_PAGE_CONTENTS[url]) {
+			return Promise.resolve(CACHED_PAGE_CONTENTS[url]);
+		}
+		return fetch(url).then(response => {
+			return response.arrayBuffer();
+		}).then(response => {
+			return XLSX.read(new Uint8Array(response), {type: "array"});
 		}).then(contents => {
 			CACHED_PAGE_CONTENTS[url] = contents;
 			return contents;
@@ -170,61 +192,60 @@ let PagesDataParser = function (utils) {
 	 * @returns {Promise<{courses: [{courseCode: string, isPassed: boolean, grade: number, weightedGrade: number, date: Date}], finalExams: [{courseCode: string, isPassed: boolean, grade: number, weightedGrade: number, date: Date}]}>}
 	 */
 	let getCoursesHistory = function () {
-		let escapeRegExp = str => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+		let courses = [];
+		let finalExams = [];
+		// Use a map to also validate returned types.
+		let arrayByTypes = {
+			"En curso": courses,
+			"Regularidad": courses,
+			"Equivalencia Parcial": courses,
+			"Promocion": finalExams,
+			"Examen": finalExams,
+			"Equivalencia Total": finalExams,
+		};
+		const gradeIsPassedTypes = {
+			"Promocionado": true,
+			"Aprobado": true,
+			"Reprobado": false,
+		};
+		return fetchXlsContents("/autogestion/grado/historia_academica/exportar_xls/?checks=PromocionA,RegularidadA,RegularidadR,RegularidadU,EnCurso,ExamenA,ExamenR,ExamenU,EquivalenciaA,EquivalenciaR,AprobResA,CreditosA,&modo=anio&param_modo=").then(workbook => {
+			let sheet = workbook.Sheets["Reporte"];
+			if (!sheet) throw new Error(`Workbook does not contain sheet. Sheetnames: ${workbook.SheetNames}`);
 
-		const courseTypes = ["En curso", "Regularidad", "Equivalencia Parcial"];
-		const finalExamTypes = ["Promoción", "Examen", "Equivalencia Total"];
-		const allTypes = courseTypes.concat(finalExamTypes);
+			// First 5 rows do not include important data:
+			if (sheet.A6.v !== "Fecha") throw new Error(`Invalid sheet data: ${JSON.stringify(XLSX.utils.sheet_to_json(sheet))}`);
+			sheet["!ref"] = sheet["!ref"].replace("A1:", "A6:");
 
-		const discardedGrades = [
-			"Inicio de dictado",
-			"Ausente",
-			"No aprobad (No aprobada) Ausente",
-		];
-		const gradesRegex = [
-			/(\d{1,2}) \(\w+\) (?:Promocionado|Aprobado|Reprobado)/,
-			/Aprobada \(Aprobada\) Aprobado/,
-			/No aprobad \(No aprobada\) Reprobado/,
-			/Aprobado/,
-			/Reprobado/,
-			...discardedGrades.map(grade => new RegExp(escapeRegExp(grade))),
-		];
-		const dateRegex = /\d{2}\/\d{2}\/\d{4}/;
-		const historyRowRegex = new RegExp(`^(${allTypes.map(escapeRegExp).join("|")}) {1,2}- (${gradesRegex.map(i => i.source).join("|")}) (${dateRegex.source}) - .*Detalle$`);
+			XLSX.utils.sheet_to_json(sheet).forEach(row => {
+				let date = utils.parseDate(row["Fecha"]);
+				let courseText = row["Actividad"];
+				let type = row["Tipo"];
+				let gradeText = row["Nota"];
+				let gradeIsPassedText = row["Resultado"];
 
-		return fetchAjaxPageContents("/autogestion/grado/historia_academica/?checks=PromocionA,RegularidadA,RegularidadR,RegularidadU,EnCurso,ExamenA,ExamenR,ExamenU,EquivalenciaA,EquivalenciaR,AprobResA,CreditosA,&modo=anio&param_modo=&e_cu=A&e_ex=A&e_re=A", "info_historia").then(responseText => {
-			let courses = [];
-			let finalExams = [];
-			$(responseText).find(".catedra_nombre").toArray()
-				.map(item => {
-					let courseText = $(item).find("h4").text();
-					let groups = /\((\d{6})\)/.exec(courseText);
-					if (!groups) throw new Error(`courseText couldn't be parsed: ${courseText}`);
-					let courseCode = groups[1];
+				if (!gradeText || !gradeIsPassedText) return; // Ignore non finished items
 
-					let historyRow = $(item).find("span").text().trim();
-					groups = historyRowRegex.exec(historyRow);
-					if (!groups) throw new Error(`historyRow couldn't be parsed: ${historyRow}`);
-					let arr = courseTypes.includes(groups[1]) ? courses : finalExams;
-					let gradeText = groups[2];
+				let groups = /(.*) \((\d{6})\)/.exec(courseText);
+				if (!groups) throw new Error(`courseText couldn't be parsed: ${courseText}. Row: ${JSON.stringify(row)}`);
+				let courseCode = groups[2];
 
-					// Do not care about these type of grades so we ignore the entire row.
-					if (discardedGrades.includes(gradeText)) return;
+				let arr = arrayByTypes[type];
+				if (!arr) throw new Error(`Type not handled: ${type}. Row: ${JSON.stringify(row)}`);
 
-					let isPassed = (gradeText.includes("Promocionado") || gradeText.includes("Aprobado")) && !gradeText.includes("No aprobad");
-					let date = utils.parseDate(groups[4]);
+				let grade = parseInt(gradeText) || null;
+				let weightedGrade = grade !== null ? utils.getWeightedGrade(date, grade) : null;
 
-					let grade = parseInt(groups[3]) || null;
-					let weightedGrade = grade !== null ? utils.getWeightedGrade(date, grade) : null;
+				if (typeof gradeIsPassedTypes[gradeIsPassedText] === "undefined") throw new Error(`gradeIsPassedText couldn't be parsed: ${gradeIsPassedText}. Row: ${JSON.stringify(row)}`);
+				let isPassed = gradeIsPassedTypes[gradeIsPassedText];
 
-					arr.push({
-						courseCode: courseCode,
-						isPassed: isPassed,
-						grade: grade,
-						weightedGrade: weightedGrade,
-						date: date,
-					});
+				arr.push({
+					courseCode: courseCode,
+					isPassed: isPassed,
+					grade: grade,
+					weightedGrade: weightedGrade,
+					date: date,
 				});
+			});
 			return {
 				courses: courses,
 				finalExams: finalExams,
