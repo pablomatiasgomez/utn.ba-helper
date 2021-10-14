@@ -22,7 +22,7 @@ let Utils = function (apiConnector) {
 
 	let stringifyError = function (error) {
 		if (error instanceof Error) {
-			// Stack can indlue the message in some errors, but not in all cases.
+			// Stack can include the message in some errors, but not in all cases.
 			let message = error.toString();
 			if (error.stack.startsWith(message)) {
 				return error.stack;
