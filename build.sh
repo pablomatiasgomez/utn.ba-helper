@@ -24,6 +24,7 @@ js/siga/main.js"
 cat $BASE_JS_FILES $JS_FILES > js/siga-helper.min.js
 
 JS_FILES="\
+js/xlsx.min.js \
 js/pdf.min.js \
 js/guarani/Errors.js \
 js/guarani/Utils.js \

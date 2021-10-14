@@ -22,7 +22,7 @@ let Utils = function (apiConnector) {
 
 	let stringifyError = function (error) {
 		if (error instanceof Error) {
-			// Stack can indlue the message in some errors, but not in all cases.
+			// Stack can include the message in some errors, but not in all cases.
 			let message = error.toString();
 			if (error.stack.startsWith(message)) {
 				return error.stack;
@@ -175,7 +175,7 @@ let Utils = function (apiConnector) {
 		return arr.map(schedule => {
 			// TODO: Not performant but not important right now (to be improved/unify schedules parsing.)
 			let day = Object.entries(DAYS).filter(entry => entry[1] === schedule.dia_semana).map(entry => entry[0])[0];
-			if (!day) throw new Error(`Couldn't parse day: ${day}`);
+			if (!day) throw new Error(`Couldn't parse day: ${schedule.dia_semana}`);
 
 			let shiftIdx = Math.floor((parseInt(schedule.hora_catedra_inicio) - 1) / 7); // 0:m, 1:t, 2:n
 			let shift = Object.keys(HOURS)[shiftIdx];
