@@ -90,7 +90,7 @@ let PagesDataParser = function (utils) {
 	};
 
 	/**
-	 * Fetches, from the register pdf, the current classes that the student is having.
+	 * Fetches, from the "Comprobante de cursada" pdf, the current classes that the student is taking.
 	 * Used for different puprposes:
 	 * - Collect classSchedules
 	 * - Complete the grid when registering to new classes
@@ -198,10 +198,9 @@ let PagesDataParser = function (utils) {
 		let arrayByTypes = {
 			"En curso": courses,
 			"Regularidad": courses,
-			"Equivalencia Parcial": courses,
 			"Promocion": finalExams,
 			"Examen": finalExams,
-			"Equivalencia Total": finalExams,
+			"Equivalencia": finalExams,
 		};
 		const gradeIsPassedTypes = {
 			"Promocionado": true,
