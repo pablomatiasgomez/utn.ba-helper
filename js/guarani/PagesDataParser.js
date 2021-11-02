@@ -206,6 +206,7 @@ let PagesDataParser = function (utils) {
 			"Promocionado": true,
 			"Aprobado": true,
 			"Reprobado": false,
+			"Ausente": false,
 		};
 		return fetchXlsContents("/autogestion/grado/historia_academica/exportar_xls/?checks=PromocionA,RegularidadA,RegularidadR,RegularidadU,EnCurso,ExamenA,ExamenR,ExamenU,EquivalenciaA,EquivalenciaR,AprobResA,CreditosA,&modo=anio&param_modo=").then(workbook => {
 			let sheet = workbook.Sheets["Reporte"];
