@@ -1,5 +1,11 @@
 let Utils = function (apiConnector) {
 
+	let backgroundFetch = function (url) {
+		return new Promise((resolve, reject) => {
+			chrome.runtime.sendMessage({url: url}, response => (response && response.errorStr) ? reject(new Error(response.errorStr)) : resolve(response));
+		});
+	};
+
 	let injectScript = function (content) {
 		let script = document.createElement('script');
 		script.type = 'text/javascript';
@@ -240,6 +246,7 @@ let Utils = function (apiConnector) {
 
 	// Public
 	return {
+		backgroundFetch: backgroundFetch,
 		injectScript: injectScript,
 		attachEvent: attachEvent,
 		stringifyError: stringifyError,

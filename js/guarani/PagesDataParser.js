@@ -7,7 +7,7 @@ let PagesDataParser = function (utils) {
 	 * Fetches and parses the way guarani's page ajax contents are loaded.
 	 * Returned contents are different script tags that contain the html so they need to be parsed.
 	 */
-	let fetchAjaxPageContents = function (url, infoId) {
+	let fetchAjaxPageContents = function (url) {
 		if (CACHED_PAGE_CONTENTS[url]) {
 			return Promise.resolve(CACHED_PAGE_CONTENTS[url]);
 		}
@@ -17,19 +17,29 @@ let PagesDataParser = function (utils) {
 			}
 		}).then(response => response.json()).then(response => {
 			if (response.cod === "1" && response.titulo === "Grado - Acceso" && response.operacion === "acceso") throw new LoggedOutError();
-			if (response.cod !== "1") throw new Error(`Invalid ajax contents for url ${url} and infoId: ${infoId}. response: ${JSON.stringify(response)}`);
-			let contents = $(response.cont).filter("script").toArray()
-				.map(script => $(script).html())
-				.filter(script => script.startsWith("kernel.renderer.on_arrival"))
-				.map(script => JSON.parse(script.replace("kernel.renderer.on_arrival(", "").replace(");", "")))
-				.filter(data => data.info.id === infoId)
-				.map(data => data.content);
-			if (contents.length !== 1) throw new Error(`Found unexpected number of page contents: ${contents.length} for url ${url} and infoId: ${infoId}. response: ${JSON.stringify(response)}`);
-			return contents[0];
+			if (response.cod !== "1") throw new Error(`Invalid ajax contents for url ${url}. response: ${JSON.stringify(response)}`);
+			return response.cont;
 		}).then(contents => {
 			CACHED_PAGE_CONTENTS[url] = contents;
 			return contents;
 		});
+	};
+
+	/**
+	 * Some pages that are requested via ajax return responses that contain an array of items to be
+	 * rendered in the UI. This method parses that and returns only the item that is requested (infoId)
+	 * @param responseContents the "cont" object of the ajax call.
+	 * @param infoId the infoId to filter the elements out.
+	 */
+	let parseAjaxPageRenderer = function (responseContents, infoId) {
+		let contents = $(responseContents).filter("script").toArray()
+			.map(script => $(script).html())
+			.filter(script => script.startsWith("kernel.renderer.on_arrival"))
+			.map(script => JSON.parse(script.replace("kernel.renderer.on_arrival(", "").replace(");", "")))
+			.filter(data => data.info.id === infoId)
+			.map(data => data.content);
+		if (contents.length !== 1) throw new Error(`Found unexpected number of page contents: ${contents.length} for infoId: ${infoId}. response: ${JSON.stringify(responseContents)}`);
+		return contents[0];
 	};
 
 	/**
@@ -179,7 +189,8 @@ let PagesDataParser = function (utils) {
 	 * @returns {Promise<string>}
 	 */
 	let getStudentPlanCode = function () {
-		return fetchAjaxPageContents("/autogestion/grado/plan_estudio", "info_plan").then(responseText => {
+		return fetchAjaxPageContents("/autogestion/grado/plan_estudio").then(responseContents => {
+			let responseText = parseAjaxPageRenderer(responseContents, "info_plan");
 			let planText = $(responseText).filter(".encabezado").find("td:eq(1)").text();
 			let groups = /^Plan: \((\w+)\)/.exec(planText);
 			if (!groups) throw new Error(`planText couldn't be parsed: ${planText}`);
@@ -259,22 +270,150 @@ let PagesDataParser = function (utils) {
 	 * @returns {Promise<*[]>} an array of class schedules for each combination of professor and class
 	 */
 	let getProfessorClassesFromSurveys = function () {
-		return fetchAjaxPageContents("/autogestion/grado/inicio_alumno", "lista_encuestas_pendientes").then(responseText => {
-			if ($(responseText).find(".alert").text() === "No hay encuestas pendientes para completar") {
-				return [];
-			}
-			throw new Error(`Unexpected html for getProfessorClassesFromSurveys: ${responseText}`);
+		return fetchAjaxPageContents("/autogestion/grado/inicio_alumno").then(responseContents => {
+			let surveysResponseText = parseAjaxPageRenderer(responseContents, "lista_encuestas_pendientes");
+
+			let promises = $(surveysResponseText).find("ul li a").toArray()
+				.map(a => a.href)
+				.map(siuUrl => {
+					return fetchAjaxPageContents(siuUrl).then(siuResponseText => {
+						let kollaUrl = $(siuResponseText).find("iframe").get(0).src;
+						return utils.backgroundFetch(kollaUrl);
+					}).then(kollaResponseText => {
+						let $kollaResponseText = $(kollaResponseText);
+						let surveysMetadata = parseKollaSurveyForm($kollaResponseText);
+
+						// We could eventually merge same class professors, but the backend still accepts this:
+						return surveysMetadata.map(surveyMetadata => {
+							return {
+								year: surveyMetadata.year,
+								quarter: surveyMetadata.quarter,
+								classCode: surveyMetadata.classCode,
+								courseCode: surveyMetadata.courseCode,
+								professors: [
+									{
+										name: surveyMetadata.professorName,
+										kind: surveyMetadata.surveyKind,
+										role: surveyMetadata.professorRole,
+									}
+								]
+							};
+						});
+					});
+				});
+			return Promise.all(promises).then(surveys => surveys.flat());
 		});
 	};
 
 	/**
-	 * @returns {Promise<*[]>} an array of taken surveys
+	 * Parses the responseText of the Kolla forms, and returns the survey form data along with the answers.
+	 * @return {[{professorRole: string, classCode: string, year: number, courseCode: string, professorName: string, surveyKind: string, quarter}]}
 	 */
-	let getTakenSurveys = function () {
-		// TODO parse this information once we know where it is.
-		return Promise.resolve([]);
-	};
+	let parseKollaSurveyForm = function ($kollaResponseText) {
+		const quarterMapping = {
+			"PRIMER": "1C",
+			"SEGUNDO": "2C",
+			// TODO we don't know how Annual is returned.
+			//  "ANUAL": "A",
+		};
+		const questionsMapping = { // TODO temporarly legacy mapping until we use a enum for this.
+			"¿Presenta la planificación de su asignatura al inicio del ciclo lectivo y luego la cumple?": "Presenta la planificación de su asignatura al inicio del ciclo lectivo y luego la cumple.",
+			"¿Planifica el desarrollo de los temas?": "Planifica el desarrollo de los temas",
+			"¿El docente explica los temas en forma clara y comprensible? (exposiciones organizadas y respuestas precisas)": "Explica los temas en forma clara y comprensible (exposiciones organizadas y respuestas precisas)",
+			"¿Trata correctamente a los estudiantes? (respeto, comunicación adecuada)": "Trata correctamente a los estudiantes (respeto, comunicación adecuada)",
+			"¿Demuestra seguridad en el tratamiento de los temas?": "Demuestra seguridad en el tratamiento de los temas",
+			"¿Desarrolla todos los contenidos del programa?": "Desarrolla todos los contenidos del programa",
+			"¿Asiste regularmente a clases?": "Asistencia regular a las clases",
+			"¿Emplea material didáctico de la asignatura que sea útil y accesible?": "Emplea  material didáctico de la asignatura útil y accesible",
+			"¿Los temas de los parciales concuerdan con los contenidos desarrollados en clase?": "Los temas de los parciales concuerdan con los contenidos desarrollados en clase",
+			"¿Da a conocer la forma de evaluación que se va a aplicar en la asignatura?": "Da a conocer la forma de evaluación que se va a aplicar en la asignatura",
+			"¿Da a conocer las fechas de los parciales con anticipación respetando el Calendario Académico?": "Da a conocer las fechas de los parciales con anticipación respetando el Calendario Académico",
+			"¿Satisface dudas o consultas que surgen en clase?": "Satisface dudas o consultas que surgen en la clase",
+			"¿Dedica tiempo suficiente a la ejercitación de los temas desarrollados?": "Dedica tiempo suficiente a la ejercitación de los temas desarrollados",
+			"¿Lidera el desarrollo de la asignatura tanto en sus aspectos teóricos como prácticos?": "¿El profesor lidera el desarrollo de la asignatura tanto en sus aspectos teóricos como prácticos?",
+			"¿Cumple con las fechas establecidas en el Calendario Académico?": "Cumplimiento con las fechas establecidas en el Calendario Académico",
+			"¿Utiliza diversos recursos para la enseñanza? (guía de trabajos, pizarra, presentaciones, proyector, videos, software, hardware, aula virtual, otros)": "Utiliza distintos recursos para la enseñanza (pizarra, presentaciones, proyector, guías de trabajos, videos, software, hardware, Aula Virtual, otros)",
+			"¿La bibliografía es actualizada y accesible?": "La bibliografía es actualizada y accesible",
+			"¿Es puntual al llegar y al retirarse de las clases?": "Puntualidad al llegar y al retirarse de las clases",
+			"¿Favorece la participación de los estudiantes?": "Favorece la participación de los estudiantes",
+			"¿Las evaluaciones se llevan a cabo según la reglamentación vigente?": "¿las evaluaciones se llevan a cabo según la reglamentación vigente?",
+			"¿Logró continuidad en el cursado y estudio de la asignatura? (estudiar regularmente, participación en clase, asistencia, puntualidad)": "Logró continuidad en el cursado y estudio de la asignatura (estudiar regularmente, asistencia, puntualidad, participación en clase",
+			"¿Relaciona los contenidos con otras asignaturas de la carrera?": "Relaciona los contenidos con otras asignaturas de la carrera.",
+			"¿Tuvo posibilidad de aplicar sus conocimientos previos durante el cursado de esta materia?": "Tuvo posibilidad de aplicar sus conocimientos previos durante el cursado de esta materia. (contestar cuando corresponda)",
 
+			"Mencione las características del docente que ayudaron en su aprendizaje": "Mencione las características del docente que ayudaron en su  aprendizaje",
+			"Realice las observaciones y aclaraciones que crea convenientes sobre las puntuaciones asignadas": "Realice las observaciones y aclaraciones que crea convenientes sobre  las puntuaciones asignadas",
+			"Mencione los aspectos del proceso de enseñanza que deberían mejorarse": "Mencione los aspectos del proceso de enseñanza que deberían mejorarse",
+		};
+
+		let courseTitle = $kollaResponseText.find(".formulario-titulo").text(); // E.g.: 'Simulación (082041) - Comisión: K4053', 'Administración Gerencial (082039) - Comisión: K5054'
+		let groups = /^(.*) \((\d{6})\) - Comisión: ([\w\d]{5})$/.exec(courseTitle);
+		if (!groups) throw new Error(`Survey courseTitle couldn't be parsed: ${courseTitle}`);
+		// let courseName = groups[1]; // E.g. Simulación
+		let courseCode = groups[2]; // E.g. 082041
+		let classCode = groups[3]; // E.g. K4053
+
+		let surveyTitle = $kollaResponseText.find(".encuesta .encuesta-titulo");
+		if (surveyTitle.length !== 1) throw new Error(`Do not know how to handle ${surveyTitle.length} survey title elements. kollaResponse: ${$kollaResponseText.find("html").html()}`);
+		surveyTitle = surveyTitle.text().trim();
+
+		groups = /^ENCUESTA (DOCENTE|AUXILIAR) (PRIMER|SEGUNDO) CUATRIMESTRE (\d{4})$/g.exec(surveyTitle);
+		if (!groups) throw new Error(`surveyTitle couldn't be parsed: ${surveyTitle}`);
+
+		let surveyKind = groups[1].toUpperCase(); // DOCENTE, AUXILIAR
+		let quarter = quarterMapping[groups[2]]; // A, 1C, 2C
+		let year = parseInt(groups[3]); // 2018, 2019, ...
+
+		let professor = $kollaResponseText.find(".encuesta-elemento h3");
+		if (professor.length !== 1) throw new Error(`Do not know how to handle ${professor.length} professor elements. kollaResponse: ${$kollaResponseText.find("html").html()}`); // TODO test on both.
+		professor = professor.text().trim();
+
+		groups = /^(.*) \((Titular|Asociado|Adjunto|)\)$/g.exec(professor);
+		if (!groups) throw new Error(`professor couldn't be parsed: ${professor}`);
+
+		let professorName = groups[1].toUpperCase();
+		let professorRole = groups[2].toUpperCase(); // TITULAR, ASOCIADO, ADJUNTO, etc.
+
+		let answers = $(".panel-info .panel-body .form-group").toArray()
+			.map(item => {
+				let $item = $(item);
+				let $questionLabel = $item.find("> label");
+
+				let question = $questionLabel.text().replace("*", "").trim(); // TODO replace this with a backend enum.
+				question = questionsMapping[question] || question;
+
+				let answer = {
+					question: question,
+				};
+
+				let labelFor = $questionLabel.attr("for");
+				let $answerElement = $item.find(`[name=${labelFor}]`);
+				if ($answerElement.is("textarea")) {
+					answer.type = "TEXT";
+					answer.value = $answerElement.val() || null;
+				} else if ($answerElement.is("input")) {
+					answer.type = "PERCENTAGE";
+					let value = parseInt($answerElement.filter(":checked").parent().text());
+					answer.value = isNaN(value) ? null : value;
+				} else {
+					throw new Error(`Couldn't parse value for question ${question}. Item: ${$item.html()}`);
+				}
+				return answer;
+			});
+
+		// TODO retrning an array as there proably are many professors for each course, but we don't know how to parse them yet..
+		return [{
+			surveyKind: surveyKind,
+			year: year,
+			quarter: quarter,
+			classCode: classCode,
+			courseCode: courseCode,
+			professorName: professorName,
+			professorRole: professorRole,
+
+			surveyFields: answers, // Only used for posting surveys, not professors.
+		}];
+	};
 
 	// Public
 	return {
@@ -285,6 +424,6 @@ let PagesDataParser = function (utils) {
 		getCoursesHistory: getCoursesHistory,
 
 		getProfessorClassesFromSurveys: getProfessorClassesFromSurveys,
-		getTakenSurveys: getTakenSurveys,
+		parseKollaSurveyForm: parseKollaSurveyForm,
 	};
 };

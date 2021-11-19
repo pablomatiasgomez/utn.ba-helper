@@ -2,7 +2,6 @@ let DataCollector = function (pagesDataParser, apiConnector) {
 
 	const LOCAL_STORAGE_DATA_COLLECTOR_KEY = "UtnBaHelper.DataCollector";
 	const COLLECT_SCHEDULES_KEY = "schedules";
-	const COLLECT_SURVEYS_KEY = "surveys";
 
 	const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -29,7 +28,6 @@ let DataCollector = function (pagesDataParser, apiConnector) {
 	/**
 	 * Collects, every one day or more, background data such as:
 	 * - class schedules and professors
-	 * - taken surveys
 	 * @return {Promise<*>}
 	 */
 	let collectBackgroundDataIfNeeded = function () {
@@ -41,11 +39,6 @@ let DataCollector = function (pagesDataParser, apiConnector) {
 					key: COLLECT_SCHEDULES_KEY,
 					minTime: ONE_DAY_MS,
 					method: () => collectClassSchedulesWithProfessors(),
-				},
-				{
-					key: COLLECT_SURVEYS_KEY,
-					minTime: ONE_DAY_MS,
-					method: () => collectTakenSurveys(hashedStudentId),
 				}
 			];
 
@@ -64,17 +57,6 @@ let DataCollector = function (pagesDataParser, apiConnector) {
 			return promise.then(() => {
 				saveLastTimeCollected(hashedStudentId, lastTimeCollected);
 			});
-		});
-	};
-
-	let collectTakenSurveys = function (hashedStudentId) {
-		return Promise.resolve().then(() => {
-			return pagesDataParser.getTakenSurveys();
-		}).then(takenSurveys => {
-			if (takenSurveys.length) {
-				takenSurveys.forEach(survey => survey.surveyTaker = hashedStudentId);
-				return apiConnector.postProfessorSurveys(takenSurveys);
-			}
 		});
 	};
 
@@ -119,18 +101,10 @@ let DataCollector = function (pagesDataParser, apiConnector) {
 		return hash;
 	};
 
-	let markSurveysToBeCollected = function () {
-		return getHashedStudentId().then(hashedStudentId => {
-			let lastTimeCollected = getLastTimeCollectedForStudentId(hashedStudentId);
-			delete lastTimeCollected[COLLECT_SURVEYS_KEY];
-			saveLastTimeCollected(hashedStudentId, lastTimeCollected);
-		});
-	};
-
 	// Public
 	return {
+		getHashedStudentId: getHashedStudentId,
 		logUserStat: logUserStat,
 		collectBackgroundDataIfNeeded: collectBackgroundDataIfNeeded,
-		markSurveysToBeCollected: markSurveysToBeCollected,
 	};
 };

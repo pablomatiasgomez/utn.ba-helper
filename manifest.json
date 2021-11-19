@@ -36,6 +36,18 @@
             "css": [
                 "css/guarani-helper.css"
             ]
+        },
+        {
+            "matches": [
+                "*://*.kolla.frba.utn.edu.ar/*"
+            ],
+            "js": [
+                "js/guarani-kolla-helper.min.js"
+            ],
+            "css": [
+                "css/guarani-helper.css"
+            ],
+            "all_frames": true
         }
     ],
     "web_accessible_resources": [
@@ -47,6 +59,11 @@
             "js/background.js"
         ],
         "persistent": false
-    }
+    },
+
+    "permissions" : [
+        "storage",
+        "*://*.frba.utn.edu.ar/*"
+    ]
 }
 
