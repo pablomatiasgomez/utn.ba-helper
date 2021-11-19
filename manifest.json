@@ -3,7 +3,7 @@
 
     "name": "Siga Helper",
     "short_name": "SigaHelper",
-    "version": "5.3.2",
+    "version": "5.4.0",
 
     "description": "Extensión que agrega una serie de features sobre la web de la UTN - FRBA.",
     "author": "Pablo Matías Gomez",
@@ -36,6 +36,18 @@
             "css": [
                 "css/guarani-helper.css"
             ]
+        },
+        {
+            "matches": [
+                "*://*.kolla.frba.utn.edu.ar/*"
+            ],
+            "js": [
+                "js/guarani-kolla-helper.min.js"
+            ],
+            "css": [
+                "css/guarani-helper.css"
+            ],
+            "all_frames": true
         }
     ],
     "web_accessible_resources": [
@@ -47,6 +59,11 @@
             "js/background.js"
         ],
         "persistent": false
-    }
+    },
+
+    "permissions" : [
+        "storage",
+        "*://*.frba.utn.edu.ar/*"
+    ]
 }
 

@@ -13,6 +13,7 @@
 
 	let apiConnector = new ApiConnector("guarani");
 	let utils = new Utils(apiConnector);
+	let store = new Store();
 	let pagesDataParser = new PagesDataParser(utils);
 	let dataCollector = new DataCollector(pagesDataParser, apiConnector);
 	let customPages = new CustomPages(pagesDataParser, dataCollector, utils, apiConnector);
@@ -23,6 +24,7 @@
 		// match is performed using startsWith and first one is used.
 		"/autogestion/grado/calendario": () => HorariosPage(utils),
 		"/autogestion/grado/cursada/elegir_materia/": () => PreInscripcionPage(utils, apiConnector),
+		"/autogestion/grado/encuestas_kolla/": () => EncuestasPendientesPage(dataCollector, store),
 	};
 	// Wait for the loading div to hide... applies for both loading from document or ajax.
 	Object.entries(PAGE_HANDLERS).forEach(entry => PAGE_HANDLERS[entry[0]] = () => waitForElementToHide("#loading_top").then(entry[1]));
