@@ -1,12 +1,21 @@
-let EncuestasPendientesPage = function (dataCollector, store) {
+let EncuestasPendientesPage = function (pagesDataParser, dataCollector, store) {
 
 	// Init
 	return Promise.resolve().then(() => {
-		return dataCollector.getHashedStudentId();
-	}).then(hashedStudentId => {
-		let iframeUrl = $("#encuesta iframe").get(0).src;
-		return store.appendSurveyFormDataToStore(iframeUrl, {
+		return Promise.all([
+			dataCollector.getHashedStudentId(),
+			pagesDataParser.getPendingProfessorSurveys(),
+		]);
+	}).then(results => {
+		let hashedStudentId = results[0];
+		let surveyUrls = results[1];
+
+		let data = {
 			hashedStudentId: hashedStudentId,
+		};
+		return store.readSurveyFormsDataFromStore().then(surveyFormsData => {
+			surveyUrls.forEach(surveyUrl => surveyFormsData[surveyUrl.kollaUrl] = data);
+			return store.saveSurveyFormsDataToStore(surveyFormsData);
 		});
 	});
 };

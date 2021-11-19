@@ -15,16 +15,9 @@ let Store = function () {
 		chrome.storage.sync.set({[SURVEY_FORMS_DATA_STORE_KEY]: surveyFormsData});
 	};
 
-	let appendSurveyFormDataToStore = function (key, data) {
-		return readSurveyFormsDataFromStore().then(surveyFormsData => {
-			surveyFormsData[key] = data;
-			saveSurveyFormsDataToStore(surveyFormsData);
-		});
-	};
-
 	// Public
 	return {
 		readSurveyFormsDataFromStore: readSurveyFormsDataFromStore,
-		appendSurveyFormDataToStore: appendSurveyFormDataToStore,
+		saveSurveyFormsDataToStore: saveSurveyFormsDataToStore,
 	};
 };

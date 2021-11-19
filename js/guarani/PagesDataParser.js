@@ -265,11 +265,11 @@ let PagesDataParser = function (utils) {
 	};
 
 	/**
-	 * Fetches all the current surveys that the user has to take o has taken.
-	 * For each of them resolves the current professor name, class, course, quarter, etc.
-	 * @returns {Promise<*[]>} an array of class schedules for each combination of professor and class
+	 * We can only retrieve the pending professor surveys and not the completed ones.
+	 * This returns the siuUrl and the kollaUrl (the actual form)
+	 * @returns {Promise<[{siuUrl: string, kollaUrl: string}]>}
 	 */
-	let getProfessorClassesFromSurveys = function () {
+	let getPendingProfessorSurveys = function () {
 		return fetchAjaxPageContents("/autogestion/grado/inicio_alumno").then(responseContents => {
 			let surveysResponseText = parseAjaxPageRenderer(responseContents, "lista_encuestas_pendientes");
 
@@ -278,29 +278,47 @@ let PagesDataParser = function (utils) {
 				.map(siuUrl => {
 					return fetchAjaxPageContents(siuUrl).then(siuResponseText => {
 						let kollaUrl = $(siuResponseText).find("iframe").get(0).src;
-						return utils.backgroundFetch(kollaUrl);
-					}).then(kollaResponseText => {
-						let $kollaResponseText = $(kollaResponseText);
-						let surveysMetadata = parseKollaSurveyForm($kollaResponseText, kollaResponseText);
-
-						// We could eventually merge same class professors, but the backend still accepts this:
-						return surveysMetadata.map(surveyMetadata => {
-							return {
-								year: surveyMetadata.year,
-								quarter: surveyMetadata.quarter,
-								classCode: surveyMetadata.classCode,
-								courseCode: surveyMetadata.courseCode,
-								professors: [
-									{
-										name: surveyMetadata.professorName,
-										kind: surveyMetadata.surveyKind,
-										role: surveyMetadata.professorRole,
-									}
-								]
-							};
-						});
+						return {
+							siuUrl: siuUrl,
+							kollaUrl: kollaUrl,
+						};
 					});
 				});
+			return Promise.all(promises).then(surveyUrls => surveyUrls.flat());
+		});
+	};
+
+	/**
+	 * Fetches all the current surveys that the user has to take o has taken.
+	 * For each of them resolves the current professor name, class, course, quarter, etc.
+	 * @returns {Promise<*[]>} an array of class schedules for each combination of professor and class
+	 */
+	let getProfessorClassesFromSurveys = function () {
+		return getPendingProfessorSurveys().then(surveyUrls => {
+			let promises = surveyUrls.map(surveyUrl => {
+				let kollaUrl = surveyUrl.kollaUrl;
+				return utils.backgroundFetch(kollaUrl).then(kollaResponseText => {
+					let $kollaResponseText = $(kollaResponseText);
+					let surveysMetadata = parseKollaSurveyForm($kollaResponseText, kollaResponseText);
+
+					// We could eventually merge same class professors, but the backend still accepts this:
+					return surveysMetadata.map(surveyMetadata => {
+						return {
+							year: surveyMetadata.year,
+							quarter: surveyMetadata.quarter,
+							classCode: surveyMetadata.classCode,
+							courseCode: surveyMetadata.courseCode,
+							professors: [
+								{
+									name: surveyMetadata.professorName,
+									kind: surveyMetadata.surveyKind,
+									role: surveyMetadata.professorRole,
+								}
+							]
+						};
+					});
+				});
+			});
 			return Promise.all(promises).then(surveys => surveys.flat());
 		});
 	};
@@ -310,16 +328,30 @@ let PagesDataParser = function (utils) {
 	 * @return {[{professorRole: string, classCode: string, year: number, courseCode: string, professorName: string, surveyKind: string, quarter}]}
 	 */
 	let parseKollaSurveyForm = function ($kollaResponseText, htmlForLog) {
+		let escapeRegExp = str => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+		const surveyKindsMapping = {
+			"DOCENTE": "DOCENTE",
+			"AUXILIARES DOCENTES": "AUXILIAR",
+		};
 		const quarterMapping = {
 			"PRIMER": "1C",
 			"SEGUNDO": "2C",
 			// TODO we don't know how Annual is returned.
 			//  "ANUAL": "A",
 		};
-		const surveyKindsMapping = {
-			"DOCENTE": "DOCENTE",
-			"AUXILIARES DOCENTES": "AUXILIAR",
+		const surveyTitleRegex = new RegExp(`^ENCUESTA (${Object.keys(surveyKindsMapping).join("|")}) (${Object.keys(quarterMapping).join("|")}) CUATRIMESTRE (\\d{4})$`);
+
+		const professorRolesMapping = {
+			"Titular (Responsable de Cátedra)": "TITULAR",
+			"Asociado (Responsable de Cátedra)": "ASOCIADO",
+			"Adjunto": "ADJUNTO",
+
+			"JTP": "JEFE DE TP",
+			"Ayudante de 1ra": "AYUDANTE 1RA",
+			"Ayudante de 2da": "AYUDANTE 2DA",
 		};
+		const professorRegex = new RegExp(`^(.*) \\((${Object.keys(professorRolesMapping).map(escapeRegExp).join("|")})\\)$`);
+
 		const questionsMapping = { // TODO temporarly legacy mapping until we use a enum for this.
 			"¿Presenta la planificación de su asignatura al inicio del ciclo lectivo y luego la cumple?": "Presenta la planificación de su asignatura al inicio del ciclo lectivo y luego la cumple.",
 			"¿Planifica el desarrollo de los temas?": "Planifica el desarrollo de los temas",
@@ -361,7 +393,7 @@ let PagesDataParser = function (utils) {
 		if (surveyTitle.length !== 1) throw new Error(`Do not know how to handle ${surveyTitle.length} survey title elements. htmlForLog: ${htmlForLog}`);
 		surveyTitle = surveyTitle.text().trim();
 
-		groups = /^ENCUESTA (DOCENTE|AUXILIARES DOCENTES) (PRIMER|SEGUNDO) CUATRIMESTRE (\d{4})$/g.exec(surveyTitle);
+		groups = surveyTitleRegex.exec(surveyTitle);
 		if (!groups) throw new Error(`surveyTitle couldn't be parsed: ${surveyTitle}`);
 
 		let surveyKind = surveyKindsMapping[groups[1]]; // DOCENTE, AUXILIAR
@@ -372,11 +404,11 @@ let PagesDataParser = function (utils) {
 		if (professor.length !== 1) throw new Error(`Do not know how to handle ${professor.length} professor elements. htmlForLog: ${htmlForLog}`);
 		professor = professor.text().trim();
 
-		groups = /^(.*) \((Titular|Asociado|Adjunto|)\)$/g.exec(professor);
+		groups = professorRegex.exec(professor);
 		if (!groups) throw new Error(`professor couldn't be parsed: ${professor}`);
 
 		let professorName = groups[1].toUpperCase();
-		let professorRole = groups[2].toUpperCase(); // TITULAR, ASOCIADO, ADJUNTO, etc.
+		let professorRole = professorRolesMapping[groups[2]]; // TITULAR, ASOCIADO, ADJUNTO, etc.
 
 		let answers = $(".panel-info .panel-body .form-group").toArray()
 			.map(item => {
@@ -427,6 +459,7 @@ let PagesDataParser = function (utils) {
 		getStudentPlanCode: getStudentPlanCode,
 		getCoursesHistory: getCoursesHistory,
 
+		getPendingProfessorSurveys: getPendingProfessorSurveys,
 		getProfessorClassesFromSurveys: getProfessorClassesFromSurveys,
 		parseKollaSurveyForm: parseKollaSurveyForm,
 	};

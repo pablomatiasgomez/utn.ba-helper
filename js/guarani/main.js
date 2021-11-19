@@ -24,7 +24,7 @@
 		// match is performed using startsWith and first one is used.
 		"/autogestion/grado/calendario": () => HorariosPage(utils),
 		"/autogestion/grado/cursada/elegir_materia/": () => PreInscripcionPage(utils, apiConnector),
-		"/autogestion/grado/encuestas_kolla/": () => EncuestasPendientesPage(dataCollector, store),
+		"/autogestion/grado/encuestas_kolla/": () => EncuestasPendientesPage(pagesDataParser, dataCollector, store),
 	};
 	// Wait for the loading div to hide... applies for both loading from document or ajax.
 	Object.entries(PAGE_HANDLERS).forEach(entry => PAGE_HANDLERS[entry[0]] = () => waitForElementToHide("#loading_top").then(entry[1]));

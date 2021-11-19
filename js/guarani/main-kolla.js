@@ -7,22 +7,19 @@
 	let store = new Store();
 	let pagesDataParser = new PagesDataParser(utils);
 
-	let hashedStudentId;
-	utils.wrapEventFunction("getHashedStundentId", () => {
-		return store.readSurveyFormsDataFromStore().then(surveyFormsData => {
-			let data = surveyFormsData[location.href];
-			if (!data) throw new Error(`Couldn't find suvey form data for url ${location.href}. surveyFormsData: ${JSON.stringify(surveyFormsData)}`);
-			hashedStudentId = data.hashedStudentId;
-		});
-	});
-
 	$("#btn-terminar").on("mousedown", function () {
 		return utils.wrapEventFunction("surveyFinished", () => {
-			let surveys = pagesDataParser.parseKollaSurveyForm($(document), $(document).find("html").html());
-			if (surveys.length) {
-				surveys.forEach(survey => survey.surveyTaker = hashedStudentId);
-				return apiConnector.postProfessorSurveys(surveys);
-			}
+			return store.readSurveyFormsDataFromStore().then(surveyFormsData => {
+				let data = surveyFormsData[location.href];
+				if (!data) throw new Error(`Couldn't find suvey form data for url ${location.href}. surveyFormsData: ${JSON.stringify(surveyFormsData)}`);
+				let hashedStudentId = data.hashedStudentId;
+
+				let surveys = pagesDataParser.parseKollaSurveyForm($(document), $(document).find("html").html());
+				if (surveys.length) {
+					surveys.forEach(survey => survey.surveyTaker = hashedStudentId);
+					return apiConnector.postProfessorSurveys(surveys);
+				}
+			});
 		});
 	});
 
