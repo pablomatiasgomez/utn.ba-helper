@@ -18,7 +18,7 @@
 
 	$("#btn-terminar").on("mousedown", function () {
 		return utils.wrapEventFunction("surveyFinished", () => {
-			let surveys = pagesDataParser.parseKollaSurveyForm($(document));
+			let surveys = pagesDataParser.parseKollaSurveyForm($(document), $(document).find("html").html());
 			if (surveys.length) {
 				surveys.forEach(survey => survey.surveyTaker = hashedStudentId);
 				return apiConnector.postProfessorSurveys(surveys);

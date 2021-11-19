@@ -45,7 +45,6 @@ JS_FILES="\
 js/guarani/Errors.js \
 js/guarani/Utils.js \
 js/guarani/Store.js \
-js/guarani/DataCollector.js \
 js/guarani/PagesDataParser.js \
 js/guarani/main-kolla.js"
 cat $BASE_JS_FILES $JS_FILES > js/guarani-kolla-helper.min.js

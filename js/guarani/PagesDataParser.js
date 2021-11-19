@@ -281,7 +281,7 @@ let PagesDataParser = function (utils) {
 						return utils.backgroundFetch(kollaUrl);
 					}).then(kollaResponseText => {
 						let $kollaResponseText = $(kollaResponseText);
-						let surveysMetadata = parseKollaSurveyForm($kollaResponseText);
+						let surveysMetadata = parseKollaSurveyForm($kollaResponseText, kollaResponseText);
 
 						// We could eventually merge same class professors, but the backend still accepts this:
 						return surveysMetadata.map(surveyMetadata => {
@@ -309,7 +309,7 @@ let PagesDataParser = function (utils) {
 	 * Parses the responseText of the Kolla forms, and returns the survey form data along with the answers.
 	 * @return {[{professorRole: string, classCode: string, year: number, courseCode: string, professorName: string, surveyKind: string, quarter}]}
 	 */
-	let parseKollaSurveyForm = function ($kollaResponseText) {
+	let parseKollaSurveyForm = function ($kollaResponseText, htmlForLog) {
 		const quarterMapping = {
 			"PRIMER": "1C",
 			"SEGUNDO": "2C",
@@ -354,7 +354,7 @@ let PagesDataParser = function (utils) {
 		let classCode = groups[3]; // E.g. K4053
 
 		let surveyTitle = $kollaResponseText.find(".encuesta .encuesta-titulo");
-		if (surveyTitle.length !== 1) throw new Error(`Do not know how to handle ${surveyTitle.length} survey title elements. kollaResponse: ${$kollaResponseText.find("html").html()}`);
+		if (surveyTitle.length !== 1) throw new Error(`Do not know how to handle ${surveyTitle.length} survey title elements. htmlForLog: ${htmlForLog}`);
 		surveyTitle = surveyTitle.text().trim();
 
 		groups = /^ENCUESTA (DOCENTE|AUXILIAR) (PRIMER|SEGUNDO) CUATRIMESTRE (\d{4})$/g.exec(surveyTitle);
@@ -365,7 +365,7 @@ let PagesDataParser = function (utils) {
 		let year = parseInt(groups[3]); // 2018, 2019, ...
 
 		let professor = $kollaResponseText.find(".encuesta-elemento h3");
-		if (professor.length !== 1) throw new Error(`Do not know how to handle ${professor.length} professor elements. kollaResponse: ${$kollaResponseText.find("html").html()}`); // TODO test on both.
+		if (professor.length !== 1098) throw new Error(`Do not know how to handle ${professor.length} professor elements. htmlForLog: ${htmlForLog}`);
 		professor = professor.text().trim();
 
 		groups = /^(.*) \((Titular|Asociado|Adjunto|)\)$/g.exec(professor);
@@ -411,7 +411,7 @@ let PagesDataParser = function (utils) {
 			professorName: professorName,
 			professorRole: professorRole,
 
-			surveyFields: answers, // Only used for posting surveys, not professors.
+			surveyFields: answers, // Only used for posting surveys, not professor classes.
 		}];
 	};
 
