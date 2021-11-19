@@ -328,7 +328,6 @@ let PagesDataParser = function (utils) {
 	 * @return {[{professorRole: string, classCode: string, year: number, courseCode: string, professorName: string, surveyKind: string, quarter}]}
 	 */
 	let parseKollaSurveyForm = function ($kollaResponseText, htmlForLog) {
-		let escapeRegExp = str => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 		const surveyKindsMapping = {
 			"DOCENTE": "DOCENTE",
 			"AUXILIARES DOCENTES": "AUXILIAR",
@@ -342,17 +341,18 @@ let PagesDataParser = function (utils) {
 		const surveyTitleRegex = new RegExp(`^ENCUESTA (${Object.keys(surveyKindsMapping).join("|")}) (${Object.keys(quarterMapping).join("|")}) CUATRIMESTRE (\\d{4})$`);
 
 		const professorRolesMapping = {
-			"Titular (Responsable de Cátedra)": "TITULAR",
-			"Asociado (Responsable de Cátedra)": "ASOCIADO",
+			"Titular": "TITULAR",
+			"Asociado": "ASOCIADO",
 			"Adjunto": "ADJUNTO",
 
 			"JTP": "JEFE DE TP",
 			"Ayudante de 1ra": "AYUDANTE 1RA",
 			"Ayudante de 2da": "AYUDANTE 2DA",
 		};
-		const professorRegex = new RegExp(`^(.*) \\((${Object.keys(professorRolesMapping).map(escapeRegExp).join("|")})\\)$`);
+		const professorRegex = new RegExp(`^(.*) \\((${Object.keys(professorRolesMapping).join("|")})(?: \\(Responsable de Cátedra\\))?\\)$`);
 
 		const questionsMapping = { // TODO temporarly legacy mapping until we use a enum for this.
+			// DOCENTE:
 			"¿Presenta la planificación de su asignatura al inicio del ciclo lectivo y luego la cumple?": "Presenta la planificación de su asignatura al inicio del ciclo lectivo y luego la cumple.",
 			"¿Planifica el desarrollo de los temas?": "Planifica el desarrollo de los temas",
 			"¿El docente explica los temas en forma clara y comprensible? (exposiciones organizadas y respuestas precisas)": "Explica los temas en forma clara y comprensible (exposiciones organizadas y respuestas precisas)",
@@ -380,6 +380,26 @@ let PagesDataParser = function (utils) {
 			"Mencione las características del docente que ayudaron en su aprendizaje": "Mencione las características del docente que ayudaron en su  aprendizaje",
 			"Realice las observaciones y aclaraciones que crea convenientes sobre las puntuaciones asignadas": "Realice las observaciones y aclaraciones que crea convenientes sobre  las puntuaciones asignadas",
 			"Mencione los aspectos del proceso de enseñanza que deberían mejorarse": "Mencione los aspectos del proceso de enseñanza que deberían mejorarse",
+
+			// AUXILIAR:
+			"¿Trata de relacionar los contenidos de la asignatura con la actividad profesional?": "¿Trata de relacionar los contenidos de la asignatura con la actividad profesional?",
+			"¿Trata de relacionar la teoría con los contenidos de las actividades prácticas?": "¿Trata de relacionar la teroría con los contenidos de las actividades prácticas?",
+			"¿Las clases estuvieron correctamente planificadas por el auxiliar?": "Las clases ¿Estuvieron correctamente planificadas por el auxiliar?",
+			"¿Es puntual?": "El Auxiliar ¿Es puntual?",
+			"¿Orienta sobre el uso de bibliografía de la cátedra?": "¿Orienta sobre el uso de bibliografía de la cátedra?",
+			"¿El auxiliar participa adecuadamente en el desarrollo de la clase, resolución de problemas o trabajos prácticos?": "El auxiliar ¿Participa adecuadamente en el desarrollo de la clase, resolución de problemas o trabajos prácticos?",
+			"Al momento de realizar los trabajos prácticos ¿Tiene la preparación previa adecuada?": "Al momento de realizar los trabajos prácticos ¿Tiene la preparación previa adecuada?",
+			"¿El auxiliar asiste regularmente a las clases teóricas y prácticas?": "El auxiliar ¿Asiste regularmente a las clases teóricas y prácticas?",
+			"En caso de corresponder: ¿Promueve el trabajo en equipo?": "En caso de corresponder ¿Promueve el trabajo en equipo?",
+			"¿Cómo evalúa ud. el trato del auxiliar con los alumnos?": "¿Cómo evalúa Ud. el trato del auxiliar con los alumnos?",
+			"La resolución de trabajos prácticos y/o experiencias de laboratorio ¿Permitió comprender mejor la materia?": "La resolución de trabajos prácticos y/o experiencias de laboratorio ¿Permitió comprender mejor la materia?",
+			"¿Promueve la participación de los estudiantes en las clases?": "¿Promueve la participación de los estudiantes en las clases?",
+			"¿Prepara material didáctico para el desarrollo de las clases?": "¿Prepara material didáctico para el desarrollo de las clases?",
+			"¿Responde las consultas planteadas por los alumnos?": "¿Responde las consultas planteadas por los alumnos?",
+
+			"Mencione los aspectos del proceso de enseñanza referidos a los trabajos prácticos del aula, que pueden mejorarse.": "Mencione los aspectos del proceso de enseñanza referidos a los trabajos Prácticos del aula, que pueden mejorarse.",
+			"Realice las observaciones que crea conveniente.": "Realice las observaciones que crea conveniente.",
+			"Mencione las características del auxiliar docente que ayudaron en su aprendizaje": "Mencione las características del auxiliar docente que ayudaron en su aprendizaje",
 		};
 
 		let courseTitle = $kollaResponseText.find(".formulario-titulo").text(); // E.g.: 'Simulación (082041) - Comisión: K4053', 'Administración Gerencial (082039) - Comisión: K5054'
@@ -389,66 +409,69 @@ let PagesDataParser = function (utils) {
 		let courseCode = groups[2]; // E.g. 082041
 		let classCode = groups[3]; // E.g. K4053
 
-		let surveyTitle = $kollaResponseText.find(".encuesta .encuesta-titulo");
-		if (surveyTitle.length !== 1) throw new Error(`Do not know how to handle ${surveyTitle.length} survey title elements. htmlForLog: ${htmlForLog}`);
-		surveyTitle = surveyTitle.text().trim();
+		return $kollaResponseText.find(".encuesta").toArray().map(surveyDiv => {
+			let $surveyDiv = $(surveyDiv);
 
-		groups = surveyTitleRegex.exec(surveyTitle);
-		if (!groups) throw new Error(`surveyTitle couldn't be parsed: ${surveyTitle}`);
+			let surveyTitle = $surveyDiv.find(".encuesta-titulo");
+			if (surveyTitle.length !== 1) throw new Error(`Do not know how to handle ${surveyTitle.length} survey title elements. htmlForLog: ${htmlForLog}`);  // TODO delete this check?
+			surveyTitle = surveyTitle.text().trim();
 
-		let surveyKind = surveyKindsMapping[groups[1]]; // DOCENTE, AUXILIAR
-		let quarter = quarterMapping[groups[2]]; // A, 1C, 2C
-		let year = parseInt(groups[3]); // 2018, 2019, ...
+			groups = surveyTitleRegex.exec(surveyTitle);
+			if (!groups) throw new Error(`surveyTitle couldn't be parsed: ${surveyTitle}`);
 
-		let professor = $kollaResponseText.find(".encuesta-elemento h3");
-		if (professor.length !== 1) throw new Error(`Do not know how to handle ${professor.length} professor elements. htmlForLog: ${htmlForLog}`);
-		professor = professor.text().trim();
+			let surveyKind = surveyKindsMapping[groups[1]]; // DOCENTE, AUXILIAR
+			let quarter = quarterMapping[groups[2]]; // A, 1C, 2C
+			let year = parseInt(groups[3]); // 2018, 2019, ...
 
-		groups = professorRegex.exec(professor);
-		if (!groups) throw new Error(`professor couldn't be parsed: ${professor}`);
+			let professor = $surveyDiv.find(".encuesta-elemento h3");
+			if (professor.length !== 1) throw new Error(`Do not know how to handle ${professor.length} professor elements. htmlForLog: ${htmlForLog}`); // TODO delete this check?
+			professor = professor.text().trim();
 
-		let professorName = groups[1].toUpperCase();
-		let professorRole = professorRolesMapping[groups[2]]; // TITULAR, ASOCIADO, ADJUNTO, etc.
+			groups = professorRegex.exec(professor);
+			if (!groups) throw new Error(`professor couldn't be parsed: ${professor}`);
 
-		let answers = $(".panel-info .panel-body .form-group").toArray()
-			.map(item => {
-				let $item = $(item);
-				let $questionLabel = $item.find("> label");
+			let professorName = groups[1].toUpperCase();
+			let professorRole = professorRolesMapping[groups[2]]; // TITULAR, ASOCIADO, ADJUNTO, etc.
 
-				let question = $questionLabel.text().replace("*", "").trim(); // TODO replace this with a backend enum.
-				question = questionsMapping[question] || question;
+			let answers = $surveyDiv.find(".panel-info .panel-body .form-group").toArray()
+				.map(item => {
+					let $item = $(item);
+					let $questionLabel = $item.find("> label");
 
-				let answer = {
-					question: question,
-				};
+					let question = $questionLabel.text().replace("*", "").trim(); // TODO replace this with a backend enum.
+					question = questionsMapping[question] || question;
 
-				let labelFor = $questionLabel.attr("for");
-				let $answerElement = $item.find(`[name=${labelFor}]`);
-				if ($answerElement.is("textarea")) {
-					answer.type = "TEXT";
-					answer.value = $answerElement.val() || null;
-				} else if ($answerElement.is("input")) {
-					answer.type = "PERCENTAGE";
-					let value = parseInt($answerElement.filter(":checked").parent().text());
-					answer.value = isNaN(value) ? null : value;
-				} else {
-					throw new Error(`Couldn't parse value for question ${question}. Item: ${$item.html()}`);
-				}
-				return answer;
-			});
+					let answer = {
+						question: question,
+					};
 
-		// TODO retrning an array as there proably are many professors for each course, but we don't know how to parse them yet..
-		return [{
-			surveyKind: surveyKind,
-			year: year,
-			quarter: quarter,
-			classCode: classCode,
-			courseCode: courseCode,
-			professorName: professorName,
-			professorRole: professorRole,
+					let labelFor = $questionLabel.attr("for");
+					let $answerElement = $item.find(`[name=${labelFor}]`);
+					if ($answerElement.is("textarea")) {
+						answer.type = "TEXT";
+						answer.value = $answerElement.val() || null;
+					} else if ($answerElement.is("input")) {
+						answer.type = "PERCENTAGE";
+						let value = parseInt($answerElement.filter(":checked").parent().text());
+						answer.value = isNaN(value) ? null : value;
+					} else {
+						throw new Error(`Couldn't parse value for question ${question}. Item: ${$item.html()}`);
+					}
+					return answer;
+				});
 
-			surveyFields: answers, // Only used for posting surveys, not professor classes.
-		}];
+			return {
+				surveyKind: surveyKind,
+				year: year,
+				quarter: quarter,
+				classCode: classCode,
+				courseCode: courseCode,
+				professorName: professorName,
+				professorRole: professorRole,
+
+				surveyFields: answers, // Only used for posting surveys, not professor classes.
+			};
+		});
 	};
 
 	// Public
