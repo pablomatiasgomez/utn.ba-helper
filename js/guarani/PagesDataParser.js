@@ -316,6 +316,10 @@ let PagesDataParser = function (utils) {
 			// TODO we don't know how Annual is returned.
 			//  "ANUAL": "A",
 		};
+		const surveyKindsMapping = {
+			"DOCENTE": "DOCENTE",
+			"AUXILIARES DOCENTES": "AUXILIAR",
+		};
 		const questionsMapping = { // TODO temporarly legacy mapping until we use a enum for this.
 			"¿Presenta la planificación de su asignatura al inicio del ciclo lectivo y luego la cumple?": "Presenta la planificación de su asignatura al inicio del ciclo lectivo y luego la cumple.",
 			"¿Planifica el desarrollo de los temas?": "Planifica el desarrollo de los temas",
@@ -357,15 +361,15 @@ let PagesDataParser = function (utils) {
 		if (surveyTitle.length !== 1) throw new Error(`Do not know how to handle ${surveyTitle.length} survey title elements. htmlForLog: ${htmlForLog}`);
 		surveyTitle = surveyTitle.text().trim();
 
-		groups = /^ENCUESTA (DOCENTE|AUXILIAR) (PRIMER|SEGUNDO) CUATRIMESTRE (\d{4})$/g.exec(surveyTitle);
+		groups = /^ENCUESTA (DOCENTE|AUXILIARES DOCENTES) (PRIMER|SEGUNDO) CUATRIMESTRE (\d{4})$/g.exec(surveyTitle);
 		if (!groups) throw new Error(`surveyTitle couldn't be parsed: ${surveyTitle}`);
 
-		let surveyKind = groups[1].toUpperCase(); // DOCENTE, AUXILIAR
+		let surveyKind = surveyKindsMapping[groups[1]]; // DOCENTE, AUXILIAR
 		let quarter = quarterMapping[groups[2]]; // A, 1C, 2C
 		let year = parseInt(groups[3]); // 2018, 2019, ...
 
 		let professor = $kollaResponseText.find(".encuesta-elemento h3");
-		if (professor.length !== 1098) throw new Error(`Do not know how to handle ${professor.length} professor elements. htmlForLog: ${htmlForLog}`);
+		if (professor.length !== 1) throw new Error(`Do not know how to handle ${professor.length} professor elements. htmlForLog: ${htmlForLog}`);
 		professor = professor.text().trim();
 
 		groups = /^(.*) \((Titular|Asociado|Adjunto|)\)$/g.exec(professor);

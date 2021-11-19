@@ -11,7 +11,7 @@
 	utils.wrapEventFunction("getHashedStundentId", () => {
 		return store.readSurveyFormsDataFromStore().then(surveyFormsData => {
 			let data = surveyFormsData[location.href];
-			if (!data) throw new Error(`Couldn't find suvey form data for url ${location.href}`);
+			if (!data) throw new Error(`Couldn't find suvey form data for url ${location.href}. surveyFormsData: ${JSON.stringify(surveyFormsData)}`);
 			hashedStudentId = data.hashedStudentId;
 		});
 	});
