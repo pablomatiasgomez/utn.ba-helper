@@ -333,12 +333,11 @@ let PagesDataParser = function (utils) {
 			"AUXILIARES DOCENTES": "AUXILIAR",
 		};
 		const quarterMapping = {
-			"PRIMER": "1C",
-			"SEGUNDO": "2C",
-			// TODO we don't know how Annual is returned.
-			//  "ANUAL": "A",
+			"PRIMER CUATRIMESTRE": "1C",
+			"SEGUNDO CUATRIMESTRE": "2C",
+			"ANUAL": "A",
 		};
-		const surveyTitleRegex = new RegExp(`^ENCUESTA (${Object.keys(surveyKindsMapping).join("|")}) (${Object.keys(quarterMapping).join("|")}) CUATRIMESTRE (\\d{4})$`);
+		const surveyTitleRegex = new RegExp(`^ENCUESTA (${Object.keys(surveyKindsMapping).join("|")}) (${Object.keys(quarterMapping).join("|")}) (\\d{4})$`);
 
 		const professorRolesMapping = {
 			"Titular": "TITULAR",
