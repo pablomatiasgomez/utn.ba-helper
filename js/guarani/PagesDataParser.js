@@ -93,7 +93,7 @@ let PagesDataParser = function (utils) {
 			if (index === -1) throw new Error(`Couldn't find studentId in pdfContents: ${JSON.stringify(contents)}`);
 
 			let studentId = contents[index + 1].trim();
-			// Split the checkdigit, add the thousands separator, and join the checkdigit again..
+			// Split the checkdigit, add the thousands' separator, and join the checkdigit again.
 			// This is because we have been parsing studentIds in the form of "xxx.xxx-x"
 			return parseInt(studentId.slice(0, -1)).toLocaleString("es-AR") + "-" + studentId.slice(-1);
 		});
