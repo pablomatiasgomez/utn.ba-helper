@@ -21,7 +21,7 @@ chrome.runtime.onMessage.addListener(function (requestInfo, sender, resolve) {
 	}).catch(e => {
 		resolve({
 			// Need to do .toString() as Error is not "JSON-ifiable" and may get erased.
-			errorStr: `Error executing ${requestInfo.method} ${requestInfo.url} - ${e.toString()}`
+			errorStr: `Error executing ${requestInfo.method || "GET"} ${requestInfo.url} - ${e.toString()}`
 		});
 	});
 	return true;

@@ -133,7 +133,7 @@ let PagesDataParser = function (utils) {
 
 			let classSchedules = [];
 			const yearAndQuarterRegex = /^((1|2)(?:er|do) Cuat|Anual) (\d{4})$/;
-			// After all the class schedules rows, this is the following text so we know where to stop..
+			// After all the class schedules rows, this is the following text, so we know where to stop...
 			while (contents[i] !== "Firma y Sello Departamento") {
 				let courseCode = contents[i++]; // e.g.: 950701
 				if (!/^\d{6}$/.test(courseCode)) throw new Error(`courseCode couldn't be parsed: ${courseCode}. PdfContents: ${JSON.stringify(contents)}`);
@@ -143,7 +143,7 @@ let PagesDataParser = function (utils) {
 				let yearAndQuarter = contents[i++]; // e.g.: 1er Cuat 2021
 				groups = yearAndQuarterRegex.exec(yearAndQuarter);
 				if (!groups) {
-					// Sometimes it can happen that the courseName was long enough that was split into two rows..
+					// Sometimes it can happen that the courseName was long enough that was split into two rows...
 					courseName = `${courseName} ${yearAndQuarter}`;
 					yearAndQuarter = contents[i++];
 					groups = yearAndQuarterRegex.exec(yearAndQuarter);
@@ -155,16 +155,19 @@ let PagesDataParser = function (utils) {
 				let classCode = contents[i++].toUpperCase(); // e.g.: Z1154
 
 				let branch = contents[i++].toUpperCase()
-					.replace(" ", "_")
-					.replace("CAMPUS_VIRTUAL", "AULA_VIRTUAL"); // e.g.: CAMPUS, MEDRANO, AULA_VIRTUAL, ESCUELA
-				if (branch === "ESCUELA") {
+					.replace(" ", "_") // e.g.: CAMPUS, MEDRANO, CAMPUS_VIRTUAL, ESCUELA
+					.replace("SEDE_", ""); // Strip out some values like SEDE_CAMPUS or SEDE_MEDRANO
+				if (branch === "CAMPUS_VIRTUAL") {
+					branch = "AULA_VIRTUAL";
+				} else if (branch === "ESCUELA") {
 					// For some reason, this comes as two separate elements, like: ["Escuela", "Técnica -"]
 					validateExpectedContents(["Técnica -"]);
 					branch = "PIÑERO";
+				} else if (branch === "SIN_DESIGNAR") {
+					branch = null;
 				}
-				if (branch === "SIN_DESIGNAR") branch = null;
 
-				i++; // (ClassRoomnumber) e.g.: "Sin definir", "2"
+				i++; // (ClassRoomNumber) e.g.: "Sin definir", "2"
 
 				let schedulesStr = contents[i++]; // e.g.: Lu(n)1:5 Mi(n)0:2
 				// Sundays is not a valid day, not sure why this is happening, but ignoring..
