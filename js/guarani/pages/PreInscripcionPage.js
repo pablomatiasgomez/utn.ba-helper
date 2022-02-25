@@ -20,10 +20,10 @@ let PreInscripcionPage = function (utils, apiConnector) {
 
 	let parseBranch = function (branchTxt) {
 		const mapping = {
-			"Medrano": "MEDRANO",
-			"Campus": "CAMPUS",
-			"Campus Virtual": "AULA_VIRTUAL",
-		};
+			"Sede Medrano": "MEDRANO",
+			"Sede Campus": "CAMPUS",
+			"Virtual": "AULA_VIRTUAL",
+		}; // TODO reuse this in PagesDataParser too?
 		let branch = mapping[branchTxt];
 		if (!branch) throw new Error(`Branch txt couldn't be parsed: ${branchTxt}`);
 		return branch;
