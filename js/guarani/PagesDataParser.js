@@ -157,7 +157,8 @@ let PagesDataParser = function (utils) {
 				let branch = contents[i++].toUpperCase()
 					.replace(" ", "_") // e.g.: CAMPUS, MEDRANO, CAMPUS_VIRTUAL, ESCUELA
 					.replace("SEDE_", ""); // Strip out some values like SEDE_CAMPUS or SEDE_MEDRANO
-				if (branch === "CAMPUS_VIRTUAL") {
+				// TODO reuse what we have in PreInscripcionPage ?
+				if (branch === "CAMPUS_VIRTUAL" || branch === "VIRTUAL") {
 					branch = "AULA_VIRTUAL";
 				} else if (branch === "ESCUELA") {
 					// For some reason, this comes as two separate elements, like: ["Escuela", "Técnica -"]
