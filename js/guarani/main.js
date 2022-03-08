@@ -1,13 +1,4 @@
 (function () {
-	// We only will handle pages if:
-	// - the user is in the /autogestion/grado pages
-	// - the user is logged in (they have the name in the navbar)
-	// - there is a profile selector with "Alumno" selected.
-	let isInGradoPage = window.location.pathname.startsWith("/autogestion/grado");
-	let isLoggedIn = $(".user-navbar").length;
-	let isStudentProfile = $("#js-selector-perfiles .js-texto-perfil").text() === "Perfil: Alumno";
-	if (!isInGradoPage || !isLoggedIn || !isStudentProfile) return;
-
 	// Init pdf.js
 	pdfjsLib.GlobalWorkerOptions.workerSrc = chrome.runtime.getURL("js/pdf.worker.min.js");
 
@@ -17,6 +8,18 @@
 	let pagesDataParser = new PagesDataParser(utils);
 	let dataCollector = new DataCollector(pagesDataParser, apiConnector);
 	let customPages = new CustomPages(pagesDataParser, dataCollector, utils, apiConnector);
+
+	// We only will handle pages if:
+	// - the user is in the /autogestion/grado pages
+	// - the user is logged in (they have the name in the navbar)
+	// - there is a profile selector with "Alumno" selected.
+	let isInGradoPage = window.location.pathname.startsWith("/autogestion/grado");
+	let isLoggedIn = !!$(".user-navbar").length;
+	let currentProfile = $("#js-selector-perfiles .js-texto-perfil").text().trim();
+	let isStudentProfile = currentProfile === "Perfil: Alumno";
+	if (!isInGradoPage || !isLoggedIn || !isStudentProfile) {
+		return apiConnector.logMessage("pageNotHandled", false, `[Path:${window.location.pathname}][IsLoggedIn:${isLoggedIn}][CurrentProfile:${currentProfile}]`);
+	}
 
 	customPages.appendMenu();
 
