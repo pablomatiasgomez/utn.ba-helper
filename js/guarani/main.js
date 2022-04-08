@@ -1,8 +1,8 @@
 (function () {
 	// Init pdf.js
-	pdfjsLib.GlobalWorkerOptions.workerSrc = chrome.runtime.getURL("js/pdf.worker.min.js");
+	pdfjsLib.GlobalWorkerOptions.workerSrc = chrome.runtime.getURL("js/lib/pdf.worker.min.js");
 
-	let apiConnector = new ApiConnector("guarani");
+	let apiConnector = new ApiConnector();
 	let utils = new Utils(apiConnector);
 	let store = new Store();
 	let pagesDataParser = new PagesDataParser(utils);

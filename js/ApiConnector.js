@@ -1,6 +1,6 @@
-let ApiConnector = function (site) {
+let ApiConnector = function () {
 
-	const CLIENT = `CHROME@${chrome.runtime.getManifest().version}@${site}`;
+	const CLIENT = `CHROME@${chrome.runtime.getManifest().version}`;
 	const BASE_API_URL = "https://www.pablomatiasgomez.com.ar/sigahelper/v2";
 
 	const DAYS_MAPPING = {

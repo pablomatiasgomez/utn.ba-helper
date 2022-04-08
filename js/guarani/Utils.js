@@ -109,12 +109,6 @@ let Utils = function (apiConnector) {
 		t: "Tarde",
 		n: "Noche"
 	};
-	const BRANCHES = {
-		"CAMPUS": "CAMPUS",
-		"MEDRANO": "MEDRANO",
-		"AULA_VIRTUAL": "AULA VIRTUAL",
-		"PIÑERO": "PIÑERO",
-	};
 	const NEW_GRADES_REGULATION_DATE = new Date(2017, 2, 10); // Doesn't have to be exact.. just using March 10th.
 	const WEIGHTED_GRADES = {
 		// Segun ordenanza 1549
@@ -249,7 +243,6 @@ let Utils = function (apiConnector) {
 		backgroundFetch: backgroundFetch,
 		injectScript: injectScript,
 		attachEvent: attachEvent,
-		stringifyError: stringifyError,
 		wrapError: wrapError,
 		wrapEventFunction: wrapEventFunction,
 
@@ -258,7 +251,6 @@ let Utils = function (apiConnector) {
 		HOURS: HOURS,
 		DAYS: DAYS,
 		TIME_SHIFTS: TIME_SHIFTS,
-		BRANCHES: BRANCHES,
 
 		getWeightedGrade: getWeightedGrade,
 

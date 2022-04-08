@@ -17,17 +17,6 @@
     "content_scripts": [
         {
             "matches": [
-                "*://*.siga.frba.utn.edu.ar/*"
-            ],
-            "js": [
-                "js/siga-helper.min.js"
-            ],
-            "css": [
-                "css/siga-helper.css"
-            ]
-        },
-        {
-            "matches": [
                 "*://*.guarani.frba.utn.edu.ar/*"
             ],
             "js": [
@@ -51,7 +40,7 @@
         }
     ],
     "web_accessible_resources": [
-        "js/pdf.worker.min.js"
+        "js/lib/pdf.worker.min.js"
     ],
 
     "background": {

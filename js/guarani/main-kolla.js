@@ -2,7 +2,7 @@
 	// This main will only be executed on kolla pages.
 	if (!window.location.pathname.startsWith("/siu/kolla")) return;
 
-	let apiConnector = new ApiConnector("guarani");
+	let apiConnector = new ApiConnector();
 	let utils = new Utils(apiConnector);
 	let store = new Store();
 	let pagesDataParser = new PagesDataParser(utils);

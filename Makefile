@@ -4,5 +4,5 @@
 build:
 	scripts/build.sh
 
-package:
+package: build
 	scripts/package.sh
