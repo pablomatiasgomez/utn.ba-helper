@@ -1,5 +1,5 @@
 ﻿{
-    "manifest_version": 2,
+    "manifest_version": 3,
 
     "name": "Siga Helper",
     "short_name": "SigaHelper",
@@ -39,20 +39,25 @@
             "all_frames": true
         }
     ],
+
     "web_accessible_resources": [
-        "js/lib/pdf.worker.min.js"
+        {
+            "resources": [
+                "js/lib/pdf.worker.min.js",
+                "js/guarani/foreground.js"
+            ],
+            "matches": [
+                "*://*.frba.utn.edu.ar/*"
+            ]
+        }
     ],
 
     "background": {
-        "scripts": [
-            "js/background.js"
-        ],
-        "persistent": false
+        "service_worker": "js/background.js"
     },
 
     "permissions" : [
-        "storage",
-        "*://*.frba.utn.edu.ar/*"
+        "storage"
     ]
 }
 

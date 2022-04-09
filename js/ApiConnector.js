@@ -146,6 +146,7 @@ let ApiConnector = function () {
 	// ---
 
 	let makeRequest = function (options) {
+		// TODO this is duplicated in Utils.backgroundFetch.
 		return new Promise((resolve, reject) => {
 			chrome.runtime.sendMessage(options, response => (response && response.errorStr) ? reject(new Error(response.errorStr)) : resolve(response));
 		});

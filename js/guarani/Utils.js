@@ -6,24 +6,11 @@ let Utils = function (apiConnector) {
 		});
 	};
 
-	let injectScript = function (content) {
+	let injectScript = function (filePath) {
 		let script = document.createElement('script');
 		script.type = 'text/javascript';
-		script.innerHTML = content;
+		script.src = chrome.runtime.getURL(filePath);
 		document.head.appendChild(script);
-	};
-
-	/**
-	 * Attaches a handler to the utn ba events such as a changing a web page via ajax.
-	 * @param eventKey the utn.ba event key
-	 * @param handler the listener that will handle events
-	 */
-	let attachEvent = function (eventKey, handler) {
-		let windowEventKey = `__ce_${eventKey}`;
-		window.addEventListener(windowEventKey, e => {
-			wrapEventFunction(eventKey, () => handler(e.detail));
-		});
-		injectScript(`kernel.evts.escuchar("${eventKey}", e => window.dispatchEvent(new CustomEvent("${windowEventKey}", {detail: e})), true);`);
 	};
 
 	let stringifyError = function (error) {
@@ -242,7 +229,6 @@ let Utils = function (apiConnector) {
 	return {
 		backgroundFetch: backgroundFetch,
 		injectScript: injectScript,
-		attachEvent: attachEvent,
 		wrapError: wrapError,
 		wrapEventFunction: wrapEventFunction,
 

@@ -42,24 +42,11 @@
 	// noinspection JSIgnoredPromiseFromCall
 	handleCurrentPage();
 
-	// Append a script to capture ajax page changes.
-	utils.injectScript(`
-		window.history.pushState = (f => function pushState() {
-			f.apply(this, arguments); // pushState returns void so no need to return value.
-			window.dispatchEvent(new Event("locationchange"));
-		})(window.history.pushState);
+	// Append the foreground script that will subscribe to all the needed events.
+	utils.injectScript("js/guarani/foreground.js");
 
-		window.history.replaceState = (f => function replaceState() {
-			f.apply(this, arguments); // replaceState returns void so no need to return value.
-			window.dispatchEvent(new Event("locationchange"));
-		})(window.history.replaceState);
-
-		window.addEventListener('popstate', () => {
-			window.dispatchEvent(new Event("locationchange"));
-		});
-	`);
+	// Subscribe to ajax page changes (some of these events are created in the foreground script)
 	window.addEventListener("locationchange", () => handleCurrentPage());
-
 
 	// Background stuff...
 	utils.wrapEventFunction("addStudentIdToHeader", () => pagesDataParser.getStudentId().then(studentId => {
