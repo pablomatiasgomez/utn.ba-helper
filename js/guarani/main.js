@@ -56,8 +56,7 @@
 	});
 
 	$("body").on("click", ".powered-by-utnba-helper", function () {
-		// TODO rename link to utn.ba helper?
-		window.open("https://chrome.google.com/webstore/detail/siga-helper/jdgdheoeghamkhfppapjchbojhehimpe", "_blank");
+		window.open("https://chrome.google.com/webstore/detail/jdgdheoeghamkhfppapjchbojhehimpe", "_blank");
 	});
 
 	//----
