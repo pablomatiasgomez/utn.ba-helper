@@ -1,4 +1,5 @@
-let Utils = function (apiConnector) {
+if (!window.UtnBaHelper) window.UtnBaHelper = {};
+UtnBaHelper.Utils = function (apiConnector) {
 
 	let backgroundFetch = function (url) {
 		return new Promise((resolve, reject) => {
@@ -221,7 +222,7 @@ let Utils = function (apiConnector) {
 		}
 		return `<li style="font-size: ${fontSize}">
 			${getOverallScoreSpan(professor.overallScore)}
-			<a class="no-ajax" href="${CustomPages.getProfessorSurveyResultsUrl(professor.name)}" target="_blank">${professor.name}</a> (${professor.role})
+			<a class="no-ajax" href="${UtnBaHelper.CustomPages.getProfessorSurveyResultsUrl(professor.name)}" target="_blank">${professor.name}</a> (${professor.role})
 		</li>`;
 	};
 

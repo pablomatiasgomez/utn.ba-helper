@@ -1,4 +1,5 @@
-let ProfessorsSearchCustomPage = function ($container, services) {
+if (!window.UtnBaHelper) window.UtnBaHelper = {};
+UtnBaHelper.ProfessorsSearchCustomPage = function ($container, services) {
 
 	// noinspection JSNonASCIINames,SpellCheckingInspection,NonAsciiCharacters
 	const TEXT_QUESTIONS = {
@@ -103,7 +104,7 @@ let ProfessorsSearchCustomPage = function ($container, services) {
 				return `<tr>
 					<td>${classSchedule.year}</td>
 					<td>${classSchedule.quarter}</td>
-					<td><a class="no-ajax" href="${CustomPages.getCourseResultsUrl(classSchedule.courseCode)}" target="_blank">${classSchedule.courseName}</a></td>
+					<td><a class="no-ajax" href="${UtnBaHelper.CustomPages.getCourseResultsUrl(classSchedule.courseCode)}" target="_blank">${classSchedule.courseName}</a></td>
 					<td>${classSchedule.classCode}</td>
 					<td>${classSchedule.branch || "-"}</td>
 					<td>${services.utils.getTimeInfoStringFromSchedules(classSchedule.schedules)}</td>
@@ -177,12 +178,12 @@ let ProfessorsSearchCustomPage = function ($container, services) {
 	// Init
 	return Promise.resolve().then(() => {
 		createPage();
-		let professorName = new URLSearchParams(window.location.search).get(ProfessorsSearchCustomPage.customParamKey);
+		let professorName = new URLSearchParams(window.location.search).get(UtnBaHelper.ProfessorsSearchCustomPage.customParamKey);
 		if (professorName) {
 			return retrieveProfessorData(professorName);
 		}
 	});
 };
 
-ProfessorsSearchCustomPage.menuName = "Buscar docentes";
-ProfessorsSearchCustomPage.customParamKey = "professorName";
+UtnBaHelper.ProfessorsSearchCustomPage.menuName = "Buscar docentes";
+UtnBaHelper.ProfessorsSearchCustomPage.customParamKey = "professorName";

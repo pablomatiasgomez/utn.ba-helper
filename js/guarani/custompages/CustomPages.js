@@ -1,9 +1,10 @@
-let CustomPages = function (pagesDataParser, dataCollector, utils, apiConnector) {
+if (!window.UtnBaHelper) window.UtnBaHelper = {};
+UtnBaHelper.CustomPages = function (pagesDataParser, dataCollector, utils, apiConnector) {
 
 	const CUSTOM_PAGES = [
-		CoursesSearchCustomPage,
-		ProfessorsSearchCustomPage,
-		PlanTrackingCustomPage,
+		UtnBaHelper.CoursesSearchCustomPage,
+		UtnBaHelper.ProfessorsSearchCustomPage,
+		UtnBaHelper.PlanTrackingCustomPage,
 	];
 
 	let appendMenu = function () {
@@ -18,7 +19,7 @@ let CustomPages = function (pagesDataParser, dataCollector, utils, apiConnector)
 		$(".main-nav .nav:not(.perfiles)").append($li);
 
 		CUSTOM_PAGES.forEach(customPage => {
-			$customMenusContainer.append(`<li><a class="no-ajax" href="${CustomPages.getCustomPageUrl(customPage)}">${customPage.menuName}</a></li>`);
+			$customMenusContainer.append(`<li><a class="no-ajax" href="${UtnBaHelper.CustomPages.getCustomPageUrl(customPage)}">${customPage.menuName}</a></li>`);
 		});
 	};
 
@@ -43,7 +44,7 @@ let CustomPages = function (pagesDataParser, dataCollector, utils, apiConnector)
 	};
 
 	let getSelectedPageHandler = function () {
-		let selectedCustomPageName = new URLSearchParams(window.location.search).get(CustomPages.CUSTOM_PAGE_QUERY_PARAM);
+		let selectedCustomPageName = new URLSearchParams(window.location.search).get(UtnBaHelper.CustomPages.CUSTOM_PAGE_QUERY_PARAM);
 		let selectedCustomPage = CUSTOM_PAGES.filter(customPage => selectedCustomPageName === customPage.menuName)[0];
 		if (!selectedCustomPage) return null;
 
@@ -66,20 +67,20 @@ let CustomPages = function (pagesDataParser, dataCollector, utils, apiConnector)
 	};
 };
 
-CustomPages.CUSTOM_PAGE_QUERY_PARAM = "customPage";
+UtnBaHelper.CustomPages.CUSTOM_PAGE_QUERY_PARAM = "customPage";
 
-CustomPages.getCustomPageUrl = function (customPage, customParamValue) {
+UtnBaHelper.CustomPages.getCustomPageUrl = function (customPage, customParamValue) {
 	let params = {
-		[CustomPages.CUSTOM_PAGE_QUERY_PARAM]: customPage.menuName,
+		[UtnBaHelper.CustomPages.CUSTOM_PAGE_QUERY_PARAM]: customPage.menuName,
 		[customPage.customParamKey]: customParamValue,
 	};
 	return "/autogestion/grado/?" + Object.entries(params).filter(entry => !!entry[1]).map(entry => entry.map(encodeURIComponent).join("=")).join("&");
 };
 
-CustomPages.getCourseResultsUrl = function (courseCode) {
-	return CustomPages.getCustomPageUrl(CoursesSearchCustomPage, courseCode);
+UtnBaHelper.CustomPages.getCourseResultsUrl = function (courseCode) {
+	return UtnBaHelper.CustomPages.getCustomPageUrl(UtnBaHelper.CoursesSearchCustomPage, courseCode);
 };
 
-CustomPages.getProfessorSurveyResultsUrl = function (professorName) {
-	return CustomPages.getCustomPageUrl(ProfessorsSearchCustomPage, professorName);
+UtnBaHelper.CustomPages.getProfessorSurveyResultsUrl = function (professorName) {
+	return UtnBaHelper.CustomPages.getCustomPageUrl(UtnBaHelper.ProfessorsSearchCustomPage, professorName);
 };

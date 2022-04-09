@@ -1,4 +1,5 @@
-let PreInscripcionPage = function (utils, apiConnector) {
+if (!window.UtnBaHelper) window.UtnBaHelper = {};
+UtnBaHelper.PreInscripcionPage = function (utils, apiConnector) {
 
 	let parsePeriodTxt = function (periodTxt) {
 		const quarterMappings = {

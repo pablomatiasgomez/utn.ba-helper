@@ -1,4 +1,5 @@
-let CoursesSearchCustomPage = function ($container, services) {
+if (!window.UtnBaHelper) window.UtnBaHelper = {};
+UtnBaHelper.CoursesSearchCustomPage = function ($container, services) {
 
 	let $searchDiv;
 	let $searchResultsDiv;
@@ -115,12 +116,12 @@ let CoursesSearchCustomPage = function ($container, services) {
 	// Init
 	return Promise.resolve().then(() => {
 		createPage();
-		let courseCode = new URLSearchParams(window.location.search).get(CoursesSearchCustomPage.customParamKey);
+		let courseCode = new URLSearchParams(window.location.search).get(UtnBaHelper.CoursesSearchCustomPage.customParamKey);
 		if (courseCode) {
 			return retrieveClassesForCourse(courseCode, 0, 15);
 		}
 	});
 };
 
-CoursesSearchCustomPage.menuName = "Buscar cursos";
-CoursesSearchCustomPage.customParamKey = "courseCode";
+UtnBaHelper.CoursesSearchCustomPage.menuName = "Buscar cursos";
+UtnBaHelper.CoursesSearchCustomPage.customParamKey = "courseCode";

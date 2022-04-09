@@ -1,4 +1,5 @@
-let PagesDataParser = function (utils) {
+if (!window.UtnBaHelper) window.UtnBaHelper = {};
+UtnBaHelper.PagesDataParser = function (utils) {
 
 	// We want to fetch only once each page.
 	let CACHED_PAGE_CONTENTS = {};

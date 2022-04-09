@@ -1,4 +1,5 @@
-let HorariosPage = function (utils) {
+if (!window.UtnBaHelper) window.UtnBaHelper = {};
+UtnBaHelper.HorariosPage = function (utils) {
 
 	let getColorFromClass = function (className) {
 		const colorRegex = /materia-color-(\d*)/;

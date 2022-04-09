@@ -2,12 +2,12 @@
 	// Init pdf.js
 	pdfjsLib.GlobalWorkerOptions.workerSrc = chrome.runtime.getURL("js/lib/pdf.worker.min.js");
 
-	let apiConnector = new ApiConnector();
-	let utils = new Utils(apiConnector);
-	let store = new Store();
-	let pagesDataParser = new PagesDataParser(utils);
-	let dataCollector = new DataCollector(pagesDataParser, apiConnector);
-	let customPages = new CustomPages(pagesDataParser, dataCollector, utils, apiConnector);
+	let apiConnector = new UtnBaHelper.ApiConnector();
+	let utils = new UtnBaHelper.Utils(apiConnector);
+	let store = new UtnBaHelper.Store();
+	let pagesDataParser = new UtnBaHelper.PagesDataParser(utils);
+	let dataCollector = new UtnBaHelper.DataCollector(pagesDataParser, apiConnector);
+	let customPages = new UtnBaHelper.CustomPages(pagesDataParser, dataCollector, utils, apiConnector);
 
 	// We only will handle pages if:
 	// - the user is in the /autogestion/grado pages
@@ -25,9 +25,9 @@
 
 	const PAGE_HANDLERS = {
 		// match is performed using startsWith and first one is used.
-		"/autogestion/grado/calendario": () => HorariosPage(utils),
-		"/autogestion/grado/cursada/elegir_materia/": () => PreInscripcionPage(utils, apiConnector),
-		"/autogestion/grado/encuestas_kolla/": () => EncuestasPendientesPage(pagesDataParser, dataCollector, store),
+		"/autogestion/grado/calendario": () => UtnBaHelper.HorariosPage(utils),
+		"/autogestion/grado/cursada/elegir_materia/": () => UtnBaHelper.PreInscripcionPage(utils, apiConnector),
+		"/autogestion/grado/encuestas_kolla/": () => UtnBaHelper.EncuestasPendientesPage(pagesDataParser, dataCollector, store),
 	};
 	// Wait for the loading div to hide... applies for both loading from document or ajax.
 	Object.entries(PAGE_HANDLERS).forEach(entry => PAGE_HANDLERS[entry[0]] = () => waitForElementToHide("#loading_top").then(entry[1]));
