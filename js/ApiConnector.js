@@ -1,6 +1,7 @@
-let ApiConnector = function (site) {
+if (!window.UtnBaHelper) window.UtnBaHelper = {};
+UtnBaHelper.ApiConnector = function () {
 
-	const CLIENT = `CHROME@${chrome.runtime.getManifest().version}@${site}`;
+	const CLIENT = `CHROME@${chrome.runtime.getManifest().version}`;
 	const BASE_API_URL = "https://www.pablomatiasgomez.com.ar/sigahelper/v2";
 
 	const DAYS_MAPPING = {
@@ -146,6 +147,7 @@ let ApiConnector = function (site) {
 	// ---
 
 	let makeRequest = function (options) {
+		// TODO this is duplicated in Utils.backgroundFetch.
 		return new Promise((resolve, reject) => {
 			chrome.runtime.sendMessage(options, response => (response && response.errorStr) ? reject(new Error(response.errorStr)) : resolve(response));
 		});

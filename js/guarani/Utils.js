@@ -1,4 +1,5 @@
-let Utils = function (apiConnector) {
+if (!window.UtnBaHelper) window.UtnBaHelper = {};
+UtnBaHelper.Utils = function (apiConnector) {
 
 	let backgroundFetch = function (url) {
 		return new Promise((resolve, reject) => {
@@ -6,24 +7,11 @@ let Utils = function (apiConnector) {
 		});
 	};
 
-	let injectScript = function (content) {
+	let injectScript = function (filePath) {
 		let script = document.createElement('script');
 		script.type = 'text/javascript';
-		script.innerHTML = content;
+		script.src = chrome.runtime.getURL(filePath);
 		document.head.appendChild(script);
-	};
-
-	/**
-	 * Attaches a handler to the utn ba events such as a changing a web page via ajax.
-	 * @param eventKey the utn.ba event key
-	 * @param handler the listener that will handle events
-	 */
-	let attachEvent = function (eventKey, handler) {
-		let windowEventKey = `__ce_${eventKey}`;
-		window.addEventListener(windowEventKey, e => {
-			wrapEventFunction(eventKey, () => handler(e.detail));
-		});
-		injectScript(`kernel.evts.escuchar("${eventKey}", e => window.dispatchEvent(new CustomEvent("${windowEventKey}", {detail: e})), true);`);
 	};
 
 	let stringifyError = function (error) {
@@ -108,12 +96,6 @@ let Utils = function (apiConnector) {
 		m: "Mañana",
 		t: "Tarde",
 		n: "Noche"
-	};
-	const BRANCHES = {
-		"CAMPUS": "CAMPUS",
-		"MEDRANO": "MEDRANO",
-		"AULA_VIRTUAL": "AULA VIRTUAL",
-		"PIÑERO": "PIÑERO",
 	};
 	const NEW_GRADES_REGULATION_DATE = new Date(2017, 2, 10); // Doesn't have to be exact.. just using March 10th.
 	const WEIGHTED_GRADES = {
@@ -240,7 +222,7 @@ let Utils = function (apiConnector) {
 		}
 		return `<li style="font-size: ${fontSize}">
 			${getOverallScoreSpan(professor.overallScore)}
-			<a class="no-ajax" href="${CustomPages.getProfessorSurveyResultsUrl(professor.name)}" target="_blank">${professor.name}</a> (${professor.role})
+			<a class="no-ajax" href="${UtnBaHelper.CustomPages.getProfessorSurveyResultsUrl(professor.name)}" target="_blank">${professor.name}</a> (${professor.role})
 		</li>`;
 	};
 
@@ -248,8 +230,6 @@ let Utils = function (apiConnector) {
 	return {
 		backgroundFetch: backgroundFetch,
 		injectScript: injectScript,
-		attachEvent: attachEvent,
-		stringifyError: stringifyError,
 		wrapError: wrapError,
 		wrapEventFunction: wrapEventFunction,
 
@@ -258,7 +238,6 @@ let Utils = function (apiConnector) {
 		HOURS: HOURS,
 		DAYS: DAYS,
 		TIME_SHIFTS: TIME_SHIFTS,
-		BRANCHES: BRANCHES,
 
 		getWeightedGrade: getWeightedGrade,
 

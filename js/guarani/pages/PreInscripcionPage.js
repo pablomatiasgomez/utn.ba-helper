@@ -1,4 +1,5 @@
-let PreInscripcionPage = function (utils, apiConnector) {
+if (!window.UtnBaHelper) window.UtnBaHelper = {};
+UtnBaHelper.PreInscripcionPage = function (utils, apiConnector) {
 
 	let parsePeriodTxt = function (periodTxt) {
 		const quarterMappings = {
@@ -117,9 +118,10 @@ let PreInscripcionPage = function (utils, apiConnector) {
 		let currentCourseOptionsData = response.agenda.comisiones;
 		return addPreviousProfessorsInfo(currentCourseOptionsData);
 	}).then(() => {
-		// Once the alternatives start to be assigned, the combo and everything is reloaded so we need to render it again.
-		// Given that handling this is somewhat difficult as the user may navigate many different courses, for now we reload the page :(
-		utils.attachEvent("comision_preinscripta", () => location.reload());
-		utils.attachEvent("comision_despreinscripta", () => location.reload());
+		// Once the alternatives start to be assigned, the combo and everything is reloaded, so we need to render it again.
+		// Given that handling this is somewhat difficult as the user may navigate many courses, for now we reload the page :(
+		// Events triggered from foreground script:
+		window.addEventListener("__utn_ba_event_comision_preinscripta", () => location.reload());
+		window.addEventListener("__utn_ba_event_comision_despreinscripta", () => location.reload());
 	});
 };

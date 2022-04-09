@@ -1,13 +1,13 @@
 (function () {
 	// Init pdf.js
-	pdfjsLib.GlobalWorkerOptions.workerSrc = chrome.runtime.getURL("js/pdf.worker.min.js");
+	pdfjsLib.GlobalWorkerOptions.workerSrc = chrome.runtime.getURL("js/lib/pdf.worker.min.js");
 
-	let apiConnector = new ApiConnector("guarani");
-	let utils = new Utils(apiConnector);
-	let store = new Store();
-	let pagesDataParser = new PagesDataParser(utils);
-	let dataCollector = new DataCollector(pagesDataParser, apiConnector);
-	let customPages = new CustomPages(pagesDataParser, dataCollector, utils, apiConnector);
+	let apiConnector = new UtnBaHelper.ApiConnector();
+	let utils = new UtnBaHelper.Utils(apiConnector);
+	let store = new UtnBaHelper.Store();
+	let pagesDataParser = new UtnBaHelper.PagesDataParser(utils);
+	let dataCollector = new UtnBaHelper.DataCollector(pagesDataParser, apiConnector);
+	let customPages = new UtnBaHelper.CustomPages(pagesDataParser, dataCollector, utils, apiConnector);
 
 	// We only will handle pages if:
 	// - the user is in the /autogestion/grado pages
@@ -25,9 +25,9 @@
 
 	const PAGE_HANDLERS = {
 		// match is performed using startsWith and first one is used.
-		"/autogestion/grado/calendario": () => HorariosPage(utils),
-		"/autogestion/grado/cursada/elegir_materia/": () => PreInscripcionPage(utils, apiConnector),
-		"/autogestion/grado/encuestas_kolla/": () => EncuestasPendientesPage(pagesDataParser, dataCollector, store),
+		"/autogestion/grado/calendario": () => UtnBaHelper.HorariosPage(utils),
+		"/autogestion/grado/cursada/elegir_materia/": () => UtnBaHelper.PreInscripcionPage(utils, apiConnector),
+		"/autogestion/grado/encuestas_kolla/": () => UtnBaHelper.EncuestasPendientesPage(pagesDataParser, dataCollector, store),
 	};
 	// Wait for the loading div to hide... applies for both loading from document or ajax.
 	Object.entries(PAGE_HANDLERS).forEach(entry => PAGE_HANDLERS[entry[0]] = () => waitForElementToHide("#loading_top").then(entry[1]));
@@ -42,24 +42,11 @@
 	// noinspection JSIgnoredPromiseFromCall
 	handleCurrentPage();
 
-	// Append a script to capture ajax page changes.
-	utils.injectScript(`
-		window.history.pushState = (f => function pushState() {
-			f.apply(this, arguments); // pushState returns void so no need to return value.
-			window.dispatchEvent(new Event("locationchange"));
-		})(window.history.pushState);
+	// Append the foreground script that will subscribe to all the needed events.
+	utils.injectScript("js/guarani/foreground.js");
 
-		window.history.replaceState = (f => function replaceState() {
-			f.apply(this, arguments); // replaceState returns void so no need to return value.
-			window.dispatchEvent(new Event("locationchange"));
-		})(window.history.replaceState);
-
-		window.addEventListener('popstate', () => {
-			window.dispatchEvent(new Event("locationchange"));
-		});
-	`);
+	// Subscribe to ajax page changes (some of these events are created in the foreground script)
 	window.addEventListener("locationchange", () => handleCurrentPage());
-
 
 	// Background stuff...
 	utils.wrapEventFunction("addStudentIdToHeader", () => pagesDataParser.getStudentId().then(studentId => {
@@ -69,7 +56,7 @@
 	});
 
 	$("body").on("click", ".powered-by-utnba-helper", function () {
-		window.open("https://chrome.google.com/webstore/detail/siga-helper/jdgdheoeghamkhfppapjchbojhehimpe", "_blank");
+		window.open("https://chrome.google.com/webstore/detail/jdgdheoeghamkhfppapjchbojhehimpe", "_blank");
 	});
 
 	//----

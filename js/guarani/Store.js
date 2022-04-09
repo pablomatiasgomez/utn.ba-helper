@@ -1,4 +1,5 @@
-let Store = function () {
+if (!window.UtnBaHelper) window.UtnBaHelper = {};
+UtnBaHelper.Store = function () {
 
 	const SURVEY_FORMS_DATA_STORE_KEY = "UtnBaHelper.SurveyFormData";
 
@@ -12,7 +13,7 @@ let Store = function () {
 	};
 
 	let saveSurveyFormsDataToStore = function (surveyFormsData) {
-		chrome.storage.sync.set({[SURVEY_FORMS_DATA_STORE_KEY]: surveyFormsData});
+		return chrome.storage.sync.set({[SURVEY_FORMS_DATA_STORE_KEY]: surveyFormsData});
 	};
 
 	// Public

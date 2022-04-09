@@ -1,4 +1,5 @@
-let PlanTrackingCustomPage = function ($container, services) {
+if (!window.UtnBaHelper) window.UtnBaHelper = {};
+UtnBaHelper.PlanTrackingCustomPage = function ($container, services) {
 
 	const TRANSLATIONS = {
 		"SIGNED": "Firmada",
@@ -222,5 +223,5 @@ let PlanTrackingCustomPage = function ($container, services) {
 	});
 };
 
-PlanTrackingCustomPage.menuName = "Seguimiento de Plan";
-PlanTrackingCustomPage.customParamKey = "";
+UtnBaHelper.PlanTrackingCustomPage.menuName = "Seguimiento de Plan";
+UtnBaHelper.PlanTrackingCustomPage.customParamKey = "";

@@ -1,4 +1,5 @@
-let DataCollector = function (pagesDataParser, apiConnector) {
+if (!window.UtnBaHelper) window.UtnBaHelper = {};
+UtnBaHelper.DataCollector = function (pagesDataParser, apiConnector) {
 
 	const LOCAL_STORAGE_DATA_COLLECTOR_KEY = "UtnBaHelper.DataCollector";
 	const COLLECT_SCHEDULES_KEY = "schedules";

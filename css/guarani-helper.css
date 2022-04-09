@@ -11,9 +11,15 @@
     content: "POWERED BY UTN.BA HELPER";
 }
 
+/* HorariosPage */
 .name-container {
     z-index: 5;
     white-space: nowrap;
+}
+
+#agenda-holder .top-left-border {
+    border-top: 1px solid grey;
+    border-left: 1px solid grey;
 }
 
 /* Allows space in the header to add the student id */

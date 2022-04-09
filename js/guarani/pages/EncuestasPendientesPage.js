@@ -1,4 +1,5 @@
-let EncuestasPendientesPage = function (pagesDataParser, dataCollector, store) {
+if (!window.UtnBaHelper) window.UtnBaHelper = {};
+UtnBaHelper.EncuestasPendientesPage = function (pagesDataParser, dataCollector, store) {
 
 	// Init
 	return Promise.resolve().then(() => {
