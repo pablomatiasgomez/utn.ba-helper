@@ -32,7 +32,7 @@ UtnBaHelper.Utils = function (apiConnector) {
 
 	let wrapError = function (message, error) {
 		let newError = new Error(message);
-		// Remove this function (wrapError) call from the stack..
+		// Remove this function (wrapError) call from the stack...
 		let newStack = newError.stack.split("\n");
 		newStack.splice(1, 1);
 		newStack = newStack.join("\n");
@@ -97,7 +97,7 @@ UtnBaHelper.Utils = function (apiConnector) {
 		t: "Tarde",
 		n: "Noche"
 	};
-	const NEW_GRADES_REGULATION_DATE = new Date(2017, 2, 10); // Doesn't have to be exact.. just using March 10th.
+	const NEW_GRADES_REGULATION_DATE = new Date(2017, 2, 10); // Doesn't have to be exact... just using March 10th.
 	const WEIGHTED_GRADES = {
 		// Segun ordenanza 1549
 		1: 1,
@@ -188,7 +188,7 @@ UtnBaHelper.Utils = function (apiConnector) {
 	let trimCourseName = function (name) {
 		name = name.trim();
 		if (name.length > 20) {
-			return name.substr(0, 20) + "...";
+			return name.substring(0, 20) + "...";
 		} else {
 			return name;
 		}

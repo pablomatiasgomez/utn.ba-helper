@@ -1,6 +1,7 @@
 if (!window.UtnBaHelper) window.UtnBaHelper = {};
 UtnBaHelper.ProfessorsSearchCustomPage = function ($container, services) {
 
+	// TODO use a new enum instead of the question string.
 	// noinspection JSNonASCIINames,SpellCheckingInspection,NonAsciiCharacters
 	const TEXT_QUESTIONS = {
 		// Good:
@@ -94,7 +95,7 @@ UtnBaHelper.ProfessorsSearchCustomPage = function ($container, services) {
 
 	let retrieveProfessorCourses = function (professorName) {
 		$coursesResultDiv.hide();
-		// For now we are showing just the latest 20 classes.
+		// For now, we are showing just the latest 20 classes.
 		return services.apiConnector.getClassesForProfessor(professorName, 0, 20).then(classSchedules => {
 			$coursesResultDiv.html("");
 			let trs = classSchedules.map(classSchedule => {

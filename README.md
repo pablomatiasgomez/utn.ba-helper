@@ -5,7 +5,7 @@
 	<a href="https://chrome.google.com/webstore/detail/jdgdheoeghamkhfppapjchbojhehimpe"><img src="https://img.shields.io/chrome-web-store/rating/jdgdheoeghamkhfppapjchbojhehimpe.svg" alt="rating"></a>
 	<a href="https://chrome.google.com/webstore/detail/jdgdheoeghamkhfppapjchbojhehimpe"><img src="https://img.shields.io/chrome-web-store/stars/jdgdheoeghamkhfppapjchbojhehimpe.svg" alt="stars"></a>
 </p>
-<p align="center"><a href="https://chrome.google.com/webstore/detail/jdgdheoeghamkhfppapjchbojhehimpe"><b>Install from the Chrome webstore</b></a></p>
+<p align="center"><a href="https://chrome.google.com/webstore/detail/jdgdheoeghamkhfppapjchbojhehimpe"><b>Install from the Chrome Web Store</b></a></p>
 <p align="center"><a href="https://chrome.google.com/webstore/detail/jdgdheoeghamkhfppapjchbojhehimpe"><img src="https://img.shields.io/chrome-web-store/v/jdgdheoeghamkhfppapjchbojhehimpe.svg" alt="install"></a></p>
 <p align="center"><img src="https://github.com/pablomatiasgomez/utn.ba-helper/raw/master/images/icons/icon128.png" alt="logo"></p>
 

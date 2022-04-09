@@ -6,7 +6,7 @@ UtnBaHelper.PagesDataParser = function (utils) {
 
 	/**
 	 * Fetches and parses the way guarani's page ajax contents are loaded.
-	 * Returned contents are different script tags that contain the html so they need to be parsed.
+	 * Returned contents are different script tags that contain the html, so they need to be parsed.
 	 */
 	let fetchAjaxPageContents = function (url) {
 		if (CACHED_PAGE_CONTENTS[url]) {
@@ -44,7 +44,7 @@ UtnBaHelper.PagesDataParser = function (utils) {
 	};
 
 	/**
-	 * Fetches a url that returns a pdf and parses the content into an array of strings.
+	 * Fetches an url that returns a pdf and parses the content into an array of strings.
 	 * @param url url that returns a pdf.
 	 * @returns {Promise<string[]>}
 	 */
@@ -66,7 +66,7 @@ UtnBaHelper.PagesDataParser = function (utils) {
 	};
 
 	/**
-	 * Fetches a url that returns a XLS and returnes the parsed workbook
+	 * Fetches an url that returns a XLS and returns the parsed workbook
 	 * @param url url that returns a XLS.
 	 * @returns {Promise<{}>}
 	 */
@@ -85,7 +85,7 @@ UtnBaHelper.PagesDataParser = function (utils) {
 	};
 
 	/**
-	 * Tries to resolve and return the student id for the current logged in user.
+	 * Tries to resolve and return the student id for the current logged-in user.
 	 * @returns {Promise<String>}
 	 */
 	let getStudentId = function () {
@@ -355,7 +355,10 @@ UtnBaHelper.PagesDataParser = function (utils) {
 		};
 		const professorRegex = new RegExp(`^(.*) \\((${Object.keys(professorRolesMapping).join("|")})(?: \\(Responsable de Cátedra\\))?\\)$`);
 
-		const questionsMapping = { // TODO temporarly legacy mapping until we use a enum for this.
+		// TODO temporarily legacy mapping until we use a enum for this.
+		//  We should also use the new enum in the ProfessorsSearchCustomPage for the colors of the text questions.
+		// noinspection JSNonASCIINames,SpellCheckingInspection,NonAsciiCharacters
+		const questionsMapping = {
 			// DOCENTE:
 			"¿Presenta la planificación de su asignatura al inicio del ciclo lectivo y luego la cumple?": "Presenta la planificación de su asignatura al inicio del ciclo lectivo y luego la cumple.",
 			"¿Planifica el desarrollo de los temas?": "Planifica el desarrollo de los temas",
