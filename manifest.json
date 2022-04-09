@@ -3,7 +3,7 @@
   "name": "UTN.BA Helper (ex Siga Helper)",
   "short_name": "UTN.BA Helper",
   "version": "6.0.0",
-  "description": "Extensión que agrega una serie de features sobre la web de la UTN - FRBA.",
+  "description": "UTN.BA Helper facilita el uso de la web de la UTN - FRBA.",
   "author": "Pablo Matías Gomez",
   "icons": {
     "16": "images/icons/icon16.png",
