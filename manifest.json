@@ -1,8 +1,8 @@
 ﻿{
     "manifest_version": 3,
 
-    "name": "Siga Helper",
-    "short_name": "SigaHelper",
+    "name": "UTN.BA Helper (ex Siga Helper)",
+    "short_name": "UTN.BA Helper",
     "version": "5.4.8",
 
     "description": "Extensión que agrega una serie de features sobre la web de la UTN - FRBA.",
