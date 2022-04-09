@@ -19,7 +19,7 @@ restoreJs () {
   mv "$1.bk.js" "$1"
 }
 
-rm out.zip
+rm out.zip || true
 
 minifyJs "js/guarani-helper.min.js"
 minifyJs "js/guarani-kolla-helper.min.js"
