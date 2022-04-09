@@ -1,63 +1,56 @@
 ﻿{
-    "manifest_version": 3,
-
-    "name": "UTN.BA Helper (ex Siga Helper)",
-    "short_name": "UTN.BA Helper",
-    "version": "6.0.0",
-
-    "description": "Extensión que agrega una serie de features sobre la web de la UTN - FRBA.",
-    "author": "Pablo Matías Gomez",
-
-    "icons": {
-        "16": "images/icons/icon16.png",
-        "48": "images/icons/icon48.png",
-        "128": "images/icons/icon128.png"
+  "manifest_version": 3,
+  "name": "UTN.BA Helper (ex Siga Helper)",
+  "short_name": "UTN.BA Helper",
+  "version": "6.0.0",
+  "description": "Extensión que agrega una serie de features sobre la web de la UTN - FRBA.",
+  "author": "Pablo Matías Gomez",
+  "icons": {
+    "16": "images/icons/icon16.png",
+    "48": "images/icons/icon48.png",
+    "128": "images/icons/icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.guarani.frba.utn.edu.ar/*"
+      ],
+      "js": [
+        "js/guarani-helper.min.js"
+      ],
+      "css": [
+        "css/guarani-helper.css"
+      ]
     },
-
-    "content_scripts": [
-        {
-            "matches": [
-                "*://*.guarani.frba.utn.edu.ar/*"
-            ],
-            "js": [
-                "js/guarani-helper.min.js"
-            ],
-            "css": [
-                "css/guarani-helper.css"
-            ]
-        },
-        {
-            "matches": [
-                "*://*.kolla.frba.utn.edu.ar/*"
-            ],
-            "js": [
-                "js/guarani-kolla-helper.min.js"
-            ],
-            "css": [
-                "css/guarani-helper.css"
-            ],
-            "all_frames": true
-        }
-    ],
-
-    "web_accessible_resources": [
-        {
-            "resources": [
-                "js/lib/pdf.worker.min.js",
-                "js/guarani/foreground.js"
-            ],
-            "matches": [
-                "*://*.frba.utn.edu.ar/*"
-            ]
-        }
-    ],
-
-    "background": {
-        "service_worker": "js/background.js"
-    },
-
-    "permissions" : [
-        "storage"
-    ]
+    {
+      "matches": [
+        "*://*.kolla.frba.utn.edu.ar/*"
+      ],
+      "js": [
+        "js/guarani-kolla-helper.min.js"
+      ],
+      "css": [
+        "css/guarani-helper.css"
+      ],
+      "all_frames": true
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "js/lib/pdf.worker.min.js",
+        "js/guarani/foreground.js"
+      ],
+      "matches": [
+        "*://*.frba.utn.edu.ar/*"
+      ]
+    }
+  ],
+  "background": {
+    "service_worker": "js/background.js"
+  },
+  "permissions": [
+    "storage"
+  ]
 }
 
