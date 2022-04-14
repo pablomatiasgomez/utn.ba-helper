@@ -113,6 +113,7 @@ UtnBaHelper.PreInscripcionPage = function (utils, apiConnector) {
 	}).then(responseText => {
 		let response = JSON.parse(responseText);
 		if (response.cod === "1" && response.titulo === "Grado - Acceso" && response.operacion === "acceso") throw new LoggedOutError();
+		if (response.cod === "-1" && response.cont === "error") throw new GuaraniBackendError(response);
 		if (response.cod !== "1" || !response.agenda) throw new Error(`Invalid ajax contents getting courseOptionsData. responseText: ${responseText}`);
 
 		let currentCourseOptionsData = response.agenda.comisiones;

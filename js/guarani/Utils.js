@@ -49,7 +49,7 @@ UtnBaHelper.Utils = function (apiConnector) {
 			return fn();
 		}).catch(e => {
 			console.error(`Error while executing event function ${name}`, e);
-			if (e instanceof LoggedOutError) return; // Not sending LoggedOutError.
+			if (e instanceof LoggedOutError || e instanceof GuaraniBackendError) return; // Not logging LoggedOutError nor GuaraniBackendError.
 			return apiConnector.logMessage(name, true, stringifyError(e));
 		});
 	};
