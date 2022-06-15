@@ -48,13 +48,10 @@
 	// Subscribe to ajax page changes (some of these events are created in the foreground script)
 	window.addEventListener("locationchange", () => handleCurrentPage());
 
-	// Background stuff...
-	utils.wrapEventFunction("addStudentIdToHeader", () => pagesDataParser.getStudentId().then(studentId => {
-		$(".user-navbar").append(`<div style="margin: -10px 10px 0 0; float: right; clear: right;">Legajo: ${studentId}<br><span class="powered-by-utnba-helper"></span></div>`);
-	})).then(() => {
-		return utils.wrapEventFunction("collectBackgroundDataIfNeeded", () => dataCollector.collectBackgroundDataIfNeeded());
-	});
+	// noinspection JSIgnoredPromiseFromCall
+	utils.wrapEventFunction("collectBackgroundDataIfNeeded", () => dataCollector.collectBackgroundDataIfNeeded());
 
+	$(".user-navbar").closest(".row-fluid").prepend(`<span class="powered-by-utnba-helper"></span>`);
 	$("body").on("click", ".powered-by-utnba-helper", function () {
 		window.open("https://chrome.google.com/webstore/detail/jdgdheoeghamkhfppapjchbojhehimpe", "_blank");
 	});

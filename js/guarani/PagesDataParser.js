@@ -89,16 +89,9 @@ UtnBaHelper.PagesDataParser = function (utils) {
 	 * @returns {Promise<String>}
 	 */
 	let getStudentId = function () {
-		return fetchXlsContents("/autogestion/grado/plan_estudio/generar_excel").then(workbook => {
-			let sheet = workbook.Sheets["Reporte"];
-			if (!sheet) throw new Error(`Workbook does not contain sheet. Sheetnames: ${workbook.SheetNames}`);
-			if (!sheet.A6.v.startsWith("Legajo:")) throw new Error(`Invalid sheet data: ${JSON.stringify(XLSX.utils.sheet_to_json(sheet))}`);
-
-			let studentId = sheet.A6.v.replace("Legajo:", "").trim();
-			// Split the checkdigit, add the thousands' separator, and join the checkdigit again.
-			// This is because we have been parsing studentIds in the form of "xxx.xxx-x"
-			return parseInt(studentId.slice(0, -1)).toLocaleString("es-AR") + "-" + studentId.slice(-1);
-		});
+		let studentId = $(".legajo-container .legajo-numero").text().trim();
+		if (studentId[studentId.length - 2] !== "-" || studentId[studentId.length - 6] !== ".") throw new Error(`Invalid studentId: ${studentId}`);
+		return Promise.resolve(studentId);
 	};
 
 	/**
@@ -125,7 +118,7 @@ UtnBaHelper.PagesDataParser = function (utils) {
 
 			// This is not being used right now, but keeping it to validate the contents format.
 			// WARN: the studentId is not properly formatted in the pdf, that is why we are considering the check digit as optional.
-			// For example, it could be shown as  "123.456-" instead of "12.345-6"
+			// For example, it could be shown as "123.456-" instead of "12.345-6"
 			// If we need to use its value, we need to sanitize to the correct format.
 			let studentIdAndName = contents[i++];
 			let groups = /^(\d{2,3}\.\d{3}-\d?) (.*)$/.exec(studentIdAndName);
