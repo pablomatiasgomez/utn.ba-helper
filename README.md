@@ -31,8 +31,6 @@ UTN.BA Helper facilita el uso de la web de la UTN - FRBA.
         - Peso académico, cantidad de finales aprobados y desaprobados.
         - Promedio de notas ponderadas (según Ordenanza Nº 1549) y no ponderadas, contando y sin contar desaprobados.
 
-- Muestra el numero de legajo en la parte superior de la pagina.
-
 - Agrega el nombre de la materia en la grilla de horarios en la sección de Agenda.
 
 ## Screenshots:
