@@ -89,11 +89,12 @@ UtnBaHelper.PagesDataParser = function (utils) {
 	 * @returns {Promise<String>}
 	 */
 	let getStudentId = function () {
-		return fetchPdfContents("/autogestion/grado/plan_estudio/generar_pdf").then(contents => {
-			let index = contents.indexOf("Legajo:");
-			if (index === -1) throw new Error(`Couldn't find studentId in pdfContents: ${JSON.stringify(contents)}`);
+		return fetchXlsContents("/autogestion/grado/plan_estudio/generar_excel").then(workbook => {
+			let sheet = workbook.Sheets["Reporte"];
+			if (!sheet) throw new Error(`Workbook does not contain sheet. Sheetnames: ${workbook.SheetNames}`);
+			if (!sheet.A6.v.startsWith("Legajo:")) throw new Error(`Invalid sheet data: ${JSON.stringify(XLSX.utils.sheet_to_json(sheet))}`);
 
-			let studentId = contents[index + 1].trim();
+			let studentId = sheet.A6.v.replace("Legajo:", "").trim();
 			// Split the checkdigit, add the thousands' separator, and join the checkdigit again.
 			// This is because we have been parsing studentIds in the form of "xxx.xxx-x"
 			return parseInt(studentId.slice(0, -1)).toLocaleString("es-AR") + "-" + studentId.slice(-1);

@@ -8,7 +8,7 @@ js/lib/jquery-3.6.0.min.js \
 js/ApiConnector.js"
 
 JS_FILES="\
-js/lib/xlsx.min.js \
+js/lib/xlsx.full.min.js \
 js/lib/pdf.min.js \
 js/guarani/Errors.js \
 js/guarani/Utils.js \
