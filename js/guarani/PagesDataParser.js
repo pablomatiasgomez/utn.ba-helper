@@ -96,7 +96,7 @@ UtnBaHelper.PagesDataParser = function (utils) {
 
 	/**
 	 * Fetches, from the "Comprobante de cursada" pdf, the current classes that the student is taking.
-	 * Used for different puprposes:
+	 * Used for different purposes:
 	 * - Collect classSchedules
 	 * - Complete the grid when registering to new classes
 	 * @returns {Promise<Array<{}>>} array of objects for each class, that contains the schedule for it.
