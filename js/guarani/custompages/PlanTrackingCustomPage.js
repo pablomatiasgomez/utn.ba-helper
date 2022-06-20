@@ -84,7 +84,7 @@ UtnBaHelper.PlanTrackingCustomPage = function ($container, services) {
 			return courseNamesByCode;
 		}, {});
 
-		// For signed courses we condier both passed and signed, and remove duplicates.
+		// For signed courses we consider both passed and signed, and remove duplicates.
 		let passedCourses = coursesHistory.finalExams.filter(course => course.isPassed).map(course => course.courseCode);
 		let signedCourses = [...new Set([...passedCourses, ...coursesHistory.courses.filter(course => course.isPassed).map(course => course.courseCode)])];
 		let courseRequirementToArray = {
