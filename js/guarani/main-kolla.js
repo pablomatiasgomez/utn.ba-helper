@@ -14,7 +14,7 @@
 				if (!data) throw new Error(`Couldn't find survey form data for url ${location.href}. surveyFormsData: ${JSON.stringify(surveyFormsData)}`);
 				let hashedStudentId = data.hashedStudentId;
 
-				let surveys = pagesDataParser.parseKollaSurveyForm($(document), $(document).find("html").html());
+				let surveys = pagesDataParser.parseKollaSurveyForm($(document));
 				if (surveys.length) {
 					surveys.forEach(survey => survey.surveyTaker = hashedStudentId);
 					return apiConnector.postProfessorSurveys(surveys);

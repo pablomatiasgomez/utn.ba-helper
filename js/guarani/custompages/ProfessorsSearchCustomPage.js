@@ -1,19 +1,11 @@
 if (!window.UtnBaHelper) window.UtnBaHelper = {};
 UtnBaHelper.ProfessorsSearchCustomPage = function ($container, services) {
 
-	// TODO use a new enum instead of the question string.
-	// noinspection JSNonASCIINames,SpellCheckingInspection,NonAsciiCharacters
-	const TEXT_QUESTIONS = {
-		// Good:
-		"Mencione las características del docente que ayudaron en su  aprendizaje": "#19B135",
-		"Mencione las características del auxiliar docente que ayudaron en su aprendizaje": "#19B135",
-		// Neutral:
-		"Realice las observaciones y aclaraciones que crea convenientes sobre  las puntuaciones asignadas": "#000000",
-		"Realice las observaciones que crea conveniente.": "#000000",
-		// Bad:
-		"Mencione los aspectos del proceso de enseñanza que deberían mejorarse": "#D51C26",
-		"Mencione los aspectos del proceso de enseñanza referidos a los trabajos Prácticos del aula, que pueden mejorarse.": "#D51C26",
-	};
+	const SENTIMENT_COLORS = {
+		"POSITIVE": "#19B135",
+		"NEUTRAL": "#000000",
+		"NEGATIVE": "#D51C26",
+	}
 
 	let $searchDiv;
 	let $searchResultsDiv;
@@ -142,7 +134,7 @@ UtnBaHelper.ProfessorsSearchCustomPage = function ($container, services) {
 		$surveyResultDiv.append(`<h3>Encuesta de tipo ${surveyKind}</h3>`);
 
 		if (results.percentageFields.length) {
-			let percetangeRows = results.percentageFields.map(item => {
+			let percentageRows = results.percentageFields.map(item => {
 				return `<tr><td>${item.question}</td><td style="background-color: ${services.utils.getColorForAvg(item.average)}">${item.average}</td><td>${item.count}</td></tr>`;
 			}).join("");
 			$surveyResultDiv.append(`
@@ -151,24 +143,26 @@ UtnBaHelper.ProfessorsSearchCustomPage = function ($container, services) {
 				<table class="percentage-questions">
 					<tbody>
 						<tr><th>Pregunta</th><th>Promedio</th><th>Muestra</th></tr>
-						${percetangeRows}
+						${percentageRows}
 					</tbody>
 				</table>
 			`);
 		}
 
-		let textQuestions = Object.keys(TEXT_QUESTIONS).filter(question => results.textFields[question] && results.textFields[question].length);
-		if (textQuestions.length) {
-			let textColumns = textQuestions.map(question => {
-				let answers = results.textFields[question].map(answer => `<i>"${answer}"</i>`).join(`<hr style="margin: 8px 0;">`);
-				return `<td style="color: ${TEXT_QUESTIONS[question]}">${answers}</td>`;
+		if (results.textFields.length) {
+			let textHeaderColumns = results.textFields.map(item => {
+				return `<th>${item.question}</th>`;
+			}).join("");
+			let textValueColumns = results.textFields.map(item => {
+				let answers = item.values.map(answer => `<i>"${answer}"</i>`).join(`<hr style="margin: 8px 0;">`);
+				return `<td style="color: ${SENTIMENT_COLORS[item.sentiment]}">${answers}</td>`;
 			}).join("");
 			$surveyResultDiv.append(`
 				<h4>Comentarios</h4>
 				<table class="text-questions" style="table-layout: fixed; width: 100%;">
 					<tbody>
-						<tr>${textQuestions.map(question => `<th>${question}</th>`).join("")}</tr>
-						<tr>${textColumns}</tr>
+						<tr>${textHeaderColumns}</tr>
+						<tr>${textValueColumns}</tr>
 					</tbody>
 				</table>
 			`);

@@ -303,8 +303,7 @@ UtnBaHelper.PagesDataParser = function (utils) {
 			let promises = surveyUrls.map(surveyUrl => {
 				let kollaUrl = surveyUrl.kollaUrl;
 				return utils.backgroundFetch(kollaUrl).then(kollaResponseText => {
-					let $kollaResponseText = $(kollaResponseText);
-					let surveysMetadata = parseKollaSurveyForm($kollaResponseText, kollaResponseText);
+					let surveysMetadata = parseKollaSurveyForm($(kollaResponseText));
 
 					// We could eventually merge same class professors, but the backend still accepts this:
 					return surveysMetadata.map(surveyMetadata => {
@@ -332,7 +331,7 @@ UtnBaHelper.PagesDataParser = function (utils) {
 	 * Parses the responseText of the Kolla forms, and returns the survey form data along with the answers.
 	 * @return {[{professorRole: string, classCode: string, year: number, courseCode: string, professorName: string, surveyKind: string, quarter}]}
 	 */
-	let parseKollaSurveyForm = function ($kollaResponseText, htmlForLog) {
+	let parseKollaSurveyForm = function ($kollaResponseText) {
 		const surveyKindsMapping = {
 			"DOCENTE": "DOCENTE",
 			"AUXILIARES DOCENTES": "AUXILIAR",
@@ -355,60 +354,6 @@ UtnBaHelper.PagesDataParser = function (utils) {
 		};
 		const professorRegex = new RegExp(`^(.*) \\((${Object.keys(professorRolesMapping).join("|")})(?: \\(Responsable de Cátedra\\))?\\)$`);
 
-		// TODO temporarily legacy mapping until we use a enum for this.
-		//  We should also use the new enum in the ProfessorsSearchCustomPage for the colors of the text questions.
-		// noinspection JSNonASCIINames,SpellCheckingInspection,NonAsciiCharacters
-		const questionsMapping = {
-			// DOCENTE:
-			"¿Presenta la planificación de su asignatura al inicio del ciclo lectivo y luego la cumple?": "Presenta la planificación de su asignatura al inicio del ciclo lectivo y luego la cumple.",
-			"¿Planifica el desarrollo de los temas?": "Planifica el desarrollo de los temas",
-			"¿El docente explica los temas en forma clara y comprensible? (exposiciones organizadas y respuestas precisas)": "Explica los temas en forma clara y comprensible (exposiciones organizadas y respuestas precisas)",
-			"¿Trata correctamente a los estudiantes? (respeto, comunicación adecuada)": "Trata correctamente a los estudiantes (respeto, comunicación adecuada)",
-			"¿Demuestra seguridad en el tratamiento de los temas?": "Demuestra seguridad en el tratamiento de los temas",
-			"¿Desarrolla todos los contenidos del programa?": "Desarrolla todos los contenidos del programa",
-			"¿Asiste regularmente a clases?": "Asistencia regular a las clases",
-			"¿Emplea material didáctico de la asignatura que sea útil y accesible?": "Emplea  material didáctico de la asignatura útil y accesible",
-			"¿Los temas de los parciales concuerdan con los contenidos desarrollados en clase?": "Los temas de los parciales concuerdan con los contenidos desarrollados en clase",
-			"¿Da a conocer la forma de evaluación que se va a aplicar en la asignatura?": "Da a conocer la forma de evaluación que se va a aplicar en la asignatura",
-			"¿Da a conocer las fechas de los parciales con anticipación respetando el Calendario Académico?": "Da a conocer las fechas de los parciales con anticipación respetando el Calendario Académico",
-			"¿Satisface dudas o consultas que surgen en clase?": "Satisface dudas o consultas que surgen en la clase",
-			"¿Dedica tiempo suficiente a la ejercitación de los temas desarrollados?": "Dedica tiempo suficiente a la ejercitación de los temas desarrollados",
-			"¿Lidera el desarrollo de la asignatura tanto en sus aspectos teóricos como prácticos?": "¿El profesor lidera el desarrollo de la asignatura tanto en sus aspectos teóricos como prácticos?",
-			"¿Cumple con las fechas establecidas en el Calendario Académico?": "Cumplimiento con las fechas establecidas en el Calendario Académico",
-			"¿Utiliza diversos recursos para la enseñanza? (guía de trabajos, pizarra, presentaciones, proyector, videos, software, hardware, aula virtual, otros)": "Utiliza distintos recursos para la enseñanza (pizarra, presentaciones, proyector, guías de trabajos, videos, software, hardware, Aula Virtual, otros)",
-			"¿La bibliografía es actualizada y accesible?": "La bibliografía es actualizada y accesible",
-			"¿Es puntual al llegar y al retirarse de las clases?": "Puntualidad al llegar y al retirarse de las clases",
-			"¿Favorece la participación de los estudiantes?": "Favorece la participación de los estudiantes",
-			"¿Las evaluaciones se llevan a cabo según la reglamentación vigente?": "¿las evaluaciones se llevan a cabo según la reglamentación vigente?",
-			"¿Logró continuidad en el cursado y estudio de la asignatura? (estudiar regularmente, participación en clase, asistencia, puntualidad)": "Logró continuidad en el cursado y estudio de la asignatura (estudiar regularmente, asistencia, puntualidad, participación en clase",
-			"¿Relaciona los contenidos con otras asignaturas de la carrera?": "Relaciona los contenidos con otras asignaturas de la carrera.",
-			"¿Tuvo posibilidad de aplicar sus conocimientos previos durante el cursado de esta materia?": "Tuvo posibilidad de aplicar sus conocimientos previos durante el cursado de esta materia. (contestar cuando corresponda)",
-
-			"Mencione las características del docente que ayudaron en su aprendizaje": "Mencione las características del docente que ayudaron en su  aprendizaje",
-			"Realice las observaciones y aclaraciones que crea convenientes sobre las puntuaciones asignadas": "Realice las observaciones y aclaraciones que crea convenientes sobre  las puntuaciones asignadas",
-			"Mencione los aspectos del proceso de enseñanza que deberían mejorarse": "Mencione los aspectos del proceso de enseñanza que deberían mejorarse",
-
-			// AUXILIAR:
-			"¿Trata de relacionar los contenidos de la asignatura con la actividad profesional?": "¿Trata de relacionar los contenidos de la asignatura con la actividad profesional?",
-			"¿Trata de relacionar la teoría con los contenidos de las actividades prácticas?": "¿Trata de relacionar la teroría con los contenidos de las actividades prácticas?",
-			"¿Las clases estuvieron correctamente planificadas por el auxiliar?": "Las clases ¿Estuvieron correctamente planificadas por el auxiliar?",
-			"¿Es puntual?": "El Auxiliar ¿Es puntual?",
-			"¿Orienta sobre el uso de bibliografía de la cátedra?": "¿Orienta sobre el uso de bibliografía de la cátedra?",
-			"¿El auxiliar participa adecuadamente en el desarrollo de la clase, resolución de problemas o trabajos prácticos?": "El auxiliar ¿Participa adecuadamente en el desarrollo de la clase, resolución de problemas o trabajos prácticos?",
-			"Al momento de realizar los trabajos prácticos ¿Tiene la preparación previa adecuada?": "Al momento de realizar los trabajos prácticos ¿Tiene la preparación previa adecuada?",
-			"¿El auxiliar asiste regularmente a las clases teóricas y prácticas?": "El auxiliar ¿Asiste regularmente a las clases teóricas y prácticas?",
-			"En caso de corresponder: ¿Promueve el trabajo en equipo?": "En caso de corresponder ¿Promueve el trabajo en equipo?",
-			"¿Cómo evalúa ud. el trato del auxiliar con los alumnos?": "¿Cómo evalúa Ud. el trato del auxiliar con los alumnos?",
-			"La resolución de trabajos prácticos y/o experiencias de laboratorio ¿Permitió comprender mejor la materia?": "La resolución de trabajos prácticos y/o experiencias de laboratorio ¿Permitió comprender mejor la materia?",
-			"¿Promueve la participación de los estudiantes en las clases?": "¿Promueve la participación de los estudiantes en las clases?",
-			"¿Prepara material didáctico para el desarrollo de las clases?": "¿Prepara material didáctico para el desarrollo de las clases?",
-			"¿Responde las consultas planteadas por los alumnos?": "¿Responde las consultas planteadas por los alumnos?",
-
-			"Mencione los aspectos del proceso de enseñanza referidos a los trabajos prácticos del aula, que pueden mejorarse.": "Mencione los aspectos del proceso de enseñanza referidos a los trabajos Prácticos del aula, que pueden mejorarse.",
-			"Realice las observaciones que crea conveniente.": "Realice las observaciones que crea conveniente.",
-			"Mencione las características del auxiliar docente que ayudaron en su aprendizaje": "Mencione las características del auxiliar docente que ayudaron en su aprendizaje",
-		};
-
 		let courseTitle = $kollaResponseText.find(".formulario-titulo").text(); // E.g.: 'Simulación (082041) - Comisión: K4053', 'Administración Gerencial (082039) - Comisión: K5054'
 		let groups = /^(.*) \((\d{6})\) - Comisión: ([\w\d]{5})$/.exec(courseTitle);
 		if (!groups) throw new Error(`Survey courseTitle couldn't be parsed: ${courseTitle}`);
@@ -420,7 +365,6 @@ UtnBaHelper.PagesDataParser = function (utils) {
 			let $surveyDiv = $(surveyDiv);
 
 			let surveyTitle = $surveyDiv.find(".encuesta-titulo");
-			if (surveyTitle.length !== 1) throw new Error(`Do not know how to handle ${surveyTitle.length} survey title elements. htmlForLog: ${htmlForLog}`);  // TODO delete this check?
 			surveyTitle = surveyTitle.text().trim();
 
 			groups = surveyTitleRegex.exec(surveyTitle);
@@ -431,7 +375,6 @@ UtnBaHelper.PagesDataParser = function (utils) {
 			let year = parseInt(groups[3]); // 2018, 2019, ...
 
 			let professor = $surveyDiv.find(".encuesta-elemento h3");
-			if (professor.length !== 1) throw new Error(`Do not know how to handle ${professor.length} professor elements. htmlForLog: ${htmlForLog}`); // TODO delete this check?
 			professor = professor.text().trim();
 
 			groups = professorRegex.exec(professor);
@@ -440,31 +383,28 @@ UtnBaHelper.PagesDataParser = function (utils) {
 			let professorName = groups[1].toUpperCase();
 			let professorRole = professorRolesMapping[groups[2]]; // TITULAR, ASOCIADO, ADJUNTO, etc.
 
-			let answers = $surveyDiv.find(".panel-info .panel-body .form-group").toArray()
+			let surveyFieldValues = $surveyDiv.find(".panel-info .panel-body .form-group").toArray()
 				.map(item => {
 					let $item = $(item);
 					let $questionLabel = $item.find("> label");
 
-					let question = $questionLabel.text().replace("*", "").trim(); // TODO replace this with a backend enum.
-					question = questionsMapping[question] || question;
-
-					let answer = {
-						question: question,
-					};
+					let question = $questionLabel.text().replace("*", "").trim();
+					let value = null;
 
 					let labelFor = $questionLabel.attr("for");
 					let $answerElement = $item.find(`[name=${labelFor}]`);
 					if ($answerElement.is("textarea")) {
-						answer.type = "TEXT";
-						answer.value = $answerElement.val() || null;
+						value = $answerElement.val() || null;
 					} else if ($answerElement.is("input")) {
-						answer.type = "PERCENTAGE";
-						let value = parseInt($answerElement.filter(":checked").parent().text());
-						answer.value = isNaN(value) ? null : value;
+						value = parseInt($answerElement.filter(":checked").parent().text());
+						value = isNaN(value) ? null : value;
 					} else {
 						throw new Error(`Couldn't parse value for question ${question}. Item: ${$item.html()}`);
 					}
-					return answer;
+					return {
+						question: question,
+						value: value,
+					};
 				});
 
 			return {
@@ -476,7 +416,7 @@ UtnBaHelper.PagesDataParser = function (utils) {
 				professorName: professorName,
 				professorRole: professorRole,
 
-				surveyFields: answers, // Only used for posting surveys, not professor classes.
+				surveyFieldValues: surveyFieldValues, // Only used for posting surveys, not professor classes.
 			};
 		});
 	};
