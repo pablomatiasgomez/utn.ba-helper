@@ -1,6 +1,6 @@
 .idea/
 .DS_Store
-out.zip
+package.zip
 
 js/guarani-helper.min.js
 js/guarani-kolla-helper.min.js

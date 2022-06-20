@@ -19,15 +19,16 @@ restoreJs () {
   mv "$1.bk.js" "$1"
 }
 
-rm out.zip || true
+rm package.zip || true
 
 minifyJs "js/guarani-helper.min.js"
 minifyJs "js/guarani-kolla-helper.min.js"
 minifyJs "js/background.js"
 minifyJs "js/guarani/foreground.js"
 
-echo "Creating out.zip ..."
-zip -vr out.zip css/ images/ js/guarani-helper.min.js js/guarani-kolla-helper.min.js js/background.js js/guarani/foreground.js js/lib/pdf.worker.min.js manifest.json
+echo "Creating package.zip ..."
+zip -vr package.zip css/ images/ js/guarani-helper.min.js js/guarani-kolla-helper.min.js js/background.js js/guarani/foreground.js js/lib/pdf.worker.min.js manifest.json
+echo "Created package.zip ..."
 
 restoreJs "js/guarani-helper.min.js"
 restoreJs "js/guarani-kolla-helper.min.js"
