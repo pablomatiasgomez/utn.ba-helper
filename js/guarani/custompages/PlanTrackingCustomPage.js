@@ -181,7 +181,7 @@ UtnBaHelper.PlanTrackingCustomPage = function ($container, services) {
 							</span>
 						</a>
 						<div class="text-small">[${course.courseCode}] ${status ? " - " + status : ""}</div>
-						<div class="text-medium">${course.courseName}</div>
+						<div class="text-medium">${course.courseName}<a class="no-ajax" href="${UtnBaHelper.CustomPages.getCourseResultsUrl(course.courseCode)}" target="_blank">&#x2197;</a></div>
 					</div>`;
 			}).join("");
 		};
