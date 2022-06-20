@@ -62,6 +62,12 @@ UtnBaHelper.PagesDataParser = function (utils) {
 		}).then(contents => {
 			CACHED_PAGE_CONTENTS[url] = contents;
 			return contents;
+		}).catch(e => {
+			// Sometimes guarani's backend throws a 500. We want to ignore those errors from being reported to backend.
+			if (e instanceof pdfjsLib.UnexpectedResponseException && e.status === 500) {
+				console.error("Failed to fetch pdf", e);
+				throw new GuaraniBackendError(e);
+			}
 		});
 	};
 
