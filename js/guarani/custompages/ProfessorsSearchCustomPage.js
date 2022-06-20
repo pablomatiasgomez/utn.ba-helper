@@ -61,12 +61,12 @@ UtnBaHelper.ProfessorsSearchCustomPage = function ($container, services) {
 		$searchResultsDiv.hide();
 		return services.apiConnector.searchProfessors(query).then(results => {
 			let trs = results.map(item => {
-				return `<tr><td><a href="#">${item.value}</a></td><td>${item.data}</td></tr>`;
+				return `<tr><td><a href="#">${item.value}</a></td><td>${item.data.surveysCount}</td><td>${item.data.classScheduleOccurrences}</td></tr>`;
 			}).join("");
 			$searchResultsDiv.show();
 			$searchResultsDiv.find("table tbody")
 				.html(trs)
-				.prepend("<tr><th>Profesor</th><th>Cantidad de encuestas</th></tr>");
+				.prepend("<tr><th>Profesor</th><th>Cantidad de encuestas (total historico)</th><th>Cantidad de cursos (total historico)</th></tr>");
 		});
 	};
 
