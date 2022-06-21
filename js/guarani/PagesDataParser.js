@@ -69,6 +69,7 @@ UtnBaHelper.PagesDataParser = function (utils) {
 				console.error("Failed to fetch pdf", e);
 				throw new GuaraniBackendError(e);
 			}
+			throw e;
 		});
 	};
 
