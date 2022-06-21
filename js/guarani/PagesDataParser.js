@@ -18,6 +18,7 @@ UtnBaHelper.PagesDataParser = function (utils) {
 			}
 		}).then(response => response.json()).then(response => {
 			if (response.cod === "1" && response.titulo === "Grado - Acceso" && response.operacion === "acceso") throw new LoggedOutError();
+			if (response.cod === "-2" && response.cont.url.includes("/autogestion/grado/acceso/login")) throw new LoggedOutError();
 			if (response.cod !== "1") throw new Error(`Invalid ajax contents for url ${url}. response: ${JSON.stringify(response)}`);
 			return response.cont;
 		}).then(contents => {
@@ -68,6 +69,7 @@ UtnBaHelper.PagesDataParser = function (utils) {
 				console.error("Failed to fetch pdf", e);
 				throw new GuaraniBackendError(e);
 			}
+			throw e;
 		});
 	};
 

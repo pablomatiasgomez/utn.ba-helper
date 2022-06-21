@@ -84,7 +84,7 @@ UtnBaHelper.PlanTrackingCustomPage = function ($container, services) {
 			return courseNamesByCode;
 		}, {});
 
-		// For signed courses we condier both passed and signed, and remove duplicates.
+		// For signed courses we consider both passed and signed, and remove duplicates.
 		let passedCourses = coursesHistory.finalExams.filter(course => course.isPassed).map(course => course.courseCode);
 		let signedCourses = [...new Set([...passedCourses, ...coursesHistory.courses.filter(course => course.isPassed).map(course => course.courseCode)])];
 		let courseRequirementToArray = {
@@ -181,7 +181,7 @@ UtnBaHelper.PlanTrackingCustomPage = function ($container, services) {
 							</span>
 						</a>
 						<div class="text-small">[${course.courseCode}] ${status ? " - " + status : ""}</div>
-						<div class="text-medium">${course.courseName}</div>
+						<div class="text-medium">${course.courseName}<a class="no-ajax" href="${UtnBaHelper.CustomPages.getCourseResultsUrl(course.courseCode)}" target="_blank">&#x2197;</a></div>
 					</div>`;
 			}).join("");
 		};
