@@ -1,5 +1,8 @@
 if (!window.UtnBaHelper) window.UtnBaHelper = {};
-UtnBaHelper.PagesDataParser = function (utils) {
+UtnBaHelper.PagesDataParser = function (utils, apiConnector) {
+
+	// Init pdf.js
+	pdfjsLib.GlobalWorkerOptions.workerSrc = chrome.runtime.getURL("js/lib/pdf.worker.min.js");
 
 	// We want to fetch only once each page.
 	let CACHED_PAGE_CONTENTS = {};
@@ -65,7 +68,14 @@ UtnBaHelper.PagesDataParser = function (utils) {
 			return contents;
 		}).catch(e => {
 			// Sometimes guarani's backend throws a 500. We want to ignore those errors from being reported to backend.
-			if (e instanceof pdfjsLib.UnexpectedResponseException && e.status === 500) {
+			apiConnector.logMessage("fetchPdfContentsError", false, [
+				`[ClassName:${e?.constructor?.name}]`,
+				`[isInstanceOf:${e instanceof pdfjsLib.UnexpectedResponseException}]`,
+				`[Status:${e?.status}]`,
+				`[MatchesIf:${e instanceof pdfjsLib.UnexpectedResponseException && e.status >= 500}]`,
+				`[Stringify:${JSON.stringify(e)}]`,
+			].join(""));
+			if (e instanceof pdfjsLib.UnexpectedResponseException && e.status >= 500) {
 				console.error("Failed to fetch pdf", e);
 				throw new GuaraniBackendError(e);
 			}
