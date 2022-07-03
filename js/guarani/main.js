@@ -1,11 +1,8 @@
 (function () {
-	// Init pdf.js
-	pdfjsLib.GlobalWorkerOptions.workerSrc = chrome.runtime.getURL("js/lib/pdf.worker.min.js");
-
 	let apiConnector = new UtnBaHelper.ApiConnector();
 	let utils = new UtnBaHelper.Utils(apiConnector);
 	let store = new UtnBaHelper.Store();
-	let pagesDataParser = new UtnBaHelper.PagesDataParser(utils);
+	let pagesDataParser = new UtnBaHelper.PagesDataParser(utils, apiConnector);
 	let dataCollector = new UtnBaHelper.DataCollector(pagesDataParser, apiConnector);
 	let customPages = new UtnBaHelper.CustomPages(pagesDataParser, dataCollector, utils, apiConnector);
 
