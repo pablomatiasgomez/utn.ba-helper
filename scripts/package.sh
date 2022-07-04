@@ -27,7 +27,16 @@ minifyJs "js/background.js"
 minifyJs "js/guarani/foreground.js"
 
 echo "Creating package.zip ..."
-zip -vr package.zip css/ images/ js/guarani-helper.min.js js/guarani-kolla-helper.min.js js/background.js js/guarani/foreground.js js/lib/pdf.worker.min.js manifest.json
+zip -vr package.zip \
+css/ \
+images/ \
+js/guarani-helper.min.js \
+js/guarani-kolla-helper.min.js \
+js/background.js \
+js/guarani/foreground.js \
+js/lib/libs.min.js \
+js/lib/pdf.worker.min.js \
+manifest.json
 echo "Created package.zip ..."
 
 restoreJs "js/guarani-helper.min.js"
