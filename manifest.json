@@ -16,6 +16,7 @@
         "*://*.guarani.frba.utn.edu.ar/*"
       ],
       "js": [
+        "js/lib/libs.min.js",
         "js/guarani-helper.min.js"
       ],
       "css": [
@@ -27,6 +28,7 @@
         "*://*.kolla.frba.utn.edu.ar/*"
       ],
       "js": [
+        "js/lib/libs.min.js",
         "js/guarani-kolla-helper.min.js"
       ],
       "css": [
