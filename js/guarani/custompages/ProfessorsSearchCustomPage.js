@@ -19,14 +19,14 @@ UtnBaHelper.ProfessorsSearchCustomPage = function ($container, services) {
 		let $searchTxt = $(`<input type="text" style="margin: 0 5px 0 0;" placeholder="Minimo 3 caracteres..." />`);
 		$searchTxt.on("keydown", function (e) {
 			if (e.key === "Enter") {
-				services.utils.wrapEventFunction("ProfessorsSearch", () => search($searchTxt.val().trim()));
+				services.utils.runAsync("ProfessorsSearch", () => search($searchTxt.val().trim()));
 				return false;
 			}
 		});
 		$searchDiv.append($searchTxt);
 		let $searchBtn = $(`<a href="#" class="btn btn-info btn-small">Buscar</a>`);
 		$searchBtn.on("click", function () {
-			services.utils.wrapEventFunction("ProfessorsSearch", () => search($searchTxt.val().trim()));
+			services.utils.runAsync("ProfessorsSearch", () => search($searchTxt.val().trim()));
 			return false;
 		});
 		$searchDiv.append($searchBtn);
@@ -39,7 +39,7 @@ UtnBaHelper.ProfessorsSearchCustomPage = function ($container, services) {
 		let $searchResultsTable = $(`<table></table>`).append("<tbody></tbody>");
 		$searchResultsTable.on("click", "a", function () {
 			let professorName = $(this).text();
-			services.utils.wrapEventFunction("retrieveProfessorData", () => retrieveProfessorData(professorName));
+			services.utils.runAsync("retrieveProfessorData", () => retrieveProfessorData(professorName));
 			return false;
 		});
 		$searchResultsDiv.append($searchResultsTable);

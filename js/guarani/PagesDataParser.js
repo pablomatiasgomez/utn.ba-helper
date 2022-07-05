@@ -1,5 +1,5 @@
 if (!window.UtnBaHelper) window.UtnBaHelper = {};
-UtnBaHelper.PagesDataParser = function (apiConnector, utils) {
+UtnBaHelper.PagesDataParser = function (utils) {
 
 	// We want to fetch only once each page.
 	let CACHED_PAGE_CONTENTS = {};
@@ -313,9 +313,12 @@ UtnBaHelper.PagesDataParser = function (apiConnector, utils) {
 			return {
 				year: period.year,
 				quarter: period.quarter,
-				courseName: classData.actividad_nombre,
 				classCode: classData.comision_nombre,
 				courseCode: classData.actividad_codigo,
+				// courseName is not used right now.
+				// The backend does not accept this for posts (class schedules or previous professors),
+				// so if we decide to add it, we should remove it from api calls.
+				// courseName: classData.actividad_nombre,
 				branch: branch,
 				schedules: schedules,
 			};
@@ -326,7 +329,7 @@ UtnBaHelper.PagesDataParser = function (apiConnector, utils) {
 
 	/**
 	 * Parses the responseText of the Kolla forms, and returns the survey form data along with the answers.
-	 * @return {[{professorRole: string, classCode: string, year: number, courseCode: string, professorName: string, surveyKind: string, quarter}]}
+	 * @returns {[{surveyKind: string, professorRole: string, classCode: string, year: number, courseCode: string, professorName: string, quarter: string, surveyFieldValues: []}]}
 	 */
 	let parseKollaSurveyForm = function ($kollaResponseText) {
 		const surveyKindsMapping = {

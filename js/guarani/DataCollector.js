@@ -29,7 +29,7 @@ UtnBaHelper.DataCollector = function (pagesDataParser, apiConnector) {
 	/**
 	 * Collects, every one day or more, background data such as:
 	 * - class schedules and professors
-	 * @return {Promise<*>}
+	 * @returns {Promise<void>}
 	 */
 	let collectBackgroundDataIfNeeded = function () {
 		return getHashedStudentId().then(hashedStudentId => {

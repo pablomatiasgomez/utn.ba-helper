@@ -45,7 +45,7 @@ UtnBaHelper.Utils = function (apiConnector) {
 	/**
 	 * Wraps a function that is triggered from an async event, and handles errors by logging them to the api.
 	 */
-	let wrapEventFunction = function (name, fn) {
+	let runAsync = function (name, fn) {
 		// Start with Promise.resolve() as we don't know if fn returns promise or not.
 		return Promise.resolve().then(() => {
 			return fn();
@@ -99,7 +99,7 @@ UtnBaHelper.Utils = function (apiConnector) {
 		backgroundFetch: backgroundFetch,
 		injectScript: injectScript,
 		wrapError: wrapError,
-		wrapEventFunction: wrapEventFunction,
+		runAsync: runAsync,
 
 		//--
 		getSchedulesAsString: getSchedulesAsString,

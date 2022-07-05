@@ -5,10 +5,10 @@
 	let apiConnector = new UtnBaHelper.ApiConnector();
 	let utils = new UtnBaHelper.Utils(apiConnector);
 	let store = new UtnBaHelper.Store();
-	let pagesDataParser = new UtnBaHelper.PagesDataParser(apiConnector, utils);
+	let pagesDataParser = new UtnBaHelper.PagesDataParser(utils);
 
 	$("#btn-terminar").on("mousedown", function () {
-		return utils.wrapEventFunction("surveyFinished", () => {
+		return utils.runAsync("surveyFinished", () => {
 			return store.readSurveyFormsDataFromStore().then(surveyFormsData => {
 				let data = surveyFormsData[location.href];
 				if (!data) throw new Error(`Couldn't find survey form data for url ${location.href}. surveyFormsData: ${JSON.stringify(surveyFormsData)}`);

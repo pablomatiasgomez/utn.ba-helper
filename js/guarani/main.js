@@ -2,7 +2,7 @@
 	let apiConnector = new UtnBaHelper.ApiConnector();
 	let utils = new UtnBaHelper.Utils(apiConnector);
 	let store = new UtnBaHelper.Store();
-	let pagesDataParser = new UtnBaHelper.PagesDataParser(apiConnector, utils);
+	let pagesDataParser = new UtnBaHelper.PagesDataParser(utils);
 	let dataCollector = new UtnBaHelper.DataCollector(pagesDataParser, apiConnector);
 	let customPages = new UtnBaHelper.CustomPages(pagesDataParser, dataCollector, utils, apiConnector);
 
@@ -30,7 +30,7 @@
 	Object.entries(PAGE_HANDLERS).forEach(entry => PAGE_HANDLERS[entry[0]] = () => waitForElementToHide("#loading_top").then(entry[1]));
 
 	let handleCurrentPage = () => {
-		return utils.wrapEventFunction("HandlePage " + window.location.pathname + window.location.search, () => {
+		return utils.runAsync("HandlePage " + window.location.pathname + window.location.search, () => {
 			let handler = customPages.getSelectedPageHandler() || Object.keys(PAGE_HANDLERS).filter(key => window.location.pathname.startsWith(key)).map(key => PAGE_HANDLERS[key])[0];
 			return handler && handler();
 		});
@@ -46,7 +46,7 @@
 	window.addEventListener("locationchange", () => handleCurrentPage());
 
 	// noinspection JSIgnoredPromiseFromCall
-	utils.wrapEventFunction("collectBackgroundDataIfNeeded", () => dataCollector.collectBackgroundDataIfNeeded());
+	utils.runAsync("collectBackgroundDataIfNeeded", () => dataCollector.collectBackgroundDataIfNeeded());
 
 	$(".user-navbar").closest(".row-fluid").prepend(`<span class="powered-by-utnba-helper"></span>`);
 	$("body").on("click", ".powered-by-utnba-helper", function () {
