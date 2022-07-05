@@ -84,6 +84,7 @@ UtnBaHelper.Utils = function (apiConnector) {
 			5: {start: "22:15", end: "23:00"},
 		}
 	};
+	// TODO remove all this mappins and unify with model used in the backend.
 	const DAYS = {
 		Lu: "Lunes",
 		Ma: "Martes",
@@ -121,6 +122,7 @@ UtnBaHelper.Utils = function (apiConnector) {
 	};
 
 	/**
+	 * TODO this could be removed if we stop parsing pdf.
 	 * @returns {{shift: string, firstHour: string, lastHour: string, day: string}}
 	 */
 	let getScheduleFromString = function (str) {
@@ -136,6 +138,7 @@ UtnBaHelper.Utils = function (apiConnector) {
 	};
 
 	/**
+	 * TODO this could be removed if we stop parsing pdf.
 	 * Old (or at least legacy) version of the schedules, represented in the form of:
 	 * "Lu(m)0:6 Ma(t)1:5"
 	 * @param str
@@ -172,8 +175,8 @@ UtnBaHelper.Utils = function (apiConnector) {
 			return {
 				day: day,
 				shift: shift,
-				firstHour: firstHour,
-				lastHour: lastHour,
+				firstHour: firstHour.toString(), // TODO this could be int eventually. But for consistency, until we migrate everything to a common domain, we keep it as string.
+				lastHour: lastHour.toString(),
 			};
 		});
 	};

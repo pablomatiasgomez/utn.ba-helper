@@ -5,7 +5,7 @@
 	let apiConnector = new UtnBaHelper.ApiConnector();
 	let utils = new UtnBaHelper.Utils(apiConnector);
 	let store = new UtnBaHelper.Store();
-	let pagesDataParser = new UtnBaHelper.PagesDataParser(utils);
+	let pagesDataParser = new UtnBaHelper.PagesDataParser(apiConnector, utils);
 
 	$("#btn-terminar").on("mousedown", function () {
 		return utils.wrapEventFunction("surveyFinished", () => {

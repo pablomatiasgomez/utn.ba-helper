@@ -1,5 +1,5 @@
 if (!window.UtnBaHelper) window.UtnBaHelper = {};
-UtnBaHelper.PagesDataParser = function (utils) {
+UtnBaHelper.PagesDataParser = function (apiConnector, utils) {
 
 	// Init pdf.js
 	pdfjsLib.GlobalWorkerOptions.workerSrc = chrome.runtime.getURL("js/lib/pdf.worker.min.js");
@@ -37,14 +37,13 @@ UtnBaHelper.PagesDataParser = function (utils) {
 	 * @param infoId the infoId to filter the elements out.
 	 */
 	let parseAjaxPageRenderer = function (responseContents, infoId) {
-		let contents = $(responseContents).filter("script").toArray()
+		let renderData = $(responseContents).filter("script").toArray()
 			.map(script => $(script).html())
 			.filter(script => script.startsWith("kernel.renderer.on_arrival"))
 			.map(script => JSON.parse(script.replace("kernel.renderer.on_arrival(", "").replace(");", "")))
-			.filter(data => data.info.id === infoId)
-			.map(data => data.content);
-		if (contents.length !== 1) throw new Error(`Found unexpected number of page contents: ${contents.length} for infoId: ${infoId}. response: ${JSON.stringify(responseContents)}`);
-		return contents[0];
+			.filter(data => data.info.id === infoId);
+		if (renderData.length !== 1) throw new Error(`Found unexpected number of renderers: ${renderData.length} for infoId: ${infoId}. response: ${JSON.stringify(responseContents)}`);
+		return renderData[0];
 	};
 
 	/**
@@ -95,6 +94,8 @@ UtnBaHelper.PagesDataParser = function (utils) {
 		});
 	};
 
+	// --------------------
+
 	/**
 	 * Tries to resolve and return the student id for the current logged-in user.
 	 * @returns {Promise<String>}
@@ -113,7 +114,9 @@ UtnBaHelper.PagesDataParser = function (utils) {
 	 * @returns {Promise<Array<{}>>} array of objects for each class, that contains the schedule for it.
 	 */
 	let getClassSchedules = function () {
-		return fetchPdfContents("/autogestion/grado/calendario/descargar_comprobante").then(contents => {
+		// TODO delete all this if we confirm that the data is the same.
+		// TODO delete also the fetchPdfContents and everything related to pdf.
+		let classSchedulesFromPdf = fetchPdfContents("/autogestion/grado/calendario/descargar_comprobante").then(contents => {
 			if (contents.length === 1 && contents[0] === "") {
 				// If we get an empty pdf it means the student does not have any current class schedules.
 				return [];
@@ -192,6 +195,35 @@ UtnBaHelper.PagesDataParser = function (utils) {
 			}
 			return classSchedules;
 		});
+
+		let classSchedulesFromPage = fetchAjaxPageContents("/autogestion/grado/calendario").then(responseContents => {
+			let renderData = parseAjaxPageRenderer(responseContents, "agenda_utn");
+			return renderData.info.agenda.cursadas.map(cursadaId => {
+				let classData = renderData.info.agenda.comisiones[cursadaId];
+				return mapClassDataToClassSchedule(classData);
+			});
+		});
+
+		return Promise.all([
+			classSchedulesFromPdf,
+			classSchedulesFromPage,
+		]).then(results => {
+			let fromPdf = results[0];
+			let fromPage = results[1];
+			fromPdf.sort((cs1, cs2) => parseInt(cs2.courseCode) - parseInt(cs2.courseCode));
+			fromPage.sort((cs1, cs2) => parseInt(cs2.courseCode) - parseInt(cs2.courseCode));
+			fromPdf.forEach(cs => cs.schedules.sort((sc1, sc2) => (sc1.day + sc1.shift + sc1.firstHour).localeCompare((sc2.day + sc2.shift + sc2.firstHour))))
+			fromPage.forEach(cs => cs.schedules.sort((sc1, sc2) => (sc1.day + sc1.shift + sc1.firstHour).localeCompare((sc2.day + sc2.shift + sc2.firstHour))))
+
+			apiConnector.logMessage("compareClassSchedules", false, [
+				`[fromPdfCount:${fromPdf.length}]`,
+				`[fromPageCount:${fromPage.length}]`,
+				`[match:${JSON.stringify(fromPdf) === JSON.stringify(fromPage)}]`,
+				`[fromPdf:${JSON.stringify(fromPdf)}]`,
+				`[fromPage:${JSON.stringify(fromPage)}]`,
+			].join(""));
+			return fromPdf; // Still using fromPdf just in case.
+		});
 	};
 
 	/**
@@ -200,7 +232,7 @@ UtnBaHelper.PagesDataParser = function (utils) {
 	 */
 	let getStudentPlanCode = function () {
 		return fetchAjaxPageContents("/autogestion/grado/plan_estudio").then(responseContents => {
-			let responseText = parseAjaxPageRenderer(responseContents, "info_plan");
+			let responseText = parseAjaxPageRenderer(responseContents, "info_plan").content;
 			let planText = $(responseText).filter(".encabezado").find("td:eq(1)").text();
 			let groups = /^Plan: \((\w+)\)/.exec(planText);
 			if (!groups) throw new Error(`planText couldn't be parsed: ${planText}`);
@@ -281,7 +313,7 @@ UtnBaHelper.PagesDataParser = function (utils) {
 	 */
 	let getPendingProfessorSurveys = function () {
 		return fetchAjaxPageContents("/autogestion/grado/inicio_alumno").then(responseContents => {
-			let surveysResponseText = parseAjaxPageRenderer(responseContents, "lista_encuestas_pendientes");
+			let surveysResponseText = parseAjaxPageRenderer(responseContents, "lista_encuestas_pendientes").content;
 
 			let promises = $(surveysResponseText).find("ul li a").toArray()
 				.map(a => a.href)
@@ -331,6 +363,61 @@ UtnBaHelper.PagesDataParser = function (utils) {
 			return Promise.all(promises).then(surveys => surveys.flat());
 		});
 	};
+
+	// --------------------
+
+	/**
+	 * Parses a period with the form `Grado Primer Cuatrimestre 2022` into an object that contains the year and quarter.
+	 * @param periodTxt
+	 * @returns {{year: number, quarter: string}}
+	 */
+	let parsePeriodTxt = function (periodTxt) {
+		const quarterTxtMapping = {
+			"Anual": "A",
+			"Primer Cuatrimestre": "1C",
+			"Segundo Cuatrimestre": "2C",
+			"ASS": "A", // Weird case, was found in "Grado ASS 2022" (seems to be specific to courseCode: 950454)
+		};
+		const yearAndQuarterRegex = new RegExp(`^Grado (${Object.keys(quarterTxtMapping).join("|")}) (\\d{4})$`);
+		let groups = yearAndQuarterRegex.exec(periodTxt);
+		if (!groups) throw new Error(`Class period couldn't be parsed: ${periodTxt}`);
+		let quarter = quarterTxtMapping[groups[1]];
+		let year = parseInt(groups[2]);
+		return {
+			quarter: quarter,
+			year: year,
+		};
+	};
+
+	let parseBranchTxt = function (branchTxt) {
+		const branchTxtMapping = {
+			"Sede Medrano": "MEDRANO",
+			"Sede Campus": "CAMPUS",
+			"Virtual": "AULA_VIRTUAL",
+		};
+		let branch = branchTxtMapping[branchTxt];
+		if (!branch) throw new Error(`Branch txt couldn't be parsed: ${branchTxt}`);
+		return branch;
+	};
+
+	let mapClassDataToClassSchedule = function (classData) {
+		try {
+			let period = parsePeriodTxt(classData.periodo_nombre);
+			let branch = parseBranchTxt(classData.ubicacion_nombre);
+			let schedules = utils.getSchedulesFromArray(classData.horas_catedra);  // TODO move this out of utils?
+			return {
+				year: period.year,
+				quarter: period.quarter,
+				courseName: classData.actividad_nombre,
+				classCode: classData.comision_nombre,
+				courseCode: classData.actividad_codigo,
+				branch: branch,
+				schedules: schedules,
+			};
+		} catch (e) {
+			throw utils.wrapError(`Couldn't parse classData: ${JSON.stringify(classData)}`, e);
+		}
+	}
 
 	/**
 	 * Parses the responseText of the Kolla forms, and returns the survey form data along with the answers.
@@ -436,6 +523,9 @@ UtnBaHelper.PagesDataParser = function (utils) {
 
 		getPendingProfessorSurveys: getPendingProfessorSurveys,
 		getProfessorClassesFromSurveys: getProfessorClassesFromSurveys,
+
+		// Exposed parsers / mappers
 		parseKollaSurveyForm: parseKollaSurveyForm,
+		mapClassDataToClassSchedule: mapClassDataToClassSchedule,
 	};
 };
