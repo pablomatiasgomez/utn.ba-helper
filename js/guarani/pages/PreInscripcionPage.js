@@ -1,34 +1,5 @@
 if (!window.UtnBaHelper) window.UtnBaHelper = {};
-UtnBaHelper.PreInscripcionPage = function (utils, apiConnector) {
-
-	let parsePeriodTxt = function (periodTxt) {
-		const quarterMappings = {
-			"Anual": "A",
-			"Primer Cuatrimestre": "1C",
-			"Segundo Cuatrimestre": "2C",
-			"ASS": "A", // Weird case, was found in "Grado ASS 2022" (seems to be specific to courseCode: 950454)
-		};
-		const yearAndQuarterRegex = new RegExp(`^Grado (${Object.keys(quarterMappings).join("|")}) (\\d{4})$`);
-		let groups = yearAndQuarterRegex.exec(periodTxt);
-		if (!groups) throw new Error(`Class period couldn't be parsed: ${periodTxt}`);
-		let quarter = quarterMappings[groups[1]];
-		let year = parseInt(groups[2]);
-		return {
-			quarter: quarter,
-			year: year,
-		};
-	};
-
-	let parseBranch = function (branchTxt) {
-		const mapping = {
-			"Sede Medrano": "MEDRANO",
-			"Sede Campus": "CAMPUS",
-			"Virtual": "AULA_VIRTUAL",
-		}; // TODO reuse this in PagesDataParser too?
-		let branch = mapping[branchTxt];
-		if (!branch) throw new Error(`Branch txt couldn't be parsed: ${branchTxt}`);
-		return branch;
-	};
+UtnBaHelper.PreInscripcionPage = function (pagesDataParser, utils, apiConnector) {
 
 	let addPreviousProfessorsInfo = function (courseOptionsData) {
 		let optionId = 0;
@@ -44,21 +15,7 @@ UtnBaHelper.PreInscripcionPage = function (utils, apiConnector) {
 				optionDetails.push($option.text());
 				$option.text(`(${optionId})` + $option.text());
 
-				try {
-					let period = parsePeriodTxt(classData.periodo_nombre); // TODO define a common place to parse things, and move all of that out of Utils? (and PagesDataParser)
-					let branch = parseBranch(classData.ubicacion_nombre);
-					let schedules = utils.getSchedulesFromArray(classData.horas_catedra);
-					return {
-						year: period.year,
-						quarter: period.quarter,
-						classCode: classData.comision_nombre,
-						courseCode: classData.actividad_codigo,
-						branch: branch,
-						schedules: schedules,
-					};
-				} catch (e) {
-					throw utils.wrapError(`Couldn't parse classData: ${JSON.stringify(classData)}`, e);
-				}
+				return pagesDataParser.mapClassDataToClassSchedule(classData);
 			})
 			.filter(req => !!req);
 
@@ -116,8 +73,10 @@ UtnBaHelper.PreInscripcionPage = function (utils, apiConnector) {
 		if (response.cod === "-1" && response.cont === "error") throw new GuaraniBackendError(response);
 		if (response.cod !== "1" || !response.agenda) throw new Error(`Invalid ajax contents getting courseOptionsData. responseText: ${responseText}`);
 
-		let currentCourseOptionsData = response.agenda.comisiones;
-		return addPreviousProfessorsInfo(currentCourseOptionsData);
+		// TODO check (in mid year) that this is not including the current class schedules
+		//  I think it is, and we should filter to the ids that are present in `alternativas`.
+		let courseOptionsData = response.agenda.comisiones;
+		return addPreviousProfessorsInfo(courseOptionsData);
 	}).then(() => {
 		// Once the alternatives start to be assigned, the combo and everything is reloaded, so we need to render it again.
 		// Given that handling this is somewhat difficult as the user may navigate many courses, for now we reload the page :(

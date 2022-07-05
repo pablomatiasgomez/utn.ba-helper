@@ -2,7 +2,7 @@
 	let apiConnector = new UtnBaHelper.ApiConnector();
 	let utils = new UtnBaHelper.Utils(apiConnector);
 	let store = new UtnBaHelper.Store();
-	let pagesDataParser = new UtnBaHelper.PagesDataParser(utils);
+	let pagesDataParser = new UtnBaHelper.PagesDataParser(apiConnector, utils);
 	let dataCollector = new UtnBaHelper.DataCollector(pagesDataParser, apiConnector);
 	let customPages = new UtnBaHelper.CustomPages(pagesDataParser, dataCollector, utils, apiConnector);
 
@@ -23,7 +23,7 @@
 	const PAGE_HANDLERS = {
 		// match is performed using startsWith and first one is used.
 		"/autogestion/grado/calendario": () => UtnBaHelper.HorariosPage(utils),
-		"/autogestion/grado/cursada/elegir_materia/": () => UtnBaHelper.PreInscripcionPage(utils, apiConnector),
+		"/autogestion/grado/cursada/elegir_materia/": () => UtnBaHelper.PreInscripcionPage(pagesDataParser, utils, apiConnector),
 		"/autogestion/grado/encuestas_kolla/": () => UtnBaHelper.EncuestasPendientesPage(pagesDataParser, dataCollector, store),
 	};
 	// Wait for the loading div to hide... applies for both loading from document or ajax.
