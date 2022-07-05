@@ -84,7 +84,7 @@ UtnBaHelper.Utils = function (apiConnector) {
 			5: {start: "22:15", end: "23:00"},
 		}
 	};
-	// TODO remove all this mappins and unify with model used in the backend.
+	// TODO remove all this mappings and unify with model used in the backend.
 	const DAYS = {
 		Lu: "Lunes",
 		Ma: "Martes",
