@@ -106,7 +106,7 @@ UtnBaHelper.CoursesSearchCustomPage = function ($container, services) {
 					<td>${classSchedule.quarter}</td>
 					<td>${classSchedule.classCode}</td>
 					<td>${classSchedule.branch || "-"}</td>
-					<td>${services.utils.getTimeInfoStringFromSchedules(classSchedule.schedules)}</td>
+					<td>${services.utils.getSchedulesAsString(classSchedule.schedules)}</td>
 					<td><ul class="no-margin">${professorLis}</ul></td>
 				</tr>`;
 		}).join("");

@@ -100,7 +100,7 @@ UtnBaHelper.ProfessorsSearchCustomPage = function ($container, services) {
 					<td><a class="no-ajax" href="${UtnBaHelper.CustomPages.getCourseResultsUrl(classSchedule.courseCode)}" target="_blank">${classSchedule.courseName}</a></td>
 					<td>${classSchedule.classCode}</td>
 					<td>${classSchedule.branch || "-"}</td>
-					<td>${services.utils.getTimeInfoStringFromSchedules(classSchedule.schedules)}</td>
+					<td>${services.utils.getSchedulesAsString(classSchedule.schedules)}</td>
 					<td><ul class="no-margin">${professorLis}</ul></td>
 				</tr>`;
 			}).join("");

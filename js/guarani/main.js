@@ -22,7 +22,7 @@
 
 	const PAGE_HANDLERS = {
 		// match is performed using startsWith and first one is used.
-		"/autogestion/grado/calendario": () => UtnBaHelper.HorariosPage(utils),
+		"/autogestion/grado/calendario": () => UtnBaHelper.HorariosPage(),
 		"/autogestion/grado/cursada/elegir_materia/": () => UtnBaHelper.PreInscripcionPage(pagesDataParser, utils, apiConnector),
 		"/autogestion/grado/encuestas_kolla/": () => UtnBaHelper.EncuestasPendientesPage(pagesDataParser, dataCollector, store),
 	};

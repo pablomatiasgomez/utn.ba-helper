@@ -35,7 +35,6 @@ js/guarani-kolla-helper.min.js \
 js/background.js \
 js/guarani/foreground.js \
 js/lib/libs.min.js \
-js/lib/pdf.worker.min.js \
 manifest.json
 echo "Created package.zip ..."
 

@@ -1,5 +1,7 @@
 if (!window.UtnBaHelper) window.UtnBaHelper = {};
 UtnBaHelper.Utils = function (apiConnector) {
+	// TODO utils eventually shouldn't be instantiated and should be a set of functions.
+	//  But we need to get rid of using apiConnector here.
 
 	let backgroundFetch = function (url) {
 		return new Promise((resolve, reject) => {
@@ -55,152 +57,14 @@ UtnBaHelper.Utils = function (apiConnector) {
 	};
 
 	// ----
-	// TODO: move all constants to a separate file and unify data model with api?
-	const HOURS = {
-		m: {
-			0: {start: "7:45", end: "8:30"},
-			1: {start: "8:30", end: "9:15"},
-			2: {start: "9:15", end: "10:00"},
-			3: {start: "10:15", end: "11:00"},
-			4: {start: "11:00", end: "11:45"},
-			5: {start: "11:45", end: "12:30"},
-			6: {start: "12:30", end: "13:15"}
-		},
-		t: {
-			0: {start: "13:30", end: "14:15"},
-			1: {start: "14:15", end: "15:00"},
-			2: {start: "15:00", end: "15:45"},
-			3: {start: "16:00", end: "16:45"},
-			4: {start: "16:45", end: "17:30"},
-			5: {start: "17:30", end: "18:15"},
-			6: {start: "18:15", end: "19:00"},
-		},
-		n: {
-			0: {start: "18:15", end: "19:00"},
-			1: {start: "19:00", end: "19:45"},
-			2: {start: "19:45", end: "20:30"},
-			3: {start: "20:45", end: "21:30"},
-			4: {start: "21:30", end: "22:15"},
-			5: {start: "22:15", end: "23:00"},
-		}
-	};
-	// TODO remove all this mappings and unify with model used in the backend.
-	const DAYS = {
-		Lu: "Lunes",
-		Ma: "Martes",
-		Mi: "Miercoles",
-		Ju: "Jueves",
-		Vi: "Viernes",
-		Sa: "Sabado"
-	};
-	const TIME_SHIFTS = {
-		m: "Mañana",
-		t: "Tarde",
-		n: "Noche"
-	};
-	const NEW_GRADES_REGULATION_DATE = new Date(2017, 2, 10); // Doesn't have to be exact... just using March 10th.
-	const WEIGHTED_GRADES = {
-		// Segun ordenanza 1549
-		1: 1,
-		2: 2.67,
-		3: 4.33,
-		4: 6,
-		5: 6.67,
-		6: 7.33,
-		7: 8,
-		8: 8.67,
-		9: 9.33,
-		10: 10
-	};
 
-	let getWeightedGrade = function (date, grade) {
-		if (date < NEW_GRADES_REGULATION_DATE) {
-			return WEIGHTED_GRADES[grade];
-		} else {
-			return grade;
-		}
-	};
-
-	/**
-	 * TODO this could be removed if we stop parsing pdf.
-	 * @returns {{shift: string, firstHour: string, lastHour: string, day: string}}
-	 */
-	let getScheduleFromString = function (str) {
-		str = str.replace("á", "a"); // This is for day Sá
-		let groups = /^(Lu|Ma|Mi|Ju|Vi|Sa)\(([mtn])\)([0-6]):([0-6])$/.exec(str);
-		if (!groups) throw new Error(`Schedule string couldn't be parsed: '${str}'`);
-		return {
-			day: groups[1],
-			shift: groups[2],
-			firstHour: groups[3],
-			lastHour: groups[4],
-		};
-	};
-
-	/**
-	 * TODO this could be removed if we stop parsing pdf.
-	 * Old (or at least legacy) version of the schedules, represented in the form of:
-	 * "Lu(m)0:6 Ma(t)1:5"
-	 * @param str
-	 * @returns {{shift: string, firstHour: string, lastHour: string, day: string}[]}
-	 */
-	let getSchedulesFromString = function (str) {
-		if (!str) return [];
-		try {
-			return str.split(" ").filter(el => !!el).map(getScheduleFromString);
-		} catch (e) {
-			throw wrapError(`Schedules string couldn't be parsed: '${str}'`, e);
-		}
-	};
-
-	/**
-	 * New (or different) version of the schedules, represented in the form of:
-	 * [
-	 * 		{dia_semana: "Lunes", hora_catedra_inicio: "16", hora_catedra_fin: "19"},
-	 * 		{dia_semana: "Jueves", hora_catedra_inicio: "16", hora_catedra_fin: "19"}
-	 * ]
-	 * @param arr
-	 * @returns {{shift: string, firstHour: string, lastHour: string, day: string}[]}
-	 */
-	let getSchedulesFromArray = function (arr) {
-		return arr.map(schedule => {
-			// TODO: Not performant but not important right now (to be improved/unify schedules parsing.)
-			let day = Object.entries(DAYS).filter(entry => entry[1] === schedule.dia_semana).map(entry => entry[0])[0];
-			if (!day) throw new Error(`Couldn't parse day: ${schedule.dia_semana}`);
-
-			let shiftIdx = Math.floor((parseInt(schedule.hora_catedra_inicio) - 1) / 7); // 0:m, 1:t, 2:n
-			let shift = Object.keys(HOURS)[shiftIdx];
-			let firstHour = (parseInt(schedule.hora_catedra_inicio) - 1) % 7;
-			let lastHour = (parseInt(schedule.hora_catedra_fin) - 1) % 7;
-			return {
-				day: day,
-				shift: shift,
-				firstHour: firstHour.toString(), // TODO this could be int eventually. But for consistency, until we migrate everything to a common domain, we keep it as string.
-				lastHour: lastHour.toString(),
-			};
-		});
-	};
-
-	let getTimeInfoStringFromSchedules = function (schedules) {
+	let getSchedulesAsString = function (schedules) {
 		if (!schedules) return "-";
 		return schedules
-			.map(schedule => DAYS[schedule.day] + " (" + TIME_SHIFTS[schedule.shift] + ") " + HOURS[schedule.shift][schedule.firstHour].start + "hs a " + HOURS[schedule.shift][schedule.lastHour].end + "hs")
+			.map(schedule =>
+				UtnBaHelper.Consts.DAYS[schedule.day] + " (" + UtnBaHelper.Consts.TIME_SHIFTS[schedule.shift] + ") " +
+				UtnBaHelper.Consts.HOURS[schedule.shift][schedule.firstHour].start + "hs a " + UtnBaHelper.Consts.HOURS[schedule.shift][schedule.lastHour].end + "hs")
 			.join(" y ");
-	};
-
-	let trimCourseName = function (name) {
-		name = name.trim();
-		if (name.length > 20) {
-			return name.substring(0, 20) + "...";
-		} else {
-			return name;
-		}
-	};
-
-	// Parses a date with format DD/MM/YYYY
-	let parseDate = function (dateStr) {
-		let dateParts = dateStr.split("/");
-		return new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);
 	};
 
 	let getColorForAvg = function (avg) {
@@ -231,26 +95,14 @@ UtnBaHelper.Utils = function (apiConnector) {
 
 	// Public
 	return {
+		// Related to the extension:
 		backgroundFetch: backgroundFetch,
 		injectScript: injectScript,
 		wrapError: wrapError,
 		wrapEventFunction: wrapEventFunction,
 
 		//--
-
-		HOURS: HOURS,
-		DAYS: DAYS,
-		TIME_SHIFTS: TIME_SHIFTS,
-
-		getWeightedGrade: getWeightedGrade,
-
-		getSchedulesFromString: getSchedulesFromString,
-		getSchedulesFromArray: getSchedulesFromArray,
-		getTimeInfoStringFromSchedules: getTimeInfoStringFromSchedules,
-
-		trimCourseName: trimCourseName,
-		parseDate: parseDate,
-
+		getSchedulesAsString: getSchedulesAsString,
 		getColorForAvg: getColorForAvg,
 		getOverallScoreSpan: getOverallScoreSpan,
 		getProfessorLi: getProfessorLi,

@@ -40,7 +40,6 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "js/lib/pdf.worker.min.js",
         "js/guarani/foreground.js"
       ],
       "matches": [
