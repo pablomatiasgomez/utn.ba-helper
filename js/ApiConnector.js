@@ -4,20 +4,6 @@ UtnBaHelper.ApiConnector = function () {
 	const CLIENT = `CHROME@${chrome.runtime.getManifest().version}`;
 	const BASE_API_URL = "https://www.pablomatiasgomez.com.ar/utnba-helper/v2";
 
-	const DAYS_MAPPING = {
-		"Lu": "MONDAY",
-		"Ma": "TUESDAY",
-		"Mi": "WEDNESDAY",
-		"Ju": "THURSDAY",
-		"Vi": "FRIDAY",
-		"Sa": "SATURDAY",
-	};
-	const SHIFTS_MAPPING = {
-		"m": "MORNING",
-		"t": "AFTERNOON",
-		"n": "NIGHT",
-	};
-
 	let logMessage = function (method, isError, message) {
 		return postData(BASE_API_URL + "/log", {
 			method: method,
@@ -38,30 +24,11 @@ UtnBaHelper.ApiConnector = function () {
 	};
 
 	let postClassSchedules = function (classSchedules) {
-		return postData(BASE_API_URL + "/class-schedules", classSchedules.map(classSchedule => {
-			return {
-				year: classSchedule.year,
-				quarter: classSchedule.quarter,
-				classCode: classSchedule.classCode,
-				courseCode: classSchedule.courseCode,
-				branch: classSchedule.branch,
-				schedules: classSchedule.schedules ? classSchedule.schedules.map(mapScheduleToApi) : null,
-				professors: classSchedule.professors
-			};
-		}));
+		return postData(BASE_API_URL + "/class-schedules", classSchedules);
 	};
 
 	let postProfessorSurveys = function (surveys) {
 		return postData(BASE_API_URL + "/professor-surveys", surveys);
-	};
-
-	let mapScheduleToApi = function (schedule) {
-		return {
-			day: DAYS_MAPPING[schedule.day],
-			shift: SHIFTS_MAPPING[schedule.shift],
-			firstHour: parseInt(schedule.firstHour),
-			lastHour: parseInt(schedule.lastHour),
-		};
 	};
 
 	let postData = function (url, data) {
@@ -76,13 +43,9 @@ UtnBaHelper.ApiConnector = function () {
 		});
 	};
 
-
 	// ------
 
 	let getPreviousProfessors = function (previousProfessorsRequest) {
-		previousProfessorsRequest.forEach(request => {
-			request.schedules = request.schedules.map(mapScheduleToApi);
-		});
 		return postData(BASE_API_URL + "/previous-professors", previousProfessorsRequest);
 	};
 
@@ -117,12 +80,7 @@ UtnBaHelper.ApiConnector = function () {
 		};
 		if (courseCode) params.courseCode = courseCode;
 		if (professorName) params.professorName = professorName;
-		return getData(BASE_API_URL + "/class-schedules?" + buildQueryParams(params)).then(classSchedules => {
-			classSchedules.filter(classSchedule => classSchedule.schedules).forEach(classSchedule => {
-				classSchedule.schedules = classSchedule.schedules.map(mapScheduleFromApi);
-			});
-			return classSchedules;
-		});
+		return getData(BASE_API_URL + "/class-schedules?" + buildQueryParams(params));
 	};
 
 	let getData = function (url) {
@@ -133,15 +91,6 @@ UtnBaHelper.ApiConnector = function () {
 				"X-Client": CLIENT
 			}
 		});
-	};
-
-	let mapScheduleFromApi = function (schedule) {
-		return {
-			day: Object.entries(DAYS_MAPPING).filter(entry => entry[1] === schedule.day)[0][0],
-			shift: Object.entries(SHIFTS_MAPPING).filter(entry => entry[1] === schedule.shift)[0][0],
-			firstHour: schedule.firstHour.toString(),
-			lastHour: schedule.lastHour.toString()
-		};
 	};
 
 	// ---

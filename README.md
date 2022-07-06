@@ -72,14 +72,3 @@ UTN.BA Helper facilita el uso de la web de la UTN - FRBA.
 XLS parser is used to parse information from xls documents. The file located at `js/lib/xls.full.min.js` should be
 updated using the `full` version of the SheetJS module, which can be downloaded at https://cdn.sheetjs.com/ or directly
 from cdnjs at https://cdnjs.com/libraries/xlsx
-
-### PDF.js
-
-PDF.js parser is used to parse information from pdf documents. The files located at `js/lib/pdf.min.js`
-and `js/lib/pdf.worker.min.js` should both be updated at the same time with same version, which can be downloaded
-from https://mozilla.github.io/pdf.js/getting_started/# or directly from the cdn as a minified
-version https://cdnjs.com/libraries/pdf.js
-
-**WARNING**: we are currently using version `2.8.335` and newer versions have been tested but give weird results for the
-current class schedules pdf. If decided to upgrade, the PagesDataParser.getClassSchedules function needs to be updated
-to handle the new output (empty strings in the middle of the values).

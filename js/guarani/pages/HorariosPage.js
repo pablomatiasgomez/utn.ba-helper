@@ -1,5 +1,14 @@
 if (!window.UtnBaHelper) window.UtnBaHelper = {};
-UtnBaHelper.HorariosPage = function (utils) {
+UtnBaHelper.HorariosPage = function () {
+
+	let trimCourseName = function (name) {
+		name = name.trim();
+		if (name.length > 20) {
+			return name.substring(0, 20) + "...";
+		} else {
+			return name;
+		}
+	};
 
 	let getColorFromClass = function (className) {
 		const colorRegex = /materia-color-(\d*)/;
@@ -25,7 +34,7 @@ UtnBaHelper.HorariosPage = function (utils) {
 		$(".agenda-hora").each(function () {
 			let color = getColorFromClass($(this).attr("class"));
 			if (color && last !== color && classesByColor[color]) {
-				$(this).text(utils.trimCourseName(classesByColor[color]));
+				$(this).text(trimCourseName(classesByColor[color]));
 				$(this).addClass("name-container");
 			}
 			last = color;

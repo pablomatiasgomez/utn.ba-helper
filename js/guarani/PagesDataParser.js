@@ -1,8 +1,5 @@
 if (!window.UtnBaHelper) window.UtnBaHelper = {};
-UtnBaHelper.PagesDataParser = function (apiConnector, utils) {
-
-	// Init pdf.js
-	pdfjsLib.GlobalWorkerOptions.workerSrc = chrome.runtime.getURL("js/lib/pdf.worker.min.js");
+UtnBaHelper.PagesDataParser = function (utils) {
 
 	// We want to fetch only once each page.
 	let CACHED_PAGE_CONTENTS = {};
@@ -47,35 +44,6 @@ UtnBaHelper.PagesDataParser = function (apiConnector, utils) {
 	};
 
 	/**
-	 * Fetches an url that returns a pdf and parses the content into an array of strings.
-	 * @param url url that returns a pdf.
-	 * @returns {Promise<string[]>}
-	 */
-	let fetchPdfContents = function (url) {
-		if (CACHED_PAGE_CONTENTS[url]) {
-			return Promise.resolve(CACHED_PAGE_CONTENTS[url]);
-		}
-		return pdfjsLib.getDocument(url).promise.then(pdf => {
-			let promises = Array.from(Array(pdf.numPages).keys())
-				.map(i => pdf.getPage(i + 1)
-					.then(page => page.getTextContent())
-					.then(text => text.items.map(s => s.str)));
-			return Promise.all(promises)
-				.then(contents => contents.flat());
-		}).then(contents => {
-			CACHED_PAGE_CONTENTS[url] = contents;
-			return contents;
-		}).catch(e => {
-			// Sometimes guarani's backend throws a 500. We want to ignore those errors from being reported to backend.
-			if (e instanceof pdfjsLib.UnexpectedResponseException && e.status >= 500) {
-				console.error("Failed to fetch pdf", e);
-				throw new GuaraniBackendError(e);
-			}
-			throw e;
-		});
-	};
-
-	/**
 	 * Fetches an url that returns a XLS and returns the parsed workbook
 	 * @param url url that returns a XLS.
 	 * @returns {Promise<{}>}
@@ -107,122 +75,17 @@ UtnBaHelper.PagesDataParser = function (apiConnector, utils) {
 	};
 
 	/**
-	 * Fetches, from the "Comprobante de cursada" pdf, the current classes that the student is taking.
-	 * Used for different purposes:
-	 * - Collect classSchedules
-	 * - Complete the grid when registering to new classes
+	 * Fetches, from the "Agenda" page, the current classes that the student is taking.
+	 * Used to collect the classSchedules
 	 * @returns {Promise<Array<{}>>} array of objects for each class, that contains the schedule for it.
 	 */
 	let getClassSchedules = function () {
-		// TODO delete all this if we confirm that the data is the same.
-		// TODO delete also the fetchPdfContents and everything related to pdf.
-		let classSchedulesFromPdf = fetchPdfContents("/autogestion/grado/calendario/descargar_comprobante").then(contents => {
-			if (contents.length === 1 && contents[0] === "") {
-				// If we get an empty pdf it means the student does not have any current class schedules.
-				return [];
-			}
-
-			// We will iterate pdf contents one by one, validating the structure.
-			let i = 0;
-			let validateExpectedContents = expectedContents => expectedContents.forEach(expectedContent => {
-				if (contents[i++] !== expectedContent) throw new Error(`Invalid pdf contents (${i - 1}): ${JSON.stringify(contents)}`);
-			});
-
-			validateExpectedContents(["", "COMPROBANTE DE INSCRIPCIÓN A CURSADA"]);
-
-			// This is not being used right now, but keeping it to validate the contents format.
-			// WARN: the studentId is not properly formatted in the pdf, that is why we are considering the check digit as optional.
-			// For example, it could be shown as "123.456-" instead of "12.345-6"
-			// If we need to use its value, we need to sanitize to the correct format.
-			let studentIdAndName = contents[i++];
-			let groups = /^(\d{2,3}\.\d{3}-\d?) (.*)$/.exec(studentIdAndName);
-			if (!groups) throw new Error(`Couldn't parse studentIdAndName: ${studentIdAndName}. PdfContents: ${JSON.stringify(contents)}`);
-
-			validateExpectedContents(["Código", "Actividad", "Período", "Comisión", "Ubicación", "Aula", "Horario"]);
-
-			let classSchedules = [];
-			const yearAndQuarterRegex = /^((1|2)(?:er|do) Cuat|Anual) (\d{4})$/;
-			// After all the class schedules rows, this is the following text, so we know where to stop...
-			while (contents[i] !== "Firma y Sello Departamento") {
-				let courseCode = contents[i++]; // e.g.: 950701
-				if (!/^\d{6}$/.test(courseCode)) throw new Error(`courseCode couldn't be parsed: ${courseCode}. PdfContents: ${JSON.stringify(contents)}`);
-
-				let courseName = contents[i++]; // e.g.: Fisica I
-
-				let yearAndQuarter = contents[i++]; // e.g.: 1er Cuat 2021
-				groups = yearAndQuarterRegex.exec(yearAndQuarter);
-				if (!groups) {
-					// Sometimes it can happen that the courseName was long enough that was split into two rows...
-					courseName = `${courseName} ${yearAndQuarter}`;
-					yearAndQuarter = contents[i++];
-					groups = yearAndQuarterRegex.exec(yearAndQuarter);
-				}
-				if (!groups) throw new Error(`Class time couldn't be parsed: ${yearAndQuarter}. PdfContents: ${JSON.stringify(contents)}`);
-				let quarter = (groups[1] === "Anual") ? "A" : (groups[2] + "C"); // A, 1C, 2C
-				let year = parseInt(groups[3]);
-
-				let classCode = contents[i++].toUpperCase(); // e.g.: Z1154
-
-				let branch = contents[i++].toUpperCase()
-					.replace(" ", "_") // e.g.: CAMPUS, MEDRANO, CAMPUS_VIRTUAL, ESCUELA
-					.replace("SEDE_", ""); // Strip out some values like SEDE_CAMPUS or SEDE_MEDRANO
-				// TODO reuse what we have in PreInscripcionPage ?
-				if (branch === "CAMPUS_VIRTUAL" || branch === "VIRTUAL") {
-					branch = "AULA_VIRTUAL";
-				} else if (branch === "ESCUELA") {
-					// For some reason, this comes as two separate elements, like: ["Escuela", "Técnica -"]
-					validateExpectedContents(["Técnica -"]);
-					branch = "PIÑERO";
-				} else if (branch === "SIN_DESIGNAR") {
-					branch = null;
-				}
-
-				i++; // (ClassRoomNumber) e.g.: "Sin definir", "2"
-
-				let schedulesStr = contents[i++]; // e.g.: Lu(n)1:5 Mi(n)0:2
-				// Sundays is not a valid day, not sure why this is happening, but ignoring..
-				let schedules = ["Do(m)0:0", "Do(t)0:0", "Do(n)0:0", "Sin definir"].includes(schedulesStr) ? null : utils.getSchedulesFromString(schedulesStr);
-
-				classSchedules.push({
-					year: year,
-					quarter: quarter,
-					courseName: courseName,
-					classCode: classCode,
-					courseCode: courseCode,
-					branch: branch,
-					schedules: schedules,
-				});
-			}
-			return classSchedules;
-		});
-
-		let classSchedulesFromPage = fetchAjaxPageContents("/autogestion/grado/calendario").then(responseContents => {
+		return fetchAjaxPageContents("/autogestion/grado/calendario").then(responseContents => {
 			let renderData = parseAjaxPageRenderer(responseContents, "agenda_utn");
 			return renderData.info.agenda.cursadas.map(cursadaId => {
 				let classData = renderData.info.agenda.comisiones[cursadaId];
 				return mapClassDataToClassSchedule(classData);
 			});
-		});
-
-		return Promise.all([
-			classSchedulesFromPdf,
-			classSchedulesFromPage,
-		]).then(results => {
-			let fromPdf = results[0];
-			let fromPage = results[1];
-			fromPdf.sort((cs1, cs2) => parseInt(cs2.courseCode) - parseInt(cs2.courseCode));
-			fromPage.sort((cs1, cs2) => parseInt(cs2.courseCode) - parseInt(cs2.courseCode));
-			fromPdf.forEach(cs => cs.schedules.sort((sc1, sc2) => (sc1.day + sc1.shift + sc1.firstHour).localeCompare((sc2.day + sc2.shift + sc2.firstHour))))
-			fromPage.forEach(cs => cs.schedules.sort((sc1, sc2) => (sc1.day + sc1.shift + sc1.firstHour).localeCompare((sc2.day + sc2.shift + sc2.firstHour))))
-
-			apiConnector.logMessage("compareClassSchedules", false, [
-				`[fromPdfCount:${fromPdf.length}]`,
-				`[fromPageCount:${fromPage.length}]`,
-				`[match:${JSON.stringify(fromPdf) === JSON.stringify(fromPage)}]`,
-				`[fromPdf:${JSON.stringify(fromPdf)}]`,
-				`[fromPage:${JSON.stringify(fromPage)}]`,
-			].join(""));
-			return fromPdf; // Still using fromPdf just in case.
 		});
 	};
 
@@ -270,7 +133,7 @@ UtnBaHelper.PagesDataParser = function (apiConnector, utils) {
 			sheet["!ref"] = sheet["!ref"].replace("A1:", "A6:");
 
 			XLSX.utils.sheet_to_json(sheet).forEach(row => {
-				let date = utils.parseDate(row["Fecha"]);
+				let date = parseDate(row["Fecha"]);
 				let courseText = row["Actividad"];
 				let type = row["Tipo"];
 				let gradeText = row["Nota"];
@@ -286,7 +149,7 @@ UtnBaHelper.PagesDataParser = function (apiConnector, utils) {
 				if (!arr) throw new Error(`Type not handled: ${type}. Row: ${JSON.stringify(row)}`);
 
 				let grade = parseInt(gradeText) || null;
-				let weightedGrade = grade !== null ? utils.getWeightedGrade(date, grade) : null;
+				let weightedGrade = grade !== null ? getWeightedGrade(date, grade) : null;
 
 				if (typeof gradeIsPassedTypes[gradeIsPassedText] === "undefined") throw new Error(`gradeIsPassedText couldn't be parsed: ${gradeIsPassedText}. Row: ${JSON.stringify(row)}`);
 				let isPassed = gradeIsPassedTypes[gradeIsPassedText];
@@ -366,6 +229,20 @@ UtnBaHelper.PagesDataParser = function (apiConnector, utils) {
 
 	// --------------------
 
+	// Parses a date with format DD/MM/YYYY
+	let parseDate = function (dateStr) {
+		let dateParts = dateStr.split("/");
+		return new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);
+	};
+
+	let getWeightedGrade = function (date, grade) {
+		if (date < UtnBaHelper.Consts.NEW_GRADES_REGULATION_DATE) {
+			return UtnBaHelper.Consts.WEIGHTED_GRADES[grade];
+		} else {
+			return grade;
+		}
+	};
+
 	/**
 	 * Parses a period with the form `Grado Primer Cuatrimestre 2022` into an object that contains the year and quarter.
 	 * @param periodTxt
@@ -384,8 +261,8 @@ UtnBaHelper.PagesDataParser = function (apiConnector, utils) {
 		let quarter = quarterTxtMapping[groups[1]];
 		let year = parseInt(groups[2]);
 		return {
-			quarter: quarter,
 			year: year,
+			quarter: quarter,
 		};
 	};
 
@@ -400,17 +277,48 @@ UtnBaHelper.PagesDataParser = function (apiConnector, utils) {
 		return branch;
 	};
 
+	/**
+	 * New (or different) version of the schedules, represented in the form of:
+	 * [
+	 * 		{dia_semana: "Lunes", hora_catedra_inicio: "16", hora_catedra_fin: "19"},
+	 * 		{dia_semana: "Jueves", hora_catedra_inicio: "16", hora_catedra_fin: "19"}
+	 * ]
+	 * @param arr the schedule received from the classData struct (guarani's server)
+	 * @returns {{day: string, shift: string, firstHour: number, lastHour: number}[]}
+	 */
+	let parseSchedulesFromArray = function (arr) {
+		return arr.map(schedule => {
+			let day = Object.entries(UtnBaHelper.Consts.DAYS).filter(entry => entry[1] === schedule.dia_semana).map(entry => entry[0])[0];
+			if (!day) throw new Error(`Couldn't parse day: ${schedule.dia_semana}`);
+
+			let shiftIdx = Math.floor((parseInt(schedule.hora_catedra_inicio) - 1) / 7); // 0:MORNING, 1:AFTERNOON, 2:NIGHT
+			let shift = Object.keys(UtnBaHelper.Consts.HOURS)[shiftIdx];
+			let firstHour = (parseInt(schedule.hora_catedra_inicio) - 1) % 7;
+			let lastHour = (parseInt(schedule.hora_catedra_fin) - 1) % 7;
+			return {
+				day: day,
+				shift: shift,
+				firstHour: firstHour,
+				lastHour: lastHour,
+			};
+		});
+	};
+
+
 	let mapClassDataToClassSchedule = function (classData) {
 		try {
 			let period = parsePeriodTxt(classData.periodo_nombre);
 			let branch = parseBranchTxt(classData.ubicacion_nombre);
-			let schedules = utils.getSchedulesFromArray(classData.horas_catedra);  // TODO move this out of utils?
+			let schedules = parseSchedulesFromArray(classData.horas_catedra);
 			return {
 				year: period.year,
 				quarter: period.quarter,
-				courseName: classData.actividad_nombre,
-				classCode: classData.comision_nombre,
+				classCode: classData.comision_nombre.toUpperCase(),
 				courseCode: classData.actividad_codigo,
+				// courseName is not used right now.
+				// The backend does not accept this for posts (class schedules or previous professors),
+				// so if we decide to add it, we should remove it from api calls.
+				// courseName: classData.actividad_nombre,
 				branch: branch,
 				schedules: schedules,
 			};
@@ -421,7 +329,7 @@ UtnBaHelper.PagesDataParser = function (apiConnector, utils) {
 
 	/**
 	 * Parses the responseText of the Kolla forms, and returns the survey form data along with the answers.
-	 * @return {[{professorRole: string, classCode: string, year: number, courseCode: string, professorName: string, surveyKind: string, quarter}]}
+	 * @returns {[{surveyKind: string, professorRole: string, classCode: string, year: number, courseCode: string, professorName: string, quarter: string, surveyFieldValues: []}]}
 	 */
 	let parseKollaSurveyForm = function ($kollaResponseText) {
 		const surveyKindsMapping = {
