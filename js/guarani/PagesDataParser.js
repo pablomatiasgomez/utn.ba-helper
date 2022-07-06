@@ -261,8 +261,8 @@ UtnBaHelper.PagesDataParser = function (utils) {
 		let quarter = quarterTxtMapping[groups[1]];
 		let year = parseInt(groups[2]);
 		return {
-			quarter: quarter,
 			year: year,
+			quarter: quarter,
 		};
 	};
 
@@ -313,7 +313,7 @@ UtnBaHelper.PagesDataParser = function (utils) {
 			return {
 				year: period.year,
 				quarter: period.quarter,
-				classCode: classData.comision_nombre,
+				classCode: classData.comision_nombre.toUpperCase(),
 				courseCode: classData.actividad_codigo,
 				// courseName is not used right now.
 				// The backend does not accept this for posts (class schedules or previous professors),
