@@ -32,6 +32,13 @@ UtnBaHelper.Utils = function (apiConnector) {
 		return error;
 	};
 
+	let logError = function (method, e) {
+		console.error(`Error while executing ${method}`, e);
+		// Not logging LoggedOutError nor GuaraniBackendError.
+		if (e instanceof LoggedOutError || e instanceof GuaraniBackendError) return;
+		return apiConnector.logMessage(method, true, stringifyError(e));
+	};
+
 	let wrapError = function (message, error) {
 		let newError = new Error(message);
 		// Remove this function (wrapError) call from the stack...
@@ -50,9 +57,7 @@ UtnBaHelper.Utils = function (apiConnector) {
 		return Promise.resolve().then(() => {
 			return fn();
 		}).catch(e => {
-			console.error(`Error while executing event function ${name}`, e);
-			if (e instanceof LoggedOutError || e instanceof GuaraniBackendError) return; // Not logging LoggedOutError nor GuaraniBackendError.
-			return apiConnector.logMessage(name, true, stringifyError(e));
+			return logError(name, e);
 		});
 	};
 
@@ -98,6 +103,7 @@ UtnBaHelper.Utils = function (apiConnector) {
 		// Related to the extension:
 		backgroundFetch: backgroundFetch,
 		injectScript: injectScript,
+		logError: logError,
 		wrapError: wrapError,
 		runAsync: runAsync,
 
