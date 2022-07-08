@@ -1,8 +1,7 @@
 if (!window.UtnBaHelper) window.UtnBaHelper = {};
-UtnBaHelper.DataCollector = function (pagesDataParser, apiConnector) {
+UtnBaHelper.DataCollector = function (store, pagesDataParser, apiConnector) {
 
 	const LOCAL_STORAGE_DATA_COLLECTOR_KEY = "UtnBaHelper.DataCollector";
-	const COLLECT_SCHEDULES_KEY = "schedules";
 
 	const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -33,13 +32,21 @@ UtnBaHelper.DataCollector = function (pagesDataParser, apiConnector) {
 	 */
 	let collectBackgroundDataIfNeeded = function () {
 		return getHashedStudentId().then(hashedStudentId => {
+			// Save hashedStudentId to local storage, so that it can be used for surveys collection.
+			return store.saveHashedStudentIdToStore(hashedStudentId).then(() => hashedStudentId);
+		}).then(hashedStudentId => {
 			let lastTimeCollected = getLastTimeCollectedForStudentId(hashedStudentId);
 
 			let collectMethods = [
 				{
-					key: COLLECT_SCHEDULES_KEY,
+					key: "schedules",
 					minTime: ONE_DAY_MS,
 					method: () => collectClassSchedulesWithProfessors(),
+				},
+				{
+					key: "planCourses",
+					minTime: ONE_DAY_MS * 7,
+					method: () => collectPlanCourses(),
 				}
 			];
 
@@ -72,6 +79,14 @@ UtnBaHelper.DataCollector = function (pagesDataParser, apiConnector) {
 			}
 		});
 	};
+
+	let collectPlanCourses = function () {
+		return pagesDataParser.getPlanCourses().then(planCourses => {
+			apiConnector.logMessage("planCourses", false, `\nPlanCode:${planCourses.planCode}\n------------${planCourses.responseText}------------\n\n`);
+		});
+	};
+
+	// -----
 
 	let getLastTimeCollectedByHashedStudentId = function () {
 		let lastTimeCollectedByHashedStudentId = JSON.parse(localStorage.getItem(LOCAL_STORAGE_DATA_COLLECTOR_KEY));

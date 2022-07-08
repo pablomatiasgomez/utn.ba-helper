@@ -12,10 +12,8 @@
 
 		$("#btn-terminar").on("mousedown", function () {
 			return utils.runAsync("surveyFinished", () => {
-				return store.readSurveyFormsDataFromStore().then(surveyFormsData => {
-					let data = surveyFormsData[location.href];
-					if (!data) throw new Error(`Couldn't find survey form data for url ${location.href}. surveyFormsData: ${JSON.stringify(surveyFormsData)}`);
-					let hashedStudentId = data.hashedStudentId;
+				return store.readHashedStudentIdFromStore().then(hashedStudentId => {
+					if (!hashedStudentId) throw new Error(`Couldn't find hashedStudentId within form url ${location.href}.`);
 
 					let surveys = pagesDataParser.parseKollaSurveyForm($(document));
 					if (surveys.length) {
