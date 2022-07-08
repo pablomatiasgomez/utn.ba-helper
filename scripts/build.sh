@@ -17,7 +17,6 @@ js/guarani/Utils.js \
 js/guarani/Store.js \
 js/guarani/DataCollector.js \
 js/guarani/PagesDataParser.js \
-js/guarani/pages/EncuestasPendientesPage.js \
 js/guarani/pages/HorariosPage.js \
 js/guarani/pages/PreInscripcionPage.js \
 js/guarani/custompages/ProfessorsSearchCustomPage.js \

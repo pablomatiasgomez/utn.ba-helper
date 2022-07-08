@@ -89,6 +89,19 @@ UtnBaHelper.PagesDataParser = function (utils) {
 		});
 	};
 
+	let getPlanCourses = function () {
+		return fetchAjaxPageContents("/autogestion/grado/plan_estudio").then(responseContents => {
+			let responseText = parseAjaxPageRenderer(responseContents, "info_plan").content;
+			let planText = $(responseText).filter(".encabezado").find("td:eq(1)").text();
+			let groups = /^Plan: \((\w+)\)/.exec(planText);
+			if (!groups) throw new Error(`planText couldn't be parsed: ${planText}`);
+			return {
+				planCode: groups[1],
+				responseText: responseText.split("\n").map(l => l.trim()).filter(l => !!l).join(" "),
+			};
+		});
+	};
+
 	/**
 	 * The student's current plan code as shown in the /autogestion/grado/plan_estudio page.
 	 * @returns {Promise<string>}
@@ -170,11 +183,11 @@ UtnBaHelper.PagesDataParser = function (utils) {
 	};
 
 	/**
-	 * We can only retrieve the pending professor surveys and not the completed ones.
-	 * This returns the siuUrl and the kollaUrl (the actual form)
-	 * @returns {Promise<[{siuUrl: string, kollaUrl: string}]>}
+	 * Fetches all the current surveys that the user has to take (cannot retrieve the ones that have already been taken)
+	 * For each of them resolves the current professor name, class, course, quarter, etc.
+	 * @returns {Promise<*[]>} an array of class schedules for each combination of professor and class
 	 */
-	let getPendingProfessorSurveys = function () {
+	let getProfessorClassesFromSurveys = function () {
 		return fetchAjaxPageContents("/autogestion/grado/inicio_alumno").then(responseContents => {
 			let surveysResponseText = parseAjaxPageRenderer(responseContents, "lista_encuestas_pendientes").content;
 
@@ -182,26 +195,13 @@ UtnBaHelper.PagesDataParser = function (utils) {
 				.map(a => a.href)
 				.map(siuUrl => {
 					return fetchAjaxPageContents(siuUrl).then(siuResponseText => {
-						let kollaUrl = $(siuResponseText).find("iframe").get(0).src;
-						return {
-							siuUrl: siuUrl,
-							kollaUrl: kollaUrl,
-						};
+						// Return the kollaUrl
+						return $(siuResponseText).find("iframe").get(0).src;
 					});
 				});
-			return Promise.all(promises).then(surveyUrls => surveyUrls.flat());
-		});
-	};
-
-	/**
-	 * Fetches all the current surveys that the user has to take o has taken.
-	 * For each of them resolves the current professor name, class, course, quarter, etc.
-	 * @returns {Promise<*[]>} an array of class schedules for each combination of professor and class
-	 */
-	let getProfessorClassesFromSurveys = function () {
-		return getPendingProfessorSurveys().then(surveyUrls => {
-			let promises = surveyUrls.map(surveyUrl => {
-				let kollaUrl = surveyUrl.kollaUrl;
+			return Promise.all(promises).then(kollaUrls => kollaUrls.flat());
+		}).then(kollaUrls => {
+			let promises = kollaUrls.map(kollaUrl => {
 				return utils.backgroundFetch(kollaUrl).then(kollaResponseText => {
 					let surveysMetadata = parseKollaSurveyForm($(kollaResponseText));
 
@@ -337,9 +337,10 @@ UtnBaHelper.PagesDataParser = function (utils) {
 			"AUXILIARES DOCENTES": "AUXILIAR",
 		};
 		const quarterMapping = {
+			"ANUAL": "A",
 			"PRIMER CUATRIMESTRE": "1C",
 			"SEGUNDO CUATRIMESTRE": "2C",
-			"ANUAL": "A",
+			"ASS": "A", // Weird case, was found in "ENCUESTA DOCENTES AUXILIARES ASS 2022"
 		};
 		const surveyTitleRegex = new RegExp(`^ENCUESTA (${Object.keys(surveyKindsMapping).join("|")}) (${Object.keys(quarterMapping).join("|")}) (\\d{4})$`);
 
@@ -426,10 +427,10 @@ UtnBaHelper.PagesDataParser = function (utils) {
 		getStudentId: getStudentId,
 		getClassSchedules: getClassSchedules,
 
+		getPlanCourses: getPlanCourses,
 		getStudentPlanCode: getStudentPlanCode,
 		getCoursesHistory: getCoursesHistory,
 
-		getPendingProfessorSurveys: getPendingProfessorSurveys,
 		getProfessorClassesFromSurveys: getProfessorClassesFromSurveys,
 
 		// Exposed parsers / mappers

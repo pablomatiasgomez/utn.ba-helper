@@ -6,7 +6,7 @@
 		utils = new UtnBaHelper.Utils(apiConnector);
 		let store = new UtnBaHelper.Store();
 		let pagesDataParser = new UtnBaHelper.PagesDataParser(utils);
-		let dataCollector = new UtnBaHelper.DataCollector(pagesDataParser, apiConnector);
+		let dataCollector = new UtnBaHelper.DataCollector(store, pagesDataParser, apiConnector);
 		let customPages = new UtnBaHelper.CustomPages(pagesDataParser, dataCollector, utils, apiConnector);
 
 		// We only will handle pages if:
@@ -27,7 +27,6 @@
 			// match is performed using startsWith and first one is used.
 			"/autogestion/grado/calendario": () => UtnBaHelper.HorariosPage(),
 			"/autogestion/grado/cursada/elegir_materia/": () => UtnBaHelper.PreInscripcionPage(pagesDataParser, utils, apiConnector),
-			"/autogestion/grado/encuestas_kolla/": () => UtnBaHelper.EncuestasPendientesPage(pagesDataParser, dataCollector, store),
 		};
 		// Wait for the loading div to hide... applies for both loading from document or ajax.
 		Object.entries(PAGE_HANDLERS).forEach(entry => PAGE_HANDLERS[entry[0]] = () => waitForElementToHide("#loading_top").then(entry[1]));

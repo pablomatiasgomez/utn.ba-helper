@@ -187,7 +187,7 @@ UtnBaHelper.PlanTrackingCustomPage = function ($container, services) {
 		};
 
 		let levels = [...new Set(planCourses
-			.filter(course => course.level !== 0)
+			.filter(course => course.level !== 0) // TODO this should be removed if we update courses...
 			.map(course => course.level))]
 			.sort();
 
