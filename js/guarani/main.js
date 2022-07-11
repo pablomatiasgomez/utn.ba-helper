@@ -1,9 +1,7 @@
 (function () {
-	let apiConnector;
-	let utils;
-	try {
-		apiConnector = new UtnBaHelper.ApiConnector();
-		utils = new UtnBaHelper.Utils(apiConnector);
+	let apiConnector = new UtnBaHelper.ApiConnector();
+	let utils = new UtnBaHelper.Utils(apiConnector);
+	return utils.runAsync("main", () => {
 		let store = new UtnBaHelper.Store();
 		let pagesDataParser = new UtnBaHelper.PagesDataParser(utils);
 		let dataCollector = new UtnBaHelper.DataCollector(store, pagesDataParser, apiConnector);
@@ -29,7 +27,7 @@
 			"/autogestion/grado/cursada/elegir_materia/": () => UtnBaHelper.PreInscripcionPage(pagesDataParser, utils, apiConnector),
 		};
 		// Wait for the loading div to hide... applies for both loading from document or ajax.
-		Object.entries(PAGE_HANDLERS).forEach(entry => PAGE_HANDLERS[entry[0]] = () => waitForElementToHide("#loading_top").then(entry[1]));
+		Object.entries(PAGE_HANDLERS).forEach(entry => PAGE_HANDLERS[entry[0]] = () => utils.waitForElementToHide("#loading_top").then(entry[1]));
 
 		let handleCurrentPage = () => {
 			return utils.runAsync("HandlePage " + window.location.pathname + window.location.search, () => {
@@ -38,6 +36,7 @@
 			});
 		};
 
+		// noinspection JSIgnoredPromiseFromCall
 		handleCurrentPage();
 
 		// Append the foreground script that will subscribe to all the needed events.
@@ -53,22 +52,5 @@
 		$("body").on("click", ".powered-by-utnba-helper", function () {
 			window.open("https://chrome.google.com/webstore/detail/jdgdheoeghamkhfppapjchbojhehimpe", "_blank");
 		});
-
-		//----
-
-		function waitForElementToHide(selector) {
-			return new Promise((resolve) => {
-				let check = () => {
-					if (!$(selector).is(":visible")) {
-						resolve();
-					} else {
-						setTimeout(check, 100);
-					}
-				};
-				check();
-			});
-		}
-	} catch (e) {
-		return utils.logError("main", e);
-	}
+	});
 })();

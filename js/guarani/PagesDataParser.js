@@ -202,7 +202,7 @@ UtnBaHelper.PagesDataParser = function (utils) {
 			return Promise.all(promises).then(kollaUrls => kollaUrls.flat());
 		}).then(kollaUrls => {
 			let promises = kollaUrls.map(kollaUrl => {
-				return utils.backgroundFetch(kollaUrl).then(kollaResponseText => {
+				return utils.backgroundFetch({url: kollaUrl}).then(kollaResponseText => {
 					let surveysMetadata = parseKollaSurveyForm($(kollaResponseText));
 
 					// We could eventually merge same class professors, but the backend still accepts this:
@@ -335,6 +335,7 @@ UtnBaHelper.PagesDataParser = function (utils) {
 		const surveyKindsMapping = {
 			"DOCENTE": "DOCENTE",
 			"AUXILIARES DOCENTES": "AUXILIAR",
+			"DOCENTES AUXILIARES": "AUXILIAR",
 		};
 		const quarterMapping = {
 			"ANUAL": "A",

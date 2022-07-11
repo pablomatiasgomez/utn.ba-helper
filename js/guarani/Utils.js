@@ -3,9 +3,10 @@ UtnBaHelper.Utils = function (apiConnector) {
 	// TODO utils eventually shouldn't be instantiated and should be a set of functions.
 	//  But we need to get rid of using apiConnector here.
 
-	let backgroundFetch = function (url) {
+	// TODO this is duplicated in the ApiConnector.
+	let backgroundFetch = function (options) {
 		return new Promise((resolve, reject) => {
-			chrome.runtime.sendMessage({url: url}, response => (response && response.errorStr) ? reject(new Error(response.errorStr)) : resolve(response));
+			chrome.runtime.sendMessage(options, response => (response && response.errorStr) ? reject(new Error(response.errorStr)) : resolve(response));
 		});
 	};
 
@@ -32,13 +33,6 @@ UtnBaHelper.Utils = function (apiConnector) {
 		return error;
 	};
 
-	let logError = function (method, e) {
-		console.error(`Error while executing ${method}`, e);
-		// Not logging LoggedOutError nor GuaraniBackendError.
-		if (e instanceof LoggedOutError || e instanceof GuaraniBackendError) return;
-		return apiConnector.logMessage(method, true, stringifyError(e));
-	};
-
 	let wrapError = function (message, error) {
 		let newError = new Error(message);
 		// Remove this function (wrapError) call from the stack...
@@ -57,7 +51,23 @@ UtnBaHelper.Utils = function (apiConnector) {
 		return Promise.resolve().then(() => {
 			return fn();
 		}).catch(e => {
-			return logError(name, e);
+			console.error(`Error while executing ${name}`, e);
+			// Not logging LoggedOutError nor GuaraniBackendError.
+			if (e instanceof LoggedOutError || e instanceof GuaraniBackendError) return;
+			return apiConnector.logMessage(name, true, stringifyError(e));
+		});
+	};
+
+	let waitForElementToHide = function (selector) {
+		return new Promise((resolve) => {
+			let check = () => {
+				if (!$(selector).is(":visible")) {
+					resolve();
+				} else {
+					setTimeout(check, 100);
+				}
+			};
+			check();
 		});
 	};
 
@@ -103,9 +113,9 @@ UtnBaHelper.Utils = function (apiConnector) {
 		// Related to the extension:
 		backgroundFetch: backgroundFetch,
 		injectScript: injectScript,
-		logError: logError,
 		wrapError: wrapError,
 		runAsync: runAsync,
+		waitForElementToHide: waitForElementToHide,
 
 		//--
 		getSchedulesAsString: getSchedulesAsString,

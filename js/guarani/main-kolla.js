@@ -1,9 +1,7 @@
 (function () {
-	let apiConnector;
-	let utils;
-	try {
-		apiConnector = new UtnBaHelper.ApiConnector();
-		utils = new UtnBaHelper.Utils(apiConnector);
+	let apiConnector = new UtnBaHelper.ApiConnector();
+	let utils = new UtnBaHelper.Utils(apiConnector);
+	return utils.runAsync("mainKolla", () => {
 		let store = new UtnBaHelper.Store();
 		let pagesDataParser = new UtnBaHelper.PagesDataParser(utils);
 
@@ -23,7 +21,5 @@
 				});
 			});
 		});
-	} catch (e) {
-		return utils.logError("mainKolla", e);
-	}
+	});
 })();

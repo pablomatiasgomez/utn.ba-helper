@@ -47,6 +47,9 @@
       ]
     }
   ],
+  "host_permissions": [
+    "*://*.kolla.frba.utn.edu.ar/*"
+  ],
   "background": {
     "service_worker": "js/background.js"
   },
@@ -54,4 +57,3 @@
     "storage"
   ]
 }
-
