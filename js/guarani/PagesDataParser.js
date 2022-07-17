@@ -89,19 +89,6 @@ UtnBaHelper.PagesDataParser = function (utils) {
 		});
 	};
 
-	let getPlanCourses = function () {
-		return fetchAjaxPageContents("/autogestion/grado/plan_estudio").then(responseContents => {
-			let responseText = parseAjaxPageRenderer(responseContents, "info_plan").content;
-			let planText = $(responseText).filter(".encabezado").find("td:eq(1)").text();
-			let groups = /^Plan: \((\w+)\)/.exec(planText);
-			if (!groups) throw new Error(`planText couldn't be parsed: ${planText}`);
-			return {
-				planCode: groups[1],
-				responseText: responseText.split("\n").map(l => l.trim()).filter(l => !!l).join(" "),
-			};
-		});
-	};
-
 	/**
 	 * The student's current plan code as shown in the /autogestion/grado/plan_estudio page.
 	 * @returns {Promise<string>}
@@ -428,7 +415,6 @@ UtnBaHelper.PagesDataParser = function (utils) {
 		getStudentId: getStudentId,
 		getClassSchedules: getClassSchedules,
 
-		getPlanCourses: getPlanCourses,
 		getStudentPlanCode: getStudentPlanCode,
 		getCoursesHistory: getCoursesHistory,
 
