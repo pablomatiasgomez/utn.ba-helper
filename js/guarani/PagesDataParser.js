@@ -15,6 +15,8 @@ UtnBaHelper.PagesDataParser = function (utils) {
 			"headers": {
 				"X-Requested-With": "XMLHttpRequest", // This is needed so that guarani's server returns a json payload
 			}
+		}).catch(e => {
+			throw utils.wrapError(`Error on fetchAjaxContents for ${url}`, e);
 		}).then(response => response.json()).then(response => {
 			if (response.cod === "1" && response.titulo === "Grado - Acceso" && response.operacion === "acceso") throw new LoggedOutError();
 			if (response.cod === "-2" && response.cont.url.includes("/autogestion/grado/acceso/login")) throw new LoggedOutError();
@@ -24,8 +26,6 @@ UtnBaHelper.PagesDataParser = function (utils) {
 		}).then(contents => {
 			RESPONSES_CACHE[url] = contents;
 			return contents;
-		}).catch(e => {
-			throw utils.wrapError(`Error on fetchAjaxContents for ${url}`, e);
 		});
 	};
 
@@ -57,13 +57,13 @@ UtnBaHelper.PagesDataParser = function (utils) {
 		}
 		return fetch(url).then(response => {
 			return response.arrayBuffer();
+		}).catch(e => {
+			throw utils.wrapError(`Error on fetchXlsContents for ${url}`, e);
 		}).then(response => {
 			return XLSX.read(new Uint8Array(response), {type: "array"});
 		}).then(contents => {
 			RESPONSES_CACHE[url] = contents;
 			return contents;
-		}).catch(e => {
-			throw utils.wrapError(`Error on fetchXlsContents for ${url}`, e);
 		});
 	};
 
