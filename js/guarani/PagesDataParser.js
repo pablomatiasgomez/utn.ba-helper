@@ -24,6 +24,8 @@ UtnBaHelper.PagesDataParser = function (utils) {
 		}).then(contents => {
 			RESPONSES_CACHE[url] = contents;
 			return contents;
+		}).catch(e => {
+			throw utils.wrapError(`Error on fetchAjaxContents for ${url}`, e);
 		});
 	};
 
@@ -60,6 +62,8 @@ UtnBaHelper.PagesDataParser = function (utils) {
 		}).then(contents => {
 			RESPONSES_CACHE[url] = contents;
 			return contents;
+		}).catch(e => {
+			throw utils.wrapError(`Error on fetchXlsContents for ${url}`, e);
 		});
 	};
 
