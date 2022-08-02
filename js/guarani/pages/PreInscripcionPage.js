@@ -1,7 +1,26 @@
 if (!window.UtnBaHelper) window.UtnBaHelper = {};
 UtnBaHelper.PreInscripcionPage = function (pagesDataParser, utils, apiConnector) {
 
-	let addPreviousProfessorsInfo = function (courseOptionsData) {
+	let addPreviousProfessorsTable = function () {
+		return Promise.resolve().then(() => {
+			return fetchCourseAlternatives();
+		}).then(courseOptionsData => {
+			return renderPreviousProfessorsTable(courseOptionsData);
+		});
+	};
+
+	let fetchCourseAlternatives = function () {
+		return Promise.resolve().then(() => {
+			// Avoid using cache as the endpoint is always the same but the student may register or unregister from the course.
+			return pagesDataParser.fetchAjaxContents(location.href, false);
+		}).then(response => {
+			// `comisiones` may include the current class schedules. This is not a problem because we access the array by id.
+			// But we could eventually filter them out by using the `cursadas` array if we confirm it
+			return response.agenda.comisiones;
+		});
+	};
+
+	let renderPreviousProfessorsTable = function (courseOptionsData) {
 		let optionId = 0;
 		let optionDetails = [];
 		let previousProfessorsRequest = $("#comision option").toArray()
@@ -64,24 +83,23 @@ UtnBaHelper.PreInscripcionPage = function (pagesDataParser, utils, apiConnector)
 		});
 	};
 
-	// Init
-	return Promise.resolve().then(() => {
-		return $.ajax(location.href);
-	}).then(responseText => {
-		let response = JSON.parse(responseText);
-		if (response.cod === "1" && response.titulo === "Grado - Acceso" && response.operacion === "acceso") throw new LoggedOutError();
-		if (response.cod === "-1" && response.cont === "error") throw new GuaraniBackendError(response);
-		if (response.cod !== "1" || !response.agenda) throw new Error(`Invalid ajax contents getting courseOptionsData. responseText: ${responseText}`);
 
-		// TODO check (in mid year) that this is not including the current class schedules
-		//  I think it is, and we should filter to the ids that are present in `alternativas`.
-		let courseOptionsData = response.agenda.comisiones;
-		return addPreviousProfessorsInfo(courseOptionsData);
-	}).then(() => {
-		// Once the alternatives start to be assigned, the combo and everything is reloaded, so we need to render it again.
-		// Given that handling this is somewhat difficult as the user may navigate many courses, for now we reload the page :(
-		// Events triggered from foreground script:
-		window.addEventListener("__utn_ba_event_comision_preinscripta", () => location.reload());
-		window.addEventListener("__utn_ba_event_comision_despreinscripta", () => location.reload());
-	});
+	let addPreviousProfessorsTableEventFn;
+	return {
+		init: function () {
+			return Promise.resolve().then(() => {
+				// Need to listen to course register changes, as the combo is reloaded, and we need to add the table again.
+				// We need to un register them on close, as changing a course will trigger a new PreInscripcionPage.
+				// Events triggered from foreground script:
+				addPreviousProfessorsTableEventFn = () => utils.runAsync("addPreviousProfessorsTable", addPreviousProfessorsTable);
+				window.addEventListener("__utn_ba_event_comision_preinscripta", addPreviousProfessorsTableEventFn);
+				window.addEventListener("__utn_ba_event_comision_despreinscripta", addPreviousProfessorsTableEventFn);
+				return addPreviousProfessorsTable();
+			});
+		},
+		close: function () {
+			window.removeEventListener("__utn_ba_event_comision_preinscripta", addPreviousProfessorsTableEventFn);
+			window.removeEventListener("__utn_ba_event_comision_despreinscripta", addPreviousProfessorsTableEventFn);
+		},
+	};
 };

@@ -42,8 +42,13 @@ UtnBaHelper.HorariosPage = function () {
 	};
 
 
-	// Init
-	return Promise.resolve().then(() => {
-		setCourseNamesInTable();
-	});
+	return {
+		init: function () {
+			return Promise.resolve().then(() => {
+				setCourseNamesInTable();
+			});
+		},
+		close: function () {
+		},
+	};
 };
