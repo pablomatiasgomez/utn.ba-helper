@@ -43,11 +43,6 @@ UtnBaHelper.DataCollector = function (store, pagesDataParser, apiConnector) {
 					minTime: ONE_DAY_MS,
 					method: () => collectClassSchedulesWithProfessors(),
 				},
-				{
-					key: "planCourses",
-					minTime: ONE_DAY_MS * 7,
-					method: () => collectPlanCourses(),
-				}
 			];
 
 			let promise = Promise.resolve();
@@ -77,12 +72,6 @@ UtnBaHelper.DataCollector = function (store, pagesDataParser, apiConnector) {
 			if (classSchedules.length) {
 				return apiConnector.postClassSchedules(classSchedules);
 			}
-		});
-	};
-
-	let collectPlanCourses = function () {
-		return pagesDataParser.getPlanCourses().then(planCourses => {
-			apiConnector.logMessage("planCourses", false, `\nPlanCode:${planCourses.planCode}\n------------${planCourses.responseText}------------\n\n`);
 		});
 	};
 

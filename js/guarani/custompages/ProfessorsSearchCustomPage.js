@@ -170,14 +170,20 @@ UtnBaHelper.ProfessorsSearchCustomPage = function ($container, services) {
 		$surveyResultDiv.append(`<hr>`);
 	};
 
-	// Init
-	return Promise.resolve().then(() => {
-		createPage();
-		let professorName = new URLSearchParams(window.location.search).get(UtnBaHelper.ProfessorsSearchCustomPage.customParamKey);
-		if (professorName) {
-			return retrieveProfessorData(professorName);
-		}
-	});
+
+	return {
+		init: function () {
+			return Promise.resolve().then(() => {
+				createPage();
+				let professorName = new URLSearchParams(window.location.search).get(UtnBaHelper.ProfessorsSearchCustomPage.customParamKey);
+				if (professorName) {
+					return retrieveProfessorData(professorName);
+				}
+			});
+		},
+		close: function () {
+		},
+	};
 };
 
 UtnBaHelper.ProfessorsSearchCustomPage.menuName = "Buscar docentes";

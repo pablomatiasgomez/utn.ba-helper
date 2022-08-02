@@ -2,34 +2,37 @@ if (!window.UtnBaHelper) window.UtnBaHelper = {};
 UtnBaHelper.PagesDataParser = function (utils) {
 
 	// We want to fetch only once each page.
-	let CACHED_PAGE_CONTENTS = {};
+	let RESPONSES_CACHE = {};
 
 	/**
 	 * Fetches and parses the way guarani's page ajax contents are loaded.
-	 * Returned contents are different script tags that contain the html, so they need to be parsed.
 	 */
-	let fetchAjaxPageContents = function (url) {
-		if (CACHED_PAGE_CONTENTS[url]) {
-			return Promise.resolve(CACHED_PAGE_CONTENTS[url]);
+	let fetchAjaxContents = function (url, useCache = true) {
+		if (useCache && RESPONSES_CACHE[url]) {
+			return Promise.resolve(RESPONSES_CACHE[url]);
 		}
 		return fetch(url, {
 			"headers": {
 				"X-Requested-With": "XMLHttpRequest", // This is needed so that guarani's server returns a json payload
 			}
+		}).catch(e => {
+			throw utils.wrapError(`Error on fetchAjaxContents for ${url}`, e);
 		}).then(response => response.json()).then(response => {
 			if (response.cod === "1" && response.titulo === "Grado - Acceso" && response.operacion === "acceso") throw new LoggedOutError();
 			if (response.cod === "-2" && response.cont.url.includes("/autogestion/grado/acceso/login")) throw new LoggedOutError();
+			if (response.cod === "-1" && response.cont === "error") throw new GuaraniBackendError(response);
 			if (response.cod !== "1") throw new Error(`Invalid ajax contents for url ${url}. response: ${JSON.stringify(response)}`);
-			return response.cont;
+			return response;
 		}).then(contents => {
-			CACHED_PAGE_CONTENTS[url] = contents;
+			RESPONSES_CACHE[url] = contents;
 			return contents;
 		});
 	};
 
 	/**
 	 * Some pages that are requested via ajax return responses that contain an array of items to be
-	 * rendered in the UI. This method parses that and returns only the item that is requested (infoId)
+	 * rendered in the UI, which are different script tags that contain the html, so they need to be parsed.
+	 * This method parses that and returns only the item that is requested (infoId)
 	 * @param responseContents the "cont" object of the ajax call.
 	 * @param infoId the infoId to filter the elements out.
 	 */
@@ -49,15 +52,17 @@ UtnBaHelper.PagesDataParser = function (utils) {
 	 * @returns {Promise<{}>}
 	 */
 	let fetchXlsContents = function (url) {
-		if (CACHED_PAGE_CONTENTS[url]) {
-			return Promise.resolve(CACHED_PAGE_CONTENTS[url]);
+		if (RESPONSES_CACHE[url]) {
+			return Promise.resolve(RESPONSES_CACHE[url]);
 		}
 		return fetch(url).then(response => {
 			return response.arrayBuffer();
+		}).catch(e => {
+			throw utils.wrapError(`Error on fetchXlsContents for ${url}`, e);
 		}).then(response => {
 			return XLSX.read(new Uint8Array(response), {type: "array"});
 		}).then(contents => {
-			CACHED_PAGE_CONTENTS[url] = contents;
+			RESPONSES_CACHE[url] = contents;
 			return contents;
 		});
 	};
@@ -80,25 +85,12 @@ UtnBaHelper.PagesDataParser = function (utils) {
 	 * @returns {Promise<Array<{}>>} array of objects for each class, that contains the schedule for it.
 	 */
 	let getClassSchedules = function () {
-		return fetchAjaxPageContents("/autogestion/grado/calendario").then(responseContents => {
-			let renderData = parseAjaxPageRenderer(responseContents, "agenda_utn");
+		return fetchAjaxContents("/autogestion/grado/calendario").then(responseContents => {
+			let renderData = parseAjaxPageRenderer(responseContents.cont, "agenda_utn");
 			return renderData.info.agenda.cursadas.map(cursadaId => {
 				let classData = renderData.info.agenda.comisiones[cursadaId];
 				return mapClassDataToClassSchedule(classData);
 			});
-		});
-	};
-
-	let getPlanCourses = function () {
-		return fetchAjaxPageContents("/autogestion/grado/plan_estudio").then(responseContents => {
-			let responseText = parseAjaxPageRenderer(responseContents, "info_plan").content;
-			let planText = $(responseText).filter(".encabezado").find("td:eq(1)").text();
-			let groups = /^Plan: \((\w+)\)/.exec(planText);
-			if (!groups) throw new Error(`planText couldn't be parsed: ${planText}`);
-			return {
-				planCode: groups[1],
-				responseText: responseText.split("\n").map(l => l.trim()).filter(l => !!l).join(" "),
-			};
 		});
 	};
 
@@ -107,8 +99,8 @@ UtnBaHelper.PagesDataParser = function (utils) {
 	 * @returns {Promise<string>}
 	 */
 	let getStudentPlanCode = function () {
-		return fetchAjaxPageContents("/autogestion/grado/plan_estudio").then(responseContents => {
-			let responseText = parseAjaxPageRenderer(responseContents, "info_plan").content;
+		return fetchAjaxContents("/autogestion/grado/plan_estudio").then(responseContents => {
+			let responseText = parseAjaxPageRenderer(responseContents.cont, "info_plan").content;
 			let planText = $(responseText).filter(".encabezado").find("td:eq(1)").text();
 			let groups = /^Plan: \((\w+)\)/.exec(planText);
 			if (!groups) throw new Error(`planText couldn't be parsed: ${planText}`);
@@ -188,15 +180,15 @@ UtnBaHelper.PagesDataParser = function (utils) {
 	 * @returns {Promise<*[]>} an array of class schedules for each combination of professor and class
 	 */
 	let getProfessorClassesFromSurveys = function () {
-		return fetchAjaxPageContents("/autogestion/grado/inicio_alumno").then(responseContents => {
-			let surveysResponseText = parseAjaxPageRenderer(responseContents, "lista_encuestas_pendientes").content;
+		return fetchAjaxContents("/autogestion/grado/inicio_alumno").then(responseContents => {
+			let surveysResponseText = parseAjaxPageRenderer(responseContents.cont, "lista_encuestas_pendientes").content;
 
 			let promises = $(surveysResponseText).find("ul li a").toArray()
 				.map(a => a.href)
 				.map(siuUrl => {
-					return fetchAjaxPageContents(siuUrl).then(siuResponseText => {
+					return fetchAjaxContents(siuUrl).then(siuResponseText => {
 						// Return the kollaUrl
-						return $(siuResponseText).find("iframe").get(0).src;
+						return $(siuResponseText.cont).find("iframe").get(0).src;
 					});
 				});
 			return Promise.all(promises).then(kollaUrls => kollaUrls.flat());
@@ -425,10 +417,13 @@ UtnBaHelper.PagesDataParser = function (utils) {
 
 	// Public
 	return {
+		fetchAjaxContents: fetchAjaxContents,
+
+		// --
+
 		getStudentId: getStudentId,
 		getClassSchedules: getClassSchedules,
 
-		getPlanCourses: getPlanCourses,
 		getStudentPlanCode: getStudentPlanCode,
 		getCoursesHistory: getCoursesHistory,
 

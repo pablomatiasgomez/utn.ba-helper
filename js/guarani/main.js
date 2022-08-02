@@ -26,13 +26,16 @@
 			"/autogestion/grado/calendario": () => UtnBaHelper.HorariosPage(),
 			"/autogestion/grado/cursada/elegir_materia/": () => UtnBaHelper.PreInscripcionPage(pagesDataParser, utils, apiConnector),
 		};
-		// Wait for the loading div to hide... applies for both loading from document or ajax.
-		Object.entries(PAGE_HANDLERS).forEach(entry => PAGE_HANDLERS[entry[0]] = () => utils.waitForElementToHide("#loading_top").then(entry[1]));
 
+		let currentHandler = null;
 		let handleCurrentPage = () => {
 			return utils.runAsync("HandlePage " + window.location.pathname + window.location.search, () => {
-				let handler = customPages.getSelectedPageHandler() || Object.keys(PAGE_HANDLERS).filter(key => window.location.pathname.startsWith(key)).map(key => PAGE_HANDLERS[key])[0];
-				return handler && handler();
+				if (currentHandler) currentHandler.close();
+				currentHandler = customPages.getSelectedPageHandler() || Object.keys(PAGE_HANDLERS).filter(key => window.location.pathname.startsWith(key)).map(key => PAGE_HANDLERS[key])[0];
+				if (!currentHandler) return;
+				currentHandler = currentHandler();
+				// Wait for the loading div to hide... applies for both loading from document or ajax.
+				return utils.waitForElementToHide("#loading_top").then(() => currentHandler.init());
 			});
 		};
 

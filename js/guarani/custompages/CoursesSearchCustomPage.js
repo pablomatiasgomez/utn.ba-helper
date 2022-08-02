@@ -113,14 +113,20 @@ UtnBaHelper.CoursesSearchCustomPage = function ($container, services) {
 		$courseDataDiv.find("table tbody tr:last").before(trs);
 	};
 
-	// Init
-	return Promise.resolve().then(() => {
-		createPage();
-		let courseCode = new URLSearchParams(window.location.search).get(UtnBaHelper.CoursesSearchCustomPage.customParamKey);
-		if (courseCode) {
-			return retrieveClassesForCourse(courseCode, 0, 15);
-		}
-	});
+
+	return {
+		init: function () {
+			return Promise.resolve().then(() => {
+				createPage();
+				let courseCode = new URLSearchParams(window.location.search).get(UtnBaHelper.CoursesSearchCustomPage.customParamKey);
+				if (courseCode) {
+					return retrieveClassesForCourse(courseCode, 0, 15);
+				}
+			});
+		},
+		close: function () {
+		},
+	};
 };
 
 UtnBaHelper.CoursesSearchCustomPage.menuName = "Buscar cursos";

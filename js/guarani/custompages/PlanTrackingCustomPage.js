@@ -210,17 +210,23 @@ UtnBaHelper.PlanTrackingCustomPage = function ($container, services) {
 		});
 	};
 
-	// Init
-	return Promise.resolve().then(() => {
-		return Promise.all([
-			services.pagesDataParser.getStudentPlanCode(),
-			services.pagesDataParser.getCoursesHistory(),
-		]);
-	}).then(result => {
-		let planCode = result[0];
-		let coursesHistory = result[1];
-		return createPage(planCode, coursesHistory);
-	});
+
+	return {
+		init: function () {
+			return Promise.resolve().then(() => {
+				return Promise.all([
+					services.pagesDataParser.getStudentPlanCode(),
+					services.pagesDataParser.getCoursesHistory(),
+				]);
+			}).then(result => {
+				let planCode = result[0];
+				let coursesHistory = result[1];
+				return createPage(planCode, coursesHistory);
+			});
+		},
+		close: function () {
+		},
+	};
 };
 
 UtnBaHelper.PlanTrackingCustomPage.menuName = "Seguimiento de Plan";
