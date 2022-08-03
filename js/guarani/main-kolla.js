@@ -13,7 +13,7 @@
 				return store.readHashedStudentIdFromStore().then(hashedStudentId => {
 					if (!hashedStudentId) throw new Error(`Couldn't find hashedStudentId within form url ${location.href}.`);
 
-					let surveys = pagesDataParser.parseKollaSurveyForm($(document));
+					let surveys = pagesDataParser.parseKollaSurveyForm($(document), $(document).find("html").html());
 					if (surveys.length) {
 						surveys.forEach(survey => survey.surveyTaker = hashedStudentId);
 						return apiConnector.postProfessorSurveys(surveys);

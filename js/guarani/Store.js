@@ -14,7 +14,8 @@ UtnBaHelper.Store = function () {
 	};
 
 	let saveHashedStudentIdToStore = function (hashedStudentId) {
-		return chrome.storage.sync.set({[HASHED_STUDENT_ID_DATASTORE_KEY]: hashedStudentId});
+		// Some old browsers return undefined instead of Promise... so we return an empty one if that happens.
+		return chrome.storage.sync.set({[HASHED_STUDENT_ID_DATASTORE_KEY]: hashedStudentId}) || Promise.resolve();
 	};
 
 	// Public
