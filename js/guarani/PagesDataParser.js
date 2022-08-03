@@ -195,7 +195,7 @@ UtnBaHelper.PagesDataParser = function (utils) {
 		}).then(kollaUrls => {
 			let promises = kollaUrls.map(kollaUrl => {
 				return utils.backgroundFetch({url: kollaUrl}).then(kollaResponseText => {
-					let surveysMetadata = parseKollaSurveyForm($(kollaResponseText));
+					let surveysMetadata = parseKollaSurveyForm($(kollaResponseText), kollaResponseText);
 
 					// We could eventually merge same class professors, but the backend still accepts this:
 					return surveysMetadata.map(surveyMetadata => {
@@ -323,7 +323,7 @@ UtnBaHelper.PagesDataParser = function (utils) {
 	 * Parses the responseText of the Kolla forms, and returns the survey form data along with the answers.
 	 * @returns {[{surveyKind: string, professorRole: string, classCode: string, year: number, courseCode: string, professorName: string, quarter: string, surveyFieldValues: []}]}
 	 */
-	let parseKollaSurveyForm = function ($kollaResponseText) {
+	let parseKollaSurveyForm = function ($kollaResponseText, htmlForLog) {
 		const surveyKindsMapping = {
 			"DOCENTE": "DOCENTE",
 			"AUXILIARES DOCENTES": "AUXILIAR",
@@ -350,7 +350,7 @@ UtnBaHelper.PagesDataParser = function (utils) {
 
 		let courseTitle = $kollaResponseText.find(".formulario-titulo").text(); // E.g.: 'Simulación (082041) - Comisión: K4053', 'Administración Gerencial (082039) - Comisión: K5054'
 		let groups = /^(.*) \((\d{6})\) - Comisión: ([\w\d]{5})$/.exec(courseTitle);
-		if (!groups) throw new Error(`Survey courseTitle couldn't be parsed: ${courseTitle}`);
+		if (!groups) throw new Error(`Survey courseTitle couldn't be parsed: ${courseTitle}. HTML: ${htmlForLog}`);
 		// let courseName = groups[1]; // E.g. Simulación
 		let courseCode = groups[2]; // E.g. 082041
 		let classCode = groups[3]; // E.g. K4053
@@ -362,7 +362,7 @@ UtnBaHelper.PagesDataParser = function (utils) {
 			surveyTitle = surveyTitle.text().trim();
 
 			groups = surveyTitleRegex.exec(surveyTitle);
-			if (!groups) throw new Error(`surveyTitle couldn't be parsed: ${surveyTitle}`);
+			if (!groups) throw new Error(`surveyTitle couldn't be parsed: ${surveyTitle}. HTML: ${htmlForLog}`);
 
 			let surveyKind = surveyKindsMapping[groups[1]]; // DOCENTE, AUXILIAR
 			let quarter = quarterMapping[groups[2]]; // A, 1C, 2C
@@ -372,7 +372,7 @@ UtnBaHelper.PagesDataParser = function (utils) {
 			professor = professor.text().trim();
 
 			groups = professorRegex.exec(professor);
-			if (!groups) throw new Error(`professor couldn't be parsed: ${professor}`);
+			if (!groups) throw new Error(`professor couldn't be parsed: ${professor}. HTML: ${htmlForLog}`);
 
 			let professorName = groups[1].toUpperCase();
 			let professorRole = professorRolesMapping[groups[2]]; // TITULAR, ASOCIADO, ADJUNTO, etc.
