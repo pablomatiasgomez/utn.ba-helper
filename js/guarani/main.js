@@ -28,16 +28,17 @@
 		};
 
 		let currentHandler = null;
-		let handleCurrentPage = () => {
-			return utils.runAsync("HandlePage " + window.location.pathname + window.location.search, () => {
-				if (currentHandler) currentHandler.close();
-				currentHandler = customPages.getSelectedPageHandler() || Object.keys(PAGE_HANDLERS).filter(key => window.location.pathname.startsWith(key)).map(key => PAGE_HANDLERS[key])[0];
+		let handleCurrentPage = () => utils.runAsync("HandlePage " + window.location.pathname + window.location.search, () => {
+			if (currentHandler) currentHandler.close();
+
+			// Wait for the loading div to hide... applies for both loading from document or ajax.
+			return utils.waitForElementToHide("#loading_top").then(() => {
+				currentHandler = customPages.getSelectedPageHandler() || Object.entries(PAGE_HANDLERS).filter(entry => window.location.pathname.startsWith(entry[0])).map(entry => entry[1])[0];
 				if (!currentHandler) return;
 				currentHandler = currentHandler();
-				// Wait for the loading div to hide... applies for both loading from document or ajax.
-				return utils.waitForElementToHide("#loading_top").then(() => currentHandler.init());
+				return currentHandler.init();
 			});
-		};
+		});
 
 		// noinspection JSIgnoredPromiseFromCall
 		handleCurrentPage();
@@ -46,7 +47,7 @@
 		utils.injectScript("js/guarani/foreground.js");
 
 		// Subscribe to ajax page changes (some of these events are created in the foreground script)
-		window.addEventListener("locationchange", () => handleCurrentPage());
+		window.addEventListener("locationchange", handleCurrentPage);
 
 		// noinspection JSIgnoredPromiseFromCall
 		utils.runAsync("collectBackgroundDataIfNeeded", () => dataCollector.collectBackgroundDataIfNeeded());
