@@ -348,6 +348,10 @@ UtnBaHelper.PagesDataParser = function (utils) {
 		};
 		const professorRegex = new RegExp(`^(.*) \\((${Object.keys(professorRolesMapping).join("|")})(?: \\(Responsable de Cátedra\\))?\\)$`);
 
+		// If there is an alert box that has a text like `La encuesta 'Probabilidad y Estadística (950704) - Comisión: Z2017' ya ha sido respondida.` it's because it's a completed survey.
+		// This shouldn't happen as we are only grabbing the pending ones (or forms being completed) but from time to time we get some errors, so we can ignore these.
+		if ($kollaResponseText.find(".alert.alert-success").text().trim().endsWith(" ya ha sido respondida.")) return [];
+
 		let courseTitle = $kollaResponseText.find(".formulario-titulo").text(); // E.g.: 'Simulación (082041) - Comisión: K4053', 'Administración Gerencial (082039) - Comisión: K5054'
 		let groups = /^(.*) \((\d{6})\) - Comisión: ([\w\d]{5})$/.exec(courseTitle);
 		if (!groups) throw new Error(`Survey courseTitle couldn't be parsed: ${courseTitle}. HTML: ${htmlForLog}`);
