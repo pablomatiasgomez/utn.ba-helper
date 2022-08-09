@@ -20,6 +20,7 @@ UtnBaHelper.PagesDataParser = function (utils) {
 		}).then(response => response.json()).then(response => {
 			if (response.cod === "1" && response.titulo === "Grado - Acceso" && response.operacion === "acceso") throw new LoggedOutError();
 			if (response.cod === "-2" && response.cont.url.includes("/autogestion/grado/acceso/login")) throw new LoggedOutError();
+			if (response.cod === "-2" && response.cont.url.includes("/autogestion/grado/inicio_alumno")) throw new RedirectedToHomeError();
 			if (response.cod === "-1" && response.cont === "error") throw new GuaraniBackendError(response);
 			if (response.cod !== "1") throw new Error(`Invalid ajax contents for url ${url}. response: ${JSON.stringify(response)}`);
 			return response;
@@ -91,6 +92,13 @@ UtnBaHelper.PagesDataParser = function (utils) {
 				let classData = renderData.info.agenda.comisiones[cursadaId];
 				return mapClassDataToClassSchedule(classData);
 			});
+		}).catch(e => {
+			if (e instanceof RedirectedToHomeError) {
+				// This happens when students are in the process to register to new schedules,
+				// and there is a time window in which class schedules page cannot be seen.
+				return [];
+			}
+			throw e;
 		});
 	};
 
