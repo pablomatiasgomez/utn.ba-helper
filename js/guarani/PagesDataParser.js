@@ -20,6 +20,7 @@ UtnBaHelper.PagesDataParser = function (utils) {
 		}).then(response => response.json()).then(response => {
 			if (response.cod === "1" && response.titulo === "Grado - Acceso" && response.operacion === "acceso") throw new LoggedOutError();
 			if (response.cod === "-2" && response.cont.url.includes("/autogestion/grado/acceso/login")) throw new LoggedOutError();
+			if (response.cod === "-2" && response.cont.url.includes("/autogestion/grado/inicio_alumno")) throw new RedirectedToHomeError();
 			if (response.cod === "-1" && response.cont === "error") throw new GuaraniBackendError(response);
 			if (response.cod !== "1") throw new Error(`Invalid ajax contents for url ${url}. response: ${JSON.stringify(response)}`);
 			return response;
@@ -91,6 +92,13 @@ UtnBaHelper.PagesDataParser = function (utils) {
 				let classData = renderData.info.agenda.comisiones[cursadaId];
 				return mapClassDataToClassSchedule(classData);
 			});
+		}).catch(e => {
+			if (e instanceof RedirectedToHomeError) {
+				// This happens when students are in the process to register to new schedules,
+				// and there is a time window in which class schedules page cannot be seen.
+				return [];
+			}
+			throw e;
 		});
 	};
 
@@ -347,6 +355,10 @@ UtnBaHelper.PagesDataParser = function (utils) {
 			"Ayudante de 2da": "AYUDANTE 2DA",
 		};
 		const professorRegex = new RegExp(`^(.*) \\((${Object.keys(professorRolesMapping).join("|")})(?: \\(Responsable de Cátedra\\))?\\)$`);
+
+		// If there is an alert box that has a text like `La encuesta 'Probabilidad y Estadística (950704) - Comisión: Z2017' ya ha sido respondida.` it's because it's a completed survey.
+		// This shouldn't happen as we are only grabbing the pending ones (or forms being completed) but from time to time we get some errors, so we can ignore these.
+		if ($kollaResponseText.find(".alert.alert-success").text().trim().endsWith(" ya ha sido respondida.")) return [];
 
 		let courseTitle = $kollaResponseText.find(".formulario-titulo").text(); // E.g.: 'Simulación (082041) - Comisión: K4053', 'Administración Gerencial (082039) - Comisión: K5054'
 		let groups = /^(.*) \((\d{6})\) - Comisión: ([\w\d]{5})$/.exec(courseTitle);
