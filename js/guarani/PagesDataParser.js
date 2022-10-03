@@ -267,10 +267,12 @@ UtnBaHelper.PagesDataParser = function (utils) {
 	};
 
 	let parseBranchTxt = function (branchTxt) {
+		// noinspection JSNonASCIINames
 		const branchTxtMapping = {
 			"Sede Medrano": "MEDRANO",
 			"Sede Campus": "CAMPUS",
 			"Virtual": "AULA_VIRTUAL",
+			"Escuela Técnica - Piñero": "PIÑERO",
 		};
 		let branch = branchTxtMapping[branchTxt];
 		if (!branch) throw new Error(`Branch txt couldn't be parsed: ${branchTxt}`);
