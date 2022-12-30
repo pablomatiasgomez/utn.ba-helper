@@ -249,6 +249,17 @@ UtnBaHelper.PagesDataParser = function (utils) {
 	 * @returns {{year: number, quarter: string}}
 	 */
 	let parsePeriodTxt = function (periodTxt) {
+		if (periodTxt.startsWith("Escuela de Verano")) {
+			// Handle specific case for "Escuela de Verano", e.g. "Escuela de Verano 2023 - CL2022"
+			const yearRegex = new RegExp(`^Escuela de Verano \\d{4} - CL(\\d{4})$`);
+			let groups = yearRegex.exec(periodTxt);
+			if (!groups) throw new Error(`Class period couldn't be parsed: ${periodTxt}`);
+			let year = parseInt(groups[1]);
+			return {
+				year: year,
+				quarter: "VERANO",
+			};
+		}
 		const quarterTxtMapping = {
 			"Anual": "A",
 			"Primer Cuatrimestre": "1C",
