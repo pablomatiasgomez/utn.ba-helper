@@ -61,4 +61,26 @@ UtnBaHelper.Consts = {
 		10: 10
 	},
 
+	dictModalidad: {
+        "presencial": "sede",
+        "virtual": "virtual"
+    },
+
+    dictDuracion: {
+        "anual": "anual",
+        "cuatrimestral": "cuatrimestre"
+    },
+
+    dictTurno: {
+        "mañana": "(m)",
+        "tarde": "(t)",
+        "noche": "(n)"
+    },
+
+    dictAll : {
+        ...dictModalidad,
+        ...dictDuracion,
+        ...dictTurno
+    }
+
 };

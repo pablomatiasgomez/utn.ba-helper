@@ -1,27 +1,8 @@
+
 if (!window.UtnBaHelper) window.UtnBaHelper = {};
 UtnBaHelper.PreInscripcionPage = function (pagesDataParser, utils, apiConnector) {
 
-	const dictModalidad = {
-        "presencial": "sede",
-        "virtual": "virtual"
-    }
-
-    const dictDuracion = {
-        "anual": "anual",
-        "cuatrimestral": "cuatrimestre"
-    }
-
-    const dictTurno = {
-        "mañana": "(m)",
-        "tarde": "(t)",
-        "noche": "(n)"
-    }
-
-    const dictAll = {
-        ...dictModalidad,
-        ...dictDuracion,
-        ...dictTurno
-    }
+	const { dictAll } = UtnBaHelper.Consts;
 
 	const outletOptions = document.querySelector('#comision');
 
