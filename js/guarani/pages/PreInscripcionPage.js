@@ -167,14 +167,14 @@ UtnBaHelper.PreInscripcionPage = function (pagesDataParser, utils, apiConnector)
 	};
 
 
-	let addPreviousProfessorsTableEventFn;
+	let modifyPreinscriptionPageFn;
 	return {
 		init: function () {
 			return Promise.resolve().then(() => {
 				// Need to listen to course register changes, as the combo is reloaded, and we need to add the table again.
 				// We need to un register them on close, as changing a course will trigger a new PreInscripcionPage.
 				// Events triggered from foreground script:
-				addPreviousProfessorsTableEventFn = () => {
+				modifyPreinscriptionPageFn = () => {
 					utils.runAsync("addPreviousProfessorsTable", addPreviousProfessorsTable);
 					utils.runAsync("addComissionsFilter", addComissionsFilter);
 				}
