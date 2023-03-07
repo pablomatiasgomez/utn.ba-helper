@@ -138,3 +138,8 @@
     display: inline;
     text-decoration: none;
 }
+
+/** Some other css is breaking this so it's enforced here*/
+form#filters label {
+    display: initial;
+}
