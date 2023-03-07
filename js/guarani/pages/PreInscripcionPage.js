@@ -44,34 +44,28 @@ UtnBaHelper.PreInscripcionPage = function (pagesDataParser, utils, apiConnector)
 
 		// Adds the checkboxes html
 		header.insertAdjacentHTML('afterend', 
-		`<form id="filters">
+		`<form id="filters"">
 
         <div class='modalidad'>
-            <input type="radio" id="todos" name="filtro_modalidad" value="todos" checked>
-            <label for="todos">todas</label>
-            <input type="radio" id="presencial" name="filtro_modalidad" value="presencial">
+            <input type="checkbox" checked id="presencial" name="filtro_modalidad" value="presencial">
             <label for="presencial">presencial</label>
-            <input type="radio" id="virtual" name="filtro_modalidad" value="virtual">
+            <input type="checkbox" checked id="virtual" name="filtro_modalidad" value="virtual">
             <label for="virtual">virtual</label>
         </div>
 
         <div class='duracion'>
-            <input type="radio" id="todos" name="filtro_duracion" value="todos" checked>
-            <label for="todos">todas</label>
-            <input type="radio" id="anual" name="filtro_duracion" value="anual">
+            <input type="checkbox" checked id="anual" name="filtro_duracion" value="anual">
             <label for="anual">anual</label>
-            <input type="radio" id="cuatrimestral" name="filtro_duracion" value="cuatrimestral">
+            <input type="checkbox" checked id="cuatrimestral" name="filtro_duracion" value="cuatrimestral">
             <label for="cuatrimestral">cuatrimestral</label>
         </div>
 
         <div class='turno'>
-            <input type="radio" id="todos" name="filtro_turno" value="todos" checked>
-            <label for="todos">todos</label>
-            <input type="radio" id="mañana" name="filtro_turno" value="mañana">
+            <input type="checkbox" checked id="mañana" name="filtro_turno" value="mañana">
             <label for="mañana">mañana</label>
-            <input type="radio" id="tarde" name="filtro_turno" value="tarde">
+            <input type="checkbox" checked id="tarde" name="filtro_turno" value="tarde">
             <label for="tarde">tarde</label>
-            <input type="radio" id="noche" name="filtro_turno" value="noche">
+            <input type="checkbox" checked id="noche" name="filtro_turno" value="noche">
             <label for="noche">noche</label>
         </div>
 
@@ -82,9 +76,9 @@ UtnBaHelper.PreInscripcionPage = function (pagesDataParser, utils, apiConnector)
 		document.querySelector('#filters').addEventListener('submit', (event) => {
 			event.preventDefault();
 
-			const modalidades = Array.from(document.querySelectorAll('#filtros .modalidad input:checked')).map(elmnt => dictAll[elmnt.value]);
-			const duraciones = Array.from(document.querySelectorAll('#filtros .duracion input:checked')).map(elmnt => dictAll[elmnt.value]);
-			const turnos = Array.from(document.querySelectorAll('#filtros .turno input:checked')).map(elmnt => dictAll[elmnt.value]);
+			const modalidades = Array.from(document.querySelectorAll('#filters .modalidad input:checked')).map(elmnt => dictAll[elmnt.value]);
+			const duraciones = Array.from(document.querySelectorAll('#filters .duracion input:checked')).map(elmnt => dictAll[elmnt.value]);
+			const turnos = Array.from(document.querySelectorAll('#filters .turno input:checked')).map(elmnt => dictAll[elmnt.value]);
 	
 			const filteredOptions = selectOptions
 				.filter(option => modalidades.some(value => option.text.toLowerCase().includes(value)))
