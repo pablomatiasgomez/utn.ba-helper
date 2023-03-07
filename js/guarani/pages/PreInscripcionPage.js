@@ -1,6 +1,36 @@
 if (!window.UtnBaHelper) window.UtnBaHelper = {};
 UtnBaHelper.PreInscripcionPage = function (pagesDataParser, utils, apiConnector) {
 
+	const dictModalidad = {
+        "presencial": "sede",
+        "virtual": "virtual"
+    }
+
+    const dictDuracion = {
+        "anual": "anual",
+        "cuatrimestral": "cuatrimestre"
+    }
+
+    const dictTurno = {
+        "mañana": "(m)",
+        "tarde": "(t)",
+        "noche": "(n)"
+    }
+
+    const dictAll = {
+        ...dictModalidad,
+        ...dictDuracion,
+        ...dictTurno
+    }
+
+	const outletOptions = document.querySelector('#comision');
+
+    const selectOptions = Array.from(outletOptions.options);
+    const placeholderOption = selectOptions[0];
+    const noneOption = { ...placeholderOption };
+    noneOption.text = 'No hay opciones para los filtros seleccionados';
+
+
 	let addPreviousProfessorsTable = function () {
 		return Promise.resolve().then(() => {
 			return fetchCourseAlternatives();
@@ -8,6 +38,83 @@ UtnBaHelper.PreInscripcionPage = function (pagesDataParser, utils, apiConnector)
 			return renderPreviousProfessorsTable(courseOptionsData);
 		});
 	};
+
+	let addComissionsFilter = function() {
+		const header = document.querySelector('#insc_alternativas h2');
+
+		// Adds the checkboxes html
+		header.insertAdjacentHTML('afterend', 
+		`<form id="filters">
+
+        <div class='modalidad'>
+            <input type="radio" id="todos" name="filtro_modalidad" value="todos" checked>
+            <label for="todos">todas</label>
+            <input type="radio" id="presencial" name="filtro_modalidad" value="presencial">
+            <label for="presencial">presencial</label>
+            <input type="radio" id="virtual" name="filtro_modalidad" value="virtual">
+            <label for="virtual">virtual</label>
+        </div>
+
+        <div class='duracion'>
+            <input type="radio" id="todos" name="filtro_duracion" value="todos" checked>
+            <label for="todos">todas</label>
+            <input type="radio" id="anual" name="filtro_duracion" value="anual">
+            <label for="anual">anual</label>
+            <input type="radio" id="cuatrimestral" name="filtro_duracion" value="cuatrimestral">
+            <label for="cuatrimestral">cuatrimestral</label>
+        </div>
+
+        <div class='turno'>
+            <input type="radio" id="todos" name="filtro_turno" value="todos" checked>
+            <label for="todos">todos</label>
+            <input type="radio" id="mañana" name="filtro_turno" value="mañana">
+            <label for="mañana">mañana</label>
+            <input type="radio" id="tarde" name="filtro_turno" value="tarde">
+            <label for="tarde">tarde</label>
+            <input type="radio" id="noche" name="filtro_turno" value="noche">
+            <label for="noche">noche</label>
+        </div>
+
+
+        <button type="submit">Filtrar</button>
+    </form>`);
+
+		document.querySelector('#filters').addEventListener('submit', (event) => {
+			event.preventDefault();
+
+			const modalidades = Array.from(document.querySelectorAll('#filtros .modalidad input:checked')).map(elmnt => dictAll[elmnt.value]);
+			const duraciones = Array.from(document.querySelectorAll('#filtros .duracion input:checked')).map(elmnt => dictAll[elmnt.value]);
+			const turnos = Array.from(document.querySelectorAll('#filtros .turno input:checked')).map(elmnt => dictAll[elmnt.value]);
+	
+			const filteredOptions = selectOptions
+				.filter(option => modalidades.some(value => option.text.toLowerCase().includes(value)))
+				.filter(option => duraciones.some(value => option.text.toLowerCase().includes(value)))
+				.filter(option => turnos.some(value => option.text.toLowerCase().includes(value)))
+	
+				let optionsToShow = [placeholderOption, ...filteredOptions]
+				console.log([...modalidades, ...duraciones, ...turnos], optionsToShow.length);
+		
+				var outletOptions = document.querySelector('#comision')
+		
+				// Remove existing options
+				Array.from(outletOptions).forEach((option) => outletOptions.removeChild(option))
+
+				// If no options filtered, tell user that there are no results
+				if (filteredOptions.length === 0) {
+					optionsToShow = [noneOption];
+				}
+		
+				// Add new options
+				optionsToShow.map((optionData, index) => {
+					var opt = document.createElement('option')
+					opt.appendChild(document.createTextNode(optionData.text));
+					opt.value = optionData.value;
+					opt.disabled = optionData.disabled;
+					opt.selected = index === 0;
+					outletOptions.appendChild(opt);
+				})
+		})
+	}
 
 	let fetchCourseAlternatives = function () {
 		return Promise.resolve().then(() => {
@@ -91,9 +198,13 @@ UtnBaHelper.PreInscripcionPage = function (pagesDataParser, utils, apiConnector)
 				// Need to listen to course register changes, as the combo is reloaded, and we need to add the table again.
 				// We need to un register them on close, as changing a course will trigger a new PreInscripcionPage.
 				// Events triggered from foreground script:
-				addPreviousProfessorsTableEventFn = () => utils.runAsync("addPreviousProfessorsTable", addPreviousProfessorsTable);
+				addPreviousProfessorsTableEventFn = () => {
+					utils.runAsync("addPreviousProfessorsTable", addPreviousProfessorsTable);
+					utils.runAsync("addComissionsFilter", addComissionsFilter);
+				}
 				window.addEventListener("__utn_ba_event_comision_preinscripta", addPreviousProfessorsTableEventFn);
 				window.addEventListener("__utn_ba_event_comision_despreinscripta", addPreviousProfessorsTableEventFn);
+
 				return addPreviousProfessorsTable();
 			});
 		},
