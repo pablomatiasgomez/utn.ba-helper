@@ -21,10 +21,10 @@ UtnBaHelper.PreInscripcionPage = function (pagesDataParser, utils, apiConnector)
 	};
 
 	let addComissionsFilter = function() {
-		const header = document.querySelector('#insc_alternativas h2');
+		const header = document.querySelector('#insc_alternativas .inscripcion-alternativa');
 
 		// Adds the checkboxes html
-		header.insertAdjacentHTML('afterend', 
+		header.insertAdjacentHTML("beforebegin",
 		`<form id="filters"">
 
         <div class='modalidad'>
