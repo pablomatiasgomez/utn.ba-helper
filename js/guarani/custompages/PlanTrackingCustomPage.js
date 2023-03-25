@@ -126,19 +126,21 @@ UtnBaHelper.PlanTrackingCustomPage = function ($container, services) {
 				return courseWeight(c2) - courseWeight(c1);
 			}).map(course => {
 				let status;
-				let color = "#7e7e7e";
+				let backgroundColor = "#7e7e7e";
+				let color = "#000000";
 				if (course.isPassed) {
 					status = TRANSLATIONS["PASSED"];
-					color = "#55bb55";
+					backgroundColor = "#55bb55";
 				} else if (course.canTakeFinalExam) {
 					status = "Puede " + TRANSLATIONS["TAKE_FINAL_EXAM"].toLowerCase();
-					color = "#ffcc00";
+					backgroundColor = "#ffcc00";
 				} else if (course.isSigned) {
 					status = TRANSLATIONS["SIGNED"];
-					color = "#ffcc00";
+					backgroundColor = "#ffcc00";
 				} else if (course.canRegister) {
 					status = "Puede " + TRANSLATIONS["REGISTER"].toLowerCase();
-					color = "#5555bb";
+					backgroundColor = "#5555bb";
+					color = "#f1f1f1";
 				}
 
 				let hr = "";
@@ -169,7 +171,7 @@ UtnBaHelper.PlanTrackingCustomPage = function ($container, services) {
 				return `
 					${hr}
 					${showExtraElectivesButton}
-					<div class="course level-${level} ${divClass}" style="background-color:${color};">
+					<div class="course level-${level} ${divClass}" style="background-color:${backgroundColor};color:${color}">
 						<a href="#" onclick="return false" style="float: right;">
 							<i class="icon-info-sign"></i>
 							<span class="dependency-tooltip">
