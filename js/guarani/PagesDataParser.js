@@ -264,7 +264,9 @@ UtnBaHelper.PagesDataParser = function (utils) {
 			"Anual": "A",
 			"Primer Cuatrimestre": "1C",
 			"Segundo Cuatrimestre": "2C",
-			"ASS": "A", // Weird case, was found in "Grado ASS 2022" (seems to be specific to courseCode: 950454)
+			// Weird cases, was found in "Grado ASS 2022", and "Grado SyS 2024" (seems to be specific to courseCode: 950454 -> "Análisis de Señales y Sistemas")
+			"ASS": "A",
+			"SyS": "A",
 		};
 		const yearAndQuarterRegex = new RegExp(`^Grado (${Object.keys(quarterTxtMapping).join("|")}) (\\d{4})$`);
 		let groups = yearAndQuarterRegex.exec(periodTxt);
