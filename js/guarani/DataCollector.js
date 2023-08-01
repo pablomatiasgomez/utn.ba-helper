@@ -45,6 +45,7 @@ UtnBaHelper.DataCollector = function (store, pagesDataParser, apiConnector) {
 				},
 			];
 
+			let shouldSaveLastTimeCollected = false;
 			let promise = Promise.resolve();
 			collectMethods.filter(collectMethod => {
 				// Never collected or min time has passed.
@@ -53,12 +54,16 @@ UtnBaHelper.DataCollector = function (store, pagesDataParser, apiConnector) {
 				promise = promise.then(() => {
 					return collectMethod.method();
 				}).then(() => {
+					// If at least one collect method is executed, we need to save the last time collected info to local storage.
+					shouldSaveLastTimeCollected = true;
 					lastTimeCollected[collectMethod.key] = Date.now();
 				});
 			});
 
 			return promise.then(() => {
-				saveLastTimeCollected(hashedStudentId, lastTimeCollected);
+				if (shouldSaveLastTimeCollected) {
+					saveLastTimeCollected(hashedStudentId, lastTimeCollected);
+				}
 			});
 		});
 	};
@@ -78,7 +83,13 @@ UtnBaHelper.DataCollector = function (store, pagesDataParser, apiConnector) {
 	// -----
 
 	let getLastTimeCollectedByHashedStudentId = function () {
-		let lastTimeCollectedByHashedStudentId = JSON.parse(localStorage.getItem(LOCAL_STORAGE_DATA_COLLECTOR_KEY));
+		let lastTimeCollectedByHashedStudentId;
+		try {
+			// Don't know why, but some cases were failing with json parsing errors... We simply consider those as not present.
+			lastTimeCollectedByHashedStudentId = JSON.parse(localStorage.getItem(LOCAL_STORAGE_DATA_COLLECTOR_KEY));
+		} catch (e) {
+			console.error(`Error parsing localStorage item...`, e);
+		}
 		if (!lastTimeCollectedByHashedStudentId) {
 			lastTimeCollectedByHashedStudentId = {};
 			localStorage.setItem(LOCAL_STORAGE_DATA_COLLECTOR_KEY, JSON.stringify(lastTimeCollectedByHashedStudentId));
