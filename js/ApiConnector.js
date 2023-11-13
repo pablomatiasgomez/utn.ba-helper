@@ -31,6 +31,10 @@ UtnBaHelper.ApiConnector = function () {
 		return postData(BASE_API_URL + "/professor-surveys", surveys);
 	};
 
+	let postCourses = function (courses) {
+		return postData(BASE_API_URL + "/courses", courses);
+	}
+
 	let postData = function (url, data) {
 		return makeRequest({
 			url: url,
@@ -116,6 +120,7 @@ UtnBaHelper.ApiConnector = function () {
 		logUserStat: logUserStat,
 		postClassSchedules: postClassSchedules,
 		postProfessorSurveys: postProfessorSurveys,
+		postCourses: postCourses,
 
 		// GETs:
 		getPreviousProfessors: getPreviousProfessors,

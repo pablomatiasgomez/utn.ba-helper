@@ -12,7 +12,7 @@ UtnBaHelper.PreInscripcionPage = function (pagesDataParser, utils, apiConnector)
 	let fetchCourseAlternatives = function () {
 		return Promise.resolve().then(() => {
 			// Avoid using cache as the endpoint is always the same but the student may register or unregister from the course.
-			return pagesDataParser.fetchAjaxContents(location.href, false);
+			return pagesDataParser.fetchAjaxGETContents(location.href, false);
 		}).then(response => {
 			// `comisiones` may include the current class schedules. This is not a problem because we access the array by id.
 			// But we could eventually filter them out by using the `cursadas` array if we confirm it

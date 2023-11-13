@@ -4,28 +4,44 @@ UtnBaHelper.PagesDataParser = function (utils) {
 	// We want to fetch only once each page.
 	let RESPONSES_CACHE = {};
 
-	/**
-	 * Fetches and parses the way guarani's page ajax contents are loaded.
-	 */
-	let fetchAjaxContents = function (url, useCache = true) {
-		if (useCache && RESPONSES_CACHE[url]) {
-			return Promise.resolve(RESPONSES_CACHE[url]);
-		}
-		return fetch(url, {
+	let fetchAjaxPOSTContents = function (url, body, useCache = true) {
+		return fetchAjaxContents(url, {
+			"headers": {
+				"X-Requested-With": "XMLHttpRequest", // This is needed so that guarani's server returns a json payload
+				"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+			},
+			"method": "POST",
+			"body": body,
+		}, useCache);
+	};
+	let fetchAjaxGETContents = function (url, useCache = true) {
+		return fetchAjaxContents(url, {
 			"headers": {
 				"X-Requested-With": "XMLHttpRequest", // This is needed so that guarani's server returns a json payload
 			}
-		}).catch(e => {
-			throw utils.wrapError(`Error on fetchAjaxContents for ${url}`, e);
+		}, useCache);
+	};
+
+	/**
+	 * Fetches and parses the way guarani's page ajax contents are loaded.
+	 */
+	let fetchAjaxContents = function (url, fetchOpts, useCache = true) {
+		let cacheKey = `${fetchOpts.method || "GET"}:${url}:${fetchOpts.body || ""}`;
+		if (useCache && RESPONSES_CACHE[cacheKey]) {
+			return Promise.resolve(RESPONSES_CACHE[cacheKey]);
+		}
+
+		return fetch(url, fetchOpts).catch(e => {
+			throw utils.wrapError(`Error on fetchAjaxContents for ${cacheKey}`, e);
 		}).then(response => response.json()).then(response => {
 			if (response.cod === "1" && response.titulo === "Grado - Acceso" && response.operacion === "acceso") throw new LoggedOutError();
 			if (response.cod === "-2" && response.cont.url.includes("/autogestion/grado/acceso/login")) throw new LoggedOutError();
 			if (response.cod === "-2" && response.cont.url.includes("/autogestion/grado/inicio_alumno")) throw new RedirectedToHomeError();
 			if (response.cod === "-1" && response.cont === "error") throw new GuaraniBackendError(response);
-			if (response.cod !== "1") throw new Error(`Invalid ajax contents for url ${url}. response: ${JSON.stringify(response)}`);
+			if (response.cod !== "1") throw new Error(`Invalid ajax contents for url ${cacheKey}. response: ${JSON.stringify(response)}`);
 			return response;
 		}).then(contents => {
-			RESPONSES_CACHE[url] = contents;
+			RESPONSES_CACHE[cacheKey] = contents;
 			return contents;
 		});
 	};
@@ -86,7 +102,7 @@ UtnBaHelper.PagesDataParser = function (utils) {
 	 * @returns {Promise<Array<{}>>} array of objects for each class, that contains the schedule for it.
 	 */
 	let getClassSchedules = function () {
-		return fetchAjaxContents("/autogestion/grado/calendario").then(responseContents => {
+		return fetchAjaxGETContents("/autogestion/grado/calendario").then(responseContents => {
 			let renderData = parseAjaxPageRenderer(responseContents.cont, "agenda_utn");
 			return renderData.info.agenda.cursadas.map(cursadaId => {
 				let classData = renderData.info.agenda.comisiones[cursadaId];
@@ -107,12 +123,146 @@ UtnBaHelper.PagesDataParser = function (utils) {
 	 * @returns {Promise<string>}
 	 */
 	let getStudentPlanCode = function () {
-		return fetchAjaxContents("/autogestion/grado/plan_estudio").then(responseContents => {
+		return fetchAjaxGETContents("/autogestion/grado/plan_estudio").then(responseContents => {
 			let responseText = parseAjaxPageRenderer(responseContents.cont, "info_plan").content;
 			let planText = $(responseText).filter(".encabezado").find("td:eq(1)").text();
 			let groups = /^Plan: \((\w+)\)/.exec(planText);
 			if (!groups) throw new Error(`planText couldn't be parsed: ${planText}`);
 			return groups[1];
+		});
+	};
+
+
+	/**
+	 * Parses and returns all the courses for the currently selected student's plan.
+	 * @returns {Promise<[{planCode: string, level: number, courseCode: string, courseName: string, elective: boolean, dependencies: [{kind: string, requirement: string, courseCode: string}]}]>}
+	 */
+	let getStudentPlanCourses = function () {
+		// noinspection JSNonASCIINames
+		const levelsMapping = {
+			"módulo: primer nivel": 1,
+			"módulo: segundo nivel": 2,
+			"módulo: tercer nivel": 3,
+			"módulo: cuarto nivel": 4,
+			"módulo: quinto nivel": 5,
+			"módulo: sexto nivel": 6,
+			"módulo: sexto año": 6,
+			// If we enable this, we also need to resolve how to parse and consider dependencies with "Opción 2"
+			"módulo: cuarto analista": -1,
+		};
+		const kindsMapping = {
+			"Para cursar": "REGISTER",
+			"Para aprobar": "TAKE_FINAL_EXAM",
+		};
+		const requirementMapping = {
+			"Regularizada": "SIGNED",
+			"Aprobada": "PASSED",
+		};
+
+		let getDependencies = (courseCode, dependenciesBtn) => {
+			let dependencies = [
+				{
+					// Add its own dependency (has to be signed in order to take final exam).
+					kind: "TAKE_FINAL_EXAM",
+					requirement: "SIGNED",
+					courseCode: courseCode,
+				}
+			];
+
+			if (!dependenciesBtn) return Promise.resolve(dependencies);
+			let body = `elemento=${dependenciesBtn.getAttribute("data-elemento")}&elemento_padre=${dependenciesBtn.getAttribute("data-elemento-padre")}`;
+			return fetchAjaxPOSTContents("https://guarani.frba.utn.edu.ar/autogestion/grado/plan_estudio/correlativas", body).then(response => {
+				let $table = $(response.cont).filter(".td-table-correlativas");
+				if ($table.find(".alert").text().trim() === "No hay definidas correlativas para la actividad") return dependencies;
+
+				let elems = $table.children().toArray();
+				if (elems.length % 4 !== 0) throw new Error(`invalid contents: ${elems.length}`);
+
+				for (let i = 0; i < elems.length; i += 4) {
+					// There are 4 elements per each kind:
+					// 1. div that tells the kind
+					// 2. div that is used to verify dependencies (not used here)
+					// 3. h4 that represents one option (right now we expect to only have "Opción 1")
+					// 4. table with dependencies
+					let kindTxt = $(elems[i]).find("> div > h3").text();
+					let kind = kindsMapping[kindTxt];
+					if (!kind) throw new Error(`Invalid kind ${kindTxt}`);
+
+					if ($(elems[i + 2]).filter("h4").text() !== "Opción 1") throw new Error(`Don't know how to handle other options: ${$(elems[i + 2]).filter("h4").text()}`);
+
+					// Filter for "table" just in case.
+					$(elems[i + 3]).filter("table").find("tr:not(:first)").toArray().forEach(tr => {
+						let $tr = $(tr);
+
+						let dependencyCourse = $tr.find("td:eq(0)").text().trim();
+						let groups = /^(.*) \((\d{6})\)$/.exec(dependencyCourse);
+						if (!groups) throw new Error(`requirementTxt couldn't be parsed: ${dependencyCourse}`);
+						// let courseName = groups[1];
+						let dependencyCourseCode = groups[2];
+
+						let requirementTxt = $tr.find("td:eq(1)").text().trim();
+						let requirement = requirementMapping[requirementTxt];
+						if (!requirement) throw new Error(`requirementTxt couldn't be parsed: ${requirementTxt}`);
+
+						dependencies.push({
+							kind: kind,
+							requirement: requirement,
+							courseCode: dependencyCourseCode,
+						});
+					});
+				}
+				return dependencies;
+			});
+		};
+
+		return fetchAjaxGETContents("/autogestion/grado/plan_estudio").then(responseContents => {
+			let responseText = parseAjaxPageRenderer(responseContents.cont, "info_plan").content;
+			// Need to wrap contents into parent div as many elements come as first level, and we cannot use find() then.
+			let $contents = $(`<div id="info_plan">${responseText}</div>`);
+
+			// PlanCode
+			let planText = $contents.find(".encabezado").find("td:eq(1)").text();
+			let groups = /^Plan: \((\w+)\)/.exec(planText);
+			if (!groups) throw new Error(`planText couldn't be parsed: ${planText}`);
+			let planCode = groups[1];
+
+			// Courses
+			return Promise.all($contents.find(".accordion").toArray().flatMap(accordion => {
+				let $accordion = $(accordion);
+				let $accordionHeading = $accordion.find("> .accordion-group > .accordion-heading a");
+				let areElectives = $accordionHeading.hasClass("materia_generica");
+
+				// The table could be within a level, so we try to grab it from there first.
+				let $parentAccordion = $accordion.parent().closest(".accordion");
+				if ($parentAccordion.length) {
+					$accordionHeading = $parentAccordion.find("> .accordion-group > .accordion-heading a");
+				}
+				let levelText = $accordionHeading.text().trim().toLowerCase();
+				let level = levelsMapping[levelText];
+				if (typeof level === "undefined") throw new Error(`Invalid levelText: '${levelText}. responseText: ${responseText}'`);
+				if (level === -1) return [];
+
+				return $accordion.find("table:first tbody tr:not(.correlatividades)").toArray().map(courseRow => {
+					let courseText = courseRow.querySelector("td").innerText.trim();
+					let groups = /(.*) \((\d{6})\)/.exec(courseText);
+					if (!groups) throw new Error(`courseText couldn't be parsed: ${courseText}.`);
+					let courseName = groups[1];
+					let courseCode = groups[2];
+
+					// Dependencies btn:
+					let dependenciesBtn = courseRow.lastChild.querySelector(".ver_correlatividades");
+					return getDependencies(courseCode, dependenciesBtn).then(dependencies => {
+						return {
+							planCode: planCode,
+							level: level,
+							courseCode: courseCode,
+							courseName: courseName,
+							elective: areElectives,
+							dependencies: dependencies,
+						};
+					})
+				});
+			}));
 		});
 	};
 
@@ -188,13 +338,13 @@ UtnBaHelper.PagesDataParser = function (utils) {
 	 * @returns {Promise<*[]>} an array of class schedules for each combination of professor and class
 	 */
 	let getProfessorClassesFromSurveys = function () {
-		return fetchAjaxContents("/autogestion/grado/inicio_alumno").then(responseContents => {
+		return fetchAjaxGETContents("/autogestion/grado/inicio_alumno").then(responseContents => {
 			let surveysResponseText = parseAjaxPageRenderer(responseContents.cont, "lista_encuestas_pendientes").content;
 
 			let promises = $(surveysResponseText).find("ul li a").toArray()
 				.map(a => a.href)
 				.map(siuUrl => {
-					return fetchAjaxContents(siuUrl).then(siuResponseText => {
+					return fetchAjaxGETContents(siuUrl).then(siuResponseText => {
 						// Return the kollaUrl
 						return $(siuResponseText.cont).find("iframe").get(0).src;
 					});
@@ -445,7 +595,7 @@ UtnBaHelper.PagesDataParser = function (utils) {
 
 	// Public
 	return {
-		fetchAjaxContents: fetchAjaxContents,
+		fetchAjaxGETContents: fetchAjaxGETContents,
 
 		// --
 
@@ -453,6 +603,7 @@ UtnBaHelper.PagesDataParser = function (utils) {
 		getClassSchedules: getClassSchedules,
 
 		getStudentPlanCode: getStudentPlanCode,
+		getStudentPlanCourses: getStudentPlanCourses,
 		getCoursesHistory: getCoursesHistory,
 
 		getProfessorClassesFromSurveys: getProfessorClassesFromSurveys,

@@ -43,6 +43,11 @@ UtnBaHelper.DataCollector = function (store, pagesDataParser, apiConnector) {
 					minTime: ONE_DAY_MS,
 					method: () => collectClassSchedulesWithProfessors(),
 				},
+				{
+					key: "planCourses",
+					minTime: ONE_DAY_MS * 30,
+					method: () => collectStudentPlanCourses(),
+				}
 			];
 
 			let shouldSaveLastTimeCollected = false;
@@ -77,6 +82,12 @@ UtnBaHelper.DataCollector = function (store, pagesDataParser, apiConnector) {
 			if (classSchedules.length) {
 				return apiConnector.postClassSchedules(classSchedules);
 			}
+		});
+	};
+
+	let collectStudentPlanCourses = function () {
+		return pagesDataParser.getStudentPlanCourses().then(planCourses => {
+			return apiConnector.postCourses(planCourses);
 		});
 	};
 
