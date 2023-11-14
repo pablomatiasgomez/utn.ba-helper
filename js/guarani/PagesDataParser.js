@@ -176,7 +176,7 @@ UtnBaHelper.PagesDataParser = function (utils) {
 				if ($table.find(".alert").text().trim() === "No hay definidas correlativas para la actividad") return dependencies;
 
 				let elems = $table.children().toArray();
-				if (elems.length % 4 !== 0) throw new Error(`invalid contents: ${elems.length}`);
+				if (elems.length % 4 !== 0) throw new Error(`invalid contents: ${elems.length}. responseCont: ${response.cont}`);
 
 				for (let i = 0; i < elems.length; i += 4) {
 					// There are 4 elements per each kind:
@@ -186,9 +186,9 @@ UtnBaHelper.PagesDataParser = function (utils) {
 					// 4. table with dependencies
 					let kindTxt = $(elems[i]).find("> div > h3").text();
 					let kind = kindsMapping[kindTxt];
-					if (!kind) throw new Error(`Invalid kind ${kindTxt}`);
+					if (!kind) throw new Error(`Invalid kind ${kindTxt}. responseCont: ${response.cont}`);
 
-					if ($(elems[i + 2]).filter("h4").text() !== "Opción 1") throw new Error(`Don't know how to handle other options: ${$(elems[i + 2]).filter("h4").text()}`);
+					if ($(elems[i + 2]).filter("h4").text() !== "Opción 1") throw new Error(`Don't know how to handle other options: ${$(elems[i + 2]).filter("h4").text()}. responseCont: ${response.cont}`);
 
 					// Filter for "table" just in case.
 					$(elems[i + 3]).filter("table").find("tr:not(:first)").toArray().forEach(tr => {
@@ -196,13 +196,13 @@ UtnBaHelper.PagesDataParser = function (utils) {
 
 						let dependencyCourse = $tr.find("td:eq(0)").text().trim();
 						let groups = /^(.*) \((\d{6})\)$/.exec(dependencyCourse);
-						if (!groups) throw new Error(`requirementTxt couldn't be parsed: ${dependencyCourse}`);
+						if (!groups) throw new Error(`requirementTxt couldn't be parsed: ${dependencyCourse}. responseCont: ${response.cont}`);
 						// let courseName = groups[1];
 						let dependencyCourseCode = groups[2];
 
 						let requirementTxt = $tr.find("td:eq(1)").text().trim();
 						let requirement = requirementMapping[requirementTxt];
-						if (!requirement) throw new Error(`requirementTxt couldn't be parsed: ${requirementTxt}`);
+						if (!requirement) throw new Error(`requirementTxt couldn't be parsed: ${requirementTxt}. responseCont: ${response.cont}`);
 
 						dependencies.push({
 							kind: kind,
@@ -223,7 +223,7 @@ UtnBaHelper.PagesDataParser = function (utils) {
 			// PlanCode
 			let planText = $contents.find(".encabezado").find("td:eq(1)").text();
 			let groups = /^Plan: \((\w+)\)/.exec(planText);
-			if (!groups) throw new Error(`planText couldn't be parsed: ${planText}`);
+			if (!groups) throw new Error(`planText couldn't be parsed: ${planText}. responseText: ${responseText}`);
 			let planCode = groups[1];
 
 			// Courses
@@ -252,7 +252,7 @@ UtnBaHelper.PagesDataParser = function (utils) {
 				return $accordion.find("table:first tbody tr:not(.correlatividades)").toArray().map(courseRow => {
 					let courseText = courseRow.querySelector("td").innerText.trim();
 					let groups = /(.*) \((\d{6})\)/.exec(courseText);
-					if (!groups) throw new Error(`courseText couldn't be parsed: ${courseText}.`);
+					if (!groups) throw new Error(`courseText couldn't be parsed: ${courseText}. responseText: ${responseText}`);
 					let courseName = groups[1];
 					let courseCode = groups[2];
 
