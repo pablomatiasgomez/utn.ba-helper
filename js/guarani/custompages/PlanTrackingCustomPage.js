@@ -74,11 +74,11 @@ UtnBaHelper.PlanTrackingCustomPage = function ($container, services) {
 	let loadPlan = function (planCode, coursesHistory) {
 		if (!planCode) return;
 		return services.apiConnector.getPlanCourses(planCode).then(planCourses => {
-			return loadPlanCourses(planCode, planCourses, coursesHistory);
+			return loadPlanCourses(planCourses, coursesHistory);
 		});
 	};
 
-	let loadPlanCourses = function (planCode, planCourses, coursesHistory) {
+	let loadPlanCourses = function (planCourses, coursesHistory) {
 		let courseNamesByCode = planCourses.reduce(function (courseNamesByCode, course) {
 			courseNamesByCode[course.courseCode] = course.courseName;
 			return courseNamesByCode;
@@ -88,13 +88,10 @@ UtnBaHelper.PlanTrackingCustomPage = function ($container, services) {
 		let passedCourses = coursesHistory.finalExams.filter(course => course.isPassed).map(course => course.courseCode);
 		let signedCourses = [...new Set([...passedCourses, ...coursesHistory.courses.filter(course => course.isPassed).map(course => course.courseCode)])];
 		let courseRequirementToArray = {
-			// We will always use the last 4 chars, removing the first 2 that identify the specific plan.
-			// This is done in order to connect passed courses that are transitive from a previous plan.
-			// For example, a student passed 952021 (K95), which is 082021 (K08) in the new plan.
-			"SIGNED": signedCourses.map(courseCode => courseCode.substring(2)),
-			"PASSED": passedCourses.map(courseCode => courseCode.substring(2)),
+			"SIGNED": signedCourses,
+			"PASSED": passedCourses,
 		};
-		let hasCourse = (requirement, courseCode) => courseRequirementToArray[requirement].indexOf(courseCode.substring(2)) !== -1;
+		let hasCourse = (requirement, courseCode) => courseRequirementToArray[requirement].includes(courseCode);
 
 		let getCoursesHtml = level => {
 			let lastWasElective = false;
