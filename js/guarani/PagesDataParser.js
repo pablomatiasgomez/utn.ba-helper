@@ -1,3 +1,5 @@
+// noinspection JSNonASCIINames
+
 if (!window.UtnBaHelper) window.UtnBaHelper = {};
 UtnBaHelper.PagesDataParser = function (utils) {
 
@@ -137,8 +139,8 @@ UtnBaHelper.PagesDataParser = function (utils) {
 	 * Parses and returns all the courses for the currently selected student's plan.
 	 * @returns {Promise<[{planCode: string, level: number, courseCode: string, courseName: string, elective: boolean, dependencies: [{kind: string, requirement: string, courseCode: string}]}]>}
 	 */
+
 	let getStudentPlanCourses = function () {
-		// noinspection JSNonASCIINames
 		const levelsMapping = {
 			"módulo: primer nivel": 1,
 			"módulo: segundo nivel": 2,
@@ -156,6 +158,8 @@ UtnBaHelper.PagesDataParser = function (utils) {
 		};
 		const requirementMapping = {
 			"Regularizada": "SIGNED",
+			"Regularizada o Cur. Simultánea": "SIGNED",
+			"Cursada Simultánea": "SIGNED",
 			"Aprobada": "PASSED",
 		};
 
@@ -208,7 +212,7 @@ UtnBaHelper.PagesDataParser = function (utils) {
 
 							let dependencyCourse = $tr.find("td:eq(0)").text().trim();
 							let groups = /^(.*) \((\d{6})\)$/.exec(dependencyCourse);
-							if (!groups) throw new Error(`requirementTxt couldn't be parsed: ${dependencyCourse}. responseCont: ${response.cont}`);
+							if (!groups) throw new Error(`dependencyCourse couldn't be parsed: ${dependencyCourse}. responseCont: ${response.cont}`);
 							// let courseName = groups[1];
 							let dependencyCourseCode = groups[2];
 
@@ -450,7 +454,6 @@ UtnBaHelper.PagesDataParser = function (utils) {
 	};
 
 	let parseBranchTxt = function (branchTxt) {
-		// noinspection JSNonASCIINames
 		const branchTxtMapping = {
 			"Sede Medrano": "MEDRANO",
 			"Sede Campus": "CAMPUS",
