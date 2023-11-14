@@ -172,44 +172,57 @@ UtnBaHelper.PagesDataParser = function (utils) {
 			if (!dependenciesBtn) return Promise.resolve(dependencies);
 			let body = `elemento=${dependenciesBtn.getAttribute("data-elemento")}&elemento_padre=${dependenciesBtn.getAttribute("data-elemento-padre")}`;
 			return fetchAjaxPOSTContents("https://guarani.frba.utn.edu.ar/autogestion/grado/plan_estudio/correlativas", body).then(response => {
-				let $table = $(response.cont).filter(".td-table-correlativas");
-				if ($table.find(".alert").text().trim() === "No hay definidas correlativas para la actividad") return dependencies;
+				let $response = $(response.cont).filter(".td-table-correlativas");
+				if ($response.find(".alert").text().trim() === "No hay definidas correlativas para la actividad") return dependencies;
 
-				let elems = $table.children().toArray();
-				if (elems.length % 4 !== 0) throw new Error(`invalid contents: ${elems.length}. responseCont: ${response.cont}`);
+				let elems = $response.children().toArray();
+				let i = 0;
+				while (i < elems.length) {
+					// There are 4 type elements per each kind:
+					// 1. div with h3 that tells the kind
+					// 2. div.alert_verificar_correlativas that is used to verify dependencies (not used here)
+					// There could be N of these 2:
+					// 		3. h4 that represents one option (right now we expect to only have "Opción 1")
+					// 		4. table.table-correlativas with dependencies
 
-				for (let i = 0; i < elems.length; i += 4) {
-					// There are 4 elements per each kind:
-					// 1. div that tells the kind
-					// 2. div that is used to verify dependencies (not used here)
-					// 3. h4 that represents one option (right now we expect to only have "Opción 1")
-					// 4. table with dependencies
-					let kindTxt = $(elems[i]).find("> div > h3").text();
+					// 1. div with h3 that tells the kind
+					let kindTxt = $(elems[i++]).find("> div > h3").text();
 					let kind = kindsMapping[kindTxt];
 					if (!kind) throw new Error(`Invalid kind ${kindTxt}. responseCont: ${response.cont}`);
 
-					if ($(elems[i + 2]).filter("h4").text() !== "Opción 1") throw new Error(`Don't know how to handle other options: ${$(elems[i + 2]).filter("h4").text()}. responseCont: ${response.cont}`);
+					// 2. div.alert_verificar_correlativas that is used to verify dependencies (not used here)
+					if (!$(elems[i++]).hasClass("alert_verificar_correlativas")) throw new Error(`Found invalid div in second position. responseCont: ${response.cont}`);
 
-					// Filter for "table" just in case.
-					$(elems[i + 3]).filter("table").find("tr:not(:first)").toArray().forEach(tr => {
-						let $tr = $(tr);
+					while (i < elems.length && $(elems[i]).filter("h4").length) {
+						// 3. h4 that represents one option (right now we expect to only have "Opción 1")
+						let option = $(elems[i++]).filter("h4").text();
+						if (option !== "Opción 1") {
+							// For now, we only handle "Opción 1"... TODO: Eventually we should support all of them:
+							i++;
+							continue;
+						}
 
-						let dependencyCourse = $tr.find("td:eq(0)").text().trim();
-						let groups = /^(.*) \((\d{6})\)$/.exec(dependencyCourse);
-						if (!groups) throw new Error(`requirementTxt couldn't be parsed: ${dependencyCourse}. responseCont: ${response.cont}`);
-						// let courseName = groups[1];
-						let dependencyCourseCode = groups[2];
+						// 4. table.table-correlativas with dependencies
+						$(elems[i++]).filter("table.table-correlativas").find("tr:not(:first)").toArray().forEach(tr => {
+							let $tr = $(tr);
 
-						let requirementTxt = $tr.find("td:eq(1)").text().trim();
-						let requirement = requirementMapping[requirementTxt];
-						if (!requirement) throw new Error(`requirementTxt couldn't be parsed: ${requirementTxt}. responseCont: ${response.cont}`);
+							let dependencyCourse = $tr.find("td:eq(0)").text().trim();
+							let groups = /^(.*) \((\d{6})\)$/.exec(dependencyCourse);
+							if (!groups) throw new Error(`requirementTxt couldn't be parsed: ${dependencyCourse}. responseCont: ${response.cont}`);
+							// let courseName = groups[1];
+							let dependencyCourseCode = groups[2];
 
-						dependencies.push({
-							kind: kind,
-							requirement: requirement,
-							courseCode: dependencyCourseCode,
+							let requirementTxt = $tr.find("td:eq(1)").text().trim();
+							let requirement = requirementMapping[requirementTxt];
+							if (!requirement) throw new Error(`requirementTxt couldn't be parsed: ${requirementTxt}. responseCont: ${response.cont}`);
+
+							dependencies.push({
+								kind: kind,
+								requirement: requirement,
+								courseCode: dependencyCourseCode,
+							});
 						});
-					});
+					}
 				}
 				return dependencies;
 			});
