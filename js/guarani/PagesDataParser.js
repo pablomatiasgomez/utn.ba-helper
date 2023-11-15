@@ -209,7 +209,11 @@ UtnBaHelper.PagesDataParser = function (utils) {
 						$(elems[i++]).filter("table.table-correlativas").find("tr:not(:first)").toArray().forEach(tr => {
 							let $tr = $(tr);
 
+							// Some new rows have the following texts: 'Módulo: Maquinas Alternativas y Turbomáquinas'	'Tener 1 actividades aprobadas'
+							// TODO for now we are ignoring these, eventually we should support them.
 							let dependencyCourse = $tr.find("td:eq(0)").text().trim();
+							if (dependencyCourse.startsWith("Módulo: ")) return;
+
 							let groups = /^(.*) \((\d{6})\)$/.exec(dependencyCourse);
 							if (!groups) throw new Error(`dependencyCourse couldn't be parsed: ${dependencyCourse}. responseCont: ${response.cont}`);
 							// let courseName = groups[1];
