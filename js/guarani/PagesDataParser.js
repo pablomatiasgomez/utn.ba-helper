@@ -248,7 +248,7 @@ UtnBaHelper.PagesDataParser = function (utils) {
 
 			// Courses
 			let maxLevel = -1;
-			return Promise.all($contents.find(".accordion").toArray().flatMap((accordion, index, accordions) => {
+			return Promise.all($contents.find(".accordion").toArray().flatMap(accordion => {
 				let $accordion = $(accordion);
 				let $accordionHeading = $accordion.find("> .accordion-group > .accordion-heading a");
 				let areElectives = $accordionHeading.hasClass("materia_generica") || $accordionHeading.text().toLowerCase().includes("electivas");
@@ -260,11 +260,9 @@ UtnBaHelper.PagesDataParser = function (utils) {
 				}
 				let levelText = $accordionHeading.text().trim().toLowerCase();
 				let level = levelsMapping[levelText];
-				// If level couldn't be matched, but this is an accordion of electives, is a first level accordion, and is the last one,
-				// Then it means they are the electives of the entire plan, and should be considered as part of the last level.
-				if (typeof level === "undefined" && areElectives && $parentAccordion.length === 0 && index === accordions.length - 1) {
-					level = maxLevel;
-				}
+				// If level couldn't be matched, but this is an accordion of electives and is a first level accordion,
+				// then it means they are the electives of the entire plan, and should be considered as part of the last level.
+				if (typeof level === "undefined" && areElectives && $parentAccordion.length === 0) level = maxLevel;
 				if (typeof level === "undefined") throw new Error(`Invalid levelText: '${levelText}. responseText: ${responseText}'`);
 				if (level === -1) return [];
 				maxLevel = Math.max(maxLevel, level);
