@@ -139,7 +139,6 @@ UtnBaHelper.PagesDataParser = function (utils) {
 	 * Parses and returns all the courses for the currently selected student's plan.
 	 * @returns {Promise<[{planCode: string, level: number, courseCode: string, courseName: string, elective: boolean, dependencies: [{kind: string, requirement: string, courseCode: string}]}]>}
 	 */
-
 	let getStudentPlanCourses = function () {
 		const levelsMapping = {
 			"módulo: primer nivel": 1,
@@ -248,7 +247,7 @@ UtnBaHelper.PagesDataParser = function (utils) {
 			return Promise.all($contents.find(".accordion").toArray().flatMap((accordion, index, accordions) => {
 				let $accordion = $(accordion);
 				let $accordionHeading = $accordion.find("> .accordion-group > .accordion-heading a");
-				let areElectives = $accordionHeading.hasClass("materia_generica");
+				let areElectives = $accordionHeading.hasClass("materia_generica") || $accordionHeading.text().toLowerCase().includes("electivas");
 
 				// The table could be within a level, so we try to grab it from there first.
 				let $parentAccordion = $accordion.parent().closest(".accordion");
