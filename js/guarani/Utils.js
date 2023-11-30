@@ -3,6 +3,8 @@ UtnBaHelper.Utils = function (apiConnector) {
 	// TODO utils eventually shouldn't be instantiated and should be a set of functions.
 	//  But we need to get rid of using apiConnector here.
 
+	let failedToFetchErrors = 0;
+
 	// TODO this is duplicated in the ApiConnector.
 	let backgroundFetch = function (options) {
 		return new Promise((resolve, reject) => {
@@ -30,7 +32,7 @@ UtnBaHelper.Utils = function (apiConnector) {
 		if (typeof error === "object") {
 			return JSON.stringify(error);
 		}
-		return error;
+		return error + "";
 	};
 
 	let wrapError = function (message, error) {
@@ -54,7 +56,11 @@ UtnBaHelper.Utils = function (apiConnector) {
 			console.error(`Error while executing ${name}`, e);
 			// Not logging LoggedOutError nor GuaraniBackendError.
 			if (e instanceof LoggedOutError || e instanceof GuaraniBackendError) return;
-			return apiConnector.logMessage(name, true, stringifyError(e));
+			let errStr = stringifyError(e);
+			// Skip first 5 Failed to fetch errors. We only want to know about these if it's failing for every request.
+			// These are usually related to the user closing the tab, dns not resolving, etc, but we cannot get the details.
+			if (errStr.includes("Failed to fetch") && ++failedToFetchErrors <= 3) return;
+			return apiConnector.logMessage(name, true, errStr);
 		});
 	};
 
