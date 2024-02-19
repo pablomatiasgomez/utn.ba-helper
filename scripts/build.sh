@@ -18,6 +18,7 @@ js/guarani/Store.js \
 js/guarani/DataCollector.js \
 js/guarani/PagesDataParser.js \
 js/guarani/pages/HorariosPage.js \
+js/guarani/pages/InscripcionAExamenesPage.js \
 js/guarani/pages/PreInscripcionPage.js \
 js/guarani/custompages/ProfessorsSearchCustomPage.js \
 js/guarani/custompages/CoursesSearchCustomPage.js \
