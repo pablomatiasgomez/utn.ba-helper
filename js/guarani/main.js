@@ -25,6 +25,7 @@
 			// match is performed using startsWith and first one is used.
 			"/autogestion/grado/calendario": () => UtnBaHelper.HorariosPage(),
 			"/autogestion/grado/cursada/elegir_materia/": () => UtnBaHelper.PreInscripcionPage(pagesDataParser, utils, apiConnector),
+			"/autogestion/grado/examen": () => UtnBaHelper.InscripcionAExamenesPage(),
 		};
 
 		let currentHandler = null;
