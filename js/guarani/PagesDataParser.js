@@ -458,6 +458,7 @@ UtnBaHelper.PagesDataParser = function (utils) {
 		const branchTxtMapping = {
 			"Sede Medrano": "MEDRANO",
 			"Sede Campus": "CAMPUS",
+			"Medrano / Campus": "MEDRANO_CAMPUS",
 			"Virtual": "AULA_VIRTUAL",
 			"Escuela Técnica - Piñero": "PIÑERO",
 		};
