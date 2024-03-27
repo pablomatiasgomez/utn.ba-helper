@@ -263,7 +263,7 @@ UtnBaHelper.PagesDataParser = function (utils) {
 				// If level couldn't be matched, but this is an accordion of electives and is a first level accordion,
 				// then it means they are the electives of the entire plan, and should be considered as part of the last level.
 				if (typeof level === "undefined" && areElectives && $parentAccordion.length === 0) level = maxLevel;
-				if (typeof level === "undefined") throw new Error(`Invalid levelText: '${levelText}'. responseText: ${responseText}'`);
+				if (typeof level === "undefined") throw new Error(`Invalid levelText: '${levelText}'. responseText: ${responseText}`);
 				if (level === -1) return [];
 				maxLevel = Math.max(maxLevel, level);
 
