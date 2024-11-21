@@ -5,6 +5,10 @@ UtnBaHelper.Utils = function (apiConnector) {
 
 	let failedToFetchErrors = 0;
 
+	const delay = (delayMs) => {
+		return result => new Promise(resolve => setTimeout(() => resolve(result), delayMs));
+	}
+
 	// TODO this is duplicated in the ApiConnector.
 	let backgroundFetch = function (options) {
 		return new Promise((resolve, reject) => {
@@ -117,6 +121,7 @@ UtnBaHelper.Utils = function (apiConnector) {
 	// Public
 	return {
 		// Related to the extension:
+		delay: delay,
 		backgroundFetch: backgroundFetch,
 		injectScript: injectScript,
 		wrapError: wrapError,
