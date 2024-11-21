@@ -35,7 +35,15 @@ UtnBaHelper.PagesDataParser = function (utils) {
 
 		return fetch(url, fetchOpts).catch(e => {
 			throw utils.wrapError(`Error on fetchAjaxContents for ${cacheKey}`, e);
-		}).then(response => response.json()).then(response => {
+		}).then(response => {
+			if (response.status === 429) {
+				console.warn(`Got 429 for ${cacheKey}, retrying in 1 second...`);
+				return Promise.resolve().then(utils.delay(1000)).then(() => {
+					return fetchAjaxContents(url, fetchOpts, useCache);
+				});
+			}
+			return response.json();
+		}).then(response => {
 			if (response.cod === "1" && response.titulo === "Grado - Acceso" && response.operacion === "acceso") throw new LoggedOutError();
 			if (response.cod === "-2" && response.cont.url.includes("/autogestion/grado/acceso/login")) throw new LoggedOutError();
 			if (response.cod === "-2" && response.cont.url.includes("/autogestion/grado/inicio_alumno")) throw new RedirectedToHomeError();
@@ -246,9 +254,11 @@ UtnBaHelper.PagesDataParser = function (utils) {
 			if (!groups) throw new Error(`planText couldn't be parsed: ${planText}. responseText: ${responseText}`);
 			let planCode = groups[1];
 
-			// Courses
+			// Courses, cannot do it in parallel as the server returns a lot of 429s.
+			let courses = [];
 			let maxLevel = -1;
-			return Promise.all($contents.find(".accordion").toArray().flatMap(accordion => {
+			let promise = Promise.resolve();
+			$contents.find(".accordion").toArray().forEach(accordion => {
 				let $accordion = $(accordion);
 				let $accordionHeading = $accordion.find("> .accordion-group > .accordion-heading a");
 				let areElectives = $accordionHeading.hasClass("materia_generica") || $accordionHeading.text().toLowerCase().includes("electivas");
@@ -267,7 +277,7 @@ UtnBaHelper.PagesDataParser = function (utils) {
 				if (level === -1) return [];
 				maxLevel = Math.max(maxLevel, level);
 
-				return $accordion.find("table:first tbody tr:not(.correlatividades)").toArray().map(courseRow => {
+				return $accordion.find("table:first tbody tr:not(.correlatividades)").toArray().forEach(courseRow => {
 					let courseText = courseRow.querySelector("td").innerText.trim();
 					let groups = /(.*) \((\d{6})\)/.exec(courseText);
 					if (!groups) throw new Error(`courseText couldn't be parsed: ${courseText}. responseText: ${responseText}`);
@@ -276,18 +286,24 @@ UtnBaHelper.PagesDataParser = function (utils) {
 
 					// Dependencies btn:
 					let dependenciesBtn = courseRow.lastChild.querySelector(".ver_correlatividades");
-					return getDependencies(courseCode, dependenciesBtn).then(dependencies => {
-						return {
+					promise = promise.then(() => {
+						return getDependencies(courseCode, dependenciesBtn)
+					}).then(dependencies => {
+						courses.push({
 							planCode: planCode,
 							level: level,
 							courseCode: courseCode,
 							courseName: courseName,
 							elective: areElectives,
 							dependencies: dependencies,
-						};
-					})
+						});
+					});
 				});
-			}));
+			});
+
+			return promise.then(() => {
+				return courses;
+			});
 		});
 	};
 

@@ -45,7 +45,7 @@ UtnBaHelper.DataCollector = function (store, pagesDataParser, apiConnector) {
 				},
 				{
 					key: "planCourses",
-					minTime: ONE_DAY_MS * 30,
+					minTime: ONE_DAY_MS * 90,
 					method: () => collectStudentPlanCourses(),
 				}
 			];
