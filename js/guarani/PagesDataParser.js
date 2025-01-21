@@ -522,7 +522,7 @@ UtnBaHelper.PagesDataParser = function (utils) {
 			return {
 				year: period.year,
 				quarter: period.quarter,
-				classCode: classData.comision_nombre.toUpperCase(),
+				classCode: classData.comision_nombre.toUpperCase().replace(" - TUTORÍA", ""),
 				courseCode: classData.actividad_codigo,
 				// courseName is not used right now.
 				// The backend does not accept this for posts (class schedules or previous professors),
@@ -570,7 +570,8 @@ UtnBaHelper.PagesDataParser = function (utils) {
 		// This shouldn't happen as we are only grabbing the pending ones (or forms being completed) but from time to time we get some errors, so we can ignore these.
 		if ($kollaResponseText.find(".alert.alert-success").text().trim().includes("Gracias por completar la encuesta")) return [];
 
-		let courseTitle = $kollaResponseText.find(".formulario-titulo").text(); // E.g.: 'Simulación (082041) - Comisión: K4053', 'Administración Gerencial (082039) - Comisión: K5054'
+		// Replace is for cases like 'Inglés Técnico Nivel I (951602) - Comisión: Z2498 - TUTORÍA'
+		let courseTitle = $kollaResponseText.find(".formulario-titulo").text().replace(" - TUTORÍA", ""); // E.g.: 'Simulación (082041) - Comisión: K4053', 'Administración Gerencial (082039) - Comisión: K5054'
 		let groups = /^(.*) \((\d{6})\) - Comisión: ([\w\d]{5})$/.exec(courseTitle);
 		if (!groups) throw new Error(`Survey courseTitle couldn't be parsed: ${courseTitle}. HTML: ${htmlForLog}`);
 		// let courseName = groups[1]; // E.g. Simulación
