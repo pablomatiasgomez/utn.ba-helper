@@ -565,10 +565,15 @@ UtnBaHelper.PagesDataParser = function (utils) {
 		};
 		const professorRegex = new RegExp(`^(.*) \\((${Object.keys(professorRolesMapping).join("|")})(?: \\(Responsable de Cátedra\\))?\\)$`);
 
-		// The survey may be completed already if there is an alert box that has a text like:
-		// `Gracias por completar la encuesta. Por favor descargá y guardá el comprobante generado. Los códigos allí incluídos se generaron por única vez y serán requeridos si solicitas consultar las respuestas.' ya ha sido respondida.`
-		// This shouldn't happen as we are only grabbing the pending ones (or forms being completed) but from time to time we get some errors, so we can ignore these.
-		if ($kollaResponseText.find(".alert.alert-success").text().trim().includes("Gracias por completar la encuesta")) return [];
+		// Sometimes the survey is already completed, and it looks like there are 2 types of HTML that represent this
+		// first one looks to be when completing at the moment, and second when opening a completed one, which shouldn't
+		// really happen as we are only grabbing the pending ones (or forms being completed) but from time to time
+		// we get some errors, so we can ignore these. The alert box may contain the following messages:
+		// 1. `La encuesta 'Probabilidad y Estadística (950704) - Comisión: Z2017' ya ha sido respondida.`
+		// 2. `Gracias por completar la encuesta. Por favor descargá y guardá el comprobante generado. Los códigos allí incluídos se generaron por única vez y serán requeridos si solicitas consultar las respuestas.`
+		let alertBoxText = $kollaResponseText.find(".alert.alert-success").text().trim();
+		if (alertBoxText.includes(" ya ha sido respondida.") ||
+			alertBoxText.includes("Gracias por completar la encuesta")) return [];
 
 		// Replace is for cases like 'Inglés Técnico Nivel I (951602) - Comisión: Z2498 - TUTORÍA'
 		let courseTitle = $kollaResponseText.find(".formulario-titulo").text().replace(" - TUTORÍA", ""); // E.g.: 'Simulación (082041) - Comisión: K4053', 'Administración Gerencial (082039) - Comisión: K5054'
