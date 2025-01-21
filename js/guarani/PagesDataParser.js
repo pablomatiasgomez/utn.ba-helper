@@ -87,7 +87,10 @@ UtnBaHelper.PagesDataParser = function (utils) {
 		}).catch(e => {
 			throw utils.wrapError(`Error on fetchXlsContents for ${url}`, e);
 		}).then(response => {
-			return XLSX.read(new Uint8Array(response), {type: "array"});
+			let uint8Array = new Uint8Array(response);
+			return Promise.resolve().then(() => XLSX.read(uint8Array), {type: "array"}).catch(e => {
+				throw utils.wrapError(`Error on XLSX.read for ${url}. uint8Array: [${uint8Array}].`, e);
+			});
 		}).then(contents => {
 			RESPONSES_CACHE[url] = contents;
 			return contents;
