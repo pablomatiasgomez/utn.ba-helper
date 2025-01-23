@@ -27,7 +27,7 @@ const requestFetch = function (requestInfo) {
 		} else {
 			if (response.status === 429) {
 				console.warn(`Got 429 for ${requestInfo.url}, retrying in 1 second...`);
-				return Promise.resolve().then(delay(2000)).then(() => {
+				return Promise.resolve().then(delay(1000)).then(() => {
 					return requestFetch(requestInfo);
 				});
 			}

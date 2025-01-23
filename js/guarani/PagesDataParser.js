@@ -19,13 +19,24 @@ UtnBaHelper.PagesDataParser = function (utils) {
 	let fetchAjaxGETContents = function (url, useCache = true) {
 		return fetchAjaxContents(url, {
 			"headers": {
-				"X-Requested-With": "XMLHttpRequest", // This is needed so that guarani's server returns a json payload
+				"X-Requested-With": "XMLHttpRequest", // This is needed so that Guaraní's server returns a json payload
 			}
 		}, useCache);
 	};
 
+	let fetchWithRetry = function (url, fetchOpts) {
+		return fetch(url, fetchOpts).then(response => {
+			if (response.status === 429) {
+				return Promise.resolve().then(utils.delay(1000)).then(() => {
+					return fetchWithRetry(url, fetchOpts);
+				});
+			}
+			return response;
+		});
+	};
+
 	/**
-	 * Fetches and parses the way guarani's page ajax contents are loaded.
+	 * Fetches and parses the way Guaraní's page ajax contents are loaded.
 	 */
 	let fetchAjaxContents = function (url, fetchOpts, useCache = true) {
 		let cacheKey = `${fetchOpts.method || "GET"}:${url}:${fetchOpts.body || ""}`;
@@ -33,15 +44,9 @@ UtnBaHelper.PagesDataParser = function (utils) {
 			return Promise.resolve(RESPONSES_CACHE[cacheKey]);
 		}
 
-		return fetch(url, fetchOpts).catch(e => {
+		return fetchWithRetry(url, fetchOpts).catch(e => {
 			throw utils.wrapError(`Error on fetchAjaxContents for ${cacheKey}`, e);
 		}).then(response => {
-			if (response.status === 429) {
-				console.warn(`Got 429 for ${cacheKey}, retrying in 1 second...`);
-				return Promise.resolve().then(utils.delay(1000)).then(() => {
-					return fetchAjaxContents(url, fetchOpts, useCache);
-				});
-			}
 			return response.json();
 		}).then(response => {
 			if (response.cod === "1" && response.titulo === "Grado - Acceso" && response.operacion === "acceso") throw new LoggedOutError();
@@ -82,10 +87,11 @@ UtnBaHelper.PagesDataParser = function (utils) {
 		if (RESPONSES_CACHE[url]) {
 			return Promise.resolve(RESPONSES_CACHE[url]);
 		}
-		return fetch(url).then(response => {
-			return response.arrayBuffer();
-		}).catch(e => {
+
+		return fetchWithRetry(url).catch(e => {
 			throw utils.wrapError(`Error on fetchXlsContents for ${url}`, e);
+		}).then(response => {
+			return response.arrayBuffer();
 		}).then(response => {
 			let uint8Array = new Uint8Array(response);
 			return Promise.resolve().then(() => XLSX.read(uint8Array), {type: "array"}).catch(e => {
