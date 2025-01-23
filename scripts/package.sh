@@ -3,15 +3,15 @@ set -e
 
 echo "Starting packaging.."
 
-if ! which minify &> /dev/null ; then
-  echo '[ERROR] minify not found. Install it with "npm i minify -g"'
+if ! which uglifyjs &> /dev/null ; then
+  echo '[ERROR] uglifyjs not found. Install it with "npm i uglifyjs -g"'
   exit 1
 fi
 
-minifyJs () {
-  echo "Minifying $1"
+uglifyJs () {
+  echo "Uglifying $1"
   mv "$1" "$1.bk.js"
-  minify "$1.bk.js" > "$1"
+  uglifyjs "$1.bk.js" --compress --mangle --output "$1"
 }
 restoreJs () {
   echo "Restoring $1"
@@ -21,10 +21,10 @@ restoreJs () {
 
 rm package.zip || true
 
-minifyJs "js/guarani-helper.min.js"
-minifyJs "js/guarani-kolla-helper.min.js"
-minifyJs "js/background.js"
-minifyJs "js/guarani/foreground.js"
+uglifyJs "js/guarani-helper.min.js"
+uglifyJs "js/guarani-kolla-helper.min.js"
+uglifyJs "js/background.js"
+uglifyJs "js/guarani/foreground.js"
 
 echo "Creating package.zip ..."
 zip -vr package.zip \
