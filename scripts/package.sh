@@ -8,12 +8,12 @@ if ! which uglifyjs &> /dev/null ; then
   exit 1
 fi
 
-uglifyJs () {
+uglifyJsFile () {
   echo "Uglifying $1"
   mv "$1" "$1.bk.js"
   uglifyjs "$1.bk.js" --compress --mangle --output "$1"
 }
-restoreJs () {
+restoreJsFile () {
   echo "Restoring $1"
   rm "$1"
   mv "$1.bk.js" "$1"
@@ -21,10 +21,10 @@ restoreJs () {
 
 rm package.zip || true
 
-uglifyJs "js/guarani-helper.min.js"
-uglifyJs "js/guarani-kolla-helper.min.js"
-uglifyJs "js/background.js"
-uglifyJs "js/guarani/foreground.js"
+uglifyJsFile "js/guarani-helper.min.js"
+uglifyJsFile "js/guarani-kolla-helper.min.js"
+uglifyJsFile "js/background.js"
+uglifyJsFile "js/guarani/foreground.js"
 
 echo "Creating package.zip ..."
 zip -vr package.zip \
@@ -38,7 +38,7 @@ js/lib/libs.min.js \
 manifest.json
 echo "Created package.zip ..."
 
-restoreJs "js/guarani-helper.min.js"
-restoreJs "js/guarani-kolla-helper.min.js"
-restoreJs "js/background.js"
-restoreJs "js/guarani/foreground.js"
+restoreJsFile "js/guarani-helper.min.js"
+restoreJsFile "js/guarani-kolla-helper.min.js"
+restoreJsFile "js/background.js"
+restoreJsFile "js/guarani/foreground.js"
