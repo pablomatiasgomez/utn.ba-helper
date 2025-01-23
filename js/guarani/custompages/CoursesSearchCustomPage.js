@@ -7,7 +7,7 @@ UtnBaHelper.CoursesSearchCustomPage = function ($container, services) {
 
 	let createPage = function () {
 		$searchDiv = $("<div></div>");
-		$searchDiv.append(`<span class="bold">Buscar por nombre o código de materia: </span>`);
+		$searchDiv.append(`<span style="font-weight: bold;">Buscar por nombre o código de materia: </span>`);
 		let $searchTxt = $(`<input type="text" style="margin: 0 5px 0 0;" placeholder="Minimo 3 caracteres..." />`);
 		$searchTxt.on("keydown", function (e) {
 			if (e.key === "Enter") {
