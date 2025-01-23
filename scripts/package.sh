@@ -3,17 +3,17 @@ set -e
 
 echo "Starting packaging.."
 
-if ! which minify &> /dev/null ; then
-  echo '[ERROR] minify not found. Install it with "npm i minify -g"'
+if ! which uglifyjs &> /dev/null ; then
+  echo '[ERROR] uglifyjs not found. Install it with "npm i uglifyjs -g"'
   exit 1
 fi
 
-minifyJs () {
-  echo "Minifying $1"
+uglifyJsFile () {
+  echo "Uglifying $1"
   mv "$1" "$1.bk.js"
-  minify "$1.bk.js" > "$1"
+  uglifyjs "$1.bk.js" --compress --mangle --output "$1"
 }
-restoreJs () {
+restoreJsFile () {
   echo "Restoring $1"
   rm "$1"
   mv "$1.bk.js" "$1"
@@ -21,10 +21,10 @@ restoreJs () {
 
 rm package.zip || true
 
-minifyJs "js/guarani-helper.min.js"
-minifyJs "js/guarani-kolla-helper.min.js"
-minifyJs "js/background.js"
-minifyJs "js/guarani/foreground.js"
+uglifyJsFile "js/guarani-helper.min.js"
+uglifyJsFile "js/guarani-kolla-helper.min.js"
+uglifyJsFile "js/background.js"
+uglifyJsFile "js/guarani/foreground.js"
 
 echo "Creating package.zip ..."
 zip -vr package.zip \
@@ -38,7 +38,7 @@ js/lib/libs.min.js \
 manifest.json
 echo "Created package.zip ..."
 
-restoreJs "js/guarani-helper.min.js"
-restoreJs "js/guarani-kolla-helper.min.js"
-restoreJs "js/background.js"
-restoreJs "js/guarani/foreground.js"
+restoreJsFile "js/guarani-helper.min.js"
+restoreJsFile "js/guarani-kolla-helper.min.js"
+restoreJsFile "js/background.js"
+restoreJsFile "js/guarani/foreground.js"
