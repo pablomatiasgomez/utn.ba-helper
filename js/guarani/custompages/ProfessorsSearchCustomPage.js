@@ -228,20 +228,44 @@ UtnBaHelper.ProfessorsSearchCustomPage = function ($container, services) {
 			`);
 		}
 
-		if (results.textFields.length) {
-			let textHeaderColumns = results.textFields.map(item => {
-				return `<th>${item.question}</th>`;
+		if (results.textFieldGroups.length) {
+			// First collect all question sentiments to create a header
+			let questionsBySentiment = {};
+			results.textFieldGroups.forEach(group => {
+				questionsBySentiment[group.sentiment] = group.question;
+			});
+			let sentimentsSorted = Object.keys(questionsBySentiment).sort().reverse();
+			let textHeaderColumns = sentimentsSorted.map(sentiment => {
+				return `<th>${questionsBySentiment[sentiment]}</th>`;
 			}).join("");
-			let textValueColumns = results.textFields.map(item => {
-				let answers = item.values.map(answer => `<i>"${answer}"</i>`).join(`<hr style="margin: 8px 0;">`);
-				return `<td style="color: ${SENTIMENT_COLORS[item.sentiment]}">${answers}</td>`;
+
+			// Now for each group create rows:
+			let answersByGroup = {};
+			results.textFieldGroups.forEach(group => {
+				let key = `${group.year} ${group.quarter} - ${group.courseName} (${group.courseCode})`;
+				if (!answersByGroup[key]) answersByGroup[key] = {};
+				answersByGroup[key][group.sentiment] = group.values;
+			});
+
+			let textValueRows = Object.keys(answersByGroup).sort().reverse().map(groupKey => {
+				let textValueColumns = sentimentsSorted.map(sentiment => {
+					let values = answersByGroup[groupKey][sentiment] || [];
+					let answers = values.map(answer => `<i>"${answer}"</i>`).join(`<hr style="margin: 8px 0;">`);
+					return `<td style="color: ${SENTIMENT_COLORS[sentiment]}">${answers}</td>`;
+				}).join("");
+
+				return `
+					<tr><td style="text-align: center; font-weight: bold;" colspan="${sentimentsSorted.length}">${groupKey}</td></tr>
+					<tr>${textValueColumns}</tr>
+				`;
 			}).join("");
+
 			$surveyResultDiv.append(`
 				<h4>Comentarios</h4>
 				<table class="text-questions" style="table-layout: fixed; width: 100%;">
 					<tbody>
 						<tr>${textHeaderColumns}</tr>
-						<tr>${textValueColumns}</tr>
+						${textValueRows}
 					</tbody>
 				</table>
 			`);
