@@ -92,13 +92,13 @@ UtnBaHelper.Utils = function (apiConnector) {
 			.join(" y ");
 	};
 
-	let getColorForAvg = function (avg) {
+	let getColorForAvg = function (avg, alpha = 1) {
 		if (avg < 60) {
-			return "#D51C26";
+			return `rgba(213, 28, 38, ${alpha})`; // "#D51C26";
 		} else if (avg >= 80) {
-			return "#19B135";
+			return `rgba(25, 177, 53, ${alpha})`; // "#19B135";
 		} else {
-			return "#F4D224";
+			return `rgba(244, 210, 36, ${alpha})`; // "#F4D224";
 		}
 	};
 
