@@ -72,3 +72,8 @@ UTN.BA Helper facilita el uso de la web de la UTN - FRBA.
 XLS parser is used to parse information from xls documents. The file located at `js/lib/xls.full.min.js` should be
 updated using the `full` version of the SheetJS module, which can be downloaded at https://cdn.sheetjs.com/ or directly
 from cdnjs at https://cdnjs.com/libraries/xlsx
+
+### ChartJS
+
+Used to render charts in the UI.
+File: `js/lib/chart.umd.js` can be downloaded from https://cdnjs.com/libraries/Chart.js (the umd file has to be used)

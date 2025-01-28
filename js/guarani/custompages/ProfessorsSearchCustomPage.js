@@ -133,6 +133,85 @@ UtnBaHelper.ProfessorsSearchCustomPage = function ($container, services) {
 	let appendSurveyResults = function (surveyKind, results) {
 		$surveyResultDiv.append(`<h3>Encuesta de tipo ${surveyKind}</h3>`);
 
+		if (results.historicalScores && Object.keys(results.historicalScores).length) {
+			let canvasId = `historical-score-${surveyKind}`;
+
+			$surveyResultDiv.append(`
+				<div style="height: 400px; width: 100%;"><canvas id="${canvasId}"></canvas></div>
+			`);
+
+			let minYear, maxYear;
+			Object.values(results.historicalScores).forEach(historicalScores => {
+				historicalScores.forEach(historicalScore => {
+					let year = parseInt(historicalScore.year);
+					if (!minYear || year < minYear) minYear = year;
+					if (!maxYear || year > maxYear) maxYear = year;
+				});
+			});
+
+			let canvas = document.getElementById(canvasId);
+			new Chart(canvas, {
+					type: 'line',
+					data: {
+						// All years in between as labels
+						labels: Array.from({length: maxYear - minYear + 1}, (_, i) => minYear + i),
+						datasets: Object.entries(results.historicalScores).map(historicalScore => {
+							let courseName = historicalScore[0];
+							let historicalScores = historicalScore[1];
+
+							let data = Array.from({length: maxYear - minYear + 1}, (_, i) => {
+								let year = minYear + i;
+								// Not ideal to use `find` but these are usually a few datapoints so it's fine...
+								let score = historicalScores.find(score => parseInt(score.year) === year);
+								return score ? score.overallScore : undefined;
+							});
+							return {
+								label: courseName,
+								data: data,
+							};
+						})
+					},
+					plugins: [
+						{
+							id: 'backgroundColor',
+							beforeDraw: (chart) => {
+								let backgroundRules = [
+									{from: 0, to: 60},
+									{from: 60, to: 80},
+									{from: 80, to: 100},
+								];
+
+								let xAxis = chart.scales.x;
+								let yAxis = chart.scales.y;
+								backgroundRules.forEach(rule => {
+									let yTop = yAxis.top + (yAxis.height / 100 * (100 - rule.to));
+									let yHeight = yAxis.height / 100 * (rule.to - rule.from);
+									chart.ctx.fillStyle = services.utils.getColorForAvg(rule.from, 0.1);
+									chart.ctx.fillRect(xAxis.left, yTop, xAxis.width, yHeight);
+								});
+							}
+						},
+					],
+					options: {
+						maintainAspectRatio: false,
+						plugins: {
+							title: {
+								display: true,
+								text: 'Puntajes históricos',
+							},
+						},
+						scales: {
+							y: {
+								suggestedMin: 0,
+								suggestedMax: 100,
+							},
+						},
+					},
+				}
+			);
+		}
+
+
 		if (results.percentageFields.length) {
 			let percentageRows = results.percentageFields.map(item => {
 				return `<tr><td>${item.question}</td><td style="background-color: ${services.utils.getColorForAvg(item.average)}">${item.average}</td><td>${item.count}</td></tr>`;

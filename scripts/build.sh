@@ -5,6 +5,7 @@ echo "Building app.."
 
 JS_FILES="\
 js/lib/jquery-3.6.0.min.js \
+js/lib/chart.umd.js \
 js/lib/xlsx.full.min.js"
 cat $JS_FILES > js/lib/libs.min.js
 
