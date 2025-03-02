@@ -143,3 +143,7 @@
 form#filters label {
     display: initial;
 }
+
+form#filters button {
+    margin-top: 8px;
+}
