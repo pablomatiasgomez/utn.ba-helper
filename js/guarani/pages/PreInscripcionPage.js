@@ -46,9 +46,9 @@ UtnBaHelper.PreInscripcionPage = function (pagesDataParser, utils, apiConnector)
 				<div class="utnba-helper">
 					<div class="alert info">
 						<h3 style="text-align: center;">UTN.BA HELPER - Información importante</h3>
-						<p><b>La informacion sobre profesores anteriores es provista por el "UTN.BA Helper" y no es parte del sistema de la UTN.</b></p>
-						<p>La intencion de esta tabla es, en base a datos colectados por el "UTN.BA Helper", intentar predecir que profesor va a estar en cada cursada, basandonos en los profesores que estuvieron en cursadas anteriores.
-						<p>Para cada horario presentado en el combo de abajo, se muestra un item en la tabla, que puede ser identificado por el ID que es agregado al texto de cada opcion, y que es mostrado en cada fila de la tabla.</p>
+						<p><b>La información sobre profesores anteriores es provista por el "UTN.BA Helper" y no es parte del sistema de la UTN.</b></p>
+						<p>La intención de esta tabla es, en base a datos colectados por el "UTN.BA Helper", intentar predecir que profesor va a estar en cada cursada, basándonos en los profesores que estuvieron en cursadas anteriores.
+						<p>Para cada horario presentado en el combo de abajo, se muestra un item en la tabla, que puede ser identificado por el ID que es agregado al texto de cada opción, y que es mostrado en cada fila de la tabla.</p>
 					</div>
 					<table><tbody><tr><th>ID</th><th>Detalle</th><th>Profesores en años anteriores</th></tr></tbody></table>
 					<hr>
