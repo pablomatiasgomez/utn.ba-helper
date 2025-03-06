@@ -130,7 +130,6 @@ UtnBaHelper.DataCollector = function (store, pagesDataParser, apiConnector) {
 
 	// Public
 	return {
-		getHashedStudentId: getHashedStudentId,
 		logUserStat: logUserStat,
 		collectBackgroundDataIfNeeded: collectBackgroundDataIfNeeded,
 	};
