@@ -29,12 +29,14 @@ UtnBaHelper.PreInscripcionPage = function (pagesDataParser, utils, apiConnector)
 				let classData = courseOptionsData[$option.val()];
 				if (!classData) return null;
 
+				let classSchedule = pagesDataParser.mapClassDataToClassSchedule(classData);
+
 				// Set a optionId in the option text to identify in the table that is added later.
 				optionId++;
-				optionDetails.push($option.text());
-				$option.text(`(${optionId})` + $option.text());
+				optionDetails.push($option.text().split("|").map(t => t.trim()).join("<br>") + "<br>" + classSchedule.classCode);
+				$option.text(`(${optionId}) | ${$option.text()} | ${classSchedule.classCode}`);
 
-				return pagesDataParser.mapClassDataToClassSchedule(classData);
+				return classSchedule;
 			})
 			.filter(req => !!req);
 
@@ -77,8 +79,7 @@ UtnBaHelper.PreInscripcionPage = function (pagesDataParser, utils, apiConnector)
 						content += `</ul></li>`;
 					});
 				content += `</ul>`;
-				let details = optionDetails[i].split("|").map(t => t.trim()).join("<br>");
-				$tbody.append(`<tr><td>(${optionId})</td><td>${details}</td><td>${content}</td></tr>`);
+				$tbody.append(`<tr><td>(${optionId})</td><td>${optionDetails[i]}</td><td>${content}</td></tr>`);
 			}
 		});
 	};
