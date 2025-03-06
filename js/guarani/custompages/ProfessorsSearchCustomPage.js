@@ -105,7 +105,7 @@ UtnBaHelper.ProfessorsSearchCustomPage = function ($container, services) {
 				</tr>`;
 			}).join("");
 			$coursesResultDiv.append(`
-				<h3>Ultimos cursos en los que estuvo presente</h3>
+				<h3>Cursos en los que estuvo presente en los últimos 3 años (incluyendo el actual)</h3>
 				<table>
 					<tbody>
 						<tr><th colspan="2">Cuatr.</th><th>Materia</th><th>Curso</th><th>Anexo</th><th>Horario</th><th>Profesores</th></tr>
