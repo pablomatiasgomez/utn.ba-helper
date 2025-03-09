@@ -61,19 +61,4 @@ UtnBaHelper.Consts = {
 		10: 10
 	},
 
-	TIME_SHIFTS_KEYS: {
-		"mañana": "(m)",
-		"tarde": "(t)",
-		"noche": "(n)"
-	},
-
-	MODE: {
-		"presencial": "sede",
-		"virtual": "virtual",
-	},
-
-	COURSE_LENGTH: {
-		"anual": "anual",
-		"cuatrimestral": "cuatrimestre",
-	},
-}
+};

@@ -139,11 +139,16 @@
     text-decoration: none;
 }
 
+
 /** Some other css is breaking this so it's enforced here*/
-form#filters label {
+.utnba-helper .filters label {
     display: initial;
 }
 
-form#filters button {
+.utnba-helper .filters a {
     margin-top: 8px;
+}
+
+.utnba-helper .filters input[type="checkbox"] {
+    margin-top: 0px;
 }
