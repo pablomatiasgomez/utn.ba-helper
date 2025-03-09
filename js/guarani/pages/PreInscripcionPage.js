@@ -139,6 +139,7 @@ UtnBaHelper.PreInscripcionPage = function (pagesDataParser, utils, apiConnector)
 
 
 	let addPreviousProfessorsTableEventFn;
+	let addPreviousProfessorsTableEventWithDelayFn;
 	return {
 		init: function () {
 			return Promise.resolve().then(() => {
@@ -146,7 +147,9 @@ UtnBaHelper.PreInscripcionPage = function (pagesDataParser, utils, apiConnector)
 				// We need to un register them on close, as changing a course will trigger a new PreInscripcionPage.
 				// Events triggered from foreground script:
 				addPreviousProfessorsTableEventFn = () => {
-					document.querySelector("#insc_alternativas .inscripcion-alternativa").insertAdjacentHTML("beforebegin", `
+					let alternativesDiv = document.querySelector("#insc_alternativas .inscripcion-alternativa");
+					if (!alternativesDiv) return; // There may be no div if for example the alternative already has a selected option.
+					alternativesDiv.insertAdjacentHTML("beforebegin", `
 						<div class="utnba-helper">
 							<div class="alert info">
 								<h3 style="text-align: center;">UTN.BA HELPER - Información importante</h3>
@@ -166,17 +169,19 @@ UtnBaHelper.PreInscripcionPage = function (pagesDataParser, utils, apiConnector)
 					`);
 					utils.runAsync("addClassSchedulesFilter", addClassSchedulesFilter);
 					utils.runAsync("addPreviousProfessorsTable", addPreviousProfessorsTable);
-				}
+				};
+				addPreviousProfessorsTableEventWithDelayFn = () => setTimeout(addPreviousProfessorsTableEventFn, 500);
+
 				window.addEventListener("__utn_ba_event_comision_preinscripta", addPreviousProfessorsTableEventFn);
 				window.addEventListener("__utn_ba_event_comision_despreinscripta", addPreviousProfessorsTableEventFn);
-				window.addEventListener("__utn_ba_event_setear_comisiones_insc_alternativa", addPreviousProfessorsTableEventFn);
+				window.addEventListener("__utn_ba_event_setear_comisiones_insc_alternativa", addPreviousProfessorsTableEventWithDelayFn);
 				return addPreviousProfessorsTableEventFn();
 			});
 		},
 		close: function () {
 			window.removeEventListener("__utn_ba_event_comision_preinscripta", addPreviousProfessorsTableEventFn);
 			window.removeEventListener("__utn_ba_event_comision_despreinscripta", addPreviousProfessorsTableEventFn);
-			window.removeEventListener("__utn_ba_event_setear_comisiones_insc_alternativa", addPreviousProfessorsTableEventFn);
+			window.removeEventListener("__utn_ba_event_setear_comisiones_insc_alternativa", addPreviousProfessorsTableEventWithDelayFn);
 		},
 	};
 };
