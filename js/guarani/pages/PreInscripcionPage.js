@@ -1,13 +1,12 @@
-
 if (!window.UtnBaHelper) window.UtnBaHelper = {};
 UtnBaHelper.PreInscripcionPage = function (pagesDataParser, utils, apiConnector) {
-	const { TIME_SHIFTS_KEYS, MODE, COURSE_LENGTH } = UtnBaHelper.Consts;
+	const {TIME_SHIFTS_KEYS, MODE, COURSE_LENGTH} = UtnBaHelper.Consts;
 
 	const outletOptions = document.querySelector('#comision');
 
 	const selectOptions = Array.from(outletOptions.options);
 	const placeholderOption = selectOptions[0];
-	const noneOption = { ...placeholderOption };
+	const noneOption = {...placeholderOption};
 	noneOption.text = 'No hay opciones para los filtros seleccionados';
 
 	let addPreviousProfessorsTable = function () {
@@ -18,42 +17,40 @@ UtnBaHelper.PreInscripcionPage = function (pagesDataParser, utils, apiConnector)
 		});
 	};
 
-	let addComissionsFilter = function() {
+	let addComissionsFilter = function () {
 		const header = document.querySelector('#insc_alternativas .inscripcion-alternativa');
 
 		// Adds the checkboxes html
-		header.insertAdjacentHTML("beforebegin",
-			`<form id="filters"">
+		header.insertAdjacentHTML("beforebegin", `
+			<form id="filters"">
+				<div class='modalidad'>
+					<input type="checkbox" checked id="presencial" name="filtro_modalidad" value="presencial">
+					<label for="presencial">presencial</label>
+					<input type="checkbox" checked id="virtual" name="filtro_modalidad" value="virtual">
+					<label for="virtual">virtual</label>
+				</div>
 
-        <div class='modalidad'>
-            <input type="checkbox" checked id="presencial" name="filtro_modalidad" value="presencial">
-            <label for="presencial">presencial</label>
-            <input type="checkbox" checked id="virtual" name="filtro_modalidad" value="virtual">
-            <label for="virtual">virtual</label>
-        </div>
+				<div class='duracion'>
+					<input type="checkbox" checked id="anual" name="filtro_duracion" value="anual">
+					<label for="anual">anual</label>
+					<input type="checkbox" checked id="cuatrimestral" name="filtro_duracion" value="cuatrimestral">
+					<label for="cuatrimestral">cuatrimestral</label>
+				</div>
 
-        <div class='duracion'>
-            <input type="checkbox" checked id="anual" name="filtro_duracion" value="anual">
-            <label for="anual">anual</label>
-            <input type="checkbox" checked id="cuatrimestral" name="filtro_duracion" value="cuatrimestral">
-            <label for="cuatrimestral">cuatrimestral</label>
-        </div>
-
-        <div class='turno'>
-            <input type="checkbox" checked id="mañana" name="filtro_turno" value="mañana">
-            <label for="mañana">mañana</label>
-            <input type="checkbox" checked id="tarde" name="filtro_turno" value="tarde">
-            <label for="tarde">tarde</label>
-            <input type="checkbox" checked id="noche" name="filtro_turno" value="noche">
-            <label for="noche">noche</label>
-        </div>
-
-
-        <button type="submit">Filtrar</button>
-    </form>`);
+				<div class='turno'>
+					<input type="checkbox" checked id="mañana" name="filtro_turno" value="mañana">
+					<label for="mañana">mañana</label>
+					<input type="checkbox" checked id="tarde" name="filtro_turno" value="tarde">
+					<label for="tarde">tarde</label>
+					<input type="checkbox" checked id="noche" name="filtro_turno" value="noche">
+					<label for="noche">noche</label>
+				</div>
+				<button type="submit">Filtrar</button>
+			</form>`);
 
 		document.querySelector('#filters').addEventListener('submit', (event) => {
-			event.preventDefault():
+			event.preventDefault();
+
 			const modalidades = Array.from(document.querySelectorAll('#filters .modalidad input:checked')).map(elmnt => MODE[elmnt.value]);
 			const duraciones = Array.from(document.querySelectorAll('#filters .duracion input:checked')).map(elmnt => COURSE_LENGTH[elmnt.value]);
 			const turnos = Array.from(document.querySelectorAll('#filters .turno input:checked')).map(elmnt => TIME_SHIFTS_KEYS[elmnt.value]);
