@@ -4,7 +4,7 @@ set -e
 echo "Starting packaging.."
 
 if ! which uglifyjs &> /dev/null ; then
-  echo '[ERROR] uglifyjs not found. Install it with "npm i uglifyjs -g"'
+  echo '[ERROR] uglifyjs not found. Install it with "npm install uglify-js -g"'
   exit 1
 fi
 
