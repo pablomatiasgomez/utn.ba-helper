@@ -78,6 +78,8 @@ UtnBaHelper.PreInscripcionPage = function (pagesDataParser, utils, apiConnector)
 			// Avoid using cache as the endpoint is always the same but the student may register or unregister from the course.
 			return pagesDataParser.fetchAjaxGETContents(location.href, false);
 		}).then(response => {
+			if (!response.agenda || !response.agenda.comisiones) throw new Error(`Missing course alternatives for ${location.href}. response: ${JSON.stringify(response)}`);
+
 			// `comisiones` may include the current class schedules. This is not a problem because we access the array by id.
 			// But we could eventually filter them out by using the `cursadas` array if we confirm it
 			return response.agenda.comisiones;
