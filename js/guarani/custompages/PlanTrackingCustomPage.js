@@ -55,7 +55,9 @@ UtnBaHelper.PlanTrackingCustomPage = function ($container, services) {
 		let allNonWeightedGradesAverage = arrayAverage(passedNonWeightedGrades.concat(failedNonWeightedGrades));
 		let passedNonWeightedGradesAverage = arrayAverage(passedNonWeightedGrades);
 
-		$gradesSummary.html(`<table><tbody></tbody></table>(*) La nota ponderada es calculada por el "UTN.BA Helper" segun Ordenanza Nº 1549`);
+		$gradesSummary.html(`<table><tbody></tbody></table>
+				<i><span>Peso académico: Materias Aprobadas * 11 - años de carrera * 5 - finales desaprobados * 3</span></br>
+				<span>(*) La nota ponderada es calculada por el "UTN.BA Helper" segun <a href="https://www.frba.utn.edu.ar/wp-content/uploads/2019/09/ordenanza_1549.pdf">Ordenanza Nº 1549</a></span></i>`);
 		const appendTableRow = (description, value) => $gradesSummary.find("tbody").append("<tr><td>" + description + "</td><td><b>" + (value || value === 0 ? value : "n/a") + "</b></td></tr>");
 
 		appendTableRow("Peso academico", `${pesoAcademico} <small>(11*${passedFinalExams.length} - 5*${yearsCount} - 3*${failedFinalExams.length})</small>`);
