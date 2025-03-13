@@ -254,11 +254,13 @@ UtnBaHelper.PagesDataParser = function (utils) {
 
 		return fetchAjaxGETContents("/autogestion/grado/plan_estudio").then(responseContents => {
 			let responseText = parseAjaxPageRenderer(responseContents.cont, "info_plan").content;
-			// Need to wrap contents into parent div as many elements come as first level, and we cannot use find() then.
-			let $contents = $(`<div id="info_plan">${responseText}</div>`);
+			// Need to wrap contents into parent div as many elements come as first level, and we cannot use querySelector() then.
+			let doc = document.createElement("div");
+			doc.id = "info_plan";
+			doc.innerHTML = responseText;
 
 			// PlanCode
-			let planText = $contents.find(".encabezado").find("td:eq(1)").text();
+			let planText = doc.querySelectorAll(".encabezado td")[1].textContent.trim();
 			let groups = /^Plan: \((\w+)\)/.exec(planText);
 			if (!groups) throw new Error(`planText couldn't be parsed: ${planText}. responseText: ${responseText}`);
 			let planCode = groups[1];
@@ -267,27 +269,26 @@ UtnBaHelper.PagesDataParser = function (utils) {
 			let courses = [];
 			let maxLevel = -1;
 			let promise = Promise.resolve();
-			$contents.find(".accordion").toArray().forEach(accordion => {
-				let $accordion = $(accordion);
-				let $accordionHeading = $accordion.find("> .accordion-group > .accordion-heading a");
-				let areElectives = $accordionHeading.hasClass("materia_generica") || $accordionHeading.text().toLowerCase().includes("electivas");
+			doc.querySelectorAll(".accordion").forEach(accordion => {
+				let accordionHeading = accordion.querySelector(":scope > .accordion-group > .accordion-heading a");
+				let areElectives = accordionHeading.classList.contains("materia_generica") || accordionHeading.textContent.toLowerCase().includes("electivas");
 
 				// The table could be within a level, so we try to grab it from there first.
-				let $parentAccordion = $accordion.parent().closest(".accordion");
-				if ($parentAccordion.length) {
-					$accordionHeading = $parentAccordion.find("> .accordion-group > .accordion-heading a");
+				let parentAccordion = accordion.parentElement?.closest(".accordion");
+				if (parentAccordion) {
+					accordionHeading = parentAccordion.querySelector(":scope > .accordion-group > .accordion-heading a");
 				}
-				let levelText = $accordionHeading.text().trim().toLowerCase();
+				let levelText = accordionHeading.textContent.trim().toLowerCase();
 				let level = levelsMapping[levelText];
 				// If level couldn't be matched, but this is an accordion of electives and is a first level accordion,
 				// then it means they are the electives of the entire plan, and should be considered as part of the last level.
-				if (typeof level === "undefined" && areElectives && $parentAccordion.length === 0) level = maxLevel;
+				if (typeof level === "undefined" && areElectives && !parentAccordion) level = maxLevel;
 				if (typeof level === "undefined") throw new Error(`Invalid levelText: '${levelText}'. responseText: ${responseText}`);
 				if (level === -1) return [];
 				maxLevel = Math.max(maxLevel, level);
 
-				return $accordion.find("table:first tbody tr:not(.correlatividades)").toArray().forEach(courseRow => {
-					let courseText = courseRow.querySelector("td").innerText.trim();
+				return accordion.querySelectorAll("table")[0].querySelectorAll("tbody tr:not(.correlatividades)").forEach(courseRow => {
+					let courseText = courseRow.querySelector("td").textContent.trim();
 					let groups = /(.*) \((\d{6})\)/.exec(courseText);
 					if (!groups) throw new Error(`courseText couldn't be parsed: ${courseText}. responseText: ${responseText}`);
 					let courseName = groups[1];
