@@ -165,8 +165,9 @@ UtnBaHelper.PagesDataParser = function (utils) {
 			"módulo: quinto nivel": 5,
 			"módulo: sexto nivel": 6,
 			"módulo: sexto año": 6,
-			// If we enable this, we also need to resolve how to parse and consider dependencies with "Opción 2"
-			"módulo: cuarto analista": -1,
+			// Not supported:
+			"módulo: cuarto analista": -1, // If we enable this, we also need to resolve how to parse and consider dependencies with "Opción 2"
+			"módulo: título intermedio": -1, // don't have support for this as of now in the BE.
 		};
 		const kindsMapping = {
 			"Para cursar": "REGISTER",
