@@ -77,3 +77,7 @@ from cdnjs at https://cdnjs.com/libraries/xlsx
 
 Used to render charts in the UI.
 File: `js/lib/chart.umd.js` can be downloaded from https://cdnjs.com/libraries/Chart.js (the umd file has to be used)
+
+
+## Stargazers over time
+[![Stargazers over time](https://starchart.cc/pablomatiasgomez/utn.ba-helper.svg?variant=adaptive)](https://starchart.cc/pablomatiasgomez/utn.ba-helper)
