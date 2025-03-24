@@ -58,8 +58,8 @@ UtnBaHelper.Utils = function (apiConnector) {
 			return fn();
 		}).catch(e => {
 			console.error(`Error while executing ${name}`, e);
-			// Not logging LoggedOutError nor GuaraniBackendError.
-			if (e instanceof LoggedOutError || e instanceof GuaraniBackendError) return;
+			// Not logging errors that we can't do anything.
+			if (e instanceof LoggedOutError || e instanceof GuaraniBackendError || e instanceof MissingStudentIdError) return;
 			let errStr = stringifyError(e);
 			// Skip first 5 Failed to fetch errors. We only want to know about these if it's failing for every request.
 			// These are usually related to the user closing the tab, dns not resolving, etc, but we cannot get the details.

@@ -1,27 +1,32 @@
-function LoggedOutError() {
-	this.name = 'LoggedOutError';
-	this.message = "User has been logged out!";
-	this.stack = (new Error()).stack;
+// RedirectedToHomeError is thrown when a request to Guarani's backend returns that the user's session is expired.
+class LoggedOutError extends Error {
+	constructor(message = "User has been logged out!", options) {
+		super(message, options);
+		this.name = "LoggedOutError";
+	}
 }
 
-LoggedOutError.prototype = new Error;
-
-
-function RedirectedToHomeError() {
-	this.name = 'RedirectedToHomeError';
-	this.message = "Request has been redirected to home";
-	this.stack = (new Error()).stack;
+// RedirectedToHomeError is thrown when a request to Guarani's backend returns that the user was redirected to the home.
+class RedirectedToHomeError extends Error {
+	constructor(message = "Request has been redirected to home", options) {
+		super(message, options);
+		this.name = "RedirectedToHomeError";
+	}
 }
-
-RedirectedToHomeError.prototype = new Error;
-
 
 // GuaraniBackendError is thrown when the Guarani's server is not working correctly.
-function GuaraniBackendError(error) {
-	this.name = 'GuaraniBackendError';
-	this.message = "Guarani's backend error";
-	this.stack = (new Error()).stack;
-	this.error = error;
+class GuaraniBackendError extends Error {
+	constructor(message, options) {
+		super(message, options);
+		this.name = "GuaraniBackendError";
+	}
 }
 
-GuaraniBackendError.prototype = new Error;
+// MissingStudentIdError is thrown when the studentId is not present.
+// This seems to happen in a few cases where the student was not yet assigned an ID?
+class MissingStudentIdError extends Error {
+	constructor(message, options) {
+		super(message, options);
+		this.name = "MissingStudentIdError";
+	}
+}
