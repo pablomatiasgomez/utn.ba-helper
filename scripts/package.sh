@@ -11,7 +11,7 @@ fi
 uglifyJsFile () {
   echo "Uglifying $1"
   mv "$1" "$1.bk.js"
-  uglifyjs "$1.bk.js" --compress --mangle --output "$1"
+  uglifyjs "$1.bk.js" --compress --mangle --output "$1" --source-map includeSources
 }
 restoreJsFile () {
   echo "Restoring $1"

@@ -2,6 +2,5 @@
 .DS_Store
 package.zip
 
-js/guarani-helper.min.js
-js/guarani-kolla-helper.min.js
-js/lib/libs.min.js
+js/**/*min.js
+js/**/*.js.map
