@@ -59,6 +59,7 @@ UtnBaHelper.ProfessorsSearchCustomPage = function ($container, services) {
 		hideProfessorData();
 		$searchResultsDiv.show().get(0).scrollIntoView({behavior: "smooth"});
 		$searchResultsDiv.hide();
+		window.EmbraceWebSdk.log.message("Searching professors", 'info', {attributes: {query: query}});
 		return services.apiConnector.searchProfessors(query).then(results => {
 			let trs = results.map(item => {
 				return `<tr><td><a href="#">${item.value}</a></td><td>${item.data.surveysCount}</td><td>${item.data.classScheduleOccurrences}</td></tr>`;

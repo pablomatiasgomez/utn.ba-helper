@@ -52,6 +52,7 @@ UtnBaHelper.CoursesSearchCustomPage = function ($container, services) {
 		$searchResultsDiv.show().get(0).scrollIntoView({behavior: "smooth"});
 		$searchResultsDiv.hide();
 		$courseDataDiv.hide();
+		window.EmbraceWebSdk.log.message("Searching courses", 'info', {attributes: {query: query}});
 		return services.apiConnector.searchCourses(query).then(results => {
 			let trs = results.map(item => {
 				return `<tr><td>${item.value}</td><td><a href="#">${item.data}</a></td></tr>`;
