@@ -57,6 +57,7 @@ UtnBaHelper.Utils = function (apiConnector) {
 		return Promise.resolve().then(() => {
 			return fn();
 		}).catch(e => {
+			window.EmbraceWebSdk.log.logException(e, {handled:true, attributes: {name: name}});
 			console.error(`Error while executing ${name}`, e);
 			// Not logging errors that we can't do anything.
 			if (e instanceof LoggedOutError || e instanceof GuaraniBackendError || e instanceof MissingStudentIdError) return;
