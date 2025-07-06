@@ -584,8 +584,11 @@ UtnBaHelper.PagesDataParser = function (utils) {
 		if (alertBoxText.includes(" ya ha sido respondida.") ||
 			alertBoxText.includes("Gracias por completar la encuesta")) return [];
 
-		// Replace is for cases like 'Inglés Técnico Nivel I (951602) - Comisión: Z2498 - TUTORÍA'
-		let courseTitle = $kollaResponseText.find(".formulario-titulo").text().replace(" - TUTORÍA", ""); // E.g.: 'Simulación (082041) - Comisión: K4053', 'Administración Gerencial (082039) - Comisión: K5054'
+		// E.g.: 'Simulación (082041) - Comisión: K4053', 'Administración Gerencial (082039) - Comisión: K5054'
+		let courseTitle = $kollaResponseText.find(".formulario-titulo").text()
+			.trim()
+			.replace(" - TUTORÍA", "")  // Fix for cases like 'Inglés Técnico Nivel I (951602) - Comisión: Z2498 - TUTORÍA'
+			.replace(/\.$/, ""); // Replace last dot in string, if any, for cases like 'Práctica Profesional Supervisada (951699) - Comisión: I5051.'
 		let groups = /^(.*) \((\d{6})\) - Comisión: ([\w\d]{5})$/.exec(courseTitle);
 		if (!groups) throw new Error(`Survey courseTitle couldn't be parsed: ${courseTitle}. HTML: ${htmlForLog}`);
 		// let courseName = groups[1]; // E.g. Simulación
