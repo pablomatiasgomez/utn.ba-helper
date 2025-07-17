@@ -81,7 +81,7 @@ File: `js/lib/chart.umd.js` can be downloaded from https://cdnjs.com/libraries/C
 ### EmbraceIO
 
 Used to instrument the UI.
-File: `js/lib/embrace-web-sdk-1.7.0.js` can be downloaded from https://cdn.jsdelivr.net/npm/@embrace-io/web-sdk
+File: `js/lib/embrace-web-sdk-1.8.0.js` can be downloaded from https://cdn.jsdelivr.net/npm/@embrace-io/web-sdk
 
 
 ## Stargazers over time
