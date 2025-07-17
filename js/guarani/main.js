@@ -2,11 +2,6 @@
 	window.EmbraceWebSdk.sdk.initSDK({
 		appID: '08sxm',
 		appVersion: chrome.runtime.getManifest().version,
-		defaultInstrumentationConfig: {
-			'session-visibility': {
-				visibilityWaitTimeMs: 15000,
-			},
-		},
 	});
 
 	let apiConnector = new UtnBaHelper.ApiConnector();
