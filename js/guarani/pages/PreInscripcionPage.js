@@ -9,10 +9,10 @@ UtnBaHelper.PreInscripcionPage = function (pagesDataParser, utils, apiConnector)
 		// Collect all combinations for each of the filters:
 		Array.from(document.querySelector('#comision').options).forEach(option => {
 			let values = option.text.split("|");
-			if (values.length !== 3) return;
-			branches.add(values[0].trim());
-			values[1].trim().split(",").map(day => day.trim().split(" ")[0]).forEach(schedule => schedules.add(schedule.trim()));
-			yearQuarters.add(values[2].trim());
+			if (values.length !== 5) return;
+			branches.add(values[1].trim());
+			values[2].trim().split(",").map(day => day.trim().split(" ")[0]).forEach(schedule => schedules.add(schedule.trim()));
+			yearQuarters.add(values[3].trim());
 		});
 
 		let createFilterOptions = opts => {
@@ -39,7 +39,7 @@ UtnBaHelper.PreInscripcionPage = function (pagesDataParser, utils, apiConnector)
 			<a href="#" class="btn btn-info btn-small">Filtrar</a>
 		`);
 
-		$("#insc_alternativas .utnba-helper .filters a").on("click", function () {
+		let filterClassSchedules = function () {
 			// For all the filter types (branches, schedules, yearQuarter) at least one option of each has to match.
 			Array.from(document.querySelector('#comision').options).forEach((option, i) => {
 				if (i === 0) {
@@ -61,8 +61,11 @@ UtnBaHelper.PreInscripcionPage = function (pagesDataParser, utils, apiConnector)
 					document.querySelector(`#insc_alternativas .utnba-helper .previous-professors tbody tr[data-option-id='${optionId}']`).setAttribute("hidden", "");
 				}
 			});
-			return false;
-		})
+		}
+		document.querySelector("#insc_alternativas .utnba-helper .filters a").addEventListener('click', function (event) {
+			event.preventDefault();
+			utils.runAsync("filterClassSchedules", filterClassSchedules);
+		});
 	}
 
 	let addPreviousProfessorsTable = function () {
@@ -70,6 +73,9 @@ UtnBaHelper.PreInscripcionPage = function (pagesDataParser, utils, apiConnector)
 			return fetchCourseAlternatives();
 		}).then(courseOptionsData => {
 			return renderPreviousProfessorsTable(courseOptionsData);
+		}).then(() => {
+			// Once everything is rendered, display filter box:
+			return addClassSchedulesFilter();
 		});
 	};
 
@@ -89,19 +95,20 @@ UtnBaHelper.PreInscripcionPage = function (pagesDataParser, utils, apiConnector)
 	let renderPreviousProfessorsTable = function (courseOptionsData) {
 		let optionId = 0;
 		let optionDetails = [];
-		let previousProfessorsRequest = $("#comision option").toArray()
+		let previousProfessorsRequest = Array.from(document.querySelectorAll("#comision option"))
 			.map(option => {
-				let $option = $(option);
-				let classData = courseOptionsData[$option.val()];
+				let classData = courseOptionsData[option.value];
 				if (!classData) return null;
 
 				let classSchedule = pagesDataParser.mapClassDataToClassSchedule(classData);
 
-				// Set a optionId in the option text to identify in the table that is added later.
+				// Set an optionId in the option text to identify in the table that is added later.
 				optionId++;
-				optionDetails.push($option.text().split("|").map(t => t.trim()).join("<br>") + "<br>" + classSchedule.classCode);
-				$option.text(`(${optionId}) | ${$option.text()} | ${classSchedule.classCode}`);
-				$option.attr("data-option-id", optionId);
+				let textParts = option.textContent.split("|").map(t => t.trim());
+				optionDetails.push(textParts.join("<br>") + "<br>" + classSchedule.classCode);
+
+				option.textContent = `(${optionId}) | ${option.textContent} | ${classSchedule.classCode}`;
+				option.setAttribute("data-option-id", optionId);
 
 				return classSchedule;
 			})
@@ -109,7 +116,7 @@ UtnBaHelper.PreInscripcionPage = function (pagesDataParser, utils, apiConnector)
 
 		// Returns a List that corresponds one to one with the request list, with maps that represent: year -> classCode (the new one) -> List of professors
 		return apiConnector.getPreviousProfessors(previousProfessorsRequest).then(response => {
-			let $tbody = $("#insc_alternativas .utnba-helper .previous-professors tbody");
+			const tbody = document.querySelector("#insc_alternativas .utnba-helper .previous-professors tbody");
 
 			for (let i = 0; i < response.length; i++) {
 				let previousProfessors = response[i];
@@ -118,15 +125,13 @@ UtnBaHelper.PreInscripcionPage = function (pagesDataParser, utils, apiConnector)
 				let content = `<ul class="no-margin">`;
 				Object.entries(previousProfessors)
 					.sort((a, b) => (a[0] < b[0] ? 1 : a[0] > b[0] ? -1 : 0))
-					.forEach(classesByYear => {
-						let year = classesByYear[0];
+					.forEach(([year, classes]) => {
 						content += `<li>${year}<ul class="no-margin">`;
-						Object.entries(classesByYear[1])
+						Object.entries(classes)
 							.sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0))
-							.forEach(professorsByClass => {
-								let newClassCode = professorsByClass[0];
+							.forEach(([newClassCode, professors]) => {
 								content += `<li>${newClassCode}<ul class="no-margin">`;
-								professorsByClass[1].forEach(professor => {
+								professors.forEach(professor => {
 									content += utils.getProfessorLi(professor);
 								});
 								content += `</ul></li>`;
@@ -134,7 +139,11 @@ UtnBaHelper.PreInscripcionPage = function (pagesDataParser, utils, apiConnector)
 						content += `</ul></li>`;
 					});
 				content += `</ul>`;
-				$tbody.append(`<tr data-option-id="${optionId}"><td>(${optionId})</td><td>${optionDetails[i]}</td><td>${content}</td></tr>`);
+
+				const row = document.createElement("tr");
+				row.setAttribute("data-option-id", optionId);
+				row.innerHTML = `<td>(${optionId})</td><td>${optionDetails[i]}</td><td>${content}</td>`;
+				tbody.appendChild(row);
 			}
 		});
 	};
@@ -169,7 +178,6 @@ UtnBaHelper.PreInscripcionPage = function (pagesDataParser, utils, apiConnector)
 							<hr>
 						</div>
 					`);
-					utils.runAsync("addClassSchedulesFilter", addClassSchedulesFilter);
 					utils.runAsync("addPreviousProfessorsTable", addPreviousProfessorsTable);
 				};
 				addPreviousProfessorsTableEventWithDelayFn = () => setTimeout(addPreviousProfessorsTableEventFn, 500);
