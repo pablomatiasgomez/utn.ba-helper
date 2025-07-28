@@ -28,7 +28,6 @@ cat $JS_FILES > js/guarani-helper.min.js
 JS_FILES="\
 js/lib/jquery-3.6.0.min.js \
 js/lib/embrace-web-sdk-1.8.1.js \
-js/lib/xlsx.full.min.js \
 js/ApiConnector.js \
 js/guarani/Consts.js \
 js/guarani/Errors.js \
