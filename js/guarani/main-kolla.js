@@ -3,6 +3,7 @@
 		appID: '08sxm',
 		appVersion: chrome.runtime.getManifest().version,
 	});
+	window.EmbraceWebSdk.session.addProperty("content-script", "main-kolla");
 
 	let apiConnector = new UtnBaHelper.ApiConnector();
 	let utils = new UtnBaHelper.Utils(apiConnector);
