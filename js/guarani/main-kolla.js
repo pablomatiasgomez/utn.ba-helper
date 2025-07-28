@@ -1,4 +1,9 @@
 (function () {
+	window.EmbraceWebSdk.sdk.initSDK({
+		appID: '08sxm',
+		appVersion: chrome.runtime.getManifest().version,
+	});
+
 	let apiConnector = new UtnBaHelper.ApiConnector();
 	let utils = new UtnBaHelper.Utils(apiConnector);
 	return utils.runAsync("mainKolla", () => {
