@@ -26,6 +26,11 @@ uglifyJsFile "js/guarani-kolla-helper.min.js"
 uglifyJsFile "js/background.js"
 uglifyJsFile "js/guarani/foreground.js"
 
+echo "Uploading Embrace symbol files... 1/2"
+npx embrace-web-cli upload -a "08sxm" -t "$(cat embrace-token)" -b "js/guarani-helper.min.js" -m "js/guarani-helper.min.js.map"
+echo "Uploading Embrace symbol files... 2/2"
+npx embrace-web-cli upload -a "08sxm" -t "$(cat embrace-token)" -b "js/guarani-kolla-helper.min.js" -m "js/guarani-kolla-helper.min.js.map"
+
 echo "Creating package.zip ..."
 zip -vr package.zip \
 css/ \
@@ -34,7 +39,6 @@ js/guarani-helper.min.js \
 js/guarani-kolla-helper.min.js \
 js/background.js \
 js/guarani/foreground.js \
-js/lib/libs.min.js \
 manifest.json
 echo "Created package.zip ..."
 
