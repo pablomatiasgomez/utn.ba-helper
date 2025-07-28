@@ -7,6 +7,10 @@ if ! which uglifyjs &> /dev/null ; then
   echo '[ERROR] uglifyjs not found. Install it with "npm install uglify-js -g"'
   exit 1
 fi
+if ! which embrace-web-cli &> /dev/null ; then
+  echo '[ERROR] uglifyjs not found. Install it with "npm install @embrace-io/web-cli -g"'
+  exit 1
+fi
 
 uglifyJsFile () {
   echo "Uglifying $1"
@@ -27,9 +31,9 @@ uglifyJsFile "js/background.js"
 uglifyJsFile "js/guarani/foreground.js"
 
 echo "Uploading Embrace symbol files... 1/2"
-npx embrace-web-cli upload -a "08sxm" -t "$(cat embrace-token)" -b "js/guarani-helper.min.js" -m "js/guarani-helper.min.js.map"
+embrace-web-cli upload -a "08sxm" -t "$(cat embrace-token)" -b "js/guarani-helper.min.js" -m "js/guarani-helper.min.js.map"
 echo "Uploading Embrace symbol files... 2/2"
-npx embrace-web-cli upload -a "08sxm" -t "$(cat embrace-token)" -b "js/guarani-kolla-helper.min.js" -m "js/guarani-kolla-helper.min.js.map"
+embrace-web-cli upload -a "08sxm" -t "$(cat embrace-token)" -b "js/guarani-kolla-helper.min.js" -m "js/guarani-kolla-helper.min.js.map"
 
 echo "Creating package.zip ..."
 zip -vr package.zip \
