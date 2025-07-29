@@ -3,7 +3,7 @@
 		appID: '08sxm',
 		appVersion: chrome.runtime.getManifest().version,
 	});
-	window.EmbraceWebSdk.session.addProperty("content-script", "main");
+	window.EmbraceWebSdk.session.addProperty("content-script", "main", {lifespan: "permanent"});
 
 	let apiConnector = new UtnBaHelper.ApiConnector();
 	let utils = new UtnBaHelper.Utils(apiConnector);
