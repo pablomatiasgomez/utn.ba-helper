@@ -57,10 +57,14 @@ UtnBaHelper.Utils = function (apiConnector) {
 		return Promise.resolve().then(() => {
 			return fn();
 		}).catch(e => {
-			window.EmbraceWebSdk.log.logException(e, {handled:true, attributes: {name: name}});
 			console.error(`Error while executing ${name}`, e);
 			// Not logging errors that we can't do anything.
 			if (e instanceof LoggedOutError || e instanceof GuaraniBackendError || e instanceof MissingStudentIdError) return;
+
+			// Log to Embrace
+			window.EmbraceWebSdk.log.logException(e, {handled: true, attributes: {name: name}});
+
+			// Log to our backend
 			let errStr = stringifyError(e);
 			// Skip first 5 Failed to fetch errors. We only want to know about these if it's failing for every request.
 			// These are usually related to the user closing the tab, dns not resolving, etc, but we cannot get the details.
