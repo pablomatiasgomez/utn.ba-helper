@@ -8,7 +8,7 @@ if ! which uglifyjs &> /dev/null ; then
   exit 1
 fi
 if ! which embrace-web-cli &> /dev/null ; then
-  echo '[ERROR] uglifyjs not found. Install it with "npm install @embrace-io/web-cli -g"'
+  echo '[ERROR] embrace-web-cli not found. Install it with "npm install @embrace-io/web-cli -g"'
   exit 1
 fi
 
