@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "UTN.BA Helper (ex Siga Helper)",
   "short_name": "UTN.BA Helper",
-  "version": "6.8.1",
+  "version": "6.8.2",
   "description": "UTN.BA Helper facilita el uso de la web de la UTN - FRBA.",
   "author": "Pablo Matías Gomez",
   "icons": {
