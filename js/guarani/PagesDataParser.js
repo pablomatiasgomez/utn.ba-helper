@@ -47,7 +47,7 @@ UtnBaHelper.PagesDataParser = function (utils) {
 		return fetchWithRetry(url, fetchOpts).catch(e => {
 			throw utils.wrapError(`Error on fetchAjaxContents for ${cacheKey}`, e);
 		}).then(response => {
-			return response.json();
+			return response.text().then(r => JSON.parse(r));
 		}).then(response => {
 			if (response.cod === "1" && response.titulo === "Grado - Acceso" && response.operacion === "acceso") throw new LoggedOutError();
 			if (response.cod === "-2" && response.cont.url.includes("/autogestion/grado/acceso/login")) throw new LoggedOutError();
