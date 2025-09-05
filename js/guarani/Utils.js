@@ -66,9 +66,9 @@ UtnBaHelper.Utils = function (apiConnector) {
 
 			// Log to our backend
 			let errStr = stringifyError(e);
-			// Skip first 5 Failed to fetch errors. We only want to know about these if it's failing for every request.
-			// These are usually related to the user closing the tab, dns not resolving, etc, but we cannot get the details.
-			if (errStr.includes("Failed to fetch") && ++failedToFetchErrors <= 3) return;
+			// Skip first 2 Failed to fetch errors. We only want to know about these if it's failing for every request.
+			// These are usually related to the user closing the tab, dns not resolving, etc., but we cannot get the details.
+			if (errStr.includes("Failed to fetch") && ++failedToFetchErrors <= 2) return;
 			return apiConnector.logMessage(name, true, errStr);
 		});
 	};
