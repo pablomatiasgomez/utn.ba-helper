@@ -2,6 +2,11 @@
 	window.EmbraceWebSdk.initSDK({
 		appID: '08sxm',
 		appVersion: chrome.runtime.getManifest().version,
+		defaultInstrumentationConfig: {
+			'session-visibility': {
+				limitedSessionMaxDurationMs: 5000,
+			},
+		},
 	});
 	window.EmbraceWebSdk.session.addProperty("content-script", "main-kolla", {lifespan: "permanent"});
 
