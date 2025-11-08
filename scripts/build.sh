@@ -6,7 +6,7 @@ echo "Building app.."
 JS_FILES="\
 js/lib/jquery-3.6.0.min.js \
 js/lib/chart.umd.js \
-js/lib/embrace-web-sdk-2.2.0.js \
+js/lib/embrace-web-sdk-2.8.0.js \
 js/lib/xlsx.full.min.js \
 js/ApiConnector.js \
 js/guarani/Consts.js \
@@ -27,7 +27,7 @@ cat $JS_FILES > js/guarani-helper.min.js
 
 JS_FILES="\
 js/lib/jquery-3.6.0.min.js \
-js/lib/embrace-web-sdk-2.2.0.js \
+js/lib/embrace-web-sdk-2.8.0.js \
 js/ApiConnector.js \
 js/guarani/Consts.js \
 js/guarani/Errors.js \

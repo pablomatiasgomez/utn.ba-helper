@@ -7,8 +7,15 @@
 				limitedSessionMaxDurationMs: 5000,
 			},
 		},
+		instrumentations: [
+			window.EmbraceWebSdk.getNavigationInstrumentation(),
+		],
 	});
 	window.EmbraceWebSdk.session.addProperty("content-script", "main", {lifespan: "permanent"});
+	window.EmbraceWebSdk.getNavigationInstrumentation().setCurrentRoute({
+		url: window.location.pathname,
+		path: window.location.pathname
+	});
 
 	let apiConnector = new UtnBaHelper.ApiConnector();
 	let utils = new UtnBaHelper.Utils(apiConnector);
