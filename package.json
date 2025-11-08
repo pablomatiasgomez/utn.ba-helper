@@ -1,0 +1,23 @@
+{
+  "name": "utn.ba-helper",
+  "version": "6.8.5",
+  "description": "UTN.BA Helper facilita el uso de la web de la UTN - FRBA.",
+  "private": true,
+  "scripts": {
+    "watch": "webpack --mode=development --watch --config config/webpack.config.js",
+    "build": "webpack --mode=production --config config/webpack.config.js",
+    "pack": "node pack.js",
+    "repack": "npm run build && npm run pack"
+  },
+  "devDependencies": {
+    "adm-zip": "^0.5.16",
+    "copy-webpack-plugin": "^10.2.4",
+    "css-loader": "^6.11.0",
+    "file-loader": "^6.2.0",
+    "mini-css-extract-plugin": "^2.9.4",
+    "prettier": "^2.8.8",
+    "webpack": "^5.102.1",
+    "webpack-cli": "^4.10.0",
+    "webpack-merge": "^5.10.0"
+  }
+}

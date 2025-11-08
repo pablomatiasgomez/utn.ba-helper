@@ -6,9 +6,9 @@
   "description": "UTN.BA Helper facilita el uso de la web de la UTN - FRBA.",
   "author": "Pablo Matías Gomez",
   "icons": {
-    "16": "images/icons/icon16.png",
-    "48": "images/icons/icon48.png",
-    "128": "images/icons/icon128.png"
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
   },
   "content_scripts": [
     {

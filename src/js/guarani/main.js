@@ -1,3 +1,5 @@
+import { ApiConnector } from '../ApiConnector.js';
+
 (function () {
 	window.EmbraceWebSdk.initSDK({
 		appID: '08sxm',
@@ -17,7 +19,7 @@
 		path: window.location.pathname
 	});
 
-	let apiConnector = new UtnBaHelper.ApiConnector();
+	let apiConnector = new ApiConnector();
 	let utils = new UtnBaHelper.Utils(apiConnector);
 	return utils.runAsync("main", () => {
 		let store = new UtnBaHelper.Store();
