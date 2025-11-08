@@ -45,7 +45,7 @@ UtnBaHelper.PagesDataParser = function (utils) {
 		}
 
 		return fetchWithRetry(url, fetchOpts).catch(e => {
-			throw utils.wrapError(`Error on fetchAjaxContents for ${cacheKey}`, e);
+			throw new Error(`Error on fetchAjaxContents for ${cacheKey}`, {cause: e});
 		}).then(response => {
 			return response.text().then(r => JSON.parse(r));
 		}).then(response => {
@@ -89,13 +89,13 @@ UtnBaHelper.PagesDataParser = function (utils) {
 		}
 
 		return fetchWithRetry(url).catch(e => {
-			throw utils.wrapError(`Error on fetchXlsContents for ${url}`, e);
+			throw new Error(`Error on fetchXlsContents for ${url}`, {cause: e});
 		}).then(response => {
 			return response.arrayBuffer();
 		}).then(response => {
 			let uint8Array = new Uint8Array(response);
 			return Promise.resolve().then(() => XLSX.read(uint8Array), {type: "array"}).catch(e => {
-				throw utils.wrapError(`Error on XLSX.read for ${url}. uint8Array: [${uint8Array}].`, e);
+				throw new Error(`Error on XLSX.read for ${url}. uint8Array: [${uint8Array}].`, {cause: e});
 			});
 		}).then(contents => {
 			RESPONSES_CACHE[url] = contents;
@@ -541,7 +541,7 @@ UtnBaHelper.PagesDataParser = function (utils) {
 				schedules: schedules,
 			};
 		} catch (e) {
-			throw utils.wrapError(`Couldn't parse classData: ${JSON.stringify(classData)}`, e);
+			throw new Error(`Couldn't parse classData: ${JSON.stringify(classData)}`, {cause: e});
 		}
 	}
 

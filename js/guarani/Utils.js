@@ -25,28 +25,25 @@ UtnBaHelper.Utils = function (apiConnector) {
 
 	let stringifyError = function (error) {
 		if (error instanceof Error) {
-			// Stack can include the message in some errors, but not in all cases.
 			let message = error.toString();
-			if (error.stack.startsWith(message)) {
-				return error.stack;
-			} else {
-				return message + "\n" + error.stack;
+			let result = error.stack;
+
+			// `stack` usually includes the message in the first line, but not in all cases.
+			if (!error.stack.startsWith(message)) {
+				result = message + "\n" + error.stack;
 			}
+
+			// Include the cause chain if present
+			if (error.cause) {
+				result += "\nCaused by: " + stringifyError(error.cause);
+			}
+
+			return result;
 		}
 		if (typeof error === "object") {
 			return JSON.stringify(error);
 		}
 		return error + "";
-	};
-
-	let wrapError = function (message, error) {
-		let newError = new Error(message);
-		// Remove this function (wrapError) call from the stack...
-		let newStack = newError.stack.split("\n");
-		newStack.splice(1, 1);
-		newStack = newStack.join("\n");
-		newError.stack = `${newStack}\nCaused by: ${error.stack}`;
-		return newError;
 	};
 
 	/**
@@ -129,7 +126,6 @@ UtnBaHelper.Utils = function (apiConnector) {
 		delay: delay,
 		backgroundFetch: backgroundFetch,
 		injectScript: injectScript,
-		wrapError: wrapError,
 		runAsync: runAsync,
 		waitForElementToHide: waitForElementToHide,
 
