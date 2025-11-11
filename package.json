@@ -5,9 +5,9 @@
   "private": true,
   "scripts": {
     "watch": "webpack --watch --config webpack.config.js",
-    "build": "webpack --config webpack.config.js && npm run process-sourcemaps",
-    "process-sourcemaps": "embrace-web-cli upload -a 08sxm -t \"$(cat embrace-token)\" -p ./build",
-    "pack": "npm run build && node pack.js"
+    "build": "webpack --config webpack.config.js",
+    "pack": "npm run build && npm run process-sourcemaps && node pack.js && open ./release",
+    "process-sourcemaps": "embrace-web-cli upload -a 08sxm -t \"$(cat embrace-token)\" -p ./build"
   },
   "dependencies": {
     "@embrace-io/web-sdk": "^2.8.0",

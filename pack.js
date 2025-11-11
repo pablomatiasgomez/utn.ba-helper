@@ -1,12 +1,17 @@
-const {readFileSync, existsSync, mkdirSync} = require("fs");
-const {parse, resolve} = require("path");
+const {readFileSync, writeFileSync, existsSync, mkdirSync} = require("fs");
+const {resolve} = require("path");
 const AdmZip = require("adm-zip");
 
-const {base} = parse(__dirname);
-const {version} = JSON.parse(readFileSync(resolve(__dirname, "build", "manifest.json"), "utf8"));
+const {name, version} = JSON.parse(readFileSync(resolve(__dirname, "package.json"), "utf8"));
+
+// Update version in build/manifest.json
+const manifestPath = resolve(__dirname, "build", "manifest.json");
+const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+manifest.version = version;
+writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + "\n", "utf8");
 
 const outDir = "release";
-const filename = `${base}-v${version}.zip`;
+const filename = `${name}-v${version}.zip`;
 
 if (!existsSync(outDir)) mkdirSync(outDir);
 

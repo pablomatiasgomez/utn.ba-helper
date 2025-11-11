@@ -7,8 +7,6 @@ embrace-token
 /node_modules
 npm-debug.log*
 
-
-# build dir
+# build dirs
 /build
 /release
-package.zip
