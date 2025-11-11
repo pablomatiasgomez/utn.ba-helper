@@ -1,5 +1,6 @@
-if (!window.UtnBaHelper) window.UtnBaHelper = {};
-UtnBaHelper.DataCollector = function (store, pagesDataParser, apiConnector) {
+import {trace} from "@embrace-io/web-sdk";
+
+export const DataCollector = function (store, pagesDataParser, apiConnector) {
 
 	const LOCAL_STORAGE_DATA_COLLECTOR_KEY = "UtnBaHelper.DataCollector";
 
@@ -57,7 +58,7 @@ UtnBaHelper.DataCollector = function (store, pagesDataParser, apiConnector) {
 				return !lastTimeCollected[collectMethod.key] || Date.now() - lastTimeCollected[collectMethod.key] > collectMethod.minTime;
 			}).forEach(collectMethod => {
 				promise = promise.then(() => {
-					const span = window.EmbraceWebSdk.trace.startSpan("Collect-" + collectMethod.key);
+					const span = trace.startSpan("Collect-" + collectMethod.key);
 					return collectMethod.method()
 						.then(() => span.end())
 						.catch((e) => {

@@ -1,5 +1,4 @@
-if (!window.UtnBaHelper) window.UtnBaHelper = {};
-UtnBaHelper.PreInscripcionPage = function (pagesDataParser, utils, apiConnector) {
+export const PreInscripcionPage = function (pagesDataParser, utils, apiConnector) {
 
 	let addClassSchedulesFilter = function (alternativesCombo, filtersDiv, previousProfessorsTableBody) {
 		let branches = new Set();

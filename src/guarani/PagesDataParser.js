@@ -1,7 +1,10 @@
 // noinspection JSNonASCIINames
 
-if (!window.UtnBaHelper) window.UtnBaHelper = {};
-UtnBaHelper.PagesDataParser = function (utils) {
+import * as XLSX from 'xlsx';
+import {Consts} from './Consts.js';
+import {LoggedOutError, RedirectedToHomeError, GuaraniBackendError, MissingStudentIdError} from './Errors.js';
+
+export const PagesDataParser = function (utils) {
 
 	// We want to fetch only once each page.
 	let RESPONSES_CACHE = {};
@@ -439,8 +442,8 @@ UtnBaHelper.PagesDataParser = function (utils) {
 	};
 
 	let getWeightedGrade = function (date, grade) {
-		if (date < UtnBaHelper.Consts.NEW_GRADES_REGULATION_DATE) {
-			return UtnBaHelper.Consts.WEIGHTED_GRADES[grade];
+		if (date < Consts.NEW_GRADES_REGULATION_DATE) {
+			return Consts.WEIGHTED_GRADES[grade];
 		} else {
 			return grade;
 		}
@@ -506,11 +509,11 @@ UtnBaHelper.PagesDataParser = function (utils) {
 	 */
 	let parseSchedulesFromArray = function (arr) {
 		return arr.map(schedule => {
-			let day = Object.entries(UtnBaHelper.Consts.DAYS).filter(entry => entry[1] === schedule.dia_semana).map(entry => entry[0])[0];
+			let day = Object.entries(Consts.DAYS).filter(entry => entry[1] === schedule.dia_semana).map(entry => entry[0])[0];
 			if (!day) throw new Error(`Couldn't parse day: ${schedule.dia_semana}`);
 
 			let shiftIdx = Math.floor((parseInt(schedule.hora_catedra_inicio) - 1) / 7); // 0:MORNING, 1:AFTERNOON, 2:NIGHT
-			let shift = Object.keys(UtnBaHelper.Consts.HOURS)[shiftIdx];
+			let shift = Object.keys(Consts.HOURS)[shiftIdx];
 			let firstHour = (parseInt(schedule.hora_catedra_inicio) - 1) % 7;
 			let lastHour = (parseInt(schedule.hora_catedra_fin) - 1) % 7;
 			return {

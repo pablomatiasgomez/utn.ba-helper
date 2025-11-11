@@ -1,27 +1,23 @@
-(function () {
-	window.EmbraceWebSdk.initSDK({
-		appID: '08sxm',
-		appVersion: chrome.runtime.getManifest().version,
-		defaultInstrumentationConfig: {
-			'session-visibility': {
-				limitedSessionMaxDurationMs: 5000,
-			},
-		},
-		instrumentations: [
-			window.EmbraceWebSdk.getNavigationInstrumentation(),
-		],
-	});
-	window.EmbraceWebSdk.session.addProperty("content-script", "main-kolla", {lifespan: "permanent"});
-	window.EmbraceWebSdk.getNavigationInstrumentation().setCurrentRoute({
-		url: window.location.pathname,
-		path: window.location.pathname
-	});
+import './main.css';
 
-	let apiConnector = new UtnBaHelper.ApiConnector();
-	let utils = new UtnBaHelper.Utils(apiConnector);
+import $ from 'jquery';
+window.$ = window.jQuery = $;
+
+import {initializeEmbrace} from '../Embrace.js';
+
+import {ApiConnector} from '../ApiConnector.js';
+import {Utils} from './Utils.js';
+import {Store} from './Store.js';
+import {PagesDataParser} from './PagesDataParser.js';
+
+(function () {
+	initializeEmbrace("main-kolla");
+
+	let apiConnector = new ApiConnector();
+	let utils = new Utils(apiConnector);
 	return utils.runAsync("mainKolla", () => {
-		let store = new UtnBaHelper.Store();
-		let pagesDataParser = new UtnBaHelper.PagesDataParser(utils);
+		let store = new Store();
+		let pagesDataParser = new PagesDataParser(utils);
 
 		// This main will only be executed on kolla pages.
 		if (!window.location.pathname.startsWith("/siu/kolla")) return;

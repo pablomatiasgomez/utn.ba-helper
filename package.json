@@ -1,0 +1,27 @@
+{
+  "name": "utn.ba-helper",
+  "version": "6.8.5",
+  "description": "A Chrome extension that makes navigating and using the UTN.BA - FRBA website easier.",
+  "private": true,
+  "scripts": {
+    "watch": "webpack --watch --config webpack.config.js",
+    "build": "webpack --config webpack.config.js",
+    "pack": "npm run build && npm run process-sourcemaps && node pack.js && open ./release",
+    "process-sourcemaps": "embrace-web-cli upload -a 08sxm -t \"$(cat embrace-token)\" -p ./build"
+  },
+  "dependencies": {
+    "@embrace-io/web-sdk": "^2.8.0",
+    "chart.js": "^4.5.1",
+    "jquery": "^3.7.1",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+  },
+  "devDependencies": {
+    "@embrace-io/web-cli": "^2.8.0",
+    "adm-zip": "^0.5.16",
+    "copy-webpack-plugin": "^10.2.4",
+    "css-loader": "^6.11.0",
+    "mini-css-extract-plugin": "^2.9.4",
+    "webpack": "^5.102.1",
+    "webpack-cli": "^4.10.0"
+  }
+}
