@@ -9,7 +9,7 @@
 <p align="center"><a href="https://chromewebstore.google.com/detail/utnba-helper-ex-siga-help/jdgdheoeghamkhfppapjchbojhehimpe"><img src="https://img.shields.io/chrome-web-store/v/jdgdheoeghamkhfppapjchbojhehimpe.svg" alt="install"></a></p>
 <p align="center"><img src="https://github.com/pablomatiasgomez/utn.ba-helper/raw/master/images/icons/icon128.png" alt="logo"></p>
 
-UTN.BA Helper is an extension (currently available for Chrome) that helps the usage of the UTN.BA web pages.
+UTN.BA Helper is a Chrome extension that makes navigating and using the UTN.BA - FRBA website easier.
 
 Features description of this extension are written in Spanish as the target users are from Argentina.
 
@@ -64,24 +64,6 @@ UTN.BA Helper facilita el uso de la web de la UTN - FRBA.
 |   Signed | Firmada     |
 |   Passed | Aprobada    |
 |   Failed | Desaprobada |
-
-## Dependencies
-
-### SheetJS
-
-XLS parser is used to parse information from xls documents. The file located at `js/lib/xls.full.min.js` should be
-updated using the `full` version of the SheetJS module, which can be downloaded at https://cdn.sheetjs.com/ or directly
-from cdnjs at https://cdnjs.com/libraries/xlsx
-
-### ChartJS
-
-Used to render charts in the UI.
-File: `js/lib/chart.umd.js` can be downloaded from https://cdnjs.com/libraries/Chart.js (the umd file has to be used)
-
-### EmbraceIO
-
-Used to instrument the UI.
-File: `js/lib/embrace-web-sdk-2.8.0.js` can be downloaded from https://cdn.jsdelivr.net/npm/@embrace-io/web-sdk
 
 
 ## Stargazers over time

@@ -1,5 +1,6 @@
-if (!window.UtnBaHelper) window.UtnBaHelper = {};
-UtnBaHelper.PlanTrackingCustomPage = function ($container, services) {
+import {CustomPages} from './CustomPages.js';
+
+export const PlanTrackingCustomPage = function ($container, services) {
 
 	const TRANSLATIONS = {
 		"SIGNED": "Firmada",
@@ -182,7 +183,7 @@ UtnBaHelper.PlanTrackingCustomPage = function ($container, services) {
 							</span>
 						</a>
 						<div class="text-small">[${course.courseCode}] ${status ? " - " + status : ""}</div>
-						<div class="text-medium">${course.courseName}<a class="no-ajax" href="${UtnBaHelper.CustomPages.getCourseResultsUrl(course.courseCode)}" target="_blank">&#x2197;</a></div>
+						<div class="text-medium">${course.courseName}<a class="no-ajax" href="${CustomPages.getCourseResultsUrl(course.courseCode)}" target="_blank">&#x2197;</a></div>
 					</div>`;
 			}).join("");
 		};
@@ -230,5 +231,5 @@ UtnBaHelper.PlanTrackingCustomPage = function ($container, services) {
 	};
 };
 
-UtnBaHelper.PlanTrackingCustomPage.menuName = "Seguimiento de Plan";
-UtnBaHelper.PlanTrackingCustomPage.customParamKey = "";
+PlanTrackingCustomPage.menuName = "Seguimiento de Plan";
+PlanTrackingCustomPage.customParamKey = "";

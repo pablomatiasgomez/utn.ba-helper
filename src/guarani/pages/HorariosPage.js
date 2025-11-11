@@ -1,5 +1,4 @@
-if (!window.UtnBaHelper) window.UtnBaHelper = {};
-UtnBaHelper.HorariosPage = function () {
+export const HorariosPage = function () {
 
 	let trimCourseName = function (name) {
 		name = name.trim();

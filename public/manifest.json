@@ -1,4 +1,4 @@
-﻿{
+{
   "manifest_version": 3,
   "name": "UTN.BA Helper (ex Siga Helper)",
   "short_name": "UTN.BA Helper",
@@ -16,10 +16,10 @@
         "*://*.guarani.frba.utn.edu.ar/*"
       ],
       "js": [
-        "js/guarani-helper.min.js"
+        "guarani/main.js"
       ],
       "css": [
-        "css/guarani-helper.css"
+        "guarani/main.css"
       ]
     },
     {
@@ -27,10 +27,10 @@
         "*://*.kolla.frba.utn.edu.ar/*"
       ],
       "js": [
-        "js/guarani-kolla-helper.min.js"
+        "guarani/main-kolla.js"
       ],
       "css": [
-        "css/guarani-helper.css"
+        "guarani/main.css"
       ],
       "all_frames": true
     }
@@ -38,7 +38,7 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "js/guarani/foreground.js"
+        "guarani/foreground.js"
       ],
       "matches": [
         "*://*.frba.utn.edu.ar/*"
@@ -49,7 +49,7 @@
     "*://*.kolla.frba.utn.edu.ar/*"
   ],
   "background": {
-    "service_worker": "js/background.js"
+    "service_worker": "background.js"
   },
   "permissions": [
     "storage"

@@ -1,5 +1,9 @@
-if (!window.UtnBaHelper) window.UtnBaHelper = {};
-UtnBaHelper.Utils = function (apiConnector) {
+import {Consts} from './Consts.js';
+import {LoggedOutError, GuaraniBackendError, MissingStudentIdError} from './Errors.js';
+import {log} from "@embrace-io/web-sdk";
+import {CustomPages} from './custompages/CustomPages.js';
+
+export const Utils = function (apiConnector) {
 	// TODO utils eventually shouldn't be instantiated and should be a set of functions.
 	//  But we need to get rid of using apiConnector here.
 
@@ -59,7 +63,7 @@ UtnBaHelper.Utils = function (apiConnector) {
 			if (e instanceof LoggedOutError || e instanceof GuaraniBackendError || e instanceof MissingStudentIdError) return;
 
 			// Log to Embrace
-			window.EmbraceWebSdk.log.logException(e, {handled: true, attributes: {name: name}});
+			log.logException(e, {handled: true, attributes: {name: name}});
 
 			// Log to our backend
 			let errStr = stringifyError(e);
@@ -89,8 +93,8 @@ UtnBaHelper.Utils = function (apiConnector) {
 		if (!schedules) return "-";
 		return schedules
 			.map(schedule =>
-				UtnBaHelper.Consts.DAYS[schedule.day] + " (" + UtnBaHelper.Consts.TIME_SHIFTS[schedule.shift] + ") " +
-				UtnBaHelper.Consts.HOURS[schedule.shift][schedule.firstHour].start + "hs a " + UtnBaHelper.Consts.HOURS[schedule.shift][schedule.lastHour].end + "hs")
+				Consts.DAYS[schedule.day] + " (" + Consts.TIME_SHIFTS[schedule.shift] + ") " +
+				Consts.HOURS[schedule.shift][schedule.firstHour].start + "hs a " + Consts.HOURS[schedule.shift][schedule.lastHour].end + "hs")
 			.join(" y ");
 	};
 
@@ -116,7 +120,7 @@ UtnBaHelper.Utils = function (apiConnector) {
 		}
 		return `<li style="font-size: ${fontSize}">
 			${getOverallScoreSpan(professor.overallScore)}
-			<a class="no-ajax" href="${UtnBaHelper.CustomPages.getProfessorSurveyResultsUrl(professor.name)}" target="_blank">${professor.name}</a> (${professor.role})
+			<a class="no-ajax" href="${CustomPages.getProfessorSurveyResultsUrl(professor.name)}" target="_blank">${professor.name}</a> (${professor.role})
 		</li>`;
 	};
 

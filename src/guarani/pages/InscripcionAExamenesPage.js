@@ -1,12 +1,9 @@
-if (!window.UtnBaHelper) window.UtnBaHelper = {};
-
 const textChild = document.createTextNode(" o haciendo click ")
 const redirectLink = document.createElement('a')
 redirectLink.href = "/autogestion/grado/datos_censales"
 redirectLink.textContent = "AQUÍ"
 
-UtnBaHelper.InscripcionAExamenesPage = function () {
-
+export const InscripcionAExamenesPage = function () {
 
 	const errorMessageSelector = document.querySelector('#lista_materias > div.alert.info.strong')
 
