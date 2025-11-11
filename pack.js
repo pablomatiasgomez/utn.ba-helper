@@ -19,4 +19,4 @@ const zip = new AdmZip();
 zip.addLocalFolder("build", "", (filename) => !filename.endsWith(".map"));
 zip.writeZip(`${outDir}/${filename}`);
 
-console.log(`Success! Created a ${filename} file under ${outDir} directory. You can upload this file to web store.`);
+console.log(`Successfully created ${filename} file under ${outDir} directory.`);
