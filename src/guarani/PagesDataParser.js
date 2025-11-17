@@ -592,6 +592,8 @@ export const PagesDataParser = function (utils) {
 			.trim()
 			.replace(" - TUTORÍA", "")  // Fix for cases like 'Inglés Técnico Nivel I (951602) - Comisión: Z2498 - TUTORÍA'
 			.replace(/\.$/, ""); // Replace last dot in string, if any, for cases like 'Práctica Profesional Supervisada (951699) - Comisión: I5051.'
+		if (courseTitle === "21 - Encuesta de Satisfacción") return []; // Other types of surveys that we don't care.
+
 		let groups = /^(.*) \((\d{6})\) - Comisión: ([\w\d]{5})$/.exec(courseTitle);
 		if (!groups) throw new Error(`Survey courseTitle couldn't be parsed: ${courseTitle}. HTML: ${htmlForLog}`);
 		// let courseName = groups[1]; // E.g. Simulación
