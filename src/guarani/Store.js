@@ -1,5 +1,4 @@
-if (!window.UtnBaHelper) window.UtnBaHelper = {};
-UtnBaHelper.Store = function () {
+export const Store = function () {
 
 	const HASHED_STUDENT_ID_DATASTORE_KEY = "UtnBaHelper.HashedStudentId";
 

@@ -18,7 +18,7 @@ const requestFetch = function (requestInfo) {
 			let isJson = contentType && contentType.indexOf("application/json") !== -1;
 			let useCharsetDecoder = contentType && contentType.indexOf("charset=iso-8859-1") !== -1;
 			if (isJson) {
-				return response.json();
+				return response.text().then(r => JSON.parse(r));
 			} else if (useCharsetDecoder) {
 				return response.arrayBuffer().then(buffer => new TextDecoder("iso-8859-1").decode(buffer));
 			} else {

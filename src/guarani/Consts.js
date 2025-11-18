@@ -1,5 +1,4 @@
-if (!window.UtnBaHelper) window.UtnBaHelper = {};
-UtnBaHelper.Consts = {
+export const Consts = {
 
 	HOURS: {
 		"MORNING": {

@@ -1,8 +1,12 @@
 .idea/
 .DS_Store
-package.zip
 
-js/**/*min.js
-js/**/*.js.map
+embrace-token
 
-node_modules
+# dependencies
+/node_modules
+npm-debug.log*
+
+# build dirs
+/build
+/release

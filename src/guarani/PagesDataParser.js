@@ -1,7 +1,10 @@
 // noinspection JSNonASCIINames
 
-if (!window.UtnBaHelper) window.UtnBaHelper = {};
-UtnBaHelper.PagesDataParser = function (utils) {
+import * as XLSX from 'xlsx';
+import {Consts} from './Consts.js';
+import {LoggedOutError, RedirectedToHomeError, GuaraniBackendError, MissingStudentIdError} from './Errors.js';
+
+export const PagesDataParser = function (utils) {
 
 	// We want to fetch only once each page.
 	let RESPONSES_CACHE = {};
@@ -45,9 +48,9 @@ UtnBaHelper.PagesDataParser = function (utils) {
 		}
 
 		return fetchWithRetry(url, fetchOpts).catch(e => {
-			throw utils.wrapError(`Error on fetchAjaxContents for ${cacheKey}`, e);
+			throw new Error(`Error on fetchAjaxContents for ${cacheKey}`, {cause: e});
 		}).then(response => {
-			return response.json();
+			return response.text().then(r => JSON.parse(r));
 		}).then(response => {
 			if (response.cod === "1" && response.titulo === "Grado - Acceso" && response.operacion === "acceso") throw new LoggedOutError();
 			if (response.cod === "-2" && response.cont.url.includes("/autogestion/grado/acceso/login")) throw new LoggedOutError();
@@ -89,13 +92,13 @@ UtnBaHelper.PagesDataParser = function (utils) {
 		}
 
 		return fetchWithRetry(url).catch(e => {
-			throw utils.wrapError(`Error on fetchXlsContents for ${url}`, e);
+			throw new Error(`Error on fetchXlsContents for ${url}`, {cause: e});
 		}).then(response => {
 			return response.arrayBuffer();
 		}).then(response => {
 			let uint8Array = new Uint8Array(response);
 			return Promise.resolve().then(() => XLSX.read(uint8Array), {type: "array"}).catch(e => {
-				throw utils.wrapError(`Error on XLSX.read for ${url}. uint8Array: [${uint8Array}].`, e);
+				throw new Error(`Error on XLSX.read for ${url}. uint8Array: [${uint8Array}].`, {cause: e});
 			});
 		}).then(contents => {
 			RESPONSES_CACHE[url] = contents;
@@ -439,8 +442,8 @@ UtnBaHelper.PagesDataParser = function (utils) {
 	};
 
 	let getWeightedGrade = function (date, grade) {
-		if (date < UtnBaHelper.Consts.NEW_GRADES_REGULATION_DATE) {
-			return UtnBaHelper.Consts.WEIGHTED_GRADES[grade];
+		if (date < Consts.NEW_GRADES_REGULATION_DATE) {
+			return Consts.WEIGHTED_GRADES[grade];
 		} else {
 			return grade;
 		}
@@ -506,11 +509,11 @@ UtnBaHelper.PagesDataParser = function (utils) {
 	 */
 	let parseSchedulesFromArray = function (arr) {
 		return arr.map(schedule => {
-			let day = Object.entries(UtnBaHelper.Consts.DAYS).filter(entry => entry[1] === schedule.dia_semana).map(entry => entry[0])[0];
+			let day = Object.entries(Consts.DAYS).filter(entry => entry[1] === schedule.dia_semana).map(entry => entry[0])[0];
 			if (!day) throw new Error(`Couldn't parse day: ${schedule.dia_semana}`);
 
 			let shiftIdx = Math.floor((parseInt(schedule.hora_catedra_inicio) - 1) / 7); // 0:MORNING, 1:AFTERNOON, 2:NIGHT
-			let shift = Object.keys(UtnBaHelper.Consts.HOURS)[shiftIdx];
+			let shift = Object.keys(Consts.HOURS)[shiftIdx];
 			let firstHour = (parseInt(schedule.hora_catedra_inicio) - 1) % 7;
 			let lastHour = (parseInt(schedule.hora_catedra_fin) - 1) % 7;
 			return {
@@ -541,7 +544,7 @@ UtnBaHelper.PagesDataParser = function (utils) {
 				schedules: schedules,
 			};
 		} catch (e) {
-			throw utils.wrapError(`Couldn't parse classData: ${JSON.stringify(classData)}`, e);
+			throw new Error(`Couldn't parse classData: ${JSON.stringify(classData)}`, {cause: e});
 		}
 	}
 
@@ -584,8 +587,13 @@ UtnBaHelper.PagesDataParser = function (utils) {
 		if (alertBoxText.includes(" ya ha sido respondida.") ||
 			alertBoxText.includes("Gracias por completar la encuesta")) return [];
 
-		// Replace is for cases like 'Inglés Técnico Nivel I (951602) - Comisión: Z2498 - TUTORÍA'
-		let courseTitle = $kollaResponseText.find(".formulario-titulo").text().replace(" - TUTORÍA", ""); // E.g.: 'Simulación (082041) - Comisión: K4053', 'Administración Gerencial (082039) - Comisión: K5054'
+		// E.g.: 'Simulación (082041) - Comisión: K4053', 'Administración Gerencial (082039) - Comisión: K5054'
+		let courseTitle = $kollaResponseText.find(".formulario-titulo").text()
+			.trim()
+			.replace(" - TUTORÍA", "")  // Fix for cases like 'Inglés Técnico Nivel I (951602) - Comisión: Z2498 - TUTORÍA'
+			.replace(/\.$/, ""); // Replace last dot in string, if any, for cases like 'Práctica Profesional Supervisada (951699) - Comisión: I5051.'
+		if (courseTitle === "21 - Encuesta de Satisfacción") return []; // Other types of surveys that we don't care.
+
 		let groups = /^(.*) \((\d{6})\) - Comisión: ([\w\d]{5})$/.exec(courseTitle);
 		if (!groups) throw new Error(`Survey courseTitle couldn't be parsed: ${courseTitle}. HTML: ${htmlForLog}`);
 		// let courseName = groups[1]; // E.g. Simulación

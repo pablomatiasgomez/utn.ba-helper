@@ -1,5 +1,4 @@
-if (!window.UtnBaHelper) window.UtnBaHelper = {};
-UtnBaHelper.ApiConnector = function () {
+export const ApiConnector = function () {
 
 	const CLIENT = `CHROME@${chrome.runtime.getManifest().version}`;
 	const BASE_API_URL = "https://www.pablomatiasgomez.com.ar/utnba-helper/v2";

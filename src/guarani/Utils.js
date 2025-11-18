@@ -1,5 +1,9 @@
-if (!window.UtnBaHelper) window.UtnBaHelper = {};
-UtnBaHelper.Utils = function (apiConnector) {
+import {Consts} from './Consts.js';
+import {LoggedOutError, GuaraniBackendError, MissingStudentIdError} from './Errors.js';
+import {log} from "@embrace-io/web-sdk";
+import {CustomPages} from './custompages/CustomPages.js';
+
+export const Utils = function (apiConnector) {
 	// TODO utils eventually shouldn't be instantiated and should be a set of functions.
 	//  But we need to get rid of using apiConnector here.
 
@@ -25,28 +29,25 @@ UtnBaHelper.Utils = function (apiConnector) {
 
 	let stringifyError = function (error) {
 		if (error instanceof Error) {
-			// Stack can include the message in some errors, but not in all cases.
 			let message = error.toString();
-			if (error.stack.startsWith(message)) {
-				return error.stack;
-			} else {
-				return message + "\n" + error.stack;
+			let result = error.stack;
+
+			// `stack` usually includes the message in the first line, but not in all cases.
+			if (!error.stack.startsWith(message)) {
+				result = message + "\n" + error.stack;
 			}
+
+			// Include the cause chain if present
+			if (error.cause) {
+				result += "\nCaused by: " + stringifyError(error.cause);
+			}
+
+			return result;
 		}
 		if (typeof error === "object") {
 			return JSON.stringify(error);
 		}
 		return error + "";
-	};
-
-	let wrapError = function (message, error) {
-		let newError = new Error(message);
-		// Remove this function (wrapError) call from the stack...
-		let newStack = newError.stack.split("\n");
-		newStack.splice(1, 1);
-		newStack = newStack.join("\n");
-		newError.stack = `${newStack}\nCaused by: ${error.stack}`;
-		return newError;
 	};
 
 	/**
@@ -60,10 +61,15 @@ UtnBaHelper.Utils = function (apiConnector) {
 			console.error(`Error while executing ${name}`, e);
 			// Not logging errors that we can't do anything.
 			if (e instanceof LoggedOutError || e instanceof GuaraniBackendError || e instanceof MissingStudentIdError) return;
+
+			// Log to Embrace
+			log.logException(e, {handled: true, attributes: {name: name}});
+
+			// Log to our backend
 			let errStr = stringifyError(e);
-			// Skip first 5 Failed to fetch errors. We only want to know about these if it's failing for every request.
-			// These are usually related to the user closing the tab, dns not resolving, etc, but we cannot get the details.
-			if (errStr.includes("Failed to fetch") && ++failedToFetchErrors <= 3) return;
+			// Skip first 2 Failed to fetch errors. We only want to know about these if it's failing for every request.
+			// These are usually related to the user closing the tab, dns not resolving, etc., but we cannot get the details.
+			if (errStr.includes("Failed to fetch") && ++failedToFetchErrors <= 2) return;
 			return apiConnector.logMessage(name, true, errStr);
 		});
 	};
@@ -87,8 +93,8 @@ UtnBaHelper.Utils = function (apiConnector) {
 		if (!schedules) return "-";
 		return schedules
 			.map(schedule =>
-				UtnBaHelper.Consts.DAYS[schedule.day] + " (" + UtnBaHelper.Consts.TIME_SHIFTS[schedule.shift] + ") " +
-				UtnBaHelper.Consts.HOURS[schedule.shift][schedule.firstHour].start + "hs a " + UtnBaHelper.Consts.HOURS[schedule.shift][schedule.lastHour].end + "hs")
+				Consts.DAYS[schedule.day] + " (" + Consts.TIME_SHIFTS[schedule.shift] + ") " +
+				Consts.HOURS[schedule.shift][schedule.firstHour].start + "hs a " + Consts.HOURS[schedule.shift][schedule.lastHour].end + "hs")
 			.join(" y ");
 	};
 
@@ -114,7 +120,7 @@ UtnBaHelper.Utils = function (apiConnector) {
 		}
 		return `<li style="font-size: ${fontSize}">
 			${getOverallScoreSpan(professor.overallScore)}
-			<a class="no-ajax" href="${UtnBaHelper.CustomPages.getProfessorSurveyResultsUrl(professor.name)}" target="_blank">${professor.name}</a> (${professor.role})
+			<a class="no-ajax" href="${CustomPages.getProfessorSurveyResultsUrl(professor.name)}" target="_blank">${professor.name}</a> (${professor.role})
 		</li>`;
 	};
 
@@ -124,7 +130,6 @@ UtnBaHelper.Utils = function (apiConnector) {
 		delay: delay,
 		backgroundFetch: backgroundFetch,
 		injectScript: injectScript,
-		wrapError: wrapError,
 		runAsync: runAsync,
 		waitForElementToHide: waitForElementToHide,
 

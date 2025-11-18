@@ -1,5 +1,8 @@
-if (!window.UtnBaHelper) window.UtnBaHelper = {};
-UtnBaHelper.ProfessorsSearchCustomPage = function ($container, services) {
+import {Chart} from 'chart.js/auto';
+import {log} from "@embrace-io/web-sdk";
+import {CustomPages} from './CustomPages.js';
+
+export const ProfessorsSearchCustomPage = function ($container, services) {
 
 	const SENTIMENT_COLORS = {
 		"POSITIVE": "#19B135",
@@ -59,6 +62,7 @@ UtnBaHelper.ProfessorsSearchCustomPage = function ($container, services) {
 		hideProfessorData();
 		$searchResultsDiv.show().get(0).scrollIntoView({behavior: "smooth"});
 		$searchResultsDiv.hide();
+		log.message("Searching professors", 'info', {attributes: {query: query}});
 		return services.apiConnector.searchProfessors(query).then(results => {
 			let trs = results.map(item => {
 				return `<tr><td><a href="#">${item.value}</a></td><td>${item.data.surveysCount}</td><td>${item.data.classScheduleOccurrences}</td></tr>`;
@@ -97,7 +101,7 @@ UtnBaHelper.ProfessorsSearchCustomPage = function ($container, services) {
 				return `<tr>
 					<td>${classSchedule.year}</td>
 					<td>${classSchedule.quarter}</td>
-					<td><a class="no-ajax" href="${UtnBaHelper.CustomPages.getCourseResultsUrl(classSchedule.courseCode)}" target="_blank">${classSchedule.courseName}</a></td>
+					<td><a class="no-ajax" href="${CustomPages.getCourseResultsUrl(classSchedule.courseCode)}" target="_blank">${classSchedule.courseName}</a></td>
 					<td>${classSchedule.classCode}</td>
 					<td>${classSchedule.branch || "-"}</td>
 					<td>${services.utils.getSchedulesAsString(classSchedule.schedules)}</td>
@@ -278,7 +282,7 @@ UtnBaHelper.ProfessorsSearchCustomPage = function ($container, services) {
 		init: function () {
 			return Promise.resolve().then(() => {
 				createPage();
-				let professorName = new URLSearchParams(window.location.search).get(UtnBaHelper.ProfessorsSearchCustomPage.customParamKey);
+				let professorName = new URLSearchParams(window.location.search).get(ProfessorsSearchCustomPage.customParamKey);
 				if (professorName) {
 					return retrieveProfessorData(professorName);
 				}
@@ -289,5 +293,5 @@ UtnBaHelper.ProfessorsSearchCustomPage = function ($container, services) {
 	};
 };
 
-UtnBaHelper.ProfessorsSearchCustomPage.menuName = "Buscar docentes";
-UtnBaHelper.ProfessorsSearchCustomPage.customParamKey = "professorName";
+ProfessorsSearchCustomPage.menuName = "Buscar docentes";
+ProfessorsSearchCustomPage.customParamKey = "professorName";

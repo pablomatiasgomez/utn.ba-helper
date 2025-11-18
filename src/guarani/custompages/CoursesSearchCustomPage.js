@@ -1,5 +1,6 @@
-if (!window.UtnBaHelper) window.UtnBaHelper = {};
-UtnBaHelper.CoursesSearchCustomPage = function ($container, services) {
+import {log} from "@embrace-io/web-sdk";
+
+export const CoursesSearchCustomPage = function ($container, services) {
 
 	let $searchDiv;
 	let $searchResultsDiv;
@@ -52,6 +53,7 @@ UtnBaHelper.CoursesSearchCustomPage = function ($container, services) {
 		$searchResultsDiv.show().get(0).scrollIntoView({behavior: "smooth"});
 		$searchResultsDiv.hide();
 		$courseDataDiv.hide();
+		log.message("Searching courses", 'info', {attributes: {query: query}});
 		return services.apiConnector.searchCourses(query).then(results => {
 			let trs = results.map(item => {
 				return `<tr><td>${item.value}</td><td><a href="#">${item.data}</a></td></tr>`;
@@ -118,7 +120,7 @@ UtnBaHelper.CoursesSearchCustomPage = function ($container, services) {
 		init: function () {
 			return Promise.resolve().then(() => {
 				createPage();
-				let courseCode = new URLSearchParams(window.location.search).get(UtnBaHelper.CoursesSearchCustomPage.customParamKey);
+				let courseCode = new URLSearchParams(window.location.search).get(CoursesSearchCustomPage.customParamKey);
 				if (courseCode) {
 					return retrieveClassesForCourse(courseCode, 0, 15);
 				}
@@ -129,5 +131,5 @@ UtnBaHelper.CoursesSearchCustomPage = function ($container, services) {
 	};
 };
 
-UtnBaHelper.CoursesSearchCustomPage.menuName = "Buscar cursos";
-UtnBaHelper.CoursesSearchCustomPage.customParamKey = "courseCode";
+CoursesSearchCustomPage.menuName = "Buscar cursos";
+CoursesSearchCustomPage.customParamKey = "courseCode";
