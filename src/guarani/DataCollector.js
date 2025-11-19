@@ -8,22 +8,18 @@ export const DataCollector = function (store, pagesDataParser, apiConnector) {
 
 	let hashedStudentId;
 	let getHashedStudentId = function () {
-		if (hashedStudentId) {
-			return Promise.resolve(hashedStudentId);
-		}
-		return pagesDataParser.getStudentId().then(studentId => {
-			hashedStudentId = hashCode(studentId);
-			return hashedStudentId;
-		});
+		if (hashedStudentId) return hashedStudentId;
+
+		let studentId = pagesDataParser.getStudentId();
+		hashedStudentId = hashCode(studentId);
+		return hashedStudentId;
 	};
 
 	/**
 	 * Sends the user stat with the hashed student it to keep data anonymous.
 	 */
 	let logUserStat = function (pesoAcademico, passingGradesAverage, allGradesAverage, passingGradesCount, failingGradesCount) {
-		return getHashedStudentId().then(hashedStudentId => {
-			return apiConnector.logUserStat(hashedStudentId, pesoAcademico, passingGradesAverage, allGradesAverage, passingGradesCount, failingGradesCount);
-		});
+		return apiConnector.logUserStat(getHashedStudentId(), pesoAcademico, passingGradesAverage, allGradesAverage, passingGradesCount, failingGradesCount);
 	};
 
 	/**
@@ -32,10 +28,9 @@ export const DataCollector = function (store, pagesDataParser, apiConnector) {
 	 * @returns {Promise<void>}
 	 */
 	let collectBackgroundDataIfNeeded = function () {
-		return getHashedStudentId().then(hashedStudentId => {
-			// Save hashedStudentId to local storage, so that it can be used for surveys collection.
-			return store.saveHashedStudentIdToStore(hashedStudentId).then(() => hashedStudentId);
-		}).then(hashedStudentId => {
+		let hashedStudentId = getHashedStudentId();
+		// Save hashedStudentId to local storage, so that it can be used for surveys collection.
+		return store.saveHashedStudentIdToStore(hashedStudentId).then(() => {
 			let lastTimeCollected = getLastTimeCollectedForStudentId(hashedStudentId);
 
 			let collectMethods = [

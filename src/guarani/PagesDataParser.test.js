@@ -20,9 +20,8 @@ describe('pagesDataParser.getStudentId', () => {
 	});
 
 	it('successful parsing', () => {
-		return pagesDataParser.getStudentId().then(studentId => {
-			expect(studentId).toMatchSnapshot();
-		});
+		let studentId = pagesDataParser.getStudentId();
+		expect(studentId).toMatchSnapshot();
 	});
 
 	it('missing div', () => {
