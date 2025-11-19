@@ -1,5 +1,4 @@
-if (!window.UtnBaHelper) window.UtnBaHelper = {};
-UtnBaHelper.ApiConnector = function () {
+export const ApiConnector = function () {
 
 	let logMessage = function (method, isError, message) {
 	};

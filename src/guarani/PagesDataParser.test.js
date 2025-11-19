@@ -1,15 +1,18 @@
-/** @jest-environment jsdom */
-require('../__mocks__/ApiConnector')
-require('./Utils')
-require('./PagesDataParser')
+import {ApiConnector} from '../__mocks__/ApiConnector.js';
+import {Utils} from './Utils.js';
+import {PagesDataParser} from './PagesDataParser.js';
 
-const fs = require("node:fs");
-const path = require("node:path");
+import fs from "node:fs";
+import path from "node:path";
+import {fileURLToPath} from "node:url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 describe('pagesDataParser.getStudentId', () => {
-	let apiConnector = new UtnBaHelper.ApiConnector();
-	let utils = new UtnBaHelper.Utils(apiConnector);
-	let pagesDataParser = new UtnBaHelper.PagesDataParser(utils);
+	let apiConnector = new ApiConnector();
+	let utils = new Utils(apiConnector);
+	let pagesDataParser = new PagesDataParser(utils);
 
 	beforeEach(() => {
 		const inputFile = expect.getState().currentTestName.replaceAll(" ", "_") + '.html';
@@ -23,8 +26,8 @@ describe('pagesDataParser.getStudentId', () => {
 	});
 
 	it('missing div', () => {
-		return pagesDataParser.getStudentId().then(studentId => {
-			expect(studentId).toMatchSnapshot();
-		});
+		expect(() => {
+			pagesDataParser.getStudentId();
+		}).toThrow();
 	});
 });
