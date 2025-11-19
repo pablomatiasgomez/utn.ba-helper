@@ -3,25 +3,22 @@ const redirectLink = document.createElement('a')
 redirectLink.href = "/autogestion/grado/datos_censales"
 redirectLink.textContent = "AQUÍ"
 
-export const InscripcionAExamenesPage = function () {
+export class InscripcionAExamenesPage {
+	#errorMessageSelector = document.querySelector('#lista_materias > div.alert.info.strong');
 
-	const errorMessageSelector = document.querySelector('#lista_materias > div.alert.info.strong')
-
-	function replaceMessageIfExists() {
-		if (errorMessageSelector) {
-			errorMessageSelector.appendChild(textChild)
-			errorMessageSelector.appendChild(redirectLink)
+	#replaceMessageIfExists() {
+		if (this.#errorMessageSelector) {
+			this.#errorMessageSelector.appendChild(textChild)
+			this.#errorMessageSelector.appendChild(redirectLink)
 		}
 	}
 
+	init() {
+		return Promise.resolve().then(() => {
+			this.#replaceMessageIfExists();
+		});
+	}
 
-	return {
-		init: function () {
-			return Promise.resolve().then(() => {
-				replaceMessageIfExists();
-			});
-		},
-		close: function () {
-		},
-	};
-};
+	close() {
+	}
+}
