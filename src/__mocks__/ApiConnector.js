@@ -1,70 +1,46 @@
-export const ApiConnector = function () {
-
-	let logMessage = function (method, isError, message) {
-	};
-
-	let logUserStat = function (hashedStudentId, pesoAcademico, passingGradesAverage, allGradesAverage, passingGradesCount, failingGradesCount) {
-	};
-
-	let postClassSchedules = function (classSchedules) {
-	};
-
-	let postProfessorSurveys = function (surveys) {
-	};
-
-	let postCourses = function (courses) {
+export class ApiConnector {
+	// POSTs:
+	logMessage(method, isError, message) {
 	}
 
-	// ------
+	logUserStat(hashedStudentId, pesoAcademico, passingGradesAverage, allGradesAverage, passingGradesCount, failingGradesCount) {
+	}
 
-	let getPreviousProfessors = function (previousProfessorsRequest) {
+	postClassSchedules(classSchedules) {
+	}
+
+	postProfessorSurveys(surveys) {
+	}
+
+	postCourses(courses) {
+	}
+
+	// GETs:
+	getPreviousProfessors(previousProfessorsRequest) {
 		return Promise.resolve([]);
-	};
+	}
 
-	let searchProfessors = function (query) {
+	searchProfessors(query) {
 		return Promise.resolve([]);
-	};
+	}
 
-	let getProfessorSurveysAggregate = function (professorName) {
+	getProfessorSurveysAggregate(professorName) {
 		return Promise.resolve([]);
-	};
+	}
 
-	let getClassesForProfessor = function (professorName, offset, limit) {
+	getClassesForProfessor(professorName, offset, limit) {
 		return Promise.resolve([]);
-	};
+	}
 
-	let searchCourses = function (query) {
+	searchCourses(query) {
 		return Promise.resolve([]);
-	};
+	}
 
-	let getPlanCourses = function (planCode) {
+	getPlanCourses(planCode) {
 		return Promise.resolve([]);
-	};
+	}
 
-	let getClassesForCourse = function (courseCode, offset, limit) {
+	getClassesForCourse(courseCode, offset, limit) {
 		return Promise.resolve([]);
-	};
-
-	let getClassesSchedules = function (courseCode, professorName, offset, limit) {
-		return Promise.resolve([]);
-	};
-
-	// Public
-	return {
-		// POSTs:
-		logMessage: logMessage,
-		logUserStat: logUserStat,
-		postClassSchedules: postClassSchedules,
-		postProfessorSurveys: postProfessorSurveys,
-		postCourses: postCourses,
-
-		// GETs:
-		getPreviousProfessors: getPreviousProfessors,
-		searchProfessors: searchProfessors,
-		getProfessorSurveysAggregate: getProfessorSurveysAggregate,
-		getClassesForProfessor: getClassesForProfessor,
-		searchCourses: searchCourses,
-		getPlanCourses: getPlanCourses,
-		getClassesForCourse: getClassesForCourse,
-	};
-};
+	}
+}

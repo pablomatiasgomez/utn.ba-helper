@@ -4,13 +4,16 @@ import * as XLSX from 'xlsx';
 import {Consts} from './Consts.js';
 import {LoggedOutError, RedirectedToHomeError, GuaraniBackendError, MissingStudentIdError} from './Errors.js';
 
-export const PagesDataParser = function (utils) {
+export class PagesDataParser {
+	#utils;
+	#responsesCache = {}; 	// We want to fetch only once each page.
 
-	// We want to fetch only once each page.
-	let RESPONSES_CACHE = {};
+	constructor(utils) {
+		this.#utils = utils;
+	}
 
-	let fetchAjaxPOSTContents = function (url, body, useCache = true) {
-		return fetchAjaxContents(url, {
+	#fetchAjaxPOSTContents(url, body, useCache = true) {
+		return this.#fetchAjaxContents(url, {
 			"headers": {
 				"X-Requested-With": "XMLHttpRequest", // This is needed so that guarani's server returns a json payload
 				"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
@@ -18,36 +21,37 @@ export const PagesDataParser = function (utils) {
 			"method": "POST",
 			"body": body,
 		}, useCache);
-	};
-	let fetchAjaxGETContents = function (url, useCache = true) {
-		return fetchAjaxContents(url, {
+	}
+
+	#fetchAjaxGETContents(url, useCache = true) {
+		return this.#fetchAjaxContents(url, {
 			"headers": {
 				"X-Requested-With": "XMLHttpRequest", // This is needed so that Guaraní's server returns a json payload
 			}
 		}, useCache);
-	};
+	}
 
-	let fetchWithRetry = function (url, fetchOpts) {
+	#fetchWithRetry(url, fetchOpts) {
 		return fetch(url, fetchOpts).then(response => {
 			if (response.status === 429) {
-				return Promise.resolve().then(utils.delay(1000)).then(() => {
-					return fetchWithRetry(url, fetchOpts);
+				return Promise.resolve().then(this.#utils.delay(1000)).then(() => {
+					return this.#fetchWithRetry(url, fetchOpts);
 				});
 			}
 			return response;
 		});
-	};
+	}
 
 	/**
 	 * Fetches and parses the way Guaraní's page ajax contents are loaded.
 	 */
-	let fetchAjaxContents = function (url, fetchOpts, useCache = true) {
+	#fetchAjaxContents(url, fetchOpts, useCache = true) {
 		let cacheKey = `${fetchOpts.method || "GET"}:${url}:${fetchOpts.body || ""}`;
-		if (useCache && RESPONSES_CACHE[cacheKey]) {
-			return Promise.resolve(RESPONSES_CACHE[cacheKey]);
+		if (useCache && this.#responsesCache[cacheKey]) {
+			return Promise.resolve(this.#responsesCache[cacheKey]);
 		}
 
-		return fetchWithRetry(url, fetchOpts).catch(e => {
+		return this.#fetchWithRetry(url, fetchOpts).catch(e => {
 			throw new Error(`Error on fetchAjaxContents for ${cacheKey}`, {cause: e});
 		}).then(response => {
 			return response.text().then(r => JSON.parse(r));
@@ -59,10 +63,10 @@ export const PagesDataParser = function (utils) {
 			if (response.cod !== "1") throw new Error(`Invalid ajax contents for url ${cacheKey}. response: ${JSON.stringify(response)}`);
 			return response;
 		}).then(contents => {
-			RESPONSES_CACHE[cacheKey] = contents;
+			this.#responsesCache[cacheKey] = contents;
 			return contents;
 		});
-	};
+	}
 
 	/**
 	 * Some pages that are requested via ajax return responses that contain an array of items to be
@@ -71,7 +75,7 @@ export const PagesDataParser = function (utils) {
 	 * @param responseContents the "cont" object of the ajax call.
 	 * @param infoId the infoId to filter the elements out.
 	 */
-	let parseAjaxPageRenderer = function (responseContents, infoId) {
+	#parseAjaxPageRenderer(responseContents, infoId) {
 		let renderData = $(responseContents).filter("script").toArray()
 			.map(script => $(script).html())
 			.filter(script => script.startsWith("kernel.renderer.on_arrival"))
@@ -79,19 +83,19 @@ export const PagesDataParser = function (utils) {
 			.filter(data => data.info.id === infoId);
 		if (renderData.length !== 1) throw new Error(`Found unexpected number of renderers: ${renderData.length} for infoId: ${infoId}. response: ${JSON.stringify(responseContents)}`);
 		return renderData[0];
-	};
+	}
 
 	/**
 	 * Fetches an url that returns a XLS and returns the parsed workbook
 	 * @param url url that returns a XLS.
 	 * @returns {Promise<{}>}
 	 */
-	let fetchXlsContents = function (url) {
-		if (RESPONSES_CACHE[url]) {
-			return Promise.resolve(RESPONSES_CACHE[url]);
+	#fetchXlsContents(url) {
+		if (this.#responsesCache[url]) {
+			return Promise.resolve(this.#responsesCache[url]);
 		}
 
-		return fetchWithRetry(url).catch(e => {
+		return this.#fetchWithRetry(url).catch(e => {
 			throw new Error(`Error on fetchXlsContents for ${url}`, {cause: e});
 		}).then(response => {
 			return response.arrayBuffer();
@@ -101,10 +105,10 @@ export const PagesDataParser = function (utils) {
 				throw new Error(`Error on XLSX.read for ${url}. uint8Array: [${uint8Array}].`, {cause: e});
 			});
 		}).then(contents => {
-			RESPONSES_CACHE[url] = contents;
+			this.#responsesCache[url] = contents;
 			return contents;
 		});
-	};
+	}
 
 	// --------------------
 
@@ -112,24 +116,24 @@ export const PagesDataParser = function (utils) {
 	 * Tries to resolve and return the student id for the current logged-in user.
 	 * @returns {String}
 	 */
-	let getStudentId = function () {
+	#getStudentId() {
 		let studentId = document.querySelector(".legajo-container .legajo-numero")?.textContent.trim() || "";
 		if (studentId === "-.") throw new MissingStudentIdError(`Missing studentId: ${studentId}`);
 		if (studentId[studentId.length - 2] !== "-" || studentId[studentId.length - 6] !== ".") throw new Error(`Invalid studentId: ${studentId}. HTML: ${document.querySelector("html").innerHTML}`);
 		return studentId;
-	};
+	}
 
 	/**
 	 * Fetches, from the "Agenda" page, the current classes that the student is taking.
 	 * Used to collect the classSchedules
 	 * @returns {Promise<Array<{}>>} array of objects for each class, that contains the schedule for it.
 	 */
-	let getClassSchedules = function () {
-		return fetchAjaxGETContents("/autogestion/grado/calendario").then(responseContents => {
-			let renderData = parseAjaxPageRenderer(responseContents.cont, "agenda_utn");
+	#getClassSchedules() {
+		return this.#fetchAjaxGETContents("/autogestion/grado/calendario").then(responseContents => {
+			let renderData = this.#parseAjaxPageRenderer(responseContents.cont, "agenda_utn");
 			return renderData.info.agenda.cursadas.map(cursadaId => {
 				let classData = renderData.info.agenda.comisiones[cursadaId];
-				return mapClassDataToClassSchedule(classData);
+				return this.#mapClassDataToClassSchedule(classData);
 			});
 		}).catch(e => {
 			if (e instanceof RedirectedToHomeError) {
@@ -139,28 +143,28 @@ export const PagesDataParser = function (utils) {
 			}
 			throw e;
 		});
-	};
+	}
 
 	/**
 	 * The student's current plan code as shown in the /autogestion/grado/plan_estudio page.
 	 * @returns {Promise<string>}
 	 */
-	let getStudentPlanCode = function () {
-		return fetchAjaxGETContents("/autogestion/grado/plan_estudio").then(responseContents => {
-			let responseText = parseAjaxPageRenderer(responseContents.cont, "info_plan").content;
+	#getStudentPlanCode() {
+		return this.#fetchAjaxGETContents("/autogestion/grado/plan_estudio").then(responseContents => {
+			let responseText = this.#parseAjaxPageRenderer(responseContents.cont, "info_plan").content;
 			let planText = $(responseText).filter(".encabezado").find("td:eq(1)").text();
 			let groups = /^Plan: \((\w+)\)/.exec(planText);
 			if (!groups) throw new Error(`planText couldn't be parsed: ${planText}`);
 			return groups[1];
 		});
-	};
+	}
 
 
 	/**
 	 * Parses and returns all the courses for the currently selected student's plan.
 	 * @returns {Promise<[{planCode: string, level: number, courseCode: string, courseName: string, elective: boolean, dependencies: [{kind: string, requirement: string, courseCode: string}]}]>}
 	 */
-	let getStudentPlanCourses = function () {
+	#getStudentPlanCourses() {
 		const levelsMapping = {
 			"módulo: primer nivel": 1,
 			"módulo: segundo nivel": 2,
@@ -196,7 +200,7 @@ export const PagesDataParser = function (utils) {
 
 			if (!dependenciesBtn) return Promise.resolve(dependencies);
 			let body = `elemento=${dependenciesBtn.getAttribute("data-elemento")}&elemento_padre=${dependenciesBtn.getAttribute("data-elemento-padre")}`;
-			return fetchAjaxPOSTContents("https://guarani.frba.utn.edu.ar/autogestion/grado/plan_estudio/correlativas", body).then(response => {
+			return this.#fetchAjaxPOSTContents("https://guarani.frba.utn.edu.ar/autogestion/grado/plan_estudio/correlativas", body).then(response => {
 				let $response = $(response.cont).filter(".td-table-correlativas");
 				if ($response.find(".alert").text().trim() === "No hay definidas correlativas para la actividad") return dependencies;
 
@@ -257,8 +261,8 @@ export const PagesDataParser = function (utils) {
 			});
 		};
 
-		return fetchAjaxGETContents("/autogestion/grado/plan_estudio").then(responseContents => {
-			let responseText = parseAjaxPageRenderer(responseContents.cont, "info_plan").content;
+		return this.#fetchAjaxGETContents("/autogestion/grado/plan_estudio").then(responseContents => {
+			let responseText = this.#parseAjaxPageRenderer(responseContents.cont, "info_plan").content;
 			// Need to wrap contents into parent div as many elements come as first level, and we cannot use querySelector() then.
 			let doc = document.createElement("div");
 			doc.id = "info_plan";
@@ -320,13 +324,13 @@ export const PagesDataParser = function (utils) {
 				return courses;
 			});
 		});
-	};
+	}
 
 	/**
 	 * Parses and returns all the student's academic history. Includes courses and final exams (both passed and failed)
 	 * @returns {Promise<{courses: [{courseCode: string, isPassed: boolean, grade: number, weightedGrade: number, date: Date}], finalExams: [{courseCode: string, isPassed: boolean, grade: number, weightedGrade: number, date: Date}]}>}
 	 */
-	let getCoursesHistory = function () {
+	#getCoursesHistory() {
 		let courses = [];
 		let finalExams = [];
 		// Use a map to also validate returned types.
@@ -343,7 +347,7 @@ export const PagesDataParser = function (utils) {
 			"Reprobado": false,
 			"Ausente": false,
 		};
-		return fetchXlsContents("/autogestion/grado/historia_academica/exportar_xls/?checks=PromocionA,RegularidadA,RegularidadR,RegularidadU,EnCurso,ExamenA,ExamenR,ExamenU,EquivalenciaA,EquivalenciaR,AprobResA,CreditosA,&modo=anio&param_modo=").then(workbook => {
+		return this.#fetchXlsContents("/autogestion/grado/historia_academica/exportar_xls/?checks=PromocionA,RegularidadA,RegularidadR,RegularidadU,EnCurso,ExamenA,ExamenR,ExamenU,EquivalenciaA,EquivalenciaR,AprobResA,CreditosA,&modo=anio&param_modo=").then(workbook => {
 			let sheet = workbook.Sheets["Reporte"];
 			if (!sheet) throw new Error(`Workbook does not contain sheet. Sheetnames: ${workbook.SheetNames}`);
 
@@ -352,7 +356,7 @@ export const PagesDataParser = function (utils) {
 			sheet["!ref"] = sheet["!ref"].replace("A1:", "A6:");
 
 			XLSX.utils.sheet_to_json(sheet).forEach(row => {
-				let date = parseDate(row["Fecha"]);
+				let date = this.#parseDate(row["Fecha"]);
 				let courseText = row["Actividad"];
 				let type = row["Tipo"];
 				let gradeText = row["Nota"];
@@ -368,7 +372,7 @@ export const PagesDataParser = function (utils) {
 				if (!arr) throw new Error(`Type not handled: ${type}. Row: ${JSON.stringify(row)}`);
 
 				let grade = parseInt(gradeText) || null;
-				let weightedGrade = grade !== null ? getWeightedGrade(date, grade) : null;
+				let weightedGrade = grade !== null ? this.#getWeightedGrade(date, grade) : null;
 
 				if (typeof gradeIsPassedTypes[gradeIsPassedText] === "undefined") throw new Error(`gradeIsPassedText couldn't be parsed: ${gradeIsPassedText}. Row: ${JSON.stringify(row)}`);
 				let isPassed = gradeIsPassedTypes[gradeIsPassedText];
@@ -386,21 +390,21 @@ export const PagesDataParser = function (utils) {
 				finalExams: finalExams,
 			};
 		});
-	};
+	}
 
 	/**
 	 * Fetches all the current surveys that the user has to take (cannot retrieve the ones that have already been taken)
 	 * For each of them resolves the current professor name, class, course, quarter, etc.
 	 * @returns {Promise<*[]>} an array of class schedules for each combination of professor and class
 	 */
-	let getProfessorClassesFromSurveys = function () {
-		return fetchAjaxGETContents("/autogestion/grado/inicio_alumno").then(responseContents => {
-			let surveysResponseText = parseAjaxPageRenderer(responseContents.cont, "lista_encuestas_pendientes").content;
+	#getProfessorClassesFromSurveys() {
+		return this.#fetchAjaxGETContents("/autogestion/grado/inicio_alumno").then(responseContents => {
+			let surveysResponseText = this.#parseAjaxPageRenderer(responseContents.cont, "lista_encuestas_pendientes").content;
 
 			let promises = $(surveysResponseText).find("ul li a").toArray()
 				.map(a => a.href)
 				.map(siuUrl => {
-					return fetchAjaxGETContents(siuUrl).then(siuResponseText => {
+					return this.#fetchAjaxGETContents(siuUrl).then(siuResponseText => {
 						// Return the kollaUrl
 						return $(siuResponseText.cont).find("iframe").get(0).src;
 					});
@@ -408,8 +412,8 @@ export const PagesDataParser = function (utils) {
 			return Promise.all(promises).then(kollaUrls => kollaUrls.flat());
 		}).then(kollaUrls => {
 			let promises = kollaUrls.map(kollaUrl => {
-				return utils.backgroundFetch({url: kollaUrl}).then(kollaResponseText => {
-					let surveysMetadata = parseKollaSurveyForm($(kollaResponseText), kollaResponseText);
+				return this.#utils.backgroundFetch({url: kollaUrl}).then(kollaResponseText => {
+					let surveysMetadata = this.#parseKollaSurveyForm($(kollaResponseText), kollaResponseText);
 
 					// We could eventually merge same class professors, but the backend still accepts this:
 					return surveysMetadata.map(surveyMetadata => {
@@ -431,30 +435,30 @@ export const PagesDataParser = function (utils) {
 			});
 			return Promise.all(promises).then(surveys => surveys.flat());
 		});
-	};
+	}
 
 	// --------------------
 
 	// Parses a date with format DD/MM/YYYY
-	let parseDate = function (dateStr) {
+	#parseDate(dateStr) {
 		let dateParts = dateStr.split("/");
 		return new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);
-	};
+	}
 
-	let getWeightedGrade = function (date, grade) {
+	#getWeightedGrade(date, grade) {
 		if (date < Consts.NEW_GRADES_REGULATION_DATE) {
 			return Consts.WEIGHTED_GRADES[grade];
 		} else {
 			return grade;
 		}
-	};
+	}
 
 	/**
 	 * Parses a period with the form `Grado Primer Cuatrimestre 2022` into an object that contains the year and quarter.
 	 * @param periodTxt
 	 * @returns {{year: number, quarter: string}}
 	 */
-	let parsePeriodTxt = function (periodTxt) {
+	#parsePeriodTxt(periodTxt) {
 		if (periodTxt.startsWith("Escuela de Verano")) {
 			// Handle specific case for "Escuela de Verano", e.g. "Escuela de Verano 2023 - CL2022"
 			const yearRegex = new RegExp(`^Escuela de Verano \\d{4} - CL(\\d{4})$`);
@@ -483,9 +487,9 @@ export const PagesDataParser = function (utils) {
 			year: year,
 			quarter: quarter,
 		};
-	};
+	}
 
-	let parseBranchTxt = function (branchTxt) {
+	#parseBranchTxt(branchTxt) {
 		const branchTxtMapping = {
 			"Sede Medrano": "MEDRANO",
 			"Sede Campus": "CAMPUS",
@@ -496,7 +500,7 @@ export const PagesDataParser = function (utils) {
 		let branch = branchTxtMapping[branchTxt];
 		if (!branch) throw new Error(`Branch txt couldn't be parsed: ${branchTxt}`);
 		return branch;
-	};
+	}
 
 	/**
 	 * New (or different) version of the schedules, represented in the form of:
@@ -507,7 +511,7 @@ export const PagesDataParser = function (utils) {
 	 * @param arr the schedule received from the classData struct (guarani's server)
 	 * @returns {{day: string, shift: string, firstHour: number, lastHour: number}[]}
 	 */
-	let parseSchedulesFromArray = function (arr) {
+	#parseSchedulesFromArray(arr) {
 		return arr.map(schedule => {
 			let day = Object.entries(Consts.DAYS).filter(entry => entry[1] === schedule.dia_semana).map(entry => entry[0])[0];
 			if (!day) throw new Error(`Couldn't parse day: ${schedule.dia_semana}`);
@@ -523,14 +527,14 @@ export const PagesDataParser = function (utils) {
 				lastHour: lastHour,
 			};
 		});
-	};
+	}
 
 
-	let mapClassDataToClassSchedule = function (classData) {
+	#mapClassDataToClassSchedule(classData) {
 		try {
-			let period = parsePeriodTxt(classData.periodo_nombre);
-			let branch = parseBranchTxt(classData.ubicacion_nombre);
-			let schedules = parseSchedulesFromArray(classData.horas_catedra);
+			let period = this.#parsePeriodTxt(classData.periodo_nombre);
+			let branch = this.#parseBranchTxt(classData.ubicacion_nombre);
+			let schedules = this.#parseSchedulesFromArray(classData.horas_catedra);
 			return {
 				year: period.year,
 				quarter: period.quarter,
@@ -552,7 +556,7 @@ export const PagesDataParser = function (utils) {
 	 * Parses the responseText of the Kolla forms, and returns the survey form data along with the answers.
 	 * @returns {[{surveyKind: string, professorRole: string, classCode: string, year: number, courseCode: string, professorName: string, quarter: string, surveyFieldValues: []}]}
 	 */
-	let parseKollaSurveyForm = function ($kollaResponseText, htmlForLog) {
+	#parseKollaSurveyForm($kollaResponseText, htmlForLog) {
 		const surveyKindsMapping = {
 			"DOCENTE": "DOCENTE",
 			"AUXILIARES DOCENTES": "AUXILIAR",
@@ -658,25 +662,43 @@ export const PagesDataParser = function (utils) {
 				surveyFieldValues: surveyFieldValues, // Only used for posting surveys, not professor classes.
 			};
 		});
-	};
+	}
 
-	// Public
-	return {
-		fetchAjaxGETContents: fetchAjaxGETContents,
+	// Public methods
+	fetchAjaxGETContents(url, useCache = true) {
+		return this.#fetchAjaxGETContents(url, useCache);
+	}
 
-		// --
+	getStudentId() {
+		return this.#getStudentId();
+	}
 
-		getStudentId: getStudentId,
-		getClassSchedules: getClassSchedules,
+	getClassSchedules() {
+		return this.#getClassSchedules();
+	}
 
-		getStudentPlanCode: getStudentPlanCode,
-		getStudentPlanCourses: getStudentPlanCourses,
-		getCoursesHistory: getCoursesHistory,
+	getStudentPlanCode() {
+		return this.#getStudentPlanCode();
+	}
 
-		getProfessorClassesFromSurveys: getProfessorClassesFromSurveys,
+	getStudentPlanCourses() {
+		return this.#getStudentPlanCourses();
+	}
 
-		// Exposed parsers / mappers
-		parseKollaSurveyForm: parseKollaSurveyForm,
-		mapClassDataToClassSchedule: mapClassDataToClassSchedule,
-	};
-};
+	getCoursesHistory() {
+		return this.#getCoursesHistory();
+	}
+
+	getProfessorClassesFromSurveys() {
+		return this.#getProfessorClassesFromSurveys();
+	}
+
+	// Exposed parsers / mappers
+	parseKollaSurveyForm($kollaResponseText, htmlForLog) {
+		return this.#parseKollaSurveyForm($kollaResponseText, htmlForLog);
+	}
+
+	mapClassDataToClassSchedule(classData) {
+		return this.#mapClassDataToClassSchedule(classData);
+	}
+}

@@ -1,6 +1,17 @@
-export const PreInscripcionPage = function (pagesDataParser, utils, apiConnector) {
+export class PreInscripcionPage {
+	#pagesDataParser;
+	#utils;
+	#apiConnector;
+	#addPreviousProfessorsTableEventFn;
+	#addPreviousProfessorsTableEventWithDelayFn;
 
-	let addClassSchedulesFilter = function (alternativesCombo, filtersDiv, previousProfessorsTableBody) {
+	constructor(pagesDataParser, utils, apiConnector) {
+		this.#pagesDataParser = pagesDataParser;
+		this.#utils = utils;
+		this.#apiConnector = apiConnector;
+	}
+
+	#addClassSchedulesFilter(alternativesCombo, filtersDiv, previousProfessorsTableBody) {
 		let branches = new Set();
 		let schedules = new Set();
 		let yearQuarters = new Set();
@@ -61,27 +72,27 @@ export const PreInscripcionPage = function (pagesDataParser, utils, apiConnector
 				}
 			});
 		}
-		filtersDiv.querySelector("a").addEventListener('click', function (event) {
+		filtersDiv.querySelector("a").addEventListener('click', (event) => {
 			event.preventDefault();
-			utils.runAsync("filterClassSchedules", filterClassSchedules);
+			this.#utils.runAsync("filterClassSchedules", filterClassSchedules);
 		});
 	}
 
-	let addPreviousProfessorsTable = function (alternativesCombo, filtersDiv, previousProfessorsTableBody) {
+	#addPreviousProfessorsTable(alternativesCombo, filtersDiv, previousProfessorsTableBody) {
 		return Promise.resolve().then(() => {
-			return fetchCourseAlternatives();
+			return this.#fetchCourseAlternatives();
 		}).then(courseOptionsData => {
-			return renderPreviousProfessorsTable(alternativesCombo, previousProfessorsTableBody, courseOptionsData);
+			return this.#renderPreviousProfessorsTable(alternativesCombo, previousProfessorsTableBody, courseOptionsData);
 		}).then(() => {
 			// Once everything is rendered, display filter box:
-			return addClassSchedulesFilter(alternativesCombo, filtersDiv, previousProfessorsTableBody);
+			return this.#addClassSchedulesFilter(alternativesCombo, filtersDiv, previousProfessorsTableBody);
 		});
-	};
+	}
 
-	let fetchCourseAlternatives = function () {
+	#fetchCourseAlternatives() {
 		return Promise.resolve().then(() => {
 			// Avoid using cache as the endpoint is always the same but the student may register or unregister from the course.
-			return pagesDataParser.fetchAjaxGETContents(location.href, false);
+			return this.#pagesDataParser.fetchAjaxGETContents(location.href, false);
 		}).then(response => {
 			if (!response.agenda || !response.agenda.comisiones) throw new Error(`Missing course alternatives for ${location.href}. response: ${JSON.stringify(response)}`);
 
@@ -89,9 +100,9 @@ export const PreInscripcionPage = function (pagesDataParser, utils, apiConnector
 			// But we could eventually filter them out by using the `cursadas` array if we confirm it
 			return response.agenda.comisiones;
 		});
-	};
+	}
 
-	let renderPreviousProfessorsTable = function (alternativesCombo, previousProfessorsTableBody, courseOptionsData) {
+	#renderPreviousProfessorsTable(alternativesCombo, previousProfessorsTableBody, courseOptionsData) {
 		let optionId = 0;
 		let optionDetails = [];
 		let previousProfessorsRequest = Array.from(alternativesCombo.options)
@@ -99,7 +110,7 @@ export const PreInscripcionPage = function (pagesDataParser, utils, apiConnector
 				let classData = courseOptionsData[option.value];
 				if (!classData) return null;
 
-				let classSchedule = pagesDataParser.mapClassDataToClassSchedule(classData);
+				let classSchedule = this.#pagesDataParser.mapClassDataToClassSchedule(classData);
 
 				// Set an optionId in the option text to identify in the table that is added later.
 				optionId++;
@@ -114,7 +125,7 @@ export const PreInscripcionPage = function (pagesDataParser, utils, apiConnector
 			.filter(req => !!req);
 
 		// Returns a List that corresponds one to one with the request list, with maps that represent: year -> classCode (the new one) -> List of professors
-		return apiConnector.getPreviousProfessors(previousProfessorsRequest).then(response => {
+		return this.#apiConnector.getPreviousProfessors(previousProfessorsRequest).then(response => {
 			for (let i = 0; i < response.length; i++) {
 				let previousProfessors = response[i];
 				optionId = i + 1;
@@ -129,7 +140,7 @@ export const PreInscripcionPage = function (pagesDataParser, utils, apiConnector
 							.forEach(([newClassCode, professors]) => {
 								content += `<li>${newClassCode}<ul class="no-margin">`;
 								professors.forEach(professor => {
-									content += utils.getProfessorLi(professor);
+									content += this.#utils.getProfessorLi(professor);
 								});
 								content += `</ul></li>`;
 							});
@@ -143,55 +154,51 @@ export const PreInscripcionPage = function (pagesDataParser, utils, apiConnector
 				previousProfessorsTableBody.appendChild(row);
 			}
 		});
-	};
+	}
 
-
-	let addPreviousProfessorsTableEventFn;
-	let addPreviousProfessorsTableEventWithDelayFn;
-	return {
-		init: function () {
-			return Promise.resolve().then(() => {
-				// Need to listen to course register changes, as the combo is reloaded, and we need to add the table again.
-				// We need to un register them on close, as changing a course will trigger a new PreInscripcionPage.
-				// Events triggered from foreground script:
-				addPreviousProfessorsTableEventFn = () => {
-					let alternativesDiv = document.querySelector("#insc_alternativas .inscripcion-alternativa");
-					if (!alternativesDiv) return; // There may be no div if for example the alternative already has a selected option.
-					alternativesDiv.insertAdjacentHTML("beforebegin", `
-						<div class="utnba-helper">
-							<div class="alert info">
-								<h3 style="text-align: center;">UTN.BA HELPER - Información importante</h3>
-								<p><b>La información sobre profesores anteriores es provista por el "UTN.BA Helper" y no es parte del sistema de la UTN.</b></p>
-								<p>La intención de esta tabla es, en base a datos colectados por el "UTN.BA Helper", intentar predecir que profesor va a estar en cada cursada, basándonos en los profesores que estuvieron en cursadas anteriores.
-								<p>Para cada horario presentado en el combo de abajo, se muestra un item en la tabla, que puede ser identificado por el ID que es agregado al texto de cada opción, y que es mostrado en cada fila de la tabla.</p>
-							</div>
-							<div class="filters">
-								<h3 id="titulo">Filtros</h3>
-							</div>
-							<div class="previous-professors">
-								<h3 id="titulo">Profesores en años anteriores</h3>
-								<table><tbody><tr><th>ID</th><th>Detalle</th><th>Profesores en años anteriores</th></tr></tbody></table>
-							</div>
-							<hr>
+	init() {
+		return Promise.resolve().then(() => {
+			// Need to listen to course register changes, as the combo is reloaded, and we need to add the table again.
+			// We need to un register them on close, as changing a course will trigger a new PreInscripcionPage.
+			// Events triggered from foreground script:
+			this.#addPreviousProfessorsTableEventFn = () => {
+				let alternativesDiv = document.querySelector("#insc_alternativas .inscripcion-alternativa");
+				if (!alternativesDiv) return; // There may be no div if for example the alternative already has a selected option.
+				alternativesDiv.insertAdjacentHTML("beforebegin", `
+					<div class="utnba-helper">
+						<div class="alert info">
+							<h3 style="text-align: center;">UTN.BA HELPER - Información importante</h3>
+							<p><b>La información sobre profesores anteriores es provista por el "UTN.BA Helper" y no es parte del sistema de la UTN.</b></p>
+							<p>La intención de esta tabla es, en base a datos colectados por el "UTN.BA Helper", intentar predecir que profesor va a estar en cada cursada, basándonos en los profesores que estuvieron en cursadas anteriores.
+							<p>Para cada horario presentado en el combo de abajo, se muestra un item en la tabla, que puede ser identificado por el ID que es agregado al texto de cada opción, y que es mostrado en cada fila de la tabla.</p>
 						</div>
-					`);
-					let alternativesCombo = document.querySelector('#comision');
-					let filtersDiv = document.querySelector("#insc_alternativas .utnba-helper .filters");
-					let previousProfessorsTableBody = document.querySelector("#insc_alternativas .utnba-helper .previous-professors tbody");
-					utils.runAsync("addPreviousProfessorsTable", () => addPreviousProfessorsTable(alternativesCombo, filtersDiv, previousProfessorsTableBody));
-				};
-				addPreviousProfessorsTableEventWithDelayFn = () => setTimeout(addPreviousProfessorsTableEventFn, 500);
+						<div class="filters">
+							<h3 id="titulo">Filtros</h3>
+						</div>
+						<div class="previous-professors">
+							<h3 id="titulo">Profesores en años anteriores</h3>
+							<table><tbody><tr><th>ID</th><th>Detalle</th><th>Profesores en años anteriores</th></tr></tbody></table>
+						</div>
+						<hr>
+					</div>
+				`);
+				let alternativesCombo = document.querySelector('#comision');
+				let filtersDiv = document.querySelector("#insc_alternativas .utnba-helper .filters");
+				let previousProfessorsTableBody = document.querySelector("#insc_alternativas .utnba-helper .previous-professors tbody");
+				this.#utils.runAsync("addPreviousProfessorsTable", () => this.#addPreviousProfessorsTable(alternativesCombo, filtersDiv, previousProfessorsTableBody));
+			};
+			this.#addPreviousProfessorsTableEventWithDelayFn = () => setTimeout(this.#addPreviousProfessorsTableEventFn, 500);
 
-				window.addEventListener("__utn_ba_event_comision_preinscripta", addPreviousProfessorsTableEventFn);
-				window.addEventListener("__utn_ba_event_comision_despreinscripta", addPreviousProfessorsTableEventFn);
-				window.addEventListener("__utn_ba_event_setear_comisiones_insc_alternativa", addPreviousProfessorsTableEventWithDelayFn);
-				return addPreviousProfessorsTableEventFn();
-			});
-		},
-		close: function () {
-			window.removeEventListener("__utn_ba_event_comision_preinscripta", addPreviousProfessorsTableEventFn);
-			window.removeEventListener("__utn_ba_event_comision_despreinscripta", addPreviousProfessorsTableEventFn);
-			window.removeEventListener("__utn_ba_event_setear_comisiones_insc_alternativa", addPreviousProfessorsTableEventWithDelayFn);
-		},
-	};
-};
+			window.addEventListener("__utn_ba_event_comision_preinscripta", this.#addPreviousProfessorsTableEventFn);
+			window.addEventListener("__utn_ba_event_comision_despreinscripta", this.#addPreviousProfessorsTableEventFn);
+			window.addEventListener("__utn_ba_event_setear_comisiones_insc_alternativa", this.#addPreviousProfessorsTableEventWithDelayFn);
+			return this.#addPreviousProfessorsTableEventFn();
+		});
+	}
+
+	close() {
+		window.removeEventListener("__utn_ba_event_comision_preinscripta", this.#addPreviousProfessorsTableEventFn);
+		window.removeEventListener("__utn_ba_event_comision_despreinscripta", this.#addPreviousProfessorsTableEventFn);
+		window.removeEventListener("__utn_ba_event_setear_comisiones_insc_alternativa", this.#addPreviousProfessorsTableEventWithDelayFn);
+	}
+}

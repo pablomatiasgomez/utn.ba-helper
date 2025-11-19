@@ -2,7 +2,7 @@ import './main.css';
 
 import $ from 'jquery';
 
-window.$ = window.jQuery = $;
+window.$ = window.jQuery = $; // TODO delete this and add it to all the pages using it.
 
 import {initializeEmbrace} from '../Embrace.js';
 
@@ -43,9 +43,9 @@ import {InscripcionAExamenesPage} from './pages/InscripcionAExamenesPage.js';
 
 		const PAGE_HANDLERS = {
 			// match is performed using startsWith and first one is used.
-			"/autogestion/grado/calendario": () => HorariosPage(),
-			"/autogestion/grado/cursada/elegir_materia/": () => PreInscripcionPage(pagesDataParser, utils, apiConnector),
-			"/autogestion/grado/examen": () => InscripcionAExamenesPage(),
+			"/autogestion/grado/calendario": () => new HorariosPage(),
+			"/autogestion/grado/cursada/elegir_materia/": () => new PreInscripcionPage(pagesDataParser, utils, apiConnector),
+			"/autogestion/grado/examen": () => new InscripcionAExamenesPage(),
 		};
 
 		let currentHandler = null;

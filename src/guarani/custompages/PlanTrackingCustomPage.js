@@ -1,36 +1,45 @@
 import {CustomPages} from './CustomPages.js';
 
-export const PlanTrackingCustomPage = function ($container, services) {
+const TRANSLATIONS = {
+	"SIGNED": "Firmada",
+	"PASSED": "Aprobada",
+	"REGISTER": "Cursar",
+	"TAKE_FINAL_EXAM": "Rendir final",
+};
 
-	const TRANSLATIONS = {
-		"SIGNED": "Firmada",
-		"PASSED": "Aprobada",
-		"REGISTER": "Cursar",
-		"TAKE_FINAL_EXAM": "Rendir final",
-	};
+export class PlanTrackingCustomPage {
+	static menuName = "Seguimiento de Plan";
+	static customParamKey = "";
 
-	let $gradesSummary;
-	let $plan;
+	#$container;
+	#services;
+	#$gradesSummary;
+	#$plan;
 
-	let createPage = function (planCode, coursesHistory) {
+	constructor($container, services) {
+		this.#$container = $container;
+		this.#services = services;
+	}
+
+	#createPage(planCode, coursesHistory) {
 		let promises = [];
 
-		$container.append(`<h3>Plan ${planCode}</h3>`);
+		this.#$container.append(`<h3>Plan ${planCode}</h3>`);
 
-		$gradesSummary = $("<div></div>");
-		$container.append($gradesSummary);
-		promises.push(buildGradesSummary(coursesHistory));
+		this.#$gradesSummary = $("<div></div>");
+		this.#$container.append(this.#$gradesSummary);
+		promises.push(this.#buildGradesSummary(coursesHistory));
 
-		$container.append("<hr>");
+		this.#$container.append("<hr>");
 
-		$plan = $("<div></div>");
-		$container.append($plan);
-		promises.push(loadPlan(planCode, coursesHistory));
+		this.#$plan = $("<div></div>");
+		this.#$container.append(this.#$plan);
+		promises.push(this.#loadPlan(planCode, coursesHistory));
 
 		return Promise.all(promises);
-	};
+	}
 
-	let buildGradesSummary = function (coursesHistory) {
+	#buildGradesSummary(coursesHistory) {
 		let startYear = coursesHistory.courses.concat(coursesHistory.finalExams)
 			.map(course => course.date)
 			.sort((a, b) => a - b)
@@ -56,10 +65,10 @@ export const PlanTrackingCustomPage = function ($container, services) {
 		let allNonWeightedGradesAverage = arrayAverage(passedNonWeightedGrades.concat(failedNonWeightedGrades));
 		let passedNonWeightedGradesAverage = arrayAverage(passedNonWeightedGrades);
 
-		$gradesSummary.html(`<table><tbody></tbody></table>
+		this.#$gradesSummary.html(`<table><tbody></tbody></table>
 				<i><span><sup>a</sup> Peso académico: Materias Aprobadas * 11 - años de carrera * 5 - finales desaprobados * 3</span></br>
 				<span><sup>b</sup> La nota ponderada es calculada por el "UTN.BA Helper" segun <a href="https://www.frba.utn.edu.ar/wp-content/uploads/2019/09/ordenanza_1549.pdf" target="_blank">Ordenanza Nº 1549</a></span></i>`);
-		const appendTableRow = (description, value) => $gradesSummary.find("tbody").append("<tr><td>" + description + "</td><td><b>" + (value || value === 0 ? value : "n/a") + "</b></td></tr>");
+		const appendTableRow = (description, value) => this.#$gradesSummary.find("tbody").append("<tr><td>" + description + "</td><td><b>" + (value || value === 0 ? value : "n/a") + "</b></td></tr>");
 
 		appendTableRow("Peso academico", `${pesoAcademico} <small>(11*${passedFinalExams.length} - 5*${yearsCount} - 3*${failedFinalExams.length})</small> <sup>a</sup>`);
 		appendTableRow("Cantidad de finales aprobados", passedFinalExams.length);
@@ -69,19 +78,19 @@ export const PlanTrackingCustomPage = function ($container, services) {
 		appendTableRow("Promedio de notas originales<sup>b</sup> con desaprobados", allNonWeightedGradesAverage);
 		appendTableRow("Promedio de notas originales<sup>b</sup> sin desaprobados", passedNonWeightedGradesAverage);
 
-		return services.dataCollector.logUserStat(pesoAcademico, passedWeightedGradesAverage, allWeightedGradesAverage, passedFinalExams.length, failedFinalExams.length);
-	};
+		return this.#services.dataCollector.logUserStat(pesoAcademico, passedWeightedGradesAverage, allWeightedGradesAverage, passedFinalExams.length, failedFinalExams.length);
+	}
 
 	//...
 
-	let loadPlan = function (planCode, coursesHistory) {
+	#loadPlan(planCode, coursesHistory) {
 		if (!planCode) return;
-		return services.apiConnector.getPlanCourses(planCode).then(planCourses => {
-			return loadPlanCourses(planCourses, coursesHistory);
+		return this.#services.apiConnector.getPlanCourses(planCode).then(planCourses => {
+			return this.#loadPlanCourses(planCourses, coursesHistory);
 		});
-	};
+	}
 
-	let loadPlanCourses = function (planCourses, coursesHistory) {
+	#loadPlanCourses(planCourses, coursesHistory) {
 		let courseNamesByCode = planCourses.reduce(function (courseNamesByCode, course) {
 			courseNamesByCode[course.courseCode] = course.courseName;
 			return courseNamesByCode;
@@ -195,7 +204,7 @@ export const PlanTrackingCustomPage = function ($container, services) {
 
 		let ths = levels.map(level => `<th>Nivel ${level}</th>`).join("");
 		let tds = levels.map(level => `<td>${getCoursesHtml(level)}</td>`).join("");
-		$plan.html(`
+		this.#$plan.html(`
 			<table class="plan-tracking">
 				<tbody>
 					<tr>${ths}</tr>
@@ -204,32 +213,27 @@ export const PlanTrackingCustomPage = function ($container, services) {
 			</table>
 		`);
 
-		$plan.find("table").on("click", ".show-electives", function () {
+		this.#$plan.find("table").on("click", ".show-electives", function () {
 			let level = $(this).attr("data-level");
-			$plan.find(`table .course.level-${level}`).removeClass("hidden");
+			this.#$plan.find(`table .course.level-${level}`).removeClass("hidden");
 			$(this).remove();
 			return false;
+		}.bind(this));
+	}
+
+	init() {
+		return Promise.resolve().then(() => {
+			return Promise.all([
+				this.#services.pagesDataParser.getStudentPlanCode(),
+				this.#services.pagesDataParser.getCoursesHistory(),
+			]);
+		}).then(result => {
+			let planCode = result[0];
+			let coursesHistory = result[1];
+			return this.#createPage(planCode, coursesHistory);
 		});
-	};
+	}
 
-
-	return {
-		init: function () {
-			return Promise.resolve().then(() => {
-				return Promise.all([
-					services.pagesDataParser.getStudentPlanCode(),
-					services.pagesDataParser.getCoursesHistory(),
-				]);
-			}).then(result => {
-				let planCode = result[0];
-				let coursesHistory = result[1];
-				return createPage(planCode, coursesHistory);
-			});
-		},
-		close: function () {
-		},
-	};
-};
-
-PlanTrackingCustomPage.menuName = "Seguimiento de Plan";
-PlanTrackingCustomPage.customParamKey = "";
+	close() {
+	}
+}
