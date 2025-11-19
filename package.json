@@ -3,7 +3,9 @@
   "version": "7.0.0",
   "description": "A Chrome extension that makes navigating and using the UTN.BA - FRBA website easier.",
   "private": true,
+  "type": "module",
   "scripts": {
+    "test": "NODE_OPTIONS='--experimental-vm-modules --experimental-specifier-resolution=node' jest",
     "watch": "webpack --watch --config webpack.config.js",
     "build": "webpack --config webpack.config.js",
     "pack": "npm run build && npm run process-sourcemaps && node pack.js && open ./release",
@@ -20,6 +22,8 @@
     "adm-zip": "^0.5.16",
     "copy-webpack-plugin": "^10.2.4",
     "css-loader": "^6.11.0",
+    "jest": "^30.2.0",
+    "jest-environment-jsdom": "^30.2.0",
     "mini-css-extract-plugin": "^2.9.4",
     "webpack": "^5.102.1",
     "webpack-cli": "^4.10.0"
