@@ -1,7 +1,8 @@
 import './main.css';
 
 import $ from 'jquery';
-window.$ = window.jQuery = $;
+
+window.$ = window.jQuery = $; // TODO delete this and add it to all the pages using it.
 
 import {initializeEmbrace} from '../Embrace.js';
 
