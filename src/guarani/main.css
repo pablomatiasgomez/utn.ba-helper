@@ -7,10 +7,6 @@
     cursor: pointer;
 }
 
-.powered-by-utnba-helper:after {
-    content: "POWERED BY UTN.BA HELPER";
-}
-
 /* HorariosPage */
 .name-container {
     z-index: 5;

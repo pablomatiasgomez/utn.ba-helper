@@ -1,7 +1,5 @@
 import './main.css';
 
-import $ from 'jquery';
-
 import {initializeEmbrace} from '../Embrace.js';
 
 import {ApiConnector} from '../ApiConnector.js';
@@ -30,8 +28,8 @@ import {InscripcionAExamenesPage} from './pages/InscripcionAExamenesPage.js';
 		// - the user is logged in (they have the name in the navbar)
 		// - there is a profile selector with "Alumno" selected.
 		let isInGradoPage = window.location.pathname.startsWith("/autogestion/grado");
-		let isLoggedIn = !!$(".user-navbar").length;
-		let currentProfile = $("#js-selector-perfiles .js-texto-perfil").text().trim();
+		let isLoggedIn = !!document.querySelector(".user-navbar");
+		let currentProfile = document.querySelector("#js-selector-perfiles .js-texto-perfil")?.textContent.trim();
 		let isStudentProfile = currentProfile === "Perfil: Alumno";
 		if (!isInGradoPage || !isLoggedIn || !isStudentProfile) {
 			return apiConnector.logMessage("pageNotHandled", false, `[Path:${window.location.pathname}][IsLoggedIn:${isLoggedIn}][CurrentProfile:${currentProfile}]`);
@@ -71,9 +69,7 @@ import {InscripcionAExamenesPage} from './pages/InscripcionAExamenesPage.js';
 		// noinspection JSIgnoredPromiseFromCall
 		utils.runAsync("collectBackgroundDataIfNeeded", () => dataCollector.collectBackgroundDataIfNeeded());
 
-		$(".user-navbar").closest(".row-fluid").prepend(`<span class="powered-by-utnba-helper"></span>`);
-		$("body").on("click", ".powered-by-utnba-helper", function () {
-			window.open("https://chrome.google.com/webstore/detail/jdgdheoeghamkhfppapjchbojhehimpe", "_blank");
-		});
+		// Add powered by to the header
+		document.querySelector(".user-navbar").closest(".row-fluid").insertAdjacentHTML('afterbegin', `<a class="powered-by-utnba-helper" href="https://chromewebstore.google.com/detail/utnba-helper-ex-siga-help/jdgdheoeghamkhfppapjchbojhehimpe" target="_blank">POWERED BY UTN.BA HELPER</a>`);
 	});
 })();
