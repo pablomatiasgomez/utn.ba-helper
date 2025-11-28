@@ -18,7 +18,7 @@ export class HorariosPage {
 
 	#getClassesByColor() {
 		let classesByColor = {};
-		document.querySelectorAll(".cursada .cursada-header").forEach((element) => {
+		document.querySelectorAll(".cursada .cursada-header").forEach(element => {
 			let name = element.querySelector("h4").textContent.trim();
 			let color = this.#getColorFromClass(element.querySelector(".cuadrado").className);
 			console.log("??", name, color);
@@ -31,7 +31,7 @@ export class HorariosPage {
 	#setCourseNamesInTable() {
 		let classesByColor = this.#getClassesByColor();
 		let last = null;
-		document.querySelectorAll(".agenda-hora").forEach((element) => {
+		document.querySelectorAll(".agenda-hora").forEach(element => {
 			let color = this.#getColorFromClass(element.className);
 			if (color && last !== color && classesByColor[color]) {
 				element.textContent = this.#trimCourseName(classesByColor[color]);
