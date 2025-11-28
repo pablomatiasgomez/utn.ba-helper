@@ -1,6 +1,6 @@
 import $ from 'jquery';
 import {Consts} from './Consts.js';
-import {LoggedOutError, GuaraniBackendError, MissingStudentIdError} from './Errors.js';
+import {GuaraniBackendError, LoggedOutError, MissingStudentIdError} from './Errors.js';
 import {log} from "@embrace-io/web-sdk";
 import {CustomPages} from './custompages/CustomPages.js';
 
@@ -80,6 +80,22 @@ export class Utils {
 			return this.#apiConnector.logMessage(name, true, errStr);
 		});
 	}
+
+	logHTML(name, pct) {
+		// Only log for a percentage of users
+		if (Math.random() * 100 >= pct) return;
+
+		let message = `HTML log for ${name}`;
+		let html = document.documentElement.outerHTML;
+		log.message(message, 'warn', {
+			attributes: {
+				name: name,
+				html: html
+			}
+		});
+		return this.#apiConnector.logMessage(message, false, `HTML log for ${name}. HTML: ${html}`);
+	}
+
 
 	waitForElementToHide(selector) {
 		return new Promise((resolve) => {

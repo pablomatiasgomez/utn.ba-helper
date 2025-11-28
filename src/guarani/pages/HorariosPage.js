@@ -1,5 +1,11 @@
 export class HorariosPage {
 
+	#utils;
+
+	constructor(utils) {
+		this.#utils = utils;
+	}
+
 	#trimCourseName(name) {
 		name = name.trim();
 		if (name.length > 20) {
@@ -42,6 +48,8 @@ export class HorariosPage {
 	}
 
 	init() {
+		this.#utils.logHTML("HorariosPage", 10);
+
 		return Promise.resolve().then(() => {
 			this.#setCourseNamesInTable();
 		});

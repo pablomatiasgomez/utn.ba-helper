@@ -41,7 +41,7 @@ import {InscripcionAExamenesPage} from './pages/InscripcionAExamenesPage.js';
 
 		const PAGE_HANDLERS = {
 			// match is performed using startsWith and first one is used.
-			"/autogestion/grado/calendario": () => new HorariosPage(),
+			"/autogestion/grado/calendario": () => new HorariosPage(utils),
 			"/autogestion/grado/cursada/elegir_materia/": () => new PreInscripcionPage(pagesDataParser, utils, apiConnector),
 			"/autogestion/grado/examen": () => new InscripcionAExamenesPage(),
 		};
