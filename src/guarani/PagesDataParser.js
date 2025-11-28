@@ -34,12 +34,20 @@ export class PagesDataParser {
 
 	#fetchWithRetry(url, fetchOpts) {
 		return fetch(url, fetchOpts).then(response => {
-			if (response.status === 429) {
-				return Promise.resolve().then(this.#utils.delay(1000)).then(() => {
-					return this.#fetchWithRetry(url, fetchOpts);
+			if (response.ok) {
+				return response;
+			} else {
+				if (response.status === 429) {
+					console.warn(`Got 429 for ${url}, retrying in 1 second...`);
+					return Promise.resolve().then(this.#utils.delay(1000)).then(() => {
+						return this.#fetchWithRetry(url, fetchOpts);
+					});
+				}
+
+				return response.text().then(body => {
+					throw new Error(`Got unexpected ResponseStatus: ${response.status} for url: ${url} - ResponseBody: ${body}`);
 				});
 			}
-			return response;
 		});
 	}
 

@@ -33,7 +33,7 @@ const requestFetch = function (requestInfo) {
 			}
 
 			return response.text().then(body => {
-				throw new Error(`Unexpected ResponseStatus: ${response.status} - ResponseBody: ${body}`);
+				throw new Error(`Got unexpected ResponseStatus: ${response.status} for url: ${requestInfo.url} - ResponseBody: ${body}`);
 			});
 		}
 	});
