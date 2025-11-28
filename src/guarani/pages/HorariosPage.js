@@ -18,26 +18,27 @@ export class HorariosPage {
 
 	#getClassesByColor() {
 		let classesByColor = {};
-		$(".cursada .cursada-header").each(function () {
-			let name = $(this).find("h4").text().trim();
-			let color = this.#getColorFromClass($(this).find(".cuadrado").attr("class"));
+		document.querySelectorAll(".cursada .cursada-header").forEach((element) => {
+			let name = element.querySelector("h4").textContent.trim();
+			let color = this.#getColorFromClass(element.querySelector(".cuadrado").className);
+			console.log("??", name, color);
 			if (!name || !color) return;
 			classesByColor[color] = name;
-		}.bind(this)); // TODO is this needed?
+		});
 		return classesByColor;
 	}
 
 	#setCourseNamesInTable() {
 		let classesByColor = this.#getClassesByColor();
 		let last = null;
-		$(".agenda-hora").each(function () {
-			let color = this.#getColorFromClass($(this).attr("class"));
+		document.querySelectorAll(".agenda-hora").forEach((element) => {
+			let color = this.#getColorFromClass(element.className);
 			if (color && last !== color && classesByColor[color]) {
-				$(this).text(this.#trimCourseName(classesByColor[color]));
-				$(this).addClass("name-container");
+				element.textContent = this.#trimCourseName(classesByColor[color]);
+				element.classList.add("name-container");
 			}
 			last = color;
-		}.bind(this));
+		});
 	}
 
 	init() {
