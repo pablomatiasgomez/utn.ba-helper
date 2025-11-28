@@ -128,7 +128,7 @@ export class PagesDataParser {
 	getStudentId() {
 		let studentId = document.querySelector(".legajo-container .legajo-numero")?.textContent.trim() || "";
 		if (studentId === "-.") throw new MissingStudentIdError(`Missing studentId: ${studentId}`);
-		if (studentId[studentId.length - 2] !== "-" || studentId[studentId.length - 6] !== ".") throw new Error(`Invalid studentId: ${studentId}. HTML: ${document.querySelector("html").innerHTML}`);
+		if (studentId[studentId.length - 2] !== "-" || studentId[studentId.length - 6] !== ".") throw new Error(`Invalid studentId: ${studentId}. HTML: ${document.documentElement.outerHTML}`);
 		return studentId;
 	}
 
