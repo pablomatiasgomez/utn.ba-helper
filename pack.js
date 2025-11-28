@@ -1,6 +1,8 @@
-const {readFileSync, writeFileSync, existsSync, mkdirSync} = require("fs");
-const {resolve} = require("path");
-const AdmZip = require("adm-zip");
+import {readFileSync, writeFileSync, existsSync, mkdirSync} from "fs";
+import {resolve} from "path";
+import AdmZip from "adm-zip";
+
+const __dirname = import.meta.dirname;
 
 const {name, version} = JSON.parse(readFileSync(resolve(__dirname, "package.json"), "utf8"));
 

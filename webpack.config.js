@@ -1,15 +1,16 @@
-'use strict';
+import path from 'path';
+import CopyWebpackPlugin from 'copy-webpack-plugin';
+import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 
-const path = require('path');
-const CopyWebpackPlugin = require('copy-webpack-plugin');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const __dirname = import.meta.dirname;
 
 const PATHS = {
 	src: path.resolve(__dirname, './src'),
 	build: path.resolve(__dirname, './build'),
 };
 
-module.exports = {
+// noinspection JSUnusedGlobalSymbols
+export default {
 	entry: {
 		"guarani/main": PATHS.src + '/guarani/main.js',
 		"guarani/main-kolla": PATHS.src + '/guarani/main-kolla.js',
