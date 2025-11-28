@@ -42,6 +42,8 @@ export class PagesDataParser {
 					return Promise.resolve().then(this.#utils.delay(1000)).then(() => {
 						return this.#fetchWithRetry(url, fetchOpts);
 					});
+				} else if (response.status === 500) {
+					throw new GuaraniBackendError();
 				}
 
 				return response.text().then(body => {
