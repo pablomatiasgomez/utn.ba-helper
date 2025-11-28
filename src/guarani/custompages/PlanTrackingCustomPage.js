@@ -14,7 +14,7 @@ export class PlanTrackingCustomPage {
 	#$container;
 	#services;
 	#$gradesSummary;
-	#$plan;
+	#planDiv;
 
 	constructor($container, services) {
 		this.#$container = $container;
@@ -32,8 +32,8 @@ export class PlanTrackingCustomPage {
 
 		this.#$container.append("<hr>");
 
-		this.#$plan = $("<div></div>");
-		this.#$container.append(this.#$plan);
+		this.#planDiv = document.createElement('div');
+		this.#$container.append(this.#planDiv);
 		promises.push(this.#loadPlan(planCode, coursesHistory));
 
 		return Promise.all(promises);
@@ -67,7 +67,7 @@ export class PlanTrackingCustomPage {
 
 		this.#$gradesSummary.html(`<table><tbody></tbody></table>
 				<i><span><sup>a</sup> Peso académico: Materias Aprobadas * 11 - años de carrera * 5 - finales desaprobados * 3</span></br>
-				<span><sup>b</sup> La nota ponderada es calculada por el "UTN.BA Helper" segun <a href="https://www.frba.utn.edu.ar/wp-content/uploads/2019/09/ordenanza_1549.pdf" target="_blank">Ordenanza Nº 1549</a></span></i>`);
+				<span><sup>b</sup> La nota ponderada es calculada por el "UTN.BA Helper" según <a href="https://www.frba.utn.edu.ar/wp-content/uploads/2019/09/ordenanza_1549.pdf" target="_blank">Ordenanza Nº 1549</a></span></i>`);
 		const appendTableRow = (description, value) => this.#$gradesSummary.find("tbody").append("<tr><td>" + description + "</td><td><b>" + (value || value === 0 ? value : "n/a") + "</b></td></tr>");
 
 		appendTableRow("Peso academico", `${pesoAcademico} <small>(11*${passedFinalExams.length} - 5*${yearsCount} - 3*${failedFinalExams.length})</small> <sup>a</sup>`);
@@ -204,21 +204,23 @@ export class PlanTrackingCustomPage {
 
 		let ths = levels.map(level => `<th>Nivel ${level}</th>`).join("");
 		let tds = levels.map(level => `<td>${getCoursesHtml(level)}</td>`).join("");
-		this.#$plan.html(`
+		this.#planDiv.innerHTML = `
 			<table class="plan-tracking">
 				<tbody>
 					<tr>${ths}</tr>
 					<tr>${tds}</tr>
 				</tbody>
 			</table>
-		`);
+		`;
 
-		this.#$plan.find("table").on("click", ".show-electives", function () {
-			let level = $(this).attr("data-level");
-			this.#$plan.find(`table .course.level-${level}`).removeClass("hidden");
-			$(this).remove();
-			return false;
-		}.bind(this));
+		this.#planDiv.querySelectorAll("table .show-electives").forEach(element => {
+			element.addEventListener("click", e => {
+				let level = element.getAttribute("data-level");
+				this.#planDiv.querySelectorAll(`table .course.level-${level}`).forEach(el => el.classList.remove("hidden"));
+				element.remove(); // TODO eventually we could allow hiding again the electives.
+				e.preventDefault();
+			});
+		});
 	}
 
 	init() {
