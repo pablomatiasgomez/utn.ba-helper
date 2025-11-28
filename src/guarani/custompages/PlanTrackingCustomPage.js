@@ -17,8 +17,8 @@ export class PlanTrackingCustomPage {
 	#$gradesSummary;
 	#planDiv;
 
-	constructor($container, services) {
-		this.#$container = $container;
+	constructor(container, services) {
+		this.#$container = $(container);
 		this.#services = services;
 	}
 

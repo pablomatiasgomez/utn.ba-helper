@@ -21,8 +21,8 @@ export class ProfessorsSearchCustomPage {
 	#$coursesResultDiv; // Shows the last courses in which the professor was present
 	#$surveyResultDiv; // Shows the survey results of the given professor
 
-	constructor($container, services) {
-		this.#$container = $container;
+	constructor(container, services) {
+		this.#$container = $(container);
 		this.#services = services;
 	}
 

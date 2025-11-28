@@ -1,4 +1,3 @@
-import $ from 'jquery';
 import {CoursesSearchCustomPage} from './CoursesSearchCustomPage.js';
 import {ProfessorsSearchCustomPage} from './ProfessorsSearchCustomPage.js';
 import {PlanTrackingCustomPage} from './PlanTrackingCustomPage.js';
@@ -27,21 +26,25 @@ export class CustomPages {
 	appendMenu() {
 		if (!CUSTOM_PAGES.length) return;
 
-		let $customMenusContainer = $(`<ul class="dropdown-menu"></ul>`);
-		let $li = $(`
-				<li class="dropdown js-menuitem-root">
-					<a href="#" class="dropdown-toggle" data-toggle="dropdown">UTN.BA Helper <b class="caret"></b></a>
-				</li>`);
-		$li.append($customMenusContainer);
-		$(".main-nav .nav:not(.perfiles)").append($li);
+		const customMenusContainer = document.createElement('ul');
+		customMenusContainer.className = 'dropdown-menu';
+
+		const li = document.createElement('li');
+		li.className = 'dropdown js-menuitem-root';
+		li.innerHTML = `<a href="#" class="dropdown-toggle" data-toggle="dropdown">UTN.BA Helper <b class="caret"></b></a>`;
+
+		li.appendChild(customMenusContainer);
+		document.querySelector(".main-nav .nav:not(.perfiles)").appendChild(li);
 
 		CUSTOM_PAGES.forEach(customPage => {
-			$customMenusContainer.append(`<li><a class="no-ajax" href="${CustomPages.getCustomPageUrl(customPage)}">${customPage.menuName}</a></li>`);
+			const menuItem = document.createElement('li');
+			menuItem.innerHTML = `<a class="no-ajax" href="${CustomPages.getCustomPageUrl(customPage)}">${customPage.menuName}</a>`;
+			customMenusContainer.appendChild(menuItem);
 		});
 	}
 
 	#initCustomPage(customPage) {
-		$("#kernel_contenido").html(`
+		document.querySelector("#kernel_contenido").innerHTML = `
 			<div class="utnba-helper">
 				<div class="alert info">
 					<h3 style="text-align: center;">UTN.BA HELPER - Información importante</h3>
@@ -57,7 +60,7 @@ export class CustomPages {
 					<h3 style="text-align: center;">Esta sección es provista por el "UTN.BA Helper" y no es parte del sistema de la UTN.</h3>
 				</div>
 			</div>
-		`);
+		`;
 	}
 
 	getSelectedPageHandler() {
@@ -67,7 +70,7 @@ export class CustomPages {
 
 		return () => {
 			this.#initCustomPage(selectedCustomPage);
-			return new selectedCustomPage($("#kernel_contenido .main"), {
+			return new selectedCustomPage(document.querySelector("#kernel_contenido .main"), {
 				pagesDataParser: this.#pagesDataParser,
 				dataCollector: this.#dataCollector,
 				utils: this.#utils,

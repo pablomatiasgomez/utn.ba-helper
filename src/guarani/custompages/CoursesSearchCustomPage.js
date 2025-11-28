@@ -14,8 +14,8 @@ export class CoursesSearchCustomPage {
 	#lastYear;
 	#lastQuarter;
 
-	constructor($container, services) {
-		this.#$container = $container;
+	constructor(container, services) {
+		this.#$container = $(container);
 		this.#services = services;
 	}
 
