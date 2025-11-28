@@ -27,7 +27,6 @@ export class HorariosPage {
 		document.querySelectorAll(".cursada .cursada-header").forEach(element => {
 			let name = element.querySelector("h4").textContent.trim();
 			let color = this.#getColorFromClass(element.querySelector(".cuadrado").className);
-			console.log("??", name, color);
 			if (!name || !color) return;
 			classesByColor[color] = name;
 		});
