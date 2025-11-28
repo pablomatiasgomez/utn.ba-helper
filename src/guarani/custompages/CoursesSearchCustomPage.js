@@ -1,3 +1,4 @@
+import $ from 'jquery';
 import {log} from "@embrace-io/web-sdk";
 
 export class CoursesSearchCustomPage {

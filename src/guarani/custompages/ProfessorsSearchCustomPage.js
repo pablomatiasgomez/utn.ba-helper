@@ -1,3 +1,4 @@
+import $ from 'jquery';
 import {Chart} from 'chart.js/auto';
 import {log} from "@embrace-io/web-sdk";
 import {CustomPages} from './CustomPages.js';

@@ -1,3 +1,4 @@
+import $ from 'jquery';
 import {Consts} from './Consts.js';
 import {LoggedOutError, GuaraniBackendError, MissingStudentIdError} from './Errors.js';
 import {log} from "@embrace-io/web-sdk";

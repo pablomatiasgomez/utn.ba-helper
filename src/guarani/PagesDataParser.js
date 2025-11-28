@@ -1,5 +1,6 @@
 // noinspection JSNonASCIINames
 
+import $ from 'jquery';
 import * as XLSX from 'xlsx';
 import {Consts} from './Consts.js';
 import {LoggedOutError, RedirectedToHomeError, GuaraniBackendError, MissingStudentIdError} from './Errors.js';

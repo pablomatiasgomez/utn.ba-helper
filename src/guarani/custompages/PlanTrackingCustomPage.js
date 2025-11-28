@@ -1,3 +1,4 @@
+import $ from 'jquery';
 import {CustomPages} from './CustomPages.js';
 
 const TRANSLATIONS = {
