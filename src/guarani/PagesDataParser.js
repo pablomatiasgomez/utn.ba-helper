@@ -24,7 +24,7 @@ export class PagesDataParser {
 		}, useCache);
 	}
 
-	#fetchAjaxGETContents(url, useCache = true) {
+	fetchAjaxGETContents(url, useCache = true) {
 		return this.#fetchAjaxContents(url, {
 			"headers": {
 				"X-Requested-With": "XMLHttpRequest", // This is needed so that Guaraní's server returns a json payload
@@ -117,7 +117,7 @@ export class PagesDataParser {
 	 * Tries to resolve and return the student id for the current logged-in user.
 	 * @returns {String}
 	 */
-	#getStudentId() {
+	getStudentId() {
 		let studentId = document.querySelector(".legajo-container .legajo-numero")?.textContent.trim() || "";
 		if (studentId === "-.") throw new MissingStudentIdError(`Missing studentId: ${studentId}`);
 		if (studentId[studentId.length - 2] !== "-" || studentId[studentId.length - 6] !== ".") throw new Error(`Invalid studentId: ${studentId}. HTML: ${document.querySelector("html").innerHTML}`);
@@ -129,12 +129,12 @@ export class PagesDataParser {
 	 * Used to collect the classSchedules
 	 * @returns {Promise<Array<{}>>} array of objects for each class, that contains the schedule for it.
 	 */
-	#getClassSchedules() {
-		return this.#fetchAjaxGETContents("/autogestion/grado/calendario").then(responseContents => {
+	getClassSchedules() {
+		return this.fetchAjaxGETContents("/autogestion/grado/calendario").then(responseContents => {
 			let renderData = this.#parseAjaxPageRenderer(responseContents.cont, "agenda_utn");
 			return renderData.info.agenda.cursadas.map(cursadaId => {
 				let classData = renderData.info.agenda.comisiones[cursadaId];
-				return this.#mapClassDataToClassSchedule(classData);
+				return this.mapClassDataToClassSchedule(classData);
 			});
 		}).catch(e => {
 			if (e instanceof RedirectedToHomeError) {
@@ -150,8 +150,8 @@ export class PagesDataParser {
 	 * The student's current plan code as shown in the /autogestion/grado/plan_estudio page.
 	 * @returns {Promise<string>}
 	 */
-	#getStudentPlanCode() {
-		return this.#fetchAjaxGETContents("/autogestion/grado/plan_estudio").then(responseContents => {
+	getStudentPlanCode() {
+		return this.fetchAjaxGETContents("/autogestion/grado/plan_estudio").then(responseContents => {
 			let responseText = this.#parseAjaxPageRenderer(responseContents.cont, "info_plan").content;
 			let planText = $(responseText).filter(".encabezado").find("td:eq(1)").text();
 			let groups = /^Plan: \((\w+)\)/.exec(planText);
@@ -165,7 +165,7 @@ export class PagesDataParser {
 	 * Parses and returns all the courses for the currently selected student's plan.
 	 * @returns {Promise<[{planCode: string, level: number, courseCode: string, courseName: string, elective: boolean, dependencies: [{kind: string, requirement: string, courseCode: string}]}]>}
 	 */
-	#getStudentPlanCourses() {
+	getStudentPlanCourses() {
 		const levelsMapping = {
 			"módulo: primer nivel": 1,
 			"módulo: segundo nivel": 2,
@@ -262,7 +262,7 @@ export class PagesDataParser {
 			});
 		};
 
-		return this.#fetchAjaxGETContents("/autogestion/grado/plan_estudio").then(responseContents => {
+		return this.fetchAjaxGETContents("/autogestion/grado/plan_estudio").then(responseContents => {
 			let responseText = this.#parseAjaxPageRenderer(responseContents.cont, "info_plan").content;
 			// Need to wrap contents into parent div as many elements come as first level, and we cannot use querySelector() then.
 			let doc = document.createElement("div");
@@ -331,7 +331,7 @@ export class PagesDataParser {
 	 * Parses and returns all the student's academic history. Includes courses and final exams (both passed and failed)
 	 * @returns {Promise<{courses: [{courseCode: string, isPassed: boolean, grade: number, weightedGrade: number, date: Date}], finalExams: [{courseCode: string, isPassed: boolean, grade: number, weightedGrade: number, date: Date}]}>}
 	 */
-	#getCoursesHistory() {
+	getCoursesHistory() {
 		let courses = [];
 		let finalExams = [];
 		// Use a map to also validate returned types.
@@ -398,14 +398,14 @@ export class PagesDataParser {
 	 * For each of them resolves the current professor name, class, course, quarter, etc.
 	 * @returns {Promise<*[]>} an array of class schedules for each combination of professor and class
 	 */
-	#getProfessorClassesFromSurveys() {
-		return this.#fetchAjaxGETContents("/autogestion/grado/inicio_alumno").then(responseContents => {
+	getProfessorClassesFromSurveys() {
+		return this.fetchAjaxGETContents("/autogestion/grado/inicio_alumno").then(responseContents => {
 			let surveysResponseText = this.#parseAjaxPageRenderer(responseContents.cont, "lista_encuestas_pendientes").content;
 
 			let promises = $(surveysResponseText).find("ul li a").toArray()
 				.map(a => a.href)
 				.map(siuUrl => {
-					return this.#fetchAjaxGETContents(siuUrl).then(siuResponseText => {
+					return this.fetchAjaxGETContents(siuUrl).then(siuResponseText => {
 						// Return the kollaUrl
 						return $(siuResponseText.cont).find("iframe").get(0).src;
 					});
@@ -414,7 +414,7 @@ export class PagesDataParser {
 		}).then(kollaUrls => {
 			let promises = kollaUrls.map(kollaUrl => {
 				return this.#utils.backgroundFetch({url: kollaUrl}).then(kollaResponseText => {
-					let surveysMetadata = this.#parseKollaSurveyForm($(kollaResponseText), kollaResponseText);
+					let surveysMetadata = this.parseKollaSurveyForm($(kollaResponseText), kollaResponseText);
 
 					// We could eventually merge same class professors, but the backend still accepts this:
 					return surveysMetadata.map(surveyMetadata => {
@@ -531,7 +531,7 @@ export class PagesDataParser {
 	}
 
 
-	#mapClassDataToClassSchedule(classData) {
+	mapClassDataToClassSchedule(classData) {
 		try {
 			let period = this.#parsePeriodTxt(classData.periodo_nombre);
 			let branch = this.#parseBranchTxt(classData.ubicacion_nombre);
@@ -557,7 +557,7 @@ export class PagesDataParser {
 	 * Parses the responseText of the Kolla forms, and returns the survey form data along with the answers.
 	 * @returns {[{surveyKind: string, professorRole: string, classCode: string, year: number, courseCode: string, professorName: string, quarter: string, surveyFieldValues: []}]}
 	 */
-	#parseKollaSurveyForm($kollaResponseText, htmlForLog) {
+	parseKollaSurveyForm($kollaResponseText, htmlForLog) {
 		const surveyKindsMapping = {
 			"DOCENTE": "DOCENTE",
 			"AUXILIARES DOCENTES": "AUXILIAR",
@@ -665,41 +665,4 @@ export class PagesDataParser {
 		});
 	}
 
-	// Public methods
-	fetchAjaxGETContents(url, useCache = true) {
-		return this.#fetchAjaxGETContents(url, useCache);
-	}
-
-	getStudentId() {
-		return this.#getStudentId();
-	}
-
-	getClassSchedules() {
-		return this.#getClassSchedules();
-	}
-
-	getStudentPlanCode() {
-		return this.#getStudentPlanCode();
-	}
-
-	getStudentPlanCourses() {
-		return this.#getStudentPlanCourses();
-	}
-
-	getCoursesHistory() {
-		return this.#getCoursesHistory();
-	}
-
-	getProfessorClassesFromSurveys() {
-		return this.#getProfessorClassesFromSurveys();
-	}
-
-	// Exposed parsers / mappers
-	parseKollaSurveyForm($kollaResponseText, htmlForLog) {
-		return this.#parseKollaSurveyForm($kollaResponseText, htmlForLog);
-	}
-
-	mapClassDataToClassSchedule(classData) {
-		return this.#mapClassDataToClassSchedule(classData);
-	}
 }

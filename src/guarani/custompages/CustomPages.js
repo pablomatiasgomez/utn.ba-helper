@@ -24,7 +24,7 @@ export class CustomPages {
 		this.#apiConnector = apiConnector;
 	}
 
-	#appendMenu() {
+	appendMenu() {
 		if (!CUSTOM_PAGES.length) return;
 
 		let $customMenusContainer = $(`<ul class="dropdown-menu"></ul>`);
@@ -60,7 +60,7 @@ export class CustomPages {
 		`);
 	}
 
-	#getSelectedPageHandler() {
+	getSelectedPageHandler() {
 		let selectedCustomPageName = new URLSearchParams(window.location.search).get(CustomPages.CUSTOM_PAGE_QUERY_PARAM);
 		let selectedCustomPage = CUSTOM_PAGES.filter(customPage => selectedCustomPageName === customPage.menuName)[0];
 		if (!selectedCustomPage) return null;
@@ -74,15 +74,6 @@ export class CustomPages {
 				apiConnector: this.#apiConnector
 			});
 		};
-	}
-
-	// Public methods
-	appendMenu() {
-		return this.#appendMenu();
-	}
-
-	getSelectedPageHandler() {
-		return this.#getSelectedPageHandler();
 	}
 
 	// Static methods

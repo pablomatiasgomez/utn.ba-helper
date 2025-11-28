@@ -26,7 +26,7 @@ export class DataCollector {
 	/**
 	 * Sends the user stat with the hashed student it to keep data anonymous.
 	 */
-	#logUserStat(pesoAcademico, passingGradesAverage, allGradesAverage, passingGradesCount, failingGradesCount) {
+	logUserStat(pesoAcademico, passingGradesAverage, allGradesAverage, passingGradesCount, failingGradesCount) {
 		return this.#apiConnector.logUserStat(this.#getHashedStudentId(), pesoAcademico, passingGradesAverage, allGradesAverage, passingGradesCount, failingGradesCount);
 	}
 
@@ -35,7 +35,7 @@ export class DataCollector {
 	 * - class schedules and professors
 	 * @returns {Promise<void>}
 	 */
-	#collectBackgroundDataIfNeeded() {
+	collectBackgroundDataIfNeeded() {
 		let hashedStudentId = this.#getHashedStudentId();
 		// Save hashedStudentId to local storage, so that it can be used for surveys collection.
 		return this.#store.saveHashedStudentIdToStore(hashedStudentId).then(() => {
@@ -138,12 +138,4 @@ export class DataCollector {
 		return hash;
 	}
 
-	// Public methods
-	logUserStat(pesoAcademico, passingGradesAverage, allGradesAverage, passingGradesCount, failingGradesCount) {
-		return this.#logUserStat(pesoAcademico, passingGradesAverage, allGradesAverage, passingGradesCount, failingGradesCount);
-	}
-
-	collectBackgroundDataIfNeeded() {
-		return this.#collectBackgroundDataIfNeeded();
-	}
 }
