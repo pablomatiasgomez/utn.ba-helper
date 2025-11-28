@@ -87,7 +87,7 @@ export class Utils {
 
 		let message = `HTML log for ${name}`;
 		let html = document.documentElement.outerHTML;
-		log.message(message, 'warn', {
+		log.message(message, 'warning', {
 			attributes: {
 				name: name,
 				html: html
