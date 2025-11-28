@@ -37,12 +37,22 @@ import {InscripcionAExamenesPage} from './pages/InscripcionAExamenesPage.js';
 
 		customPages.appendMenu();
 
-		const PAGE_HANDLERS = {
-			// match is performed using startsWith and first one is used.
-			"/autogestion/grado/calendario": () => new HorariosPage(utils),
-			"/autogestion/grado/cursada/elegir_materia/": () => new PreInscripcionPage(pagesDataParser, utils, apiConnector),
-			"/autogestion/grado/examen": () => new InscripcionAExamenesPage(),
-		};
+
+		const PAGE_HANDLERS = [
+			// match is performed using regex and first one is used.
+			{
+				pathRegex: /^\/autogestion\/grado\/calendario$/,
+				handler: () => new HorariosPage(utils)
+			},
+			{
+				pathRegex: /^\/autogestion\/grado\/cursada\/elegir_materia\/.*/,
+				handler: () => new PreInscripcionPage(pagesDataParser, utils, apiConnector)
+			},
+			{
+				pathRegex: /^\/autogestion\/grado\/examen$/,
+				handler: () => new InscripcionAExamenesPage()
+			},
+		];
 
 		let currentHandler = null;
 		let handleCurrentPage = () => utils.runAsync("HandlePage " + window.location.pathname + window.location.search, () => {
@@ -50,7 +60,7 @@ import {InscripcionAExamenesPage} from './pages/InscripcionAExamenesPage.js';
 
 			// Wait for the loading div to hide... applies for both loading from document or ajax.
 			return utils.waitForElementToHide("#loading_top").then(() => {
-				currentHandler = customPages.getSelectedPageHandler() || Object.entries(PAGE_HANDLERS).filter(entry => window.location.pathname.startsWith(entry[0])).map(entry => entry[1])[0];
+				currentHandler = customPages.getSelectedPageHandler() || PAGE_HANDLERS.find(entry => entry.pathRegex.test(window.location.pathname))?.handler;
 				if (!currentHandler) return;
 				currentHandler = currentHandler();
 				return currentHandler.init();
