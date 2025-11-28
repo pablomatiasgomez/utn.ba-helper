@@ -2,8 +2,6 @@ import './main.css';
 
 import $ from 'jquery';
 
-window.$ = window.jQuery = $;
-
 import {initializeEmbrace} from '../Embrace.js';
 
 import {ApiConnector} from '../ApiConnector.js';
@@ -43,9 +41,9 @@ import {InscripcionAExamenesPage} from './pages/InscripcionAExamenesPage.js';
 
 		const PAGE_HANDLERS = {
 			// match is performed using startsWith and first one is used.
-			"/autogestion/grado/calendario": () => HorariosPage(),
-			"/autogestion/grado/cursada/elegir_materia/": () => PreInscripcionPage(pagesDataParser, utils, apiConnector),
-			"/autogestion/grado/examen": () => InscripcionAExamenesPage(),
+			"/autogestion/grado/calendario": () => new HorariosPage(),
+			"/autogestion/grado/cursada/elegir_materia/": () => new PreInscripcionPage(pagesDataParser, utils, apiConnector),
+			"/autogestion/grado/examen": () => new InscripcionAExamenesPage(),
 		};
 
 		let currentHandler = null;

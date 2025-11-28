@@ -1,7 +1,6 @@
 import './main.css';
 
 import $ from 'jquery';
-window.$ = window.jQuery = $;
 
 import {initializeEmbrace} from '../Embrace.js';
 

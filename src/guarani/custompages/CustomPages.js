@@ -1,16 +1,30 @@
+import $ from 'jquery';
 import {CoursesSearchCustomPage} from './CoursesSearchCustomPage.js';
 import {ProfessorsSearchCustomPage} from './ProfessorsSearchCustomPage.js';
 import {PlanTrackingCustomPage} from './PlanTrackingCustomPage.js';
 
-export const CustomPages = function (pagesDataParser, dataCollector, utils, apiConnector) {
+const CUSTOM_PAGES = [
+	CoursesSearchCustomPage,
+	ProfessorsSearchCustomPage,
+	PlanTrackingCustomPage,
+];
 
-	const CUSTOM_PAGES = [
-		CoursesSearchCustomPage,
-		ProfessorsSearchCustomPage,
-		PlanTrackingCustomPage,
-	];
+export class CustomPages {
+	static CUSTOM_PAGE_QUERY_PARAM = "customPage";
 
-	let appendMenu = function () {
+	#pagesDataParser;
+	#dataCollector;
+	#utils;
+	#apiConnector;
+
+	constructor(pagesDataParser, dataCollector, utils, apiConnector) {
+		this.#pagesDataParser = pagesDataParser;
+		this.#dataCollector = dataCollector;
+		this.#utils = utils;
+		this.#apiConnector = apiConnector;
+	}
+
+	appendMenu() {
 		if (!CUSTOM_PAGES.length) return;
 
 		let $customMenusContainer = $(`<ul class="dropdown-menu"></ul>`);
@@ -24,9 +38,9 @@ export const CustomPages = function (pagesDataParser, dataCollector, utils, apiC
 		CUSTOM_PAGES.forEach(customPage => {
 			$customMenusContainer.append(`<li><a class="no-ajax" href="${CustomPages.getCustomPageUrl(customPage)}">${customPage.menuName}</a></li>`);
 		});
-	};
+	}
 
-	let initCustomPage = function (customPage) {
+	#initCustomPage(customPage) {
 		$("#kernel_contenido").html(`
 			<div class="utnba-helper">
 				<div class="alert info">
@@ -44,46 +58,38 @@ export const CustomPages = function (pagesDataParser, dataCollector, utils, apiC
 				</div>
 			</div>
 		`);
-	};
+	}
 
-	let getSelectedPageHandler = function () {
+	getSelectedPageHandler() {
 		let selectedCustomPageName = new URLSearchParams(window.location.search).get(CustomPages.CUSTOM_PAGE_QUERY_PARAM);
 		let selectedCustomPage = CUSTOM_PAGES.filter(customPage => selectedCustomPageName === customPage.menuName)[0];
 		if (!selectedCustomPage) return null;
 
 		return () => {
-			initCustomPage(selectedCustomPage);
-			return selectedCustomPage($("#kernel_contenido .main"), {
-				pagesDataParser,
-				dataCollector,
-				utils,
-				apiConnector
+			this.#initCustomPage(selectedCustomPage);
+			return new selectedCustomPage($("#kernel_contenido .main"), {
+				pagesDataParser: this.#pagesDataParser,
+				dataCollector: this.#dataCollector,
+				utils: this.#utils,
+				apiConnector: this.#apiConnector
 			});
 		};
-	};
+	}
 
+	// Static methods
+	static getCustomPageUrl(customPage, customParamValue) {
+		let params = {
+			[CustomPages.CUSTOM_PAGE_QUERY_PARAM]: customPage.menuName,
+			[customPage.customParamKey]: customParamValue,
+		};
+		return "/autogestion/grado/?" + Object.entries(params).filter(entry => !!entry[1]).map(entry => entry.map(encodeURIComponent).join("=")).join("&");
+	}
 
-	// Public
-	return {
-		appendMenu: appendMenu,
-		getSelectedPageHandler: getSelectedPageHandler,
-	};
-};
+	static getCourseResultsUrl(courseCode) {
+		return CustomPages.getCustomPageUrl(CoursesSearchCustomPage, courseCode);
+	}
 
-CustomPages.CUSTOM_PAGE_QUERY_PARAM = "customPage";
-
-CustomPages.getCustomPageUrl = function (customPage, customParamValue) {
-	let params = {
-		[CustomPages.CUSTOM_PAGE_QUERY_PARAM]: customPage.menuName,
-		[customPage.customParamKey]: customParamValue,
-	};
-	return "/autogestion/grado/?" + Object.entries(params).filter(entry => !!entry[1]).map(entry => entry.map(encodeURIComponent).join("=")).join("&");
-};
-
-CustomPages.getCourseResultsUrl = function (courseCode) {
-	return CustomPages.getCustomPageUrl(CoursesSearchCustomPage, courseCode);
-};
-
-CustomPages.getProfessorSurveyResultsUrl = function (professorName) {
-	return CustomPages.getCustomPageUrl(ProfessorsSearchCustomPage, professorName);
-};
+	static getProfessorSurveyResultsUrl(professorName) {
+		return CustomPages.getCustomPageUrl(ProfessorsSearchCustomPage, professorName);
+	}
+}

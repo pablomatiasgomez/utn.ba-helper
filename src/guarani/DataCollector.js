@@ -1,48 +1,56 @@
 import {trace} from "@embrace-io/web-sdk";
 
-export const DataCollector = function (store, pagesDataParser, apiConnector) {
+const LOCAL_STORAGE_DATA_COLLECTOR_KEY = "UtnBaHelper.DataCollector";
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
-	const LOCAL_STORAGE_DATA_COLLECTOR_KEY = "UtnBaHelper.DataCollector";
+export class DataCollector {
+	#store;
+	#pagesDataParser;
+	#apiConnector;
+	#hashedStudentId;
 
-	const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+	constructor(store, pagesDataParser, apiConnector) {
+		this.#store = store;
+		this.#pagesDataParser = pagesDataParser;
+		this.#apiConnector = apiConnector;
+	}
 
-	let hashedStudentId;
-	let getHashedStudentId = function () {
-		if (hashedStudentId) return hashedStudentId;
+	#getHashedStudentId() {
+		if (this.#hashedStudentId) return this.#hashedStudentId;
 
-		let studentId = pagesDataParser.getStudentId();
-		hashedStudentId = hashCode(studentId);
-		return hashedStudentId;
-	};
+		let studentId = this.#pagesDataParser.getStudentId();
+		this.#hashedStudentId = this.#hashCode(studentId);
+		return this.#hashedStudentId;
+	}
 
 	/**
 	 * Sends the user stat with the hashed student it to keep data anonymous.
 	 */
-	let logUserStat = function (pesoAcademico, passingGradesAverage, allGradesAverage, passingGradesCount, failingGradesCount) {
-		return apiConnector.logUserStat(getHashedStudentId(), pesoAcademico, passingGradesAverage, allGradesAverage, passingGradesCount, failingGradesCount);
-	};
+	logUserStat(pesoAcademico, passingGradesAverage, allGradesAverage, passingGradesCount, failingGradesCount) {
+		return this.#apiConnector.logUserStat(this.#getHashedStudentId(), pesoAcademico, passingGradesAverage, allGradesAverage, passingGradesCount, failingGradesCount);
+	}
 
 	/**
 	 * Collects, every one day or more, background data such as:
 	 * - class schedules and professors
 	 * @returns {Promise<void>}
 	 */
-	let collectBackgroundDataIfNeeded = function () {
-		let hashedStudentId = getHashedStudentId();
+	collectBackgroundDataIfNeeded() {
+		let hashedStudentId = this.#getHashedStudentId();
 		// Save hashedStudentId to local storage, so that it can be used for surveys collection.
-		return store.saveHashedStudentIdToStore(hashedStudentId).then(() => {
-			let lastTimeCollected = getLastTimeCollectedForStudentId(hashedStudentId);
+		return this.#store.saveHashedStudentIdToStore(hashedStudentId).then(() => {
+			let lastTimeCollected = this.#getLastTimeCollectedForStudentId(hashedStudentId);
 
 			let collectMethods = [
 				{
 					key: "schedules",
 					minTime: ONE_DAY_MS,
-					method: () => collectClassSchedulesWithProfessors(),
+					method: () => this.#collectClassSchedulesWithProfessors(),
 				},
 				{
 					key: "planCourses",
 					minTime: ONE_DAY_MS * 180,
-					method: () => collectStudentPlanCourses(),
+					method: () => this.#collectStudentPlanCourses(),
 				}
 			];
 
@@ -69,33 +77,33 @@ export const DataCollector = function (store, pagesDataParser, apiConnector) {
 
 			return promise.then(() => {
 				if (shouldSaveLastTimeCollected) {
-					saveLastTimeCollected(hashedStudentId, lastTimeCollected);
+					this.#saveLastTimeCollected(hashedStudentId, lastTimeCollected);
 				}
 			});
 		});
-	};
+	}
 
-	let collectClassSchedulesWithProfessors = function () {
+	#collectClassSchedulesWithProfessors() {
 		return Promise.all([
-			pagesDataParser.getClassSchedules(),
-			pagesDataParser.getProfessorClassesFromSurveys(),
+			this.#pagesDataParser.getClassSchedules(),
+			this.#pagesDataParser.getProfessorClassesFromSurveys(),
 		]).then(results => {
 			let classSchedules = results[0].concat(results[1]);
 			if (classSchedules.length) {
-				return apiConnector.postClassSchedules(classSchedules);
+				return this.#apiConnector.postClassSchedules(classSchedules);
 			}
 		});
-	};
+	}
 
-	let collectStudentPlanCourses = function () {
-		return pagesDataParser.getStudentPlanCourses().then(planCourses => {
-			return apiConnector.postCourses(planCourses);
+	#collectStudentPlanCourses() {
+		return this.#pagesDataParser.getStudentPlanCourses().then(planCourses => {
+			return this.#apiConnector.postCourses(planCourses);
 		});
-	};
+	}
 
 	// -----
 
-	let getLastTimeCollectedByHashedStudentId = function () {
+	#getLastTimeCollectedByHashedStudentId() {
 		let lastTimeCollectedByHashedStudentId;
 		try {
 			// Don't know why, but some cases were failing with json parsing errors... We simply consider those as not present.
@@ -108,31 +116,26 @@ export const DataCollector = function (store, pagesDataParser, apiConnector) {
 			localStorage.setItem(LOCAL_STORAGE_DATA_COLLECTOR_KEY, JSON.stringify(lastTimeCollectedByHashedStudentId));
 		}
 		return lastTimeCollectedByHashedStudentId;
-	};
+	}
 
-	let getLastTimeCollectedForStudentId = function (hashedStudentId) {
-		return getLastTimeCollectedByHashedStudentId()[hashedStudentId] || {};
-	};
+	#getLastTimeCollectedForStudentId(hashedStudentId) {
+		return this.#getLastTimeCollectedByHashedStudentId()[hashedStudentId] || {};
+	}
 
-	let saveLastTimeCollected = function (hashedStudentId, lastTimeCollected) {
-		let lastTimeCollectedByHashedStudentId = getLastTimeCollectedByHashedStudentId();
+	#saveLastTimeCollected(hashedStudentId, lastTimeCollected) {
+		let lastTimeCollectedByHashedStudentId = this.#getLastTimeCollectedByHashedStudentId();
 		lastTimeCollectedByHashedStudentId[hashedStudentId] = lastTimeCollected;
 		localStorage.setItem(LOCAL_STORAGE_DATA_COLLECTOR_KEY, JSON.stringify(lastTimeCollectedByHashedStudentId));
-	};
+	}
 
 	// Used to make the studentId anonymous.
-	let hashCode = function (str) {
+	#hashCode(str) {
 		let hash = 0;
 		for (let i = 0; i < str.length; i++) {
 			hash = ((hash << 5) - hash) + str.charCodeAt(i);
 			hash = hash & hash; // Convert to 32bit integer
 		}
 		return hash;
-	};
+	}
 
-	// Public
-	return {
-		logUserStat: logUserStat,
-		collectBackgroundDataIfNeeded: collectBackgroundDataIfNeeded,
-	};
-};
+}

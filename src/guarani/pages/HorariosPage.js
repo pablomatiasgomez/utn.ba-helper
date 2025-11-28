@@ -1,53 +1,52 @@
-export const HorariosPage = function () {
+export class HorariosPage {
 
-	let trimCourseName = function (name) {
+	#trimCourseName(name) {
 		name = name.trim();
 		if (name.length > 20) {
 			return name.substring(0, 20) + "...";
 		} else {
 			return name;
 		}
-	};
+	}
 
-	let getColorFromClass = function (className) {
+	#getColorFromClass(className) {
 		const colorRegex = /materia-color-(\d*)/;
 		let groups = colorRegex.exec(className);
 		if (!groups) return null;
 		return groups[1];
-	};
+	}
 
-	let getClassesByColor = function () {
+	#getClassesByColor() {
 		let classesByColor = {};
-		$(".cursada .cursada-header").each(function () {
-			let name = $(this).find("h4").text().trim();
-			let color = getColorFromClass($(this).find(".cuadrado").attr("class"));
+		document.querySelectorAll(".cursada .cursada-header").forEach(element => {
+			let name = element.querySelector("h4").textContent.trim();
+			let color = this.#getColorFromClass(element.querySelector(".cuadrado").className);
+			console.log("??", name, color);
 			if (!name || !color) return;
 			classesByColor[color] = name;
 		});
 		return classesByColor;
-	};
+	}
 
-	let setCourseNamesInTable = function () {
-		let classesByColor = getClassesByColor();
+	#setCourseNamesInTable() {
+		let classesByColor = this.#getClassesByColor();
 		let last = null;
-		$(".agenda-hora").each(function () {
-			let color = getColorFromClass($(this).attr("class"));
+		document.querySelectorAll(".agenda-hora").forEach(element => {
+			let color = this.#getColorFromClass(element.className);
 			if (color && last !== color && classesByColor[color]) {
-				$(this).text(trimCourseName(classesByColor[color]));
-				$(this).addClass("name-container");
+				element.textContent = this.#trimCourseName(classesByColor[color]);
+				element.classList.add("name-container");
 			}
 			last = color;
 		});
-	};
+	}
 
+	init() {
+		return Promise.resolve().then(() => {
+			this.#setCourseNamesInTable();
+		});
+	}
 
-	return {
-		init: function () {
-			return Promise.resolve().then(() => {
-				setCourseNamesInTable();
-			});
-		},
-		close: function () {
-		},
-	};
-};
+	close() {
+	}
+}
