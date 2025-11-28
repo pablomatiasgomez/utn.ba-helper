@@ -3,10 +3,11 @@
   "version": "7.0.0",
   "description": "A Chrome extension that makes navigating and using the UTN.BA - FRBA website easier.",
   "private": true,
+  "type": "module",
   "scripts": {
     "test": "NODE_OPTIONS='--experimental-vm-modules --experimental-specifier-resolution=node' jest",
-    "watch": "webpack --watch --config webpack.config.js",
-    "build": "webpack --config webpack.config.js",
+    "watch": "webpack --watch --config webpack.config.cjs",
+    "build": "webpack --config webpack.config.cjs",
     "pack": "npm run build && npm run process-sourcemaps && node pack.js && open ./release",
     "process-sourcemaps": "embrace-web-cli upload -a 08sxm -t \"$(cat embrace-token)\" -p ./build"
   },
