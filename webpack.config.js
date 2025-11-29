@@ -1,4 +1,4 @@
-import path from 'path';
+import path from 'node:path';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 

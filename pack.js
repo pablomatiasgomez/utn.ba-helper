@@ -1,5 +1,5 @@
-import {readFileSync, writeFileSync, existsSync, mkdirSync} from "fs";
-import {resolve} from "path";
+import {readFileSync, writeFileSync, existsSync, mkdirSync} from "node:fs";
+import {resolve} from "node:path";
 import AdmZip from "adm-zip";
 
 const __dirname = import.meta.dirname;
