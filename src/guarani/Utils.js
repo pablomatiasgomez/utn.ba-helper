@@ -81,6 +81,12 @@ export class Utils {
 		});
 	}
 
+	/**
+	 * logHTML is used to report the entire HTML or debug purposes
+	 * Can be called with a given pct of users to sample.
+	 * E.g.
+	 * 	this.#utils.logHTML("HorariosPage", 10);
+	 */
 	logHTML(name, pct) {
 		// Only log for a percentage of users
 		if (Math.random() * 100 >= pct) return;
@@ -95,7 +101,6 @@ export class Utils {
 		});
 		return this.#apiConnector.logMessage(message, false, `HTML log for ${name}. HTML: ${html}`);
 	}
-
 
 	waitForElementToHide(selector) {
 		return new Promise((resolve) => {

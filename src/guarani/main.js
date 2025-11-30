@@ -42,7 +42,7 @@ import {InscripcionAExamenesPage} from './pages/InscripcionAExamenesPage.js';
 			// match is performed using regex and first one is used.
 			{
 				pathRegex: /^\/autogestion\/grado\/calendario$/,
-				handler: () => new HorariosPage(utils)
+				handler: () => new HorariosPage()
 			},
 			{
 				pathRegex: /^\/autogestion\/grado\/cursada\/elegir_materia\/.*/,
