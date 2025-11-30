@@ -10,31 +10,28 @@ const __dirname = import.meta.dirname;
 describe('horariosPage.init', () => {
 	let apiConnector = new ApiConnector();
 	let utils = new Utils(apiConnector);
-	let horariosPage = new HorariosPage(utils);
+	let horariosPage;
 
-	beforeEach(() => {
+	beforeEach(async () => {
 		const inputFile = expect.getState().currentTestName.replaceAll(" ", "_") + '.html';
 		document.body.innerHTML = fs.readFileSync(path.resolve(__dirname, './__fixtures__/', inputFile), 'utf8');
+		horariosPage = new HorariosPage(utils);
+		await horariosPage.init();
+	});
+
+	afterEach(() => {
+		horariosPage.close();
 	});
 
 	it('successful parsing', async () => {
-		await horariosPage.init();
-
-		// Snapshot the entire modified body HTML
 		expect(document.body.innerHTML).toMatchSnapshot();
 	});
 
 	it('missing cursada elements', async () => {
-		await horariosPage.init();
-
-		// Snapshot the entire modified body HTML
 		expect(document.body.innerHTML).toMatchSnapshot();
 	});
 
 	it('empty agenda', async () => {
-		await horariosPage.init();
-
-		// Snapshot the entire modified body HTML
 		expect(document.body.innerHTML).toMatchSnapshot();
 	});
 });
