@@ -7,7 +7,7 @@
 </p>
 <p align="center"><a href="https://chromewebstore.google.com/detail/utnba-helper-ex-siga-help/jdgdheoeghamkhfppapjchbojhehimpe"><b>Install from the Chrome Web Store</b></a></p>
 <p align="center"><a href="https://chromewebstore.google.com/detail/utnba-helper-ex-siga-help/jdgdheoeghamkhfppapjchbojhehimpe"><img src="https://img.shields.io/chrome-web-store/v/jdgdheoeghamkhfppapjchbojhehimpe.svg" alt="install"></a></p>
-<p align="center"><img src="https://github.com/pablomatiasgomez/utn.ba-helper/raw/master/images/icons/icon128.png" alt="logo"></p>
+<p align="center"><img src="https://github.com/pablomatiasgomez/utn.ba-helper/raw/master/public/icons/icon128.png" alt="logo"></p>
 
 UTN.BA Helper is a Chrome extension that makes navigating and using the UTN.BA - FRBA website easier.
 
