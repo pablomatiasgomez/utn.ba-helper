@@ -1,0 +1,58 @@
+.utnba-helper .plan-tracking tbody td {
+    vertical-align: top;
+}
+
+.utnba-helper .plan-tracking tbody .course {
+    margin: 10px 0;
+    border: 1px solid black;
+    border-radius: 2px;
+    padding: 4px;
+}
+
+.utnba-helper .plan-tracking tbody .course .text-small {
+    font-size: 11px;
+    text-align: center;
+}
+
+.utnba-helper .plan-tracking tbody .course .text-medium {
+    font-size: 13px;
+    text-align: center;
+}
+
+.utnba-helper .plan-tracking tbody hr {
+    margin: 10px 0;
+}
+
+.utnba-helper .plan-tracking a > .dependency-tooltip {
+    text-shadow: none;
+    white-space: nowrap;
+    position: relative;
+    margin-right: 100px;
+    margin-left: -3px;
+    max-width: 300px;
+    width: auto;
+    border-radius: 12px;
+    background-color: #FFFFB0;
+    color: #000000;
+    border: 1px solid #505050;
+    font-family: arial, serif;
+    font-size: 12px;
+    padding: 10px;
+    z-index: 1;
+    text-decoration: none;
+    display: none;
+    box-shadow: 0 8px 8px -5px #a0a0a0;
+}
+
+.utnba-helper .plan-tracking a > .dependency-tooltip {
+    text-decoration: none;
+    position: absolute;
+    margin-left: 0.6rem;
+}
+
+.utnba-helper .plan-tracking a:hover > .dependency-tooltip {
+    display: inline;
+    text-decoration: none;
+}
+
+

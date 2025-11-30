@@ -1,3 +1,5 @@
+import './CustomPages.css';
+
 import {CoursesSearchCustomPage} from './CoursesSearchCustomPage.js';
 import {ProfessorsSearchCustomPage} from './ProfessorsSearchCustomPage.js';
 import {PlanTrackingCustomPage} from './PlanTrackingCustomPage.js';

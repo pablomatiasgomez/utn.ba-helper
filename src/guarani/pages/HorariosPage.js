@@ -1,3 +1,5 @@
+import './HorariosPage.css';
+
 export class HorariosPage {
 
 	#utils;

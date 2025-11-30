@@ -1,3 +1,5 @@
+import './PlanTrackingCustomPage.css';
+
 import $ from 'jquery';
 import {CustomPages} from './CustomPages.js';
 

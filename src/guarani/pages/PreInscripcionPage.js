@@ -1,3 +1,5 @@
+import './PreInscripcionPage.css';
+
 export class PreInscripcionPage {
 	#pagesDataParser;
 	#utils;
