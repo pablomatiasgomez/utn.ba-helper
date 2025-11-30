@@ -1,0 +1,12 @@
+/** Some other css is breaking this so it's enforced here*/
+.utnba-helper .filters label {
+    display: initial;
+}
+
+.utnba-helper .filters a {
+    margin-top: 8px;
+}
+
+.utnba-helper .filters input[type="checkbox"] {
+    margin-top: 0px;
+}

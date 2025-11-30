@@ -1,0 +1,11 @@
+/* HorariosPage */
+.name-container {
+    z-index: 5;
+    white-space: nowrap;
+    font-size: 11px;
+}
+
+#agenda-holder .top-left-border {
+    border-top: 1px solid grey;
+    border-left: 1px solid grey;
+}
