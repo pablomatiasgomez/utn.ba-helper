@@ -1,0 +1,2 @@
+// noinspection JSUnusedGlobalSymbols
+export default {};
