@@ -19,7 +19,10 @@ import {PagesDataParser} from './PagesDataParser.js';
 		// This main will only be executed on kolla pages.
 		if (!window.location.pathname.startsWith("/siu/kolla")) return;
 
-		document.getElementById("btn-terminar").addEventListener("mousedown", () => {
+		let btn = document.getElementById("btn-terminar");
+		if (!btn) return utils.logHTML("kollaMissingBtn", 100);
+
+		btn.addEventListener("mousedown", () => {
 			return utils.runAsync("surveyFinished", () => {
 				return store.readHashedStudentIdFromStore().then(hashedStudentId => {
 					if (!hashedStudentId) throw new Error(`Couldn't find hashedStudentId within form url ${location.href}.`);
