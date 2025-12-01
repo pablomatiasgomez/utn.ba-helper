@@ -1,6 +1,6 @@
 import $ from 'jquery';
 import {Consts} from './Consts.js';
-import {GuaraniBackendError, LoggedOutError, MissingStudentIdError} from './Errors.js';
+import {isIgnoredError, stringifyError} from './Errors.js';
 import {log} from "@embrace-io/web-sdk";
 import {CustomPages} from './custompages/CustomPages.js';
 
@@ -34,28 +34,6 @@ export class Utils {
 		document.head.appendChild(script);
 	}
 
-	#stringifyError(error) {
-		if (error instanceof Error) {
-			let message = error.toString();
-			let result = error.stack;
-
-			// `stack` usually includes the message in the first line, but not in all cases.
-			if (!error.stack.startsWith(message)) {
-				result = message + "\n" + error.stack;
-			}
-
-			// Include the cause chain if present
-			if (error.cause) {
-				result += "\nCaused by: " + this.#stringifyError(error.cause);
-			}
-
-			return result;
-		}
-		if (typeof error === "object") {
-			return JSON.stringify(error);
-		}
-		return error + "";
-	}
 
 	/**
 	 * Wraps a function that is triggered from an async event, and handles errors by logging them to the api.
@@ -67,13 +45,13 @@ export class Utils {
 		}).catch(e => {
 			console.error(`Error while executing ${name}`, e);
 			// Not logging errors that we can't do anything.
-			if (e instanceof LoggedOutError || e instanceof GuaraniBackendError || e instanceof MissingStudentIdError) return;
+			if (isIgnoredError(e)) return;
 
 			// Log to Embrace
 			log.logException(e, {handled: true, attributes: {name: name}});
 
 			// Log to our backend
-			let errStr = this.#stringifyError(e);
+			let errStr = stringifyError(e);
 			// Skip first 2 Failed to fetch errors. We only want to know about these if it's failing for every request.
 			// These are usually related to the user closing the tab, dns not resolving, etc., but we cannot get the details.
 			if (errStr.includes("Failed to fetch") && ++this.#failedToFetchErrors <= 2) return;

@@ -30,3 +30,45 @@ export class MissingStudentIdError extends Error {
 		this.name = "MissingStudentIdError";
 	}
 }
+
+// Errors that we don't want to log to our backend
+const IGNORED_ERROR_TYPES = [LoggedOutError, GuaraniBackendError, MissingStudentIdError];
+
+/**
+ * Checks if the given error or any error in its cause chain is of a type that should be ignored.
+ * @param {Error} error - The error to check
+ * @returns {boolean} - True if the error should be ignored
+ */
+export function isIgnoredError(error) {
+	if (!error) return false;
+	if (IGNORED_ERROR_TYPES.some(ErrorType => error instanceof ErrorType)) return true;
+	return isIgnoredError(error.cause);
+}
+
+/**
+ * Converts an error to a string representation, including the full cause chain.
+ * @param {Error|Object|*} error - The error to stringify
+ * @returns {string} - String representation of the error
+ */
+export function stringifyError(error) {
+	if (error instanceof Error) {
+		let message = error.toString();
+		let result = error.stack || message;
+
+		// `stack` usually includes the message in the first line, but not in all cases.
+		if (error.stack && !error.stack.startsWith(message)) {
+			result = message + "\n" + error.stack;
+		}
+
+		// Include the cause chain if present
+		if (error.cause) {
+			result += "\nCaused by: " + stringifyError(error.cause);
+		}
+
+		return result;
+	}
+	if (typeof error === "object") {
+		return JSON.stringify(error);
+	}
+	return error + "";
+}
