@@ -1,5 +1,7 @@
 import './main.css';
 
+import $ from 'jquery';
+
 import {initializeEmbrace} from '../Embrace.js';
 
 import {ApiConnector} from '../ApiConnector.js';
@@ -27,7 +29,7 @@ import {PagesDataParser} from './PagesDataParser.js';
 				return store.readHashedStudentIdFromStore().then(hashedStudentId => {
 					if (!hashedStudentId) throw new Error(`Couldn't find hashedStudentId within form url ${location.href}.`);
 
-					let surveys = pagesDataParser.parseKollaSurveyForm(document, document.documentElement.outerHTML);
+					let surveys = pagesDataParser.parseKollaSurveyForm($(document), document.documentElement.outerHTML);
 					if (surveys.length) {
 						surveys.forEach(survey => survey.surveyTaker = hashedStudentId);
 						return apiConnector.postProfessorSurveys(surveys);
