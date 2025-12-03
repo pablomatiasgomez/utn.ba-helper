@@ -1,9 +1,8 @@
 import {ApiConnector} from '../__mocks__/ApiConnector.js';
 import {Utils} from './Utils.js';
 import {PagesDataParser} from './PagesDataParser.js';
+import {loadFixture} from './test-helpers.js';
 
-import fs from "node:fs";
-import path from "node:path";
 import $ from "jquery";
 
 const __dirname = import.meta.dirname;
@@ -14,9 +13,10 @@ describe('pagesDataParser.getStudentId', () => {
 	let pagesDataParser = new PagesDataParser(utils);
 
 	beforeEach(() => {
-		const testName = expect.getState().currentTestName.split(" ").slice(1).join("_");
-		const inputFile = testName + '.html';
-		document.body.innerHTML = fs.readFileSync(path.resolve(__dirname, './__fixtures__/', 'pagesDataParser', 'getStudentId', inputFile), 'utf8');
+		loadFixture({
+			testName: expect.getState().currentTestName,
+			testFileDir: __dirname,
+		});
 	});
 
 	it('successful parsing', () => {
@@ -37,14 +37,10 @@ describe('pagesDataParser.parseKollaSurveyForm', () => {
 	let pagesDataParser = new PagesDataParser(utils);
 
 	beforeEach(() => {
-		const testName = expect.getState().currentTestName.split(" ").slice(1).join("_");
-		const inputFile = testName + '.html';
-		const htmlContent = fs.readFileSync(path.resolve(__dirname, './__fixtures__/', 'pagesDataParser', 'parseKollaSurveyForm', inputFile), 'utf8');
-		// Extract body content without executing scripts
-		const bodyMatch = htmlContent.match(/<body[^>]*>([\s\S]*)<\/body>/i);
-		if (bodyMatch) {
-			document.body.innerHTML = bodyMatch[1];
-		}
+		loadFixture({
+			testName: expect.getState().currentTestName,
+			testFileDir: __dirname,
+		});
 	});
 
 	it('082029-K4053-2021-1C-2professors', () => {

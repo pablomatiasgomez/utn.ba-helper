@@ -1,37 +1,92 @@
 
-<div class="brand-nav">
+<!DOCTYPE html>
+<html>
+    <head>
+
+
+
+
+
+
+
+
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0">
+<link rel="icon" href="/autogestion/grado/_comp/siu/img/favicon.ico" type="image/x-icon" />
+
+<title>Grado - Carreras</title>
+
+	<script type='text/javascript' src='/autogestion/grado/_comp/siu/js/guarani_mash.js' charset="iso-8859-1"></script>
+			<link type='text/css' href='/autogestion/grado/_comp/siu/css/guarani_mash.css' rel='stylesheet' />
+		                                            <link type='text/css' href='/autogestion/grado/_comp/utn/css/guarani_mash.css' rel='stylesheet' />
+                                            <link type='text/css' href='/autogestion/grado/_comp/grado/css/guarani_mash.css' rel='stylesheet' />
+
+    <!-- No se agrega en "guarani_mash.css" porque sino pierde la referencia de las fuentes -->
+    <link type='text/css' href='/autogestion/grado/css/font-awesome-4.6.3/css/font-awesome.min.css' rel='stylesheet' />
+
+
+
+<!--[if lt IE 9]>
+	<script type='text/javascript' src='/autogestion/grado/_comp/js/html5.js'></script>
+<![endif]-->
+
+
+
+<script type='text/javascript'>
+var kernel_config = {
+	widget_count: 4,
+	// Stalls js load until all widgets have loaded css and rendered its content
+	stall_js: false,
+	log: true,
+	alias: '/autogestion/grado',
+	pretty_urls: true,
+	op_default: 'inicio_alumno',
+	op_actual: 'inicio_alumno',
+	historia_activa: false,
+		es_produccion: true
+};
+var url_cambio_perfil = "https://guarani.frba.utn.edu.ar/autogestion/grado/acceso/perfil";
+var url_cambio_carrera = "https://guarani.frba.utn.edu.ar/autogestion/grado/acceso/cambiar_carrera";
+
+var autocompletar_input_habilitado = false;
+
+</script>
+    </head>
+
+    <body>
+        <div class="brand-nav">
     <div class="container">
         <div class="row-fluid">
             <div class="span3">
-                <a class="brand" href="https://guarani.frba.utn.edu.ar/autogestion/grado/inicio_alumno"><img src="/autogestion/grado/_comp/utn/img/logo-transparente.png"></a>
+                <a class="brand" href="https://guarani.frba.utn.edu.ar/autogestion/grado/inicio_alumno"><img src="/autogestion/grado/_comp/utn/img/logo-transparente.png" /></a>
             </div>
 
             <div class="span9">
-                <div class="row-fluid">
-                    <div class="span12">
-                        <div class="navbar user-navbar clearfix">
-                            <ul class="nav pull-right">
+                                    <div class="row-fluid">
+                        <div class="span12">
+                            <div class="navbar user-navbar clearfix">
+                                <ul class="nav pull-right">
 
-                                <li class="notificaciones">
-                                    <a href="https://guarani.frba.utn.edu.ar/autogestion/grado/mensajes">
-                                        <i class="icon-envelope"></i>
-                                        <span id="js-cant-mensajes" class="badge ">
+                                    <li class="notificaciones">
+                                        <a href="https://guarani.frba.utn.edu.ar/autogestion/grado/mensajes">
+                                            <i class="icon-envelope"></i>
+                                            <span id='js-cant-mensajes' class="badge ">
 											0
 										</span>
-                                    </a>
-                                </li>
-                                <li class="dropdown">
-                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-user"></i> PABLO MATIAS GOMEZ <b class="caret"></b></a>
-                                    <ul class="dropdown-menu">
-                                        <li><a href="https://guarani.frba.utn.edu.ar/autogestion/grado/configuracion"><i class="icon-cog"></i> Configuración</a></li>
-                                        <li><a href="https://guarani.frba.utn.edu.ar/autogestion/grado/acceso/logout" class="no-ajax"><i class="icon-off"></i> Cerrar sesión</a></li>
-                                    </ul>
-                                </li>
-                            </ul>
+                                        </a>
+                                    </li>
+                                    <li class="dropdown">
+                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-user"></i> PABLO MATIAS GOMEZ <b class="caret"></b></a>
+                                        <ul class="dropdown-menu">
+                                            <li><a href='https://guarani.frba.utn.edu.ar/autogestion/grado/configuracion'><i class="icon-cog"></i> Configuraci�n</a></li>
+                                            <li><a href='https://guarani.frba.utn.edu.ar/autogestion/grado/acceso/logout' class="no-ajax"><i class="icon-off"></i> Cerrar sesi�n</a></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
+                                                </div>
         </div>
     </div>
 </div>
@@ -39,192 +94,185 @@
     <div class="navbar-inner">
         <div class="container">
             <div role="navigation">
-                <ul id="js-nav" class="nav">
+                                    <ul id='js-nav' class='nav'>
 
 
 
-                    <li id="cursada" class="js-menuitem-root ">
-                        <a href="https://guarani.frba.utn.edu.ar/autogestion/grado/cursada">Preinscripción a materias</a>
-                    </li>
+                                <li id='cursada' class='js-menuitem-root '>
+                                    <a href='https://guarani.frba.utn.edu.ar/autogestion/grado/cursada'>Preinscripci�n a materias</a>
+                                </li>
 
 
-                    <li id="examen" class="js-menuitem-root ">
-                        <a href="https://guarani.frba.utn.edu.ar/autogestion/grado/examen">Inscripción a Exámenes</a>
-                    </li>
+                                <li id='examen' class='js-menuitem-root '>
+                                    <a href='https://guarani.frba.utn.edu.ar/autogestion/grado/examen'>Inscripci�n a Ex�menes</a>
+                                </li>
 
 
-                    <li class="dropdown js-menuitem-root ">
+                                <li class='dropdown js-menuitem-root '>
 
 
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Reportes <b class="caret"></b></a>
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Reportes <b class="caret"></b></a>
 
-                        <ul class="dropdown-menu">
+    <ul class='dropdown-menu'>
 
 
 
-                            <li id="actuacion_provisoria"><a href="https://guarani.frba.utn.edu.ar/autogestion/grado/actuacion_provisoria">Actuación provisoria</a></li>
+                <li id='actuacion_provisoria'><a href='https://guarani.frba.utn.edu.ar/autogestion/grado/actuacion_provisoria'>Actuaci�n provisoria</a></li>
 
 
 
 
-                            <li id="calendario"><a href="https://guarani.frba.utn.edu.ar/autogestion/grado/calendario">Agenda</a></li>
+                <li id='calendario'><a href='https://guarani.frba.utn.edu.ar/autogestion/grado/calendario'>Agenda</a></li>
 
 
 
 
-                            <li id="encuestas_kolla"><a href="https://guarani.frba.utn.edu.ar/autogestion/grado/encuestas_kolla">Encuestas Pendientes</a></li>
+                <li id='encuestas_kolla'><a href='https://guarani.frba.utn.edu.ar/autogestion/grado/encuestas_kolla'>Encuestas Pendientes</a></li>
 
 
 
 
-                            <li id="encuestas_respondidas"><a href="https://guarani.frba.utn.edu.ar/autogestion/grado/encuestas_respondidas">Encuestas respondidas</a></li>
+                <li id='encuestas_respondidas'><a href='https://guarani.frba.utn.edu.ar/autogestion/grado/encuestas_respondidas'>Encuestas respondidas</a></li>
 
 
 
 
-                            <li id="historia_academica"><a href="https://guarani.frba.utn.edu.ar/autogestion/grado/historia_academica">Historia académica</a></li>
+                <li id='historia_academica'><a href='https://guarani.frba.utn.edu.ar/autogestion/grado/historia_academica'>Historia acad�mica</a></li>
 
 
 
 
-                            <li id="reporte_inasistencias"><a href="https://guarani.frba.utn.edu.ar/autogestion/grado/reporte_inasistencias">Inasistencias</a></li>
+                <li id='reporte_inasistencias'><a href='https://guarani.frba.utn.edu.ar/autogestion/grado/reporte_inasistencias'>Inasistencias</a></li>
 
 
 
 
-                            <li id="inscripciones"><a href="https://guarani.frba.utn.edu.ar/autogestion/grado/inscripciones">Mis inscripciones</a></li>
+                <li id='inscripciones'><a href='https://guarani.frba.utn.edu.ar/autogestion/grado/inscripciones'>Mis inscripciones</a></li>
 
 
 
 
-                            <li id="plan_estudio"><a href="https://guarani.frba.utn.edu.ar/autogestion/grado/plan_estudio">Plan de estudios</a></li>
+                <li id='plan_estudio'><a href='https://guarani.frba.utn.edu.ar/autogestion/grado/plan_estudio'>Plan de estudios</a></li>
 
 
 
 
-                            <li id="tramites_mesa_entrada"><a href="https://guarani.frba.utn.edu.ar/autogestion/grado/tramites_mesa_entrada">Trámites Mesa de Entrada</a></li>
+                <li id='tramites_mesa_entrada'><a href='https://guarani.frba.utn.edu.ar/autogestion/grado/tramites_mesa_entrada'>Tr�mites Mesa de Entrada</a></li>
 
 
 
 
-                        </ul>
+    </ul>
 
 
 
-                    </li>
+                                </li>
 
 
-                    <li class="dropdown js-menuitem-root ">
+                                <li class='dropdown js-menuitem-root '>
 
 
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Trámites <b class="caret"></b></a>
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Tr�mites <b class="caret"></b></a>
 
-                        <ul class="dropdown-menu">
+    <ul class='dropdown-menu'>
 
 
 
-                            <li id="datos_censales"><a class="no-ajax" href="https://guarani.frba.utn.edu.ar/autogestion/grado/datos_censales">Mis datos personales</a></li>
+                <li id='datos_censales'><a class="no-ajax" href='https://guarani.frba.utn.edu.ar/autogestion/grado/datos_censales'>Mis datos personales</a></li>
 
 
 
 
-                            <li id="solicitudes"><a href="https://guarani.frba.utn.edu.ar/autogestion/grado/solicitudes">Solicitar Constancias y Certificados</a></li>
+                <li id='solicitudes'><a href='https://guarani.frba.utn.edu.ar/autogestion/grado/solicitudes'>Solicitar Constancias y Certificados</a></li>
 
 
 
 
-                        </ul>
+    </ul>
 
 
 
-                    </li>
+                                </li>
 
 
-                    <li id="noticias" class="js-menuitem-root ">
-                        <a href="https://guarani.frba.utn.edu.ar/autogestion/grado/noticias">Noticias</a>
-                    </li>
+                                <li id='noticias' class='js-menuitem-root '>
+                                    <a href='https://guarani.frba.utn.edu.ar/autogestion/grado/noticias'>Noticias</a>
+                                </li>
 
 
-                    <li id="calendario_academico" class="js-menuitem-root ">
-                        <a href="https://guarani.frba.utn.edu.ar/autogestion/grado/calendario_academico">Calendario Académico</a>
-                    </li>
+                                <li id='calendario_academico' class='js-menuitem-root '>
+                                    <a href='https://guarani.frba.utn.edu.ar/autogestion/grado/calendario_academico'>Calendario Acad�mico</a>
+                                </li>
 
 
-                </ul>
+                                            </ul>
 
-                <ul id="js-selector-perfiles" class="nav pull-right perfiles">
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="js-texto-perfil">Perfil: Alumno</span> <b class="caret"></b></a>
-                        <ul class="dropdown-menu" id="js-select-perfil">
-                            <li data-perfil="Alumno" data-perfilnombre="Alumno" class="js-seleccion-perfil js-perfil-item">
-                                <a href="#"><i class="icon-ok"></i> Alumno</a>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-            </div><!--/.nav-collapse -->
+                                    <ul id="js-selector-perfiles" class="nav pull-right perfiles">
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class='js-texto-perfil'></span> <b class="caret"></b></a>
+                            <ul class="dropdown-menu" id="js-select-perfil">
+                                                                                                            <li data-perfil="Alumno" data-perfilnombre="Alumno" class='js-seleccion-perfil js-perfil-item'>
+                                            <a href="#"><i class="icon-ok"></i> Alumno</a>
+                                        </li>
+                                                                                                </ul>
+                        </li>
+                    </ul>
+                            </div><!--/.nav-collapse -->
         </div><!-- container-fluid -->
     </div><!-- navbar-inner -->
 </div><!-- navbar -->
 
 <!-- https://gist.github.com/tentacode/3892186 -->
 
-<div id="loading" style="display: none;" class=""></div>
-<div id="loading_top" style="top: 0px; left: 575.5px; display: none;" class="">Cargando...</div>
-<div id="_msg_placeholder" style="display:none;" class="msg_placeholder alert-success"></div>
-<div id="kernel_contenido" class="container">
+        <div id='loading'></div>
+		<div id='loading_top' style='display:none;'>Cargando...</div>
+		<div id='_msg_placeholder' style='display:none;' class="msg_placeholder alert-success"></div>
+		<div id='kernel_contenido' class="container">
 
-    <div class="titulo_operacion row-fluid">
-        <div class="span12">
-            <h2>Bienvenido/a PABLO MATIAS GOMEZ </h2>    </div>
-    </div>
-
-    <div id="layout_dos_columnas" class="row-fluid">
-        <div id="columna_1" class="span9">
-            <div class="row-fluid">
-                <div class="span4">
-                    <div id="lista_carreras" class="pagelet" style="display: block; clear: both;"><ul class="unstyled"><h3 style="border-bottom: 1px solid #eeeeee">Períodos lectivos</h3><li><h4>Grado SyS 2025</h4><div class="box-materia"><ul><li><strong>Tipo: </strong><span>anual</span></li><li><strong>Fechas del período lectivo: </strong></li><ul><li><strong>Inicio: </strong><span>12/08/2024</span></li><li><strong>Finalización: </strong><span>12/07/2025</span></li></ul><li><strong>Período de inscripción #1: </strong></li><ul><li><strong>Inicio: </strong><span>12/07/2024</span></li><li><strong>Finalización: </strong><span>15/08/2024</span></li></ul><button data-target="js-qr-per_lec42e7f5816dec5bc149715ab69cd03516b34817970" class="btn js-btn-qr-per_lec"><span class="glyphicon icon-qrcode"></span> Agendalo!</button><img id="js-qr-per_lec42e7f5816dec5bc149715ab69cd03516b34817970" src="https://guarani.frba.utn.edu.ar/autogestion/grado/inicio_alumno/qr_periodo/42e7f5816dec5bc149715ab69cd03516b3481797$0" class="hide"></ul></div></li><li><h4>Grado Anual 2025</h4><div class="box-materia"><ul><li><strong>Tipo: </strong><span>anual</span></li><li><strong>Fechas del período lectivo: </strong></li><ul><li><strong>Inicio: </strong><span>25/03/2025</span></li><li><strong>Finalización: </strong><span>29/11/2025</span></li></ul><li><strong>Período de inscripción #1: </strong></li><ul><li><strong>Inicio: </strong><span>26/02/2025</span></li><li><strong>Finalización: </strong><span>01/04/2025</span></li></ul><button data-target="js-qr-per_lecac222eabf0e48befa533f1016929988570d0d8130" class="btn js-btn-qr-per_lec"><span class="glyphicon icon-qrcode"></span> Agendalo!</button><img id="js-qr-per_lecac222eabf0e48befa533f1016929988570d0d8130" src="https://guarani.frba.utn.edu.ar/autogestion/grado/inicio_alumno/qr_periodo/ac222eabf0e48befa533f1016929988570d0d813$0" class="hide"></ul></div></li><li><h4>Grado Primer Cuatrimestre 2025</h4><div class="box-materia"><ul><li><strong>Tipo: </strong><span>cuatrimestre</span></li><li><strong>Fechas del período lectivo: </strong></li><ul><li><strong>Inicio: </strong><span>25/03/2025</span></li><li><strong>Finalización: </strong><span>12/07/2025</span></li></ul><li><strong>Período de inscripción #1: </strong></li><ul><li><strong>Inicio: </strong><span>26/02/2025</span></li><li><strong>Finalización: </strong><span>01/04/2025</span></li></ul><button data-target="js-qr-per_lec1d231de86a58aa68ed3145eee3903a5744122e0f0" class="btn js-btn-qr-per_lec"><span class="glyphicon icon-qrcode"></span> Agendalo!</button><img id="js-qr-per_lec1d231de86a58aa68ed3145eee3903a5744122e0f0" src="https://guarani.frba.utn.edu.ar/autogestion/grado/inicio_alumno/qr_periodo/1d231de86a58aa68ed3145eee3903a5744122e0f$0" class="hide"></ul></div></li></ul><ul class="unstyled"><h3>Turnos de examen</h3></ul></div>
-                </div>
-                <div class="span7">
-                    <div id="lista_encuestas_pendientes" class="pagelet" style="display: block; clear: both;"><ul class="unstyled"><h3 style="border-bottom: 1px solid #eeeeee">Encuestas pendientes</h3><div class="alert alert-warning text-center text-warning">No hay encuestas pendientes para completar</div></ul></div>
-                </div>
-
-            </div>
-
-        </div>
-        <div id="columna_2" class="span3">        <div id="accesos_servicios" aria-live="polite" class="pagelet" style="display: block; clear: both;">            <h3 style="border-bottom: 1px solid #eeeeee">Servicios</h3>
-            <div class="accesos">
-                <a class="boton_accesos" href="https://aulasvirtuales.frba.utn.edu.ar/">Campus virtual</a>
-                <a class="boton_accesos" href="https://bolsa.frba.utn.edu.ar/">Bolsa de trabajo</a>
-                <a class="boton_accesos" href="http://biblioteca.frba.utn.edu.ar">Biblioteca</a>
-                <a class="boton_accesos" href="https://docs.frba.utn.edu.ar/books/mu---beneficios-con-cuenta-institucional">Beneficios</a>
-                <a class="boton_accesos" href="https://www.frba.utn.edu.ar/siuguarani/">Instructivos / Ayuda</a>
-            </div>
-        </div>
-
-        </div>
-    </div>
-    <script type="text/javascript">kernel.renderer.on_arrival({"css":["\/autogestion\/grado\/_comp\/siu\/operaciones\/inicio_alumno\/lista_carreras\/default.css"],"js":["\/autogestion\/grado\/_comp\/siu\/operaciones\/inicio_alumno\/lista_carreras\/pagelet_lista_carreras.js"],"op":"inicio_alumno","info":{"id":"lista_carreras","visible":"1","estado":"inicial","mensajes":{"no_existe_periodo_vigente":"No existe per\u00edodo de inscripci\u00f3n vigente.","periodo_comienza":"El pr\u00f3ximo per\u00edodo de inscripci\u00f3n comienza el d\u00eda"},"existe_periodo_de_inscripcion_actividades":"https:\/\/guarani.frba.utn.edu.ar\/autogestion\/grado\/cursada\/existe_periodo_de_inscripcion"},"content":"<ul class='unstyled'><h3 style=\"border-bottom: 1px solid #eeeeee\">Per\u00edodos lectivos<\/h3><li><h4>Grado SyS 2025<\/h4><div class=\"box-materia\"><ul><li><strong>Tipo: <\/strong><span>anual<\/span><\/li><li><strong>Fechas del per\u00edodo lectivo: <\/strong><\/li><ul><li><strong>Inicio: <\/strong><span>12\/08\/2024<\/span><\/li><li><strong>Finalizaci\u00f3n: <\/strong><span>12\/07\/2025<\/span><\/li><\/ul><li><strong>Per\u00edodo de inscripci\u00f3n #1: <\/strong><\/li><ul><li><strong>Inicio: <\/strong><span>12\/07\/2024<\/span><\/li><li><strong>Finalizaci\u00f3n: <\/strong><span>15\/08\/2024<\/span><\/li><\/ul><button data-target=\"js-qr-per_lec42e7f5816dec5bc149715ab69cd03516b34817970\" class=\"btn js-btn-qr-per_lec\"><span class=\"glyphicon icon-qrcode\"><\/span> Agendalo!<\/button><img id=\"js-qr-per_lec42e7f5816dec5bc149715ab69cd03516b34817970\" src=\"https:\/\/guarani.frba.utn.edu.ar\/autogestion\/grado\/inicio_alumno\/qr_periodo\/42e7f5816dec5bc149715ab69cd03516b3481797$0\" class=\"hide\" \/><\/ul><\/div><\/li><li><h4>Grado Anual 2025<\/h4><div class=\"box-materia\"><ul><li><strong>Tipo: <\/strong><span>anual<\/span><\/li><li><strong>Fechas del per\u00edodo lectivo: <\/strong><\/li><ul><li><strong>Inicio: <\/strong><span>25\/03\/2025<\/span><\/li><li><strong>Finalizaci\u00f3n: <\/strong><span>29\/11\/2025<\/span><\/li><\/ul><li><strong>Per\u00edodo de inscripci\u00f3n #1: <\/strong><\/li><ul><li><strong>Inicio: <\/strong><span>26\/02\/2025<\/span><\/li><li><strong>Finalizaci\u00f3n: <\/strong><span>01\/04\/2025<\/span><\/li><\/ul><button data-target=\"js-qr-per_lecac222eabf0e48befa533f1016929988570d0d8130\" class=\"btn js-btn-qr-per_lec\"><span class=\"glyphicon icon-qrcode\"><\/span> Agendalo!<\/button><img id=\"js-qr-per_lecac222eabf0e48befa533f1016929988570d0d8130\" src=\"https:\/\/guarani.frba.utn.edu.ar\/autogestion\/grado\/inicio_alumno\/qr_periodo\/ac222eabf0e48befa533f1016929988570d0d813$0\" class=\"hide\" \/><\/ul><\/div><\/li><li><h4>Grado Primer Cuatrimestre 2025<\/h4><div class=\"box-materia\"><ul><li><strong>Tipo: <\/strong><span>cuatrimestre<\/span><\/li><li><strong>Fechas del per\u00edodo lectivo: <\/strong><\/li><ul><li><strong>Inicio: <\/strong><span>25\/03\/2025<\/span><\/li><li><strong>Finalizaci\u00f3n: <\/strong><span>12\/07\/2025<\/span><\/li><\/ul><li><strong>Per\u00edodo de inscripci\u00f3n #1: <\/strong><\/li><ul><li><strong>Inicio: <\/strong><span>26\/02\/2025<\/span><\/li><li><strong>Finalizaci\u00f3n: <\/strong><span>01\/04\/2025<\/span><\/li><\/ul><button data-target=\"js-qr-per_lec1d231de86a58aa68ed3145eee3903a5744122e0f0\" class=\"btn js-btn-qr-per_lec\"><span class=\"glyphicon icon-qrcode\"><\/span> Agendalo!<\/button><img id=\"js-qr-per_lec1d231de86a58aa68ed3145eee3903a5744122e0f0\" src=\"https:\/\/guarani.frba.utn.edu.ar\/autogestion\/grado\/inicio_alumno\/qr_periodo\/1d231de86a58aa68ed3145eee3903a5744122e0f$0\" class=\"hide\" \/><\/ul><\/div><\/li><\/ul><ul class='unstyled'><h3>Turnos de examen<\/h3><\/ul>","clase_js":"lista_carreras","tiene_archivo_js":"1"});</script><script type="text/javascript">kernel.renderer.on_arrival({"css":["\/autogestion\/grado\/_comp\/siu\/operaciones\/inicio_alumno\/lista_encuestas_pendientes\/default.css"],"js":[],"op":"inicio_alumno","info":{"id":"lista_encuestas_pendientes","visible":"1","estado":"inicial","mensajes":[]},"content":"<ul class='unstyled'><h3 style=\"border-bottom: 1px solid #eeeeee\">Encuestas pendientes<\/h3><div class=\"alert alert-warning text-center text-warning\">No hay encuestas pendientes para completar<\/div><\/ul>","clase_js":"lista_encuestas_pendientes","tiene_archivo_js":""});</script><script type="text/javascript">kernel.renderer.on_arrival({"css":["\/autogestion\/grado\/_comp\/siu\/operaciones\/_comun\/pagelets\/notificaciones\/default.css","\/autogestion\/grado\/_comp\/utn\/operaciones\/_comun\/pagelets\/notificaciones\/default.css"],"js":["\/autogestion\/grado\/_comp\/siu\/operaciones\/_comun\/pagelets\/notificaciones\/pagelet_notificaciones.js","\/autogestion\/grado\/_comp\/siu\/js\/notificaciones.js"],"op":"_comun\/pagelets","info":{"id":"notificaciones","visible":"1","estado":"inicial","mensajes":{"error_subcomision":"notificaciones.errores.subcomision"},"persona":{"apellido":"GOMEZ","nombres":"PABLO MATIAS","tipo_documento_desc_abreviada":"DNI","nro_documento":"38072391","propuestas":"Ingenier\u00eda en Sistemas de Informaci\u00f3n","institucion":"Facultad Regional Buenos Aires","ras_nombre":"Carreras de Ingenier\u00edas"},"banda_horaria_cursado":{"hmin":"02:07:00","hmax":"23:00:00","min":"02:00:00","max":"23:00:00"},"asignaciones":[],"url_refresh":"https:\/\/guarani.frba.utn.edu.ar\/autogestion\/grado\/inicio_alumno\/info_notificaciones"},"content":"                <h3>Inscripciones<\/h3>\n        \t\t<select id='eleccion-periodo' class=\"span12\">\n\t\t    <option value='quincena'>Quincena<\/option> \n\t\t    <option value='mes'>Mes<\/option> \n\t\t    <option value='trimestre'>Trimestre<\/option> \n\t\t    <option value='cuatrimestre' selected>Cuatrimestre<\/option> \n\t\t    <option value='semestre'>Semestre<\/option> \n\t\t<\/select>\n\n\t    <div class=\"coda-slider-wrapper\">\n\t\t    <div class=\"scrollable\" id=\"asignaciones_cursada\"><\/div>\n\t\t    <!--<div>\n\t\t\t    <div id=\"coda-nav-left-1\" class=\"coda-nav-left\"><a href=\"#\" title=\"Slide left\">&#171;<\/a><\/div>\n\t\t\t    <div id=\"coda-nav-right-1\" class=\"coda-nav-right\"><a href=\"#\" title=\"Slide right\">&#187;<\/a><\/div>\n\t\t    <\/div>-->\n\t    <\/div>\n\t    <div id=\"asignaciones_cursada_mensajes\">\n\t    <\/div>\n                <hr\/>\n        <h3>Inscripci\u00f3n a ex\u00e1menes<\/h3>\n\t\t\t\t\t\t\t<p>Los ex\u00e1menes a los que te inscribas aparecer\u00e1n aqu\u00ed.<\/p>\n\t\t\t    ","clase_js":"notificaciones","tiene_archivo_js":"1"});</script><script type="text/javascript">kernel.renderer.on_arrival({"css":["\/autogestion\/grado\/_comp\/grado\/operaciones\/inicio_alumno\/accesos_servicios\/default.css"],"js":["\/autogestion\/grado\/_comp\/grado\/operaciones\/inicio_alumno\/accesos_servicios\/pagelet_accesos_servicios.js"],"op":"inicio_alumno","info":{"id":"accesos_servicios","visible":"1","estado":"inicial","mensajes":[]},"content":"            <h3 style=\"border-bottom: 1px solid #eeeeee\">Servicios<\/h3>\n        <div class=\"accesos\">\n            <a class=\"boton_accesos\" href=\"https:\/\/aulasvirtuales.frba.utn.edu.ar\/\">Campus virtual<\/a>\n            <a class=\"boton_accesos\" href=\"https:\/\/bolsa.frba.utn.edu.ar\/\">Bolsa de trabajo<\/a>\n            <a class=\"boton_accesos\" href=\"http:\/\/biblioteca.frba.utn.edu.ar\">Biblioteca<\/a>\n            <a class=\"boton_accesos\" href=\"https:\/\/docs.frba.utn.edu.ar\/books\/mu---beneficios-con-cuenta-institucional\">Beneficios<\/a>\n            <a class=\"boton_accesos\" href=\"https:\/\/www.frba.utn.edu.ar\/siuguarani\/\">Instructivos \/ Ayuda<\/a>\n        <\/div>\n    ","clase_js":"accesos_servicios","tiene_archivo_js":"1"});</script><script type="text/javascript">kernel_config.pagelet_count = 4</script>
+<div class='titulo_operacion row-fluid'>
+    <div class="span12">
+	<h2>Bienvenido/a PABLO MATIAS GOMEZ </h2>    </div>
 </div>
 
-<footer>
-    <div class="container">
-        <div class="row">
-            <div class="span6">
-                <div id="copyleft">
-
-                </div>
+<div id='layout_dos_columnas' class="row-fluid">
+    <div id='columna_1' class="span9">
+	<div class='row-fluid'>
+                    <div class='span4'>
+                <div id='lista_carreras'  class='pagelet'></div>
             </div>
-            <div class="span6">
-                <div id="copyright">
-
-                </div>
+            <div class='span7'>
+                <div id='lista_encuestas_pendientes'  class='pagelet'></div>
             </div>
-        </div>
+
+        	</div>
+
+</div>
+    <div id='columna_2' class="span3">        <div id='accesos_servicios' aria-live='polite' class="pagelet"></div>
+
+</div>
+</div>
+			<script type='text/javascript'>kernel.renderer.on_arrival({"css":["\/autogestion\/grado\/_comp\/siu\/operaciones\/inicio_alumno\/lista_carreras\/default.css"],"js":["\/autogestion\/grado\/_comp\/siu\/operaciones\/inicio_alumno\/lista_carreras\/pagelet_lista_carreras.js"],"op":"inicio_alumno","info":{"id":"lista_carreras","visible":"1","estado":"inicial","mensajes":{"no_existe_periodo_vigente":"No existe per\u00edodo de inscripci\u00f3n vigente.","periodo_comienza":"El pr\u00f3ximo per\u00edodo de inscripci\u00f3n comienza el d\u00eda"},"existe_periodo_de_inscripcion_actividades":"https:\/\/guarani.frba.utn.edu.ar\/autogestion\/grado\/cursada\/existe_periodo_de_inscripcion"},"content":"<ul class='unstyled'><h3 style=\"border-bottom: 1px solid #eeeeee\">Per\u00edodos lectivos<\/h3><li><h4>Grado Anual 2025<\/h4><div class=\"box-materia\"><ul><li><strong>Tipo: <\/strong><span>anual<\/span><\/li><li><strong>Fechas del per\u00edodo lectivo: <\/strong><\/li><ul><li><strong>Inicio: <\/strong><span>25\/03\/2025<\/span><\/li><li><strong>Finalizaci\u00f3n: <\/strong><span>29\/11\/2025<\/span><\/li><\/ul><li><strong>Per\u00edodo de inscripci\u00f3n #1: <\/strong><\/li><ul><li><strong>Inicio: <\/strong><span>26\/02\/2025<\/span><\/li><li><strong>Finalizaci\u00f3n: <\/strong><span>01\/04\/2025<\/span><\/li><\/ul><button data-target=\"js-qr-per_lecac222eabf0e48befa533f1016929988570d0d8130\" class=\"btn js-btn-qr-per_lec\"><span class=\"glyphicon icon-qrcode\"><\/span> Agendalo!<\/button><img id=\"js-qr-per_lecac222eabf0e48befa533f1016929988570d0d8130\" src=\"https:\/\/guarani.frba.utn.edu.ar\/autogestion\/grado\/inicio_alumno\/qr_periodo\/ac222eabf0e48befa533f1016929988570d0d813$0\" class=\"hide\" \/><\/ul><\/div><\/li><li><h4>Grado SyS 2026<\/h4><div class=\"box-materia\"><ul><li><strong>Tipo: <\/strong><span>anual<\/span><\/li><li><strong>Fechas del per\u00edodo lectivo: <\/strong><\/li><ul><li><strong>Inicio: <\/strong><span>11\/08\/2025<\/span><\/li><li><strong>Finalizaci\u00f3n: <\/strong><span>11\/07\/2026<\/span><\/li><\/ul><li><strong>Per\u00edodo de inscripci\u00f3n #1: <\/strong><\/li><ul><li><strong>Inicio: <\/strong><span>17\/07\/2025<\/span><\/li><li><strong>Finalizaci\u00f3n: <\/strong><span>04\/08\/2025<\/span><\/li><\/ul><button data-target=\"js-qr-per_lece7fd7750edce8daee8b86842e4bfd82cdfddd0a90\" class=\"btn js-btn-qr-per_lec\"><span class=\"glyphicon icon-qrcode\"><\/span> Agendalo!<\/button><img id=\"js-qr-per_lece7fd7750edce8daee8b86842e4bfd82cdfddd0a90\" src=\"https:\/\/guarani.frba.utn.edu.ar\/autogestion\/grado\/inicio_alumno\/qr_periodo\/e7fd7750edce8daee8b86842e4bfd82cdfddd0a9$0\" class=\"hide\" \/><\/ul><\/div><\/li><li><h4>Grado Segundo Cuatrimestre 2025<\/h4><div class=\"box-materia\"><ul><li><strong>Tipo: <\/strong><span>cuatrimestre<\/span><\/li><li><strong>Fechas del per\u00edodo lectivo: <\/strong><\/li><ul><li><strong>Inicio: <\/strong><span>11\/08\/2025<\/span><\/li><li><strong>Finalizaci\u00f3n: <\/strong><span>29\/11\/2025<\/span><\/li><\/ul><li><strong>Per\u00edodo de inscripci\u00f3n #1: <\/strong><\/li><ul><li><strong>Inicio: <\/strong><span>17\/07\/2025<\/span><\/li><li><strong>Finalizaci\u00f3n: <\/strong><span>04\/08\/2025<\/span><\/li><\/ul><button data-target=\"js-qr-per_lec1177bf9c756b830c1ef6d6ec512160dcb5f94f7d0\" class=\"btn js-btn-qr-per_lec\"><span class=\"glyphicon icon-qrcode\"><\/span> Agendalo!<\/button><img id=\"js-qr-per_lec1177bf9c756b830c1ef6d6ec512160dcb5f94f7d0\" src=\"https:\/\/guarani.frba.utn.edu.ar\/autogestion\/grado\/inicio_alumno\/qr_periodo\/1177bf9c756b830c1ef6d6ec512160dcb5f94f7d$0\" class=\"hide\" \/><\/ul><\/div><\/li><\/ul><ul class='unstyled'><h3>Turnos de examen<\/h3><li><h4>FINALES DE DICIEMBRE 2025 - GRADO<\/h4><div class=\"box-materia\"><ul><li><strong>Fecha de inicio: <\/strong><span>01\/12\/2025<\/span><\/li><li><strong>Fecha de finalizaci\u00f3n: <\/strong><span>15\/01\/2026<\/span><\/li><\/ul><\/div><\/li><\/ul>","clase_js":"lista_carreras","tiene_archivo_js":"1"});</script><script type='text/javascript'>kernel.renderer.on_arrival({"css":["\/autogestion\/grado\/_comp\/siu\/operaciones\/inicio_alumno\/lista_encuestas_pendientes\/default.css"],"js":[],"op":"inicio_alumno","info":{"id":"lista_encuestas_pendientes","visible":"1","estado":"inicial","mensajes":[]},"content":"<ul class='unstyled'><h3 style=\"border-bottom: 1px solid #eeeeee\">Encuestas pendientes<\/h3><div class=\"alert alert-warning text-center text-warning\">No hay encuestas pendientes para completar<\/div><\/ul>","clase_js":"lista_encuestas_pendientes","tiene_archivo_js":""});</script><script type='text/javascript'>kernel.renderer.on_arrival({"css":["\/autogestion\/grado\/_comp\/siu\/operaciones\/_comun\/pagelets\/notificaciones\/default.css","\/autogestion\/grado\/_comp\/utn\/operaciones\/_comun\/pagelets\/notificaciones\/default.css"],"js":["\/autogestion\/grado\/_comp\/siu\/operaciones\/_comun\/pagelets\/notificaciones\/pagelet_notificaciones.js","\/autogestion\/grado\/_comp\/siu\/js\/notificaciones.js"],"op":"_comun\/pagelets","info":{"id":"notificaciones","visible":"1","estado":"inicial","mensajes":{"error_subcomision":"notificaciones.errores.subcomision"},"persona":{"apellido":"GOMEZ","nombres":"PABLO MATIAS","tipo_documento_desc_abreviada":"DNI","nro_documento":"38072391","propuestas":"Ingenier\u00eda en Sistemas de Informaci\u00f3n","institucion":"Facultad Regional Buenos Aires","ras_nombre":"Carreras de Ingenier\u00edas"},"banda_horaria_cursado":{"hmin":"02:07:00","hmax":"23:00:00","min":"02:00:00","max":"23:00:00"},"asignaciones":[],"url_refresh":"https:\/\/guarani.frba.utn.edu.ar\/autogestion\/grado\/inicio_alumno\/info_notificaciones"},"content":"                <h3>Inscripciones<\/h3>\n        \t\t<select id='eleccion-periodo' class=\"span12\">\n\t\t    <option value='quincena'>Quincena<\/option> \n\t\t    <option value='mes'>Mes<\/option> \n\t\t    <option value='trimestre'>Trimestre<\/option> \n\t\t    <option value='cuatrimestre' selected>Cuatrimestre<\/option> \n\t\t    <option value='semestre'>Semestre<\/option> \n\t\t<\/select>\n\n\t    <div class=\"coda-slider-wrapper\">\n\t\t    <div class=\"scrollable\" id=\"asignaciones_cursada\"><\/div>\n\t\t    <!--<div>\n\t\t\t    <div id=\"coda-nav-left-1\" class=\"coda-nav-left\"><a href=\"#\" title=\"Slide left\">&#171;<\/a><\/div>\n\t\t\t    <div id=\"coda-nav-right-1\" class=\"coda-nav-right\"><a href=\"#\" title=\"Slide right\">&#187;<\/a><\/div>\n\t\t    <\/div>-->\n\t    <\/div>\n\t    <div id=\"asignaciones_cursada_mensajes\">\n\t    <\/div>\n                <hr\/>\n        <h3>Inscripci\u00f3n a ex\u00e1menes<\/h3>\n\t\t\t\t\t\t\t<p>Los ex\u00e1menes a los que te inscribas aparecer\u00e1n aqu\u00ed.<\/p>\n\t\t\t    ","clase_js":"notificaciones","tiene_archivo_js":"1"});</script><script type='text/javascript'>kernel.renderer.on_arrival({"css":["\/autogestion\/grado\/_comp\/grado\/operaciones\/inicio_alumno\/accesos_servicios\/default.css"],"js":["\/autogestion\/grado\/_comp\/grado\/operaciones\/inicio_alumno\/accesos_servicios\/pagelet_accesos_servicios.js"],"op":"inicio_alumno","info":{"id":"accesos_servicios","visible":"1","estado":"inicial","mensajes":[]},"content":"            <h3 style=\"border-bottom: 1px solid #eeeeee\">Servicios<\/h3>\n        <div class=\"accesos\">\n            <a class=\"boton_accesos\" href=\"https:\/\/aulasvirtuales.frba.utn.edu.ar\/\">Campus virtual<\/a>\n            <a class=\"boton_accesos\" href=\"http:\/\/utnba.talentia.com\/\">Bolsa de trabajo<\/a>\n            <a class=\"boton_accesos\" href=\"http:\/\/biblioteca.frba.utn.edu.ar\">Biblioteca<\/a>\n            <a class=\"boton_accesos\" href=\"https:\/\/docs.frba.utn.edu.ar\/books\/mu---beneficios-con-cuenta-institucional\">Beneficios<\/a>\n            <a class=\"boton_accesos\" href=\"https:\/\/www.frba.utn.edu.ar\/siuguarani\/\">Instructivos \/ Ayuda<\/a>\n        <\/div>\n    ","clase_js":"accesos_servicios","tiene_archivo_js":"1"});</script><script type='text/javascript'>kernel_config.pagelet_count = 4</script>
+					</div>
+
+        <footer>
+    <div class='container'>
+	<div class="row">
+	    <div class="span6">
+		<div id='copyleft'>
+
+		</div>
+	    </div>
+	    <div class="span6">
+		<div id='copyright'>
+
+		</div>
+	    </div>
+	</div>
     </div>
 </footer>
-<a id="back-to-top" href="#" class="btn btn-inverse btn-large" role="button" title="Ir arriba">
-    <i class="fa fa-chevron-up" aria-hidden="true"></i>
-</a>
+		<a id="back-to-top" href="#" class="btn btn-inverse btn-large" role="button" title="Ir arriba">
+			<i class="fa fa-chevron-up" aria-hidden="true"></i>
+		</a>
 
-    
+    </body>
+</html>
