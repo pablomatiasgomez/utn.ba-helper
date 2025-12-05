@@ -1,3 +1,238 @@
 // Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`pagesDataParser.getStudentId successful parsing 1`] = `"149.388-7"`;
+
+exports[`pagesDataParser.parseKollaSurveyForm 082029-K4053-2021-1C-2professors 1`] = `
+[
+  {
+    "classCode": "K4053",
+    "courseCode": "082029",
+    "professorName": "DE LELLIS FRANCISCO",
+    "professorRole": "TITULAR",
+    "quarter": "1C",
+    "surveyFieldValues": [
+      {
+        "question": "¿Asiste regularmente a clases?",
+        "value": null,
+      },
+      {
+        "question": "¿Es puntual al llegar y al retirarse de las clases?",
+        "value": null,
+      },
+      {
+        "question": "¿Cumple con las fechas establecidas en el Calendario Académico?",
+        "value": null,
+      },
+      {
+        "question": "¿Emplea material didáctico de la asignatura que sea útil y accesible?",
+        "value": null,
+      },
+      {
+        "question": "¿La bibliografía es actualizada y accesible?",
+        "value": null,
+      },
+      {
+        "question": "¿Presenta la planificación de su asignatura al inicio del ciclo lectivo y luego la cumple?",
+        "value": null,
+      },
+      {
+        "question": "¿Planifica el desarrollo de los temas?",
+        "value": null,
+      },
+      {
+        "question": "¿Da a conocer las fechas de los parciales con anticipación respetando el Calendario Académico?",
+        "value": null,
+      },
+      {
+        "question": "¿Desarrolla todos los contenidos del programa?",
+        "value": null,
+      },
+      {
+        "question": "¿Relaciona los contenidos con otras asignaturas de la carrera?",
+        "value": null,
+      },
+      {
+        "question": "¿Trata correctamente a los estudiantes? (respeto, comunicación adecuada)",
+        "value": null,
+      },
+      {
+        "question": "¿Favorece la participación de los estudiantes?",
+        "value": null,
+      },
+      {
+        "question": "¿Demuestra seguridad en el tratamiento de los temas?",
+        "value": null,
+      },
+      {
+        "question": "¿El docente explica los temas en forma clara y comprensible? (exposiciones organizadas y respuestas precisas)",
+        "value": null,
+      },
+      {
+        "question": "¿Dedica tiempo suficiente a la ejercitación de los temas desarrollados?",
+        "value": null,
+      },
+      {
+        "question": "¿Satisface dudas o consultas que surgen en clase?",
+        "value": null,
+      },
+      {
+        "question": "¿Utiliza diversos recursos para la enseñanza? (guía de trabajos, pizarra, presentaciones, proyector, videos, software, hardware, aula virtual, otros)",
+        "value": null,
+      },
+      {
+        "question": "¿Los temas de los parciales concuerdan con los contenidos desarrollados en clase?",
+        "value": null,
+      },
+      {
+        "question": "¿Da a conocer la forma de evaluación que se va a aplicar en la asignatura?",
+        "value": null,
+      },
+      {
+        "question": "¿Las evaluaciones se llevan a cabo según la reglamentación vigente?",
+        "value": null,
+      },
+      {
+        "question": "¿Lidera el desarrollo de la asignatura tanto en sus aspectos teóricos como prácticos?",
+        "value": null,
+      },
+      {
+        "question": "¿Tuvo posibilidad de aplicar sus conocimientos previos durante el cursado de esta materia?",
+        "value": null,
+      },
+      {
+        "question": "¿Logró continuidad en el cursado y estudio de la asignatura? (estudiar regularmente, participación en clase, asistencia, puntualidad)",
+        "value": null,
+      },
+      {
+        "question": "Mencione las características del docente que ayudaron en su aprendizaje",
+        "value": null,
+      },
+      {
+        "question": "Mencione los aspectos del proceso de enseñanza que deberían mejorarse",
+        "value": null,
+      },
+      {
+        "question": "Realice las observaciones y aclaraciones que crea convenientes sobre las puntuaciones asignadas",
+        "value": null,
+      },
+    ],
+    "surveyKind": "DOCENTE",
+    "year": 2021,
+  },
+  {
+    "classCode": "K4053",
+    "courseCode": "082029",
+    "professorName": "FUSARIO RUBEN JORGE",
+    "professorRole": "TITULAR",
+    "quarter": "1C",
+    "surveyFieldValues": [
+      {
+        "question": "¿Asiste regularmente a clases?",
+        "value": null,
+      },
+      {
+        "question": "¿Es puntual al llegar y al retirarse de las clases?",
+        "value": null,
+      },
+      {
+        "question": "¿Cumple con las fechas establecidas en el Calendario Académico?",
+        "value": null,
+      },
+      {
+        "question": "¿Emplea material didáctico de la asignatura que sea útil y accesible?",
+        "value": null,
+      },
+      {
+        "question": "¿La bibliografía es actualizada y accesible?",
+        "value": null,
+      },
+      {
+        "question": "¿Presenta la planificación de su asignatura al inicio del ciclo lectivo y luego la cumple?",
+        "value": null,
+      },
+      {
+        "question": "¿Planifica el desarrollo de los temas?",
+        "value": null,
+      },
+      {
+        "question": "¿Da a conocer las fechas de los parciales con anticipación respetando el Calendario Académico?",
+        "value": null,
+      },
+      {
+        "question": "¿Desarrolla todos los contenidos del programa?",
+        "value": null,
+      },
+      {
+        "question": "¿Relaciona los contenidos con otras asignaturas de la carrera?",
+        "value": null,
+      },
+      {
+        "question": "¿Trata correctamente a los estudiantes? (respeto, comunicación adecuada)",
+        "value": null,
+      },
+      {
+        "question": "¿Favorece la participación de los estudiantes?",
+        "value": null,
+      },
+      {
+        "question": "¿Demuestra seguridad en el tratamiento de los temas?",
+        "value": null,
+      },
+      {
+        "question": "¿El docente explica los temas en forma clara y comprensible? (exposiciones organizadas y respuestas precisas)",
+        "value": null,
+      },
+      {
+        "question": "¿Dedica tiempo suficiente a la ejercitación de los temas desarrollados?",
+        "value": null,
+      },
+      {
+        "question": "¿Satisface dudas o consultas que surgen en clase?",
+        "value": null,
+      },
+      {
+        "question": "¿Utiliza diversos recursos para la enseñanza? (guía de trabajos, pizarra, presentaciones, proyector, videos, software, hardware, aula virtual, otros)",
+        "value": null,
+      },
+      {
+        "question": "¿Los temas de los parciales concuerdan con los contenidos desarrollados en clase?",
+        "value": null,
+      },
+      {
+        "question": "¿Da a conocer la forma de evaluación que se va a aplicar en la asignatura?",
+        "value": null,
+      },
+      {
+        "question": "¿Las evaluaciones se llevan a cabo según la reglamentación vigente?",
+        "value": null,
+      },
+      {
+        "question": "¿Lidera el desarrollo de la asignatura tanto en sus aspectos teóricos como prácticos?",
+        "value": null,
+      },
+      {
+        "question": "¿Tuvo posibilidad de aplicar sus conocimientos previos durante el cursado de esta materia?",
+        "value": null,
+      },
+      {
+        "question": "¿Logró continuidad en el cursado y estudio de la asignatura? (estudiar regularmente, participación en clase, asistencia, puntualidad)",
+        "value": null,
+      },
+      {
+        "question": "Mencione las características del docente que ayudaron en su aprendizaje",
+        "value": null,
+      },
+      {
+        "question": "Mencione los aspectos del proceso de enseñanza que deberían mejorarse",
+        "value": null,
+      },
+      {
+        "question": "Realice las observaciones y aclaraciones que crea convenientes sobre las puntuaciones asignadas",
+        "value": null,
+      },
+    ],
+    "surveyKind": "DOCENTE",
+    "year": 2021,
+  },
+]
+`;
