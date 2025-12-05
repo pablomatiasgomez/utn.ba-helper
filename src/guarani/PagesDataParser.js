@@ -416,8 +416,12 @@ export class PagesDataParser {
 				.map(a => a.href)
 				.map(siuUrl => {
 					return this.fetchAjaxGETContents(siuUrl).then(siuResponseText => {
-						// Return the kollaUrl
-						return $(siuResponseText.cont).find("iframe").get(0).src;
+						try {
+							// Return the kollaUrl
+							return $(siuResponseText.cont).find("iframe").get(0).src;
+						} catch (e) {
+							throw new Error(`could fetch kolla url for siuUrl: ${siuUrl}. siuResponseText: ${siuResponseText}.\n surveysResponseText:${surveysResponseText}`);
+						}
 					});
 				});
 			return Promise.all(promises).then(kollaUrls => kollaUrls.flat());
