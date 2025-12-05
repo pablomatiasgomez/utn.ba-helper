@@ -15,7 +15,7 @@ import {PagesDataParser} from './PagesDataParser.js';
 
 	let apiConnector = new ApiConnector();
 	let utils = new Utils(apiConnector);
-	return utils.runAsync("mainKolla", () => {
+	utils.runAsync("mainKolla", () => {
 		let store = new Store();
 		let pagesDataParser = new PagesDataParser(utils);
 
@@ -35,7 +35,7 @@ import {PagesDataParser} from './PagesDataParser.js';
 		if (!btn) return utils.logHTML("kollaMissingBtn", 100);
 
 		btn.addEventListener("mousedown", () => {
-			return utils.runAsync("surveyFinished", () => {
+			utils.runAsync("surveyFinished", () => {
 				return store.readHashedStudentIdFromStore().then(hashedStudentId => {
 					if (!hashedStudentId) throw new Error(`Couldn't find hashedStudentId within form url ${location.href}.`);
 

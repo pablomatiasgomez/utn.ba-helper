@@ -17,7 +17,7 @@ import {InscripcionAExamenesPage} from './pages/InscripcionAExamenesPage.js';
 
 	let apiConnector = new ApiConnector();
 	let utils = new Utils(apiConnector);
-	return utils.runAsync("main", () => {
+	utils.runAsync("main", () => {
 		let store = new Store();
 		let pagesDataParser = new PagesDataParser(utils);
 		let dataCollector = new DataCollector(store, pagesDataParser, apiConnector);
@@ -69,16 +69,15 @@ import {InscripcionAExamenesPage} from './pages/InscripcionAExamenesPage.js';
 			});
 		});
 
-		// noinspection JSIgnoredPromiseFromCall
 		handleCurrentPage();
 
 		// Append the foreground script that will subscribe to all the needed events.
-		utils.injectScript("guarani/foreground-script.js");
+		utils.runAsync('injectForeground', () => utils.injectScript("guarani/foreground-script.js"));
 
 		// Subscribe to ajax page changes (some of these events are created in the foreground script)
 		window.addEventListener("locationchange", handleCurrentPage);
 
-		// noinspection JSIgnoredPromiseFromCall
+		// Collect background data
 		utils.runAsync("collectBackgroundDataIfNeeded", () => dataCollector.collectBackgroundDataIfNeeded());
 
 		// Add powered by to the header

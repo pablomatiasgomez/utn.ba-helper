@@ -28,10 +28,14 @@ export class Utils {
 	}
 
 	injectScript(filePath) {
-		let script = document.createElement('script');
-		script.type = 'text/javascript';
-		script.src = chrome.runtime.getURL(filePath);
-		document.head.appendChild(script);
+		return new Promise((resolve, reject) => {
+			let script = document.createElement('script');
+			script.type = 'text/javascript';
+			script.src = chrome.runtime.getURL(filePath);
+			script.onload = () => resolve();
+			script.onerror = () => reject(new Error(`Failed to load script: ${filePath}`));
+			document.head.appendChild(script);
+		});
 	}
 
 
@@ -40,7 +44,7 @@ export class Utils {
 	 */
 	runAsync(name, fn) {
 		// Start with Promise.resolve() as we don't know if fn returns promise or not.
-		return Promise.resolve().then(() => {
+		Promise.resolve().then(() => {
 			return fn();
 		}).catch(e => {
 			console.error(`Error while executing ${name}`, e);
