@@ -568,6 +568,21 @@ export class PagesDataParser {
 	}
 
 	/**
+	 * returns whether the given $kollaDocument represents a survey form that is already completed
+	 * @returns boolean
+	 */
+	kollaSurveyFromCompleted($kollaDocument) {
+		// Sometimes the survey is already completed, and it looks like there are 2 types of HTML that represent this
+		// first one looks to be when completing at the moment, and second when opening a completed one, which shouldn't
+		// really happen as we are only grabbing the pending ones (or forms being completed) but from time to time
+		// we get some errors, so we can ignore these. The alert box may contain the following messages:
+		// 1. `La encuesta 'Probabilidad y Estadística (950704) - Comisión: Z2017' ya ha sido respondida.`
+		// 2. `Gracias por completar la encuesta. Por favor descargá y guardá el comprobante generado. Los códigos allí incluídos se generaron por única vez y serán requeridos si solicitas consultar las respuestas.`
+		let alertBoxText = $kollaDocument.find(".alert.alert-success").text().trim();
+		return alertBoxText.includes(" ya ha sido respondida.") || alertBoxText.includes("Gracias por completar la encuesta");
+	}
+
+	/**
 	 * Parses the responseText of the Kolla forms, and returns the survey form data along with the answers.
 	 * @returns {[{surveyKind: string, professorRole: string, classCode: string, year: number, courseCode: string, professorName: string, quarter: string, surveyFieldValues: []}]}
 	 */
@@ -596,15 +611,7 @@ export class PagesDataParser {
 		};
 		const professorRegex = new RegExp(`^(.*) \\((${Object.keys(professorRolesMapping).join("|")})(?: \\(Responsable de Cátedra\\))?\\)$`);
 
-		// Sometimes the survey is already completed, and it looks like there are 2 types of HTML that represent this
-		// first one looks to be when completing at the moment, and second when opening a completed one, which shouldn't
-		// really happen as we are only grabbing the pending ones (or forms being completed) but from time to time
-		// we get some errors, so we can ignore these. The alert box may contain the following messages:
-		// 1. `La encuesta 'Probabilidad y Estadística (950704) - Comisión: Z2017' ya ha sido respondida.`
-		// 2. `Gracias por completar la encuesta. Por favor descargá y guardá el comprobante generado. Los códigos allí incluídos se generaron por única vez y serán requeridos si solicitas consultar las respuestas.`
-		let alertBoxText = $kollaResponseText.find(".alert.alert-success").text().trim();
-		if (alertBoxText.includes(" ya ha sido respondida.") ||
-			alertBoxText.includes("Gracias por completar la encuesta")) return [];
+		if (this.kollaSurveyFromCompleted($kollaResponseText)) return [];
 
 		// E.g.: 'Simulación (082041) - Comisión: K4053', 'Administración Gerencial (082039) - Comisión: K5054'
 		let courseTitle = $kollaResponseText.find(".formulario-titulo").text()

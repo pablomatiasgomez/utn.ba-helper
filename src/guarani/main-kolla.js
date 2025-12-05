@@ -22,6 +22,10 @@ import {PagesDataParser} from './PagesDataParser.js';
 		// This main will only be executed on kolla pages.
 		if (!window.location.pathname.startsWith("/siu/kolla")) return;
 
+		if (pagesDataParser.kollaSurveyFromCompleted($(document))) {
+			log.message("Exiting completed kolla survey", 'info', {attributes: {location_href: location.href}});
+			return;
+		}
 		log.message("Entering kolla survey", 'info', {attributes: {location_href: location.href}});
 
 		let btn = document.getElementById("btn-terminar");
