@@ -16,6 +16,15 @@
         "*://*.guarani.frba.utn.edu.ar/*"
       ],
       "js": [
+        "guarani/blocker-remover.js"
+      ],
+      "run_at": "document_start"
+    },
+    {
+      "matches": [
+        "*://*.guarani.frba.utn.edu.ar/*"
+      ],
+      "js": [
         "guarani/main.js"
       ],
       "css": [

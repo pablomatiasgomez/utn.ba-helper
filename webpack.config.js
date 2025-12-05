@@ -12,6 +12,7 @@ const PATHS = {
 // noinspection JSUnusedGlobalSymbols
 export default {
 	entry: {
+		"guarani/blocker-remover": PATHS.src + '/guarani/blocker-remover.js',
 		"guarani/main": PATHS.src + '/guarani/main.js',
 		"guarani/main-kolla": PATHS.src + '/guarani/main-kolla.js',
 		"guarani/foreground": PATHS.src + '/guarani/foreground.js',
