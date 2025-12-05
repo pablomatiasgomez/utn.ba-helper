@@ -38,7 +38,7 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "guarani/foreground.js",
+        "guarani/foreground-script.js",
         "guarani/*.js.map"
       ],
       "matches": [

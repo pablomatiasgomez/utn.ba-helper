@@ -35,9 +35,11 @@ import {InscripcionAExamenesPage} from './pages/InscripcionAExamenesPage.js';
 			return apiConnector.logMessage("pageNotHandled", false, `[Path:${window.location.pathname}][IsLoggedIn:${isLoggedIn}][CurrentProfile:${currentProfile}]`);
 		}
 
+		// Detect scripts
+		utils.detectScripts();
+
+		// Custom pages & handlers
 		customPages.appendMenu();
-
-
 		const PAGE_HANDLERS = [
 			// match is performed using regex and first one is used.
 			{
@@ -71,7 +73,7 @@ import {InscripcionAExamenesPage} from './pages/InscripcionAExamenesPage.js';
 		handleCurrentPage();
 
 		// Append the foreground script that will subscribe to all the needed events.
-		utils.injectScript("guarani/foreground.js");
+		utils.injectScript("guarani/foreground-script.js");
 
 		// Subscribe to ajax page changes (some of these events are created in the foreground script)
 		window.addEventListener("locationchange", handleCurrentPage);
