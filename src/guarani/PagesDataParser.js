@@ -415,12 +415,12 @@ export class PagesDataParser {
 			let promises = $(surveysResponseText).find("ul li a").toArray()
 				.map(a => a.href)
 				.map(siuUrl => {
-					return this.fetchAjaxGETContents(siuUrl).then(siuResponseText => {
+					return this.fetchAjaxGETContents(siuUrl).then(siuResponse => {
 						try {
 							// Return the kollaUrl
-							return $(siuResponseText.cont).find("iframe").get(0).src;
+							return $(siuResponse.cont).find("iframe").get(0).src;
 						} catch (e) {
-							throw new Error(`could fetch kolla url for siuUrl: ${siuUrl}. siuResponseText: ${siuResponseText}.\n surveysResponseText:${surveysResponseText}`);
+							throw new Error(`could fetch kolla url for siuUrl: ${siuUrl}. siuResponse: ${JSON.stringify(siuResponse)}.\n surveysResponseText:${surveysResponseText}`);
 						}
 					});
 				});
