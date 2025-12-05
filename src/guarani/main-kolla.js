@@ -1,6 +1,7 @@
 import './main.css';
 
 import $ from 'jquery';
+import {log} from "@embrace-io/web-sdk";
 
 import {initializeEmbrace} from '../Embrace.js';
 
@@ -20,6 +21,8 @@ import {PagesDataParser} from './PagesDataParser.js';
 
 		// This main will only be executed on kolla pages.
 		if (!window.location.pathname.startsWith("/siu/kolla")) return;
+
+		log.message("Entering kolla survey", 'info', {attributes: {location_href: location.href}});
 
 		let btn = document.getElementById("btn-terminar");
 		if (!btn) return utils.logHTML("kollaMissingBtn", 100);
