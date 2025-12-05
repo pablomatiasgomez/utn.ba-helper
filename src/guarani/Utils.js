@@ -89,7 +89,7 @@ export class Utils {
 	 */
 	detectScripts() {
 		[...document.querySelectorAll("script")]
-			.filter(script => script.textContent.includes(chrome.runtime.id))
+			.filter(script => script.textContent.includes(chrome.runtime.id) || script.textContent.includes("Por favor desactiva"))
 			.forEach(script => {
 				let contents = script.textContent;
 				log.message("DetectedScript", 'info', {attributes: {contents: contents,}});
