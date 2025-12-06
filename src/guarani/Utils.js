@@ -84,23 +84,6 @@ export class Utils {
 		return this.#apiConnector.logMessage(message, false, `HTML log for ${name}. HTML: ${html}`);
 	}
 
-	/**
-	 * detectScripts detects and logs scripts
-	 */
-	detectScripts() {
-		[...document.querySelectorAll("script")]
-			.filter(script =>
-				script.textContent.includes(chrome.runtime.id) ||
-				script.textContent.includes("Por favor desactiva") ||
-				script.textContent.includes("Por favor, desactiva")
-			)
-			.forEach(script => {
-				let contents = script.textContent;
-				log.message("DetectedScript", 'info', {attributes: {contents: contents,}});
-				return this.#apiConnector.logMessage("DetectedScript", false, `Script contents: ${contents}.`);
-			});
-	}
-
 	waitForElementToHide(selector) {
 		return new Promise((resolve) => {
 			let check = () => {
