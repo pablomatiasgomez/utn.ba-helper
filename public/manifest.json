@@ -38,7 +38,7 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "guarani/foreground-script.js"
+        "guarani/foreground.js"
       ],
       "matches": [
         "*://*.frba.utn.edu.ar/*"

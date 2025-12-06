@@ -14,7 +14,7 @@ export default {
 	entry: {
 		"guarani/main": PATHS.src + '/guarani/main.js',
 		"guarani/main-kolla": PATHS.src + '/guarani/main-kolla.js',
-		"guarani/foreground-script": PATHS.src + '/guarani/foreground-script.js',
+		"guarani/foreground": PATHS.src + '/guarani/foreground.js',
 		"background": PATHS.src + '/background.js',
 	},
 	output: {

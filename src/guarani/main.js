@@ -74,7 +74,7 @@ import {InscripcionAExamenesPage} from './pages/InscripcionAExamenesPage.js';
 
 		if (!location.pathname.startsWith("/autogestion/grado/encuestas_kolla")) {
 			// Append the foreground script that will subscribe to all the needed events.
-			utils.runAsync('injectForeground', () => utils.injectScript("guarani/foreground-script.js"));
+			utils.runAsync('injectForeground', () => utils.injectScript("guarani/foreground.js"));
 
 			// Add powered by to the header
 			document.querySelector(".user-navbar").closest(".row-fluid").insertAdjacentHTML('afterbegin', `<a class="powered-by-utnba-helper" href="https://chromewebstore.google.com/detail/utnba-helper-ex-siga-help/jdgdheoeghamkhfppapjchbojhehimpe" target="_blank">POWERED BY UTN.BA HELPER</a>`);
