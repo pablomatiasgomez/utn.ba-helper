@@ -38,15 +38,6 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "guarani/foreground.js"
-      ],
-      "matches": [
-        "*://*.frba.utn.edu.ar/*"
-      ],
-      "use_dynamic_url": true
-    },
-    {
-      "resources": [
         "guarani/*.js.map"
       ],
       "matches": [
