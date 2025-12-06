@@ -36,7 +36,8 @@ import {InscripcionAExamenesPage} from './pages/InscripcionAExamenesPage.js';
 		}
 
 		// Custom pages & handlers
-		customPages.appendMenu();
+		// TODO re-enable
+		//  customPages.appendMenu();
 		const PAGE_HANDLERS = [
 			// match is performed using regex and first one is used.
 			{
@@ -72,12 +73,13 @@ import {InscripcionAExamenesPage} from './pages/InscripcionAExamenesPage.js';
 		// Subscribe to ajax page changes (some of these events are created in the foreground script)
 		window.addEventListener("locationchange", handleCurrentPage);
 
+		// TODO re-enable
 		if (!location.pathname.startsWith("/autogestion/grado/encuestas_kolla")) {
 			// Append the foreground script that will subscribe to all the needed events.
-			utils.runAsync('injectForeground', () => utils.injectScript("guarani/foreground.js"));
+			// utils.runAsync('injectForeground', () => utils.injectScript("guarani/foreground.js"));
 
 			// Add powered by to the header
-			document.querySelector(".user-navbar").closest(".row-fluid").insertAdjacentHTML('afterbegin', `<a class="powered-by-utnba-helper" href="https://chromewebstore.google.com/detail/utnba-helper-ex-siga-help/jdgdheoeghamkhfppapjchbojhehimpe" target="_blank">POWERED BY UTN.BA HELPER</a>`);
+			// document.querySelector(".user-navbar").closest(".row-fluid").insertAdjacentHTML('afterbegin', `<a class="powered-by-utnba-helper" href="https://chromewebstore.google.com/detail/utnba-helper-ex-siga-help/jdgdheoeghamkhfppapjchbojhehimpe" target="_blank">POWERED BY UTN.BA HELPER</a>`);
 		}
 
 		// Collect background data
