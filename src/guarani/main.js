@@ -72,7 +72,7 @@ import {InscripcionAExamenesPage} from './pages/InscripcionAExamenesPage.js';
 		handleCurrentPage();
 
 		// Append the foreground script that will subscribe to all the needed events.
-		utils.runAsync('injectForeground', () => utils.injectScript("guarani/foreground-script.js"));
+		// utils.runAsync('injectForeground', () => utils.injectScript("guarani/foreground-script.js"));
 
 		// Subscribe to ajax page changes (some of these events are created in the foreground script)
 		window.addEventListener("locationchange", handleCurrentPage);
