@@ -620,7 +620,8 @@ export class PagesDataParser {
 		let courseTitle = $kollaResponseText.find(".formulario-titulo").text()
 			.trim()
 			.replace(" - TUTORÍA", "")  // Fix for cases like 'Inglés Técnico Nivel I (951602) - Comisión: Z2498 - TUTORÍA'
-			.replace(/\.$/, ""); // Replace last dot in string, if any, for cases like 'Práctica Profesional Supervisada (951699) - Comisión: I5051.'
+			.replace(/\.$/, "") // Replace last dot in string, if any, for cases like 'Práctica Profesional Supervisada (951699) - Comisión: I5051.'
+			.replace(/ B$/, ""); // Replace last " B" in string, if any, for cases like 'Proyecto Final (950289) - Comisión: O6051 B';
 		if (courseTitle === "21 - Encuesta de Satisfacción") return []; // Other types of surveys that we don't care.
 
 		let groups = /^(.*) \((\d{6})\) - Comisión: ([\w\d]{5})$/.exec(courseTitle);
