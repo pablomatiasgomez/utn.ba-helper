@@ -51,14 +51,15 @@ export class Utils {
 			// Not logging errors that we can't do anything.
 			if (isIgnoredError(e)) return;
 
-			// Log to Embrace
-			log.logException(e, {handled: true, attributes: {name: name}});
-
-			// Log to our backend
 			let errStr = stringifyError(e);
 			// Skip first 2 Failed to fetch errors. We only want to know about these if it's failing for every request.
 			// These are usually related to the user closing the tab, dns not resolving, etc., but we cannot get the details.
 			if (errStr.includes("Failed to fetch") && ++this.#failedToFetchErrors <= 2) return;
+
+			// Log to Embrace
+			log.logException(e, {handled: true, attributes: {name: name}});
+
+			// Log to our backend
 			return this.#apiConnector.logMessage(name, true, errStr);
 		});
 	}
