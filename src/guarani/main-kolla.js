@@ -28,7 +28,7 @@ import {PagesDataParser} from './PagesDataParser.js';
 		}
 		log.message("Entering kolla survey", 'info', {attributes: {location_href: location.href}});
 
-		let btn = document.getElementById("btn-terminar");
+		let btn = document.querySelector("#formulario .btn-primary[type=submit]");
 		if (!btn) return utils.logHTML("kollaMissingBtn", 100);
 
 		btn.addEventListener("mousedown", () => {
