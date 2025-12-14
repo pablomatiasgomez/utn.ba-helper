@@ -21,6 +21,7 @@ export default {
 	output: {
 		path: PATHS.build,
 		filename: '[name].js',
+		clean: true,
 	},
 	devtool: 'source-map',
 	stats: {
