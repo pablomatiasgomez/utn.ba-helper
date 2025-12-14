@@ -10,6 +10,10 @@
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
+  "action": {
+    "default_title": "UTN.BA Helper",
+    "default_popup": "popup.html"
+  },
   "content_scripts": [
     {
       "matches": [
@@ -52,6 +56,7 @@
     "service_worker": "background.js"
   },
   "permissions": [
-    "storage"
+    "storage",
+    "tabs"
   ]
 }

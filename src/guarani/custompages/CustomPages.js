@@ -4,7 +4,7 @@ import {CoursesSearchCustomPage} from './CoursesSearchCustomPage.js';
 import {ProfessorsSearchCustomPage} from './ProfessorsSearchCustomPage.js';
 import {PlanTrackingCustomPage} from './PlanTrackingCustomPage.js';
 
-const CUSTOM_PAGES = [
+export const CUSTOM_PAGES = [
 	CoursesSearchCustomPage,
 	ProfessorsSearchCustomPage,
 	PlanTrackingCustomPage,
