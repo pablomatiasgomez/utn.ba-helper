@@ -19,19 +19,16 @@ import {PagesDataParser} from './PagesDataParser.js';
 		let store = new Store();
 		let pagesDataParser = new PagesDataParser(utils);
 
-		// This main will only be executed on kolla pages.
-		if (!window.location.pathname.startsWith("/siu/kolla")) return;
-
 		if (pagesDataParser.kollaSurveyFromCompleted($(document))) {
 			log.message("Exiting completed kolla survey", 'info', {attributes: {location_href: location.href}});
 			return;
 		}
 		log.message("Entering kolla survey", 'info', {attributes: {location_href: location.href}});
 
-		let btn = $("#formulario .btn-primary[type=submit]:visible").get(0);
-		if (!btn) return utils.logHTML("kollaMissingBtn", 100);
+		let $btn = $("#formulario .btn-primary[type=submit][onclick]:visible:enabled");
+		if (!$btn.length) return utils.logHTML("kollaMissingBtn", 100);
 
-		btn.addEventListener("mousedown", () => {
+		$btn.on("mousedown", function () {
 			utils.runAsync("surveyFinished", () => {
 				return store.readHashedStudentIdFromStore().then(hashedStudentId => {
 					if (!hashedStudentId) throw new Error(`Couldn't find hashedStudentId within form url ${location.href}.`);
