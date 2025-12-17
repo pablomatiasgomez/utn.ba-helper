@@ -1,6 +1,6 @@
 {
   "name": "utn.ba-helper",
-  "version": "7.1.11",
+  "version": "7.2.0",
   "description": "A Chrome extension that makes navigating and using the UTN.BA - FRBA website easier.",
   "private": true,
   "type": "module",
