@@ -1,4 +1,4 @@
-import {initSDK, session, getNavigationInstrumentation} from '@embrace-io/web-sdk';
+import {getNavigationInstrumentation, initSDK, session} from '@embrace-io/web-sdk';
 
 export function initializeEmbrace(contentScriptName) {
 	initSDK({

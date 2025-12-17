@@ -25,18 +25,28 @@ export class CustomPages {
 		this.#apiConnector = apiConnector;
 	}
 
+	/**
+	 * Removes the existent menu, if any.
+	 */
+	removeMenu() {
+		document.querySelector(".main-nav #js-nav .utnba-helper-menu")?.remove();
+	}
+
+	/**
+	 * Appends the custom menu, unless it already exists.
+	 */
 	appendMenu() {
-		if (!CUSTOM_PAGES.length) return;
+		if (!!document.querySelector(".main-nav #js-nav .utnba-helper-menu")) return;
 
 		const customMenusContainer = document.createElement('ul');
 		customMenusContainer.className = 'dropdown-menu';
 
 		const li = document.createElement('li');
-		li.className = 'dropdown js-menuitem-root';
+		li.className = 'dropdown js-menuitem-root utnba-helper-menu';
 		li.innerHTML = `<a href="#" class="dropdown-toggle" data-toggle="dropdown">UTN.BA Helper <b class="caret"></b></a>`;
 
 		li.appendChild(customMenusContainer);
-		document.querySelector(".main-nav .nav:not(.perfiles)").appendChild(li);
+		document.querySelector(".main-nav #js-nav").appendChild(li);
 
 		CUSTOM_PAGES.forEach(customPage => {
 			const menuItem = document.createElement('li');

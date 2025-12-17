@@ -3,7 +3,7 @@
 import $ from 'jquery';
 import * as XLSX from 'xlsx';
 import {Consts} from './Consts.js';
-import {LoggedOutError, RedirectedToHomeError, GuaraniBackendError, MissingStudentIdError} from './Errors.js';
+import {GuaraniBackendError, LoggedOutError, MissingStudentIdError, RedirectedToHomeError} from './Errors.js';
 
 export class PagesDataParser {
 	#utils;
@@ -128,10 +128,11 @@ export class PagesDataParser {
 	 * @returns {String}
 	 */
 	getStudentId() {
-		let studentId = document.querySelector(".legajo-container .legajo-numero")?.textContent.trim() || "";
+		let container = document.querySelector(".legajo-container");
+		if (!container) throw new MissingStudentIdError(`Missing studentId container.`);
+
+		let studentId = container.querySelector(".legajo-numero")?.textContent.trim() || "";
 		if (studentId === "-.") throw new MissingStudentIdError(`Missing studentId: ${studentId}`);
-		// Known case that is being hidden currently... TODO: revert?
-		if (studentId === "" && location.pathname.startsWith("/autogestion/grado/encuestas_kolla")) throw new MissingStudentIdError(`Missing studentId: ${studentId}`);
 		if (studentId[studentId.length - 2] !== "-" || studentId[studentId.length - 6] !== ".") throw new Error(`Invalid studentId: ${studentId}. HTML: ${document.documentElement.outerHTML}`);
 		return studentId;
 	}
@@ -417,7 +418,7 @@ export class PagesDataParser {
 			let promises = $(surveysResponseText).find("ul li a").toArray()
 				.map(a => a.href)
 				.map(siuUrl => {
-					siuUrl += (siuUrl.includes("?") ? "&" : "?") +"terminos_condiciones=true";
+					siuUrl += (siuUrl.includes("?") ? "&" : "?") + "terminos_condiciones=true";
 					return this.fetchAjaxGETContents(siuUrl).then(siuResponse => {
 						try {
 							// Return the kollaUrl
