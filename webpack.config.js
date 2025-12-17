@@ -12,6 +12,8 @@ const PATHS = {
 // noinspection JSUnusedGlobalSymbols
 export default {
 	entry: {
+		"popup": PATHS.src + '/popup.js',
+		"page": PATHS.src + '/page.js',
 		"guarani/main": PATHS.src + '/guarani/main.js',
 		"guarani/main-kolla": PATHS.src + '/guarani/main-kolla.js',
 		// TODO re-enable

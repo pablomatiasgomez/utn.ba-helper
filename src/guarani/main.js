@@ -1,3 +1,5 @@
+'use strict';
+
 import './main.css';
 
 import {initializeEmbrace} from '../Embrace.js';
@@ -37,7 +39,7 @@ import {InscripcionAExamenesPage} from './pages/InscripcionAExamenesPage.js';
 
 		// Custom pages & handlers
 		// TODO re-enable
-		//  customPages.appendMenu();
+		customPages.appendMenu();
 		const PAGE_HANDLERS = [
 			// match is performed using regex and first one is used.
 			{
