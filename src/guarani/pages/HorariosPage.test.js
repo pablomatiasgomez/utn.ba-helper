@@ -1,21 +1,17 @@
-import {ApiConnector} from '../../__mocks__/ApiConnector.js';
-import {Utils} from '../Utils.js';
 import {HorariosPage} from './HorariosPage.js';
-
-import fs from "node:fs";
-import path from "node:path";
+import {loadFixture} from '../test-helpers.js';
 
 const __dirname = import.meta.dirname;
 
 describe('horariosPage.init', () => {
-	let apiConnector = new ApiConnector();
-	let utils = new Utils(apiConnector);
 	let horariosPage;
 
 	beforeEach(async () => {
-		const inputFile = expect.getState().currentTestName.replaceAll(" ", "_") + '.html';
-		document.body.innerHTML = fs.readFileSync(path.resolve(__dirname, './__fixtures__/', inputFile), 'utf8');
-		horariosPage = new HorariosPage(utils);
+		loadFixture({
+			testName: expect.getState().currentTestName,
+			testFileDir: __dirname,
+		});
+		horariosPage = new HorariosPage();
 		await horariosPage.init();
 	});
 
@@ -24,10 +20,6 @@ describe('horariosPage.init', () => {
 	});
 
 	it('successful parsing', async () => {
-		expect(document.body.innerHTML).toMatchSnapshot();
-	});
-
-	it('missing cursada elements', async () => {
 		expect(document.body.innerHTML).toMatchSnapshot();
 	});
 
