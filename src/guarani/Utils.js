@@ -35,7 +35,7 @@ export class Utils {
 			script.onload = () => {
 				if (removeAfterLoad) script.remove();
 				resolve();
-			}
+			};
 			script.onerror = () => reject(new Error(`Failed to load script: ${filePath}`));
 			document.head.appendChild(script);
 		});
