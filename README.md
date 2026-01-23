@@ -53,6 +53,10 @@ UTN.BA Helper facilita el uso de la web de la UTN - FRBA.
 
 <p align="center"><img src="https://github.com/pablomatiasgomez/utn.ba-helper/raw/master/screenshots/Horarios.png" alt="screenshot"></p>
 
+## Privacy Policy / Política de Privacidad
+
+[PRIVACY_POLICY.md](PRIVACY_POLICY.md)
+
 ## Glossary
 
 |  English | Spanish     |

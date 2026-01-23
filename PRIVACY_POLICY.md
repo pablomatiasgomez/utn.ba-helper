@@ -1,4 +1,8 @@
-# Política de Privacidad - UTN.BA Helper
+**Select language / Seleccionar idioma:** [Español](#política-de-privacidad---utnba-helper-español) | [English](#privacy-policy---utnba-helper-english)
+
+---
+
+# Política de Privacidad - UTN.BA Helper (Español)
 
 **Última actualización:** Enero 2026
 
