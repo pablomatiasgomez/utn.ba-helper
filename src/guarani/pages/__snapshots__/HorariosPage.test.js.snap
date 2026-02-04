@@ -1,7 +1,8 @@
 // Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`horariosPage.init empty agenda 1`] = `
-"        <div class="brand-nav">
+"
+        <div class="brand-nav">
     <div class="container">
         <div class="row-fluid">
             <div class="span3">
@@ -9,7 +10,7 @@ exports[`horariosPage.init empty agenda 1`] = `
             </div>
 
             <div class="span9">
-                                    <div class="row-fluid"><span class="powered-by-utnba-helper"></span>
+                                    <div class="row-fluid">
                         <div class="span12">
                             <div class="navbar user-navbar clearfix">
                                 <ul class="nav pull-right">
@@ -17,7 +18,9 @@ exports[`horariosPage.init empty agenda 1`] = `
                                     <li class="notificaciones">
                                         <a href="https://guarani.frba.utn.edu.ar/autogestion/grado/mensajes">
                                             <i class="icon-envelope"></i>
-                                            <span id="js-cant-mensajes" class="badge">0</span>
+                                            <span id="js-cant-mensajes" class="badge ">
+											0
+										</span>
                                         </a>
                                     </li>
                                     <li class="dropdown">
@@ -58,12 +61,12 @@ exports[`horariosPage.init empty agenda 1`] = `
 
 
 
-                                <li id="cursada" class="js-menuitem-root">
+                                <li id="cursada" class="js-menuitem-root ">
                                     <a href="https://guarani.frba.utn.edu.ar/autogestion/grado/cursada">Preinscripción a materias</a>
                                 </li>
 
 
-                                <li id="examen" class="js-menuitem-root">
+                                <li id="examen" class="js-menuitem-root ">
                                     <a href="https://guarani.frba.utn.edu.ar/autogestion/grado/examen">Inscripción a Exámenes</a>
                                 </li>
 
@@ -129,7 +132,7 @@ exports[`horariosPage.init empty agenda 1`] = `
                                 </li>
 
 
-                                <li class="dropdown js-menuitem-root">
+                                <li class="dropdown js-menuitem-root ">
 
 
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">Trámites <b class="caret"></b></a>
@@ -155,19 +158,17 @@ exports[`horariosPage.init empty agenda 1`] = `
                                 </li>
 
 
-                                <li id="noticias" class="js-menuitem-root">
+                                <li id="noticias" class="js-menuitem-root ">
                                     <a href="https://guarani.frba.utn.edu.ar/autogestion/grado/noticias">Noticias</a>
                                 </li>
 
 
-                                <li id="calendario_academico" class="js-menuitem-root">
+                                <li id="calendario_academico" class="js-menuitem-root ">
                                     <a href="https://guarani.frba.utn.edu.ar/autogestion/grado/calendario_academico">Calendario Académico</a>
                                 </li>
 
 
-                                            <li class="dropdown js-menuitem-root">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">UTN.BA Helper <b class="caret"></b></a>
-                <ul class="dropdown-menu"><li><a class="no-ajax" href="/autogestion/grado/?customPage=Buscar%20cursos">Buscar cursos</a></li><li><a class="no-ajax" href="/autogestion/grado/?customPage=Buscar%20docentes">Buscar docentes</a></li><li><a class="no-ajax" href="/autogestion/grado/?customPage=Seguimiento%20de%20Plan">Seguimiento de Plan</a></li></ul></li></ul>
+                                            </ul>
 
                                     <ul id="js-selector-perfiles" class="nav pull-right perfiles">
                         <li class="dropdown">
@@ -187,9 +188,10 @@ exports[`horariosPage.init empty agenda 1`] = `
 <!-- https://gist.github.com/tentacode/3892186 -->
 
         <div id="loading" class="" style="display: none;"></div>
-        <div id="loading_top" style="top: 0px; left: 917px; display: none;" class="">Cargando...</div>
-        <div id="_msg_placeholder" style="display:none;" class="msg_placeholder alert-success"></div>
-        <div id="kernel_contenido" class="container">
+		<div id="loading_top" style="top: 0px; left: 675.5px; display: none;" class="">Cargando...</div>
+		<div id="_msg_placeholder" style="display:none;" class="msg_placeholder alert-success"></div>
+		<div id="kernel_contenido" class="container">
+
         <div id="agenda_utn" aria-live="polite" class="pagelet" style="display: block; clear: both;">
 
 
@@ -198,294 +200,47 @@ exports[`horariosPage.init empty agenda 1`] = `
 
 
     <div class="column-flex">
-                <div id="agenda-holder" class="agenda row-flex">
-            <!-- Empty agenda -->
-        </div>
+                <div id="agenda-holder" class="agenda row-flex"><div class="col-flex dia-descr-holder"><div class="dia-descr std-height top-left-border" id="dia-lunes">Lunes</div><div class="dia-descr std-height top-left-border" id="dia-martes">Martes</div><div class="dia-descr std-height top-left-border" id="dia-miercoles">Miércoles</div><div class="dia-descr std-height top-left-border" id="dia-jueves">Jueves</div><div class="dia-descr std-height top-left-border" id="dia-viernes">Viernes</div><div class="dia-descr std-height top-left-border" id="dia-sabado">Sábado</div></div><div class="row-flex" id="turnos-holder"><div class="agenda-turno" id="turno-[object Object]"><div class="turno-nombre">Mañana</div><div class="row-flex"><div class="hora-descr std-height top-left-border" data-toggle="tooltip" data-placement="bottom" title="07:45 a 08:30">0</div><div class="hora-descr std-height top-left-border" data-toggle="tooltip" data-placement="bottom" title="08:30 a 09:15">1</div><div class="hora-descr std-height top-left-border" data-toggle="tooltip" data-placement="bottom" title="09:15 a 10:00">2</div><div class="hora-descr std-height top-left-border" data-toggle="tooltip" data-placement="bottom" title="10:15 a 11:00">3</div><div class="hora-descr std-height top-left-border" data-toggle="tooltip" data-placement="bottom" title="11:00 a 11:45">4</div><div class="hora-descr std-height top-left-border" data-toggle="tooltip" data-placement="bottom" title="11:45 a 12:30">5</div><div class="hora-descr std-height top-left-border" data-toggle="tooltip" data-placement="bottom" title="12:30 a 13:15">6</div></div><div class="row-flex"><div class="agenda-hora std-height top-left-border" id="lunes-1"></div><div class="agenda-hora std-height top-left-border" id="lunes-2"></div><div class="agenda-hora std-height top-left-border" id="lunes-3"></div><div class="agenda-hora std-height top-left-border" id="lunes-4"></div><div class="agenda-hora std-height top-left-border" id="lunes-5"></div><div class="agenda-hora std-height top-left-border" id="lunes-6"></div><div class="agenda-hora std-height top-left-border" id="lunes-7"></div></div><div class="row-flex"><div class="agenda-hora std-height top-left-border" id="martes-1"></div><div class="agenda-hora std-height top-left-border" id="martes-2"></div><div class="agenda-hora std-height top-left-border" id="martes-3"></div><div class="agenda-hora std-height top-left-border" id="martes-4"></div><div class="agenda-hora std-height top-left-border" id="martes-5"></div><div class="agenda-hora std-height top-left-border" id="martes-6"></div><div class="agenda-hora std-height top-left-border" id="martes-7"></div></div><div class="row-flex"><div class="agenda-hora std-height top-left-border" id="miercoles-1"></div><div class="agenda-hora std-height top-left-border" id="miercoles-2"></div><div class="agenda-hora std-height top-left-border" id="miercoles-3"></div><div class="agenda-hora std-height top-left-border" id="miercoles-4"></div><div class="agenda-hora std-height top-left-border" id="miercoles-5"></div><div class="agenda-hora std-height top-left-border" id="miercoles-6"></div><div class="agenda-hora std-height top-left-border" id="miercoles-7"></div></div><div class="row-flex"><div class="agenda-hora std-height top-left-border" id="jueves-1"></div><div class="agenda-hora std-height top-left-border" id="jueves-2"></div><div class="agenda-hora std-height top-left-border" id="jueves-3"></div><div class="agenda-hora std-height top-left-border" id="jueves-4"></div><div class="agenda-hora std-height top-left-border" id="jueves-5"></div><div class="agenda-hora std-height top-left-border" id="jueves-6"></div><div class="agenda-hora std-height top-left-border" id="jueves-7"></div></div><div class="row-flex"><div class="agenda-hora std-height top-left-border" id="viernes-1"></div><div class="agenda-hora std-height top-left-border" id="viernes-2"></div><div class="agenda-hora std-height top-left-border" id="viernes-3"></div><div class="agenda-hora std-height top-left-border" id="viernes-4"></div><div class="agenda-hora std-height top-left-border" id="viernes-5"></div><div class="agenda-hora std-height top-left-border" id="viernes-6"></div><div class="agenda-hora std-height top-left-border" id="viernes-7"></div></div><div class="row-flex"><div class="agenda-hora std-height top-left-border" id="sabado-1"></div><div class="agenda-hora std-height top-left-border" id="sabado-2"></div><div class="agenda-hora std-height top-left-border" id="sabado-3"></div><div class="agenda-hora std-height top-left-border" id="sabado-4"></div><div class="agenda-hora std-height top-left-border" id="sabado-5"></div><div class="agenda-hora std-height top-left-border" id="sabado-6"></div><div class="agenda-hora std-height top-left-border" id="sabado-7"></div></div></div><div class="agenda-turno" id="turno-[object Object]"><div class="turno-nombre">Tarde</div><div class="row-flex"><div class="hora-descr std-height top-left-border" data-toggle="tooltip" data-placement="bottom" title="13:30 a 14:15">0</div><div class="hora-descr std-height top-left-border" data-toggle="tooltip" data-placement="bottom" title="14:15 a 15:00">1</div><div class="hora-descr std-height top-left-border" data-toggle="tooltip" data-placement="bottom" title="15:00 a 15:45">2</div><div class="hora-descr std-height top-left-border" data-toggle="tooltip" data-placement="bottom" title="16:00 a 16:45">3</div><div class="hora-descr std-height top-left-border" data-toggle="tooltip" data-placement="bottom" title="16:45 a 17:30">4</div><div class="hora-descr std-height top-left-border" data-toggle="tooltip" data-placement="bottom" title="17:30 a 18:15">5</div><div class="hora-descr std-height top-left-border" data-toggle="tooltip" data-placement="bottom" title="18:15 a 19:00">6</div></div><div class="row-flex"><div class="agenda-hora std-height top-left-border" id="lunes-8"></div><div class="agenda-hora std-height top-left-border" id="lunes-9"></div><div class="agenda-hora std-height top-left-border" id="lunes-10"></div><div class="agenda-hora std-height top-left-border" id="lunes-11"></div><div class="agenda-hora std-height top-left-border" id="lunes-12"></div><div class="agenda-hora std-height top-left-border" id="lunes-13"></div><div class="agenda-hora std-height top-left-border" id="lunes-14"></div></div><div class="row-flex"><div class="agenda-hora std-height top-left-border" id="martes-8"></div><div class="agenda-hora std-height top-left-border" id="martes-9"></div><div class="agenda-hora std-height top-left-border" id="martes-10"></div><div class="agenda-hora std-height top-left-border" id="martes-11"></div><div class="agenda-hora std-height top-left-border" id="martes-12"></div><div class="agenda-hora std-height top-left-border" id="martes-13"></div><div class="agenda-hora std-height top-left-border" id="martes-14"></div></div><div class="row-flex"><div class="agenda-hora std-height top-left-border" id="miercoles-8"></div><div class="agenda-hora std-height top-left-border" id="miercoles-9"></div><div class="agenda-hora std-height top-left-border" id="miercoles-10"></div><div class="agenda-hora std-height top-left-border" id="miercoles-11"></div><div class="agenda-hora std-height top-left-border" id="miercoles-12"></div><div class="agenda-hora std-height top-left-border" id="miercoles-13"></div><div class="agenda-hora std-height top-left-border" id="miercoles-14"></div></div><div class="row-flex"><div class="agenda-hora std-height top-left-border" id="jueves-8"></div><div class="agenda-hora std-height top-left-border" id="jueves-9"></div><div class="agenda-hora std-height top-left-border" id="jueves-10"></div><div class="agenda-hora std-height top-left-border" id="jueves-11"></div><div class="agenda-hora std-height top-left-border" id="jueves-12"></div><div class="agenda-hora std-height top-left-border" id="jueves-13"></div><div class="agenda-hora std-height top-left-border" id="jueves-14"></div></div><div class="row-flex"><div class="agenda-hora std-height top-left-border" id="viernes-8"></div><div class="agenda-hora std-height top-left-border" id="viernes-9"></div><div class="agenda-hora std-height top-left-border" id="viernes-10"></div><div class="agenda-hora std-height top-left-border" id="viernes-11"></div><div class="agenda-hora std-height top-left-border" id="viernes-12"></div><div class="agenda-hora std-height top-left-border" id="viernes-13"></div><div class="agenda-hora std-height top-left-border" id="viernes-14"></div></div><div class="row-flex"><div class="agenda-hora std-height top-left-border" id="sabado-8"></div><div class="agenda-hora std-height top-left-border" id="sabado-9"></div><div class="agenda-hora std-height top-left-border" id="sabado-10"></div><div class="agenda-hora std-height top-left-border" id="sabado-11"></div><div class="agenda-hora std-height top-left-border" id="sabado-12"></div><div class="agenda-hora std-height top-left-border" id="sabado-13"></div><div class="agenda-hora std-height top-left-border" id="sabado-14"></div></div></div><div class="agenda-turno" id="turno-[object Object]"><div class="turno-nombre">Noche</div><div class="row-flex"><div class="hora-descr std-height top-left-border" data-toggle="tooltip" data-placement="bottom" title="18:15 a 19:00">0</div><div class="hora-descr std-height top-left-border" data-toggle="tooltip" data-placement="bottom" title="19:00 a 19:45">1</div><div class="hora-descr std-height top-left-border" data-toggle="tooltip" data-placement="bottom" title="19:45 a 20:30">2</div><div class="hora-descr std-height top-left-border" data-toggle="tooltip" data-placement="bottom" title="20:45 a 21:30">3</div><div class="hora-descr std-height top-left-border" data-toggle="tooltip" data-placement="bottom" title="21:30 a 22:15">4</div><div class="hora-descr std-height top-left-border" data-toggle="tooltip" data-placement="bottom" title="22:15 a 23:00">5</div></div><div class="row-flex"><div class="agenda-hora std-height top-left-border" id="lunes-15"></div><div class="agenda-hora std-height top-left-border" id="lunes-16"></div><div class="agenda-hora std-height top-left-border" id="lunes-17"></div><div class="agenda-hora std-height top-left-border" id="lunes-18"></div><div class="agenda-hora std-height top-left-border" id="lunes-19"></div><div class="agenda-hora std-height top-left-border" id="lunes-20"></div></div><div class="row-flex"><div class="agenda-hora std-height top-left-border" id="martes-15"></div><div class="agenda-hora std-height top-left-border" id="martes-16"></div><div class="agenda-hora std-height top-left-border" id="martes-17"></div><div class="agenda-hora std-height top-left-border" id="martes-18"></div><div class="agenda-hora std-height top-left-border" id="martes-19"></div><div class="agenda-hora std-height top-left-border" id="martes-20"></div></div><div class="row-flex"><div class="agenda-hora std-height top-left-border" id="miercoles-15"></div><div class="agenda-hora std-height top-left-border" id="miercoles-16"></div><div class="agenda-hora std-height top-left-border" id="miercoles-17"></div><div class="agenda-hora std-height top-left-border" id="miercoles-18"></div><div class="agenda-hora std-height top-left-border" id="miercoles-19"></div><div class="agenda-hora std-height top-left-border" id="miercoles-20"></div></div><div class="row-flex"><div class="agenda-hora std-height top-left-border" id="jueves-15"></div><div class="agenda-hora std-height top-left-border" id="jueves-16"></div><div class="agenda-hora std-height top-left-border" id="jueves-17"></div><div class="agenda-hora std-height top-left-border" id="jueves-18"></div><div class="agenda-hora std-height top-left-border" id="jueves-19"></div><div class="agenda-hora std-height top-left-border" id="jueves-20"></div></div><div class="row-flex"><div class="agenda-hora std-height top-left-border" id="viernes-15"></div><div class="agenda-hora std-height top-left-border" id="viernes-16"></div><div class="agenda-hora std-height top-left-border" id="viernes-17"></div><div class="agenda-hora std-height top-left-border" id="viernes-18"></div><div class="agenda-hora std-height top-left-border" id="viernes-19"></div><div class="agenda-hora std-height top-left-border" id="viernes-20"></div></div><div class="row-flex"><div class="agenda-hora std-height top-left-border" id="sabado-15"></div><div class="agenda-hora std-height top-left-border" id="sabado-16"></div><div class="agenda-hora std-height top-left-border" id="sabado-17"></div><div class="agenda-hora std-height top-left-border" id="sabado-18"></div><div class="agenda-hora std-height top-left-border" id="sabado-19"></div><div class="agenda-hora std-height top-left-border" id="sabado-20"></div></div></div></div></div>
 
             </div>
 
-    <div id="comisiones-holder" class="row-flex"><div class="cursada"><div class="cursada-header fondo-gris"><div class="cuadrado materia-color-1"></div><h4>Física I</h4></div><div class="cursada-body"><div class="cursada-text"><strong>Horario</strong>: Sab 08:30 a 12:30</div><div class="cursada-text"><strong>Comision</strong>: I1022</div><div class="cursada-text"><strong>Ubicacion</strong>: Sede Campus</div></div></div><div class="cursada"><div class="cursada-header fondo-gris"><div class="cuadrado materia-color-2"></div><h4>Ingeniería y Sociedad</h4></div><div class="cursada-body"><div class="cursada-text"><strong>Horario</strong>: Mar 14:15 a 17:30</div><div class="cursada-text"><strong>Comision</strong>: K1545</div><div class="cursada-text"><strong>Ubicacion</strong>: Sede Campus</div></div></div><div class="cursada"><div class="cursada-header fondo-gris"><div class="cuadrado materia-color-3"></div><h4>Algoritmos y Estructura de Datos</h4></div><div class="cursada-body"><div class="cursada-text"><strong>Horario</strong>: Jue 08:30 a 12:30</div><div class="cursada-text"><strong>Comision</strong>: K1030</div><div class="cursada-text"><strong>Ubicacion</strong>: Sede Campus</div></div></div><div class="cursada"><div class="cursada-header fondo-gris"><div class="cuadrado materia-color-4"></div><h4>Lógica y Estructuras Discretas</h4></div><div class="cursada-body"><div class="cursada-text"><strong>Horario</strong>: Lun 10:15 a 12:30</div><div class="cursada-text"><strong>Comision</strong>: K1030</div><div class="cursada-text"><strong>Ubicacion</strong>: Sede Medrano</div></div></div><div class="cursada"><div class="cursada-header fondo-gris"><div class="cuadrado materia-color-5"></div><h4>Arquitectura de Computadores</h4></div><div class="cursada-body"><div class="cursada-text"><strong>Horario</strong>: Mie 11:00 a 13:15 - Mie 13:30 a 14:15</div><div class="cursada-text"><strong>Comision</strong>: K1030</div><div class="cursada-text"><strong>Ubicacion</strong>: Sede Medrano</div></div></div><div class="cursada"><div class="cursada-header fondo-gris"><div class="cuadrado materia-color-6"></div><h4>Sistemas y Procesos de Negocio</h4></div><div class="cursada-body"><div class="cursada-text"><strong>Horario</strong>: Lun 07:45 a 10:00</div><div class="cursada-text"><strong>Comision</strong>: K1030</div><div class="cursada-text"><strong>Ubicacion</strong>: Sede Medrano</div></div></div><div class="cursada"><div class="cursada-header fondo-gris"><div class="cuadrado materia-color-7"></div><h4>Análisis Matemático I</h4></div><div class="cursada-body"><div class="cursada-text"><strong>Horario</strong>: Mar 08:30 a 12:30</div><div class="cursada-text"><strong>Comision</strong>: O1021</div><div class="cursada-text"><strong>Ubicacion</strong>: Sede Campus</div></div></div><div class="cursada"><div class="cursada-header fondo-gris"><div class="cuadrado materia-color-8"></div><h4>Álgebra y Geometría Analítica</h4></div><div class="cursada-body"><div class="cursada-text"><strong>Horario</strong>: Vie 08:30 a 12:30</div><div class="cursada-text"><strong>Comision</strong>: O1021</div><div class="cursada-text"><strong>Ubicacion</strong>: Sede Campus</div></div></div></div>
+    <div id="comisiones-holder" class="row-flex"></div>
 
-            <div>
-            <a id="btn-imprimir-comprobante-cursada" class="btn no-ajax descargar_cert" href="https://guarani.frba.utn.edu.ar/autogestion/grado/cursada/descargar_comprobante">
-                Imprimir comprobante de inscripción a materias
-                <span style="width: 20px; height: 20px" class="g3w-icono-pdf"></span>
-            </a>
-        </div>
 
     <hr>
     </div>
 
-<script type="text/javascript">kernel.renderer.on_arrival({"css":["\\/autogestion\\/grado\\/_comp\\/utn\\/operaciones\\/_comun\\/pagelets\\/agenda_utn\\/default.css"],"js":["\\/autogestion\\/grado\\/_comp\\/utn\\/operaciones\\/_comun\\/pagelets\\/agenda_utn\\/pagelet_agenda_utn.js"],"op":"_comun\\/pagelets","info":{"id":"agenda_utn","visible":"1","estado":"inicial","mensajes":[],"tdh":{"turnos":{"manana":{"horarios":[{"hora_catedra":"1","hora_descr":"0","hora_reloj_fin":"08:30","hora_reloj_inicio":"07:45","turno":"Ma\\u00f1ana"},{"hora_catedra":"2","hora_descr":"1","hora_reloj_fin":"09:15","hora_reloj_inicio":"08:30","turno":"Ma\\u00f1ana"},{"hora_catedra":"3","hora_descr":"2","hora_reloj_fin":"10:00","hora_reloj_inicio":"09:15","turno":"Ma\\u00f1ana"},{"hora_catedra":"4","hora_descr":"3","hora_reloj_fin":"11:00","hora_reloj_inicio":"10:15","turno":"Ma\\u00f1ana"},{"hora_catedra":"5","hora_descr":"4","hora_reloj_fin":"11:45","hora_reloj_inicio":"11:00","turno":"Ma\\u00f1ana"},{"hora_catedra":"6","hora_descr":"5","hora_reloj_fin":"12:30","hora_reloj_inicio":"11:45","turno":"Ma\\u00f1ana"},{"hora_catedra":"7","hora_descr":"6","hora_reloj_fin":"13:15","hora_reloj_inicio":"12:30","turno":"Ma\\u00f1ana"}],"nombre":"Ma\\u00f1ana","sigla":"m"},"tarde":{"horarios":[{"hora_catedra":"8","hora_descr":"0","hora_reloj_fin":"14:15","hora_reloj_inicio":"13:30","turno":"Tarde"},{"hora_catedra":"9","hora_descr":"1","hora_reloj_fin":"15:00","hora_reloj_inicio":"14:15","turno":"Tarde"},{"hora_catedra":"10","hora_descr":"2","hora_reloj_fin":"15:45","hora_reloj_inicio":"15:00","turno":"Tarde"},{"hora_catedra":"11","hora_descr":"3","hora_reloj_fin":"16:45","hora_reloj_inicio":"16:00","turno":"Tarde"},{"hora_catedra":"12","hora_descr":"4","hora_reloj_fin":"17:30","hora_reloj_inicio":"16:45","turno":"Tarde"},{"hora_catedra":"13","hora_descr":"5","hora_reloj_fin":"18:15","hora_reloj_inicio":"17:30","turno":"Tarde"},{"hora_catedra":"14","hora_descr":"6","hora_reloj_fin":"19:00","hora_reloj_inicio":"18:15","turno":"Tarde"}],"nombre":"Tarde","sigla":"t"},"noche":{"horarios":[{"hora_catedra":"15","hora_descr":"0","hora_reloj_fin":"19:00","hora_reloj_inicio":"18:15","turno":"Noche"},{"hora_catedra":"16","hora_descr":"1","hora_reloj_fin":"19:45","hora_reloj_inicio":"19:00","turno":"Noche"},{"hora_catedra":"17","hora_descr":"2","hora_reloj_fin":"20:30","hora_reloj_inicio":"19:45","turno":"Noche"},{"hora_catedra":"18","hora_descr":"3","hora_reloj_fin":"21:30","hora_reloj_inicio":"20:45","turno":"Noche"},{"hora_catedra":"19","hora_descr":"4","hora_reloj_fin":"22:15","hora_reloj_inicio":"21:30","turno":"Noche"},{"hora_catedra":"20","hora_descr":"5","hora_reloj_fin":"23:00","hora_reloj_inicio":"22:15","turno":"Noche"}],"nombre":"Noche","sigla":"n"}},"dias":[{"nombre":"Lunes","id_prefix":"lunes"},{"nombre":"Martes","id_prefix":"martes"},{"nombre":"Mi\\u00e9rcoles","id_prefix":"miercoles"},{"nombre":"Jueves","id_prefix":"jueves"},{"nombre":"Viernes","id_prefix":"viernes"},{"nombre":"S\\u00e1bado","id_prefix":"sabado"}],"ultima_hora_catedra":"20"},"tipo":"completa","agenda":{"comisiones":{"e9a65d694a31c36e45aabd8328252118e983b389":{"comision":"53309","comision_nombre":"I1022","periodo":"35795","periodo_nombre":"Grado Anual 2025","actividad_nombre":"F\\u00edsica I","actividad_codigo":"950605","actividad":"2618","ubicacion_nombre":"Sede Campus","ubicacion":"2","horario":"Sab 08:30 a 12:30","horas_catedra":[{"dia_semana":"Sabado","hora_catedra_inicio":"2","hora_catedra_fin":"6"}]},"51594eefdd010cd83640ff6ca97c2dab693bacd3":{"comision":"55874","comision_nombre":"K1545","periodo":"35825","periodo_nombre":"Grado Segundo Cuatrimestre 2025","actividad_nombre":"Ingenier\\u00eda y Sociedad","actividad_codigo":"951604","actividad":"2804","ubicacion_nombre":"Sede Campus","ubicacion":"2","horario":"Mar 14:15 a 17:30","horas_catedra":[{"dia_semana":"Martes","hora_catedra_inicio":"9","hora_catedra_fin":"12"}]},"864b4acf24e9871cd04da29cc3e9e4e4b2046e5b":{"comision":"53120","comision_nombre":"K1030","periodo":"35795","periodo_nombre":"Grado Anual 2025","actividad_nombre":"Algoritmos y Estructura de Datos","actividad_codigo":"082021","actividad":"87","ubicacion_nombre":"Sede Campus","ubicacion":"2","horario":"Jue 08:30 a 12:30","horas_catedra":[{"dia_semana":"Jueves","hora_catedra_inicio":"2","hora_catedra_fin":"6"}]},"a616de23efef59688b075545d6ec1066afe88b3f":{"comision":"53857","comision_nombre":"K1030","periodo":"35795","periodo_nombre":"Grado Anual 2025","actividad_nombre":"L\\u00f3gica y Estructuras Discretas","actividad_codigo":"232010","actividad":"5764","ubicacion_nombre":"Sede Medrano","ubicacion":"1","horario":"Lun 10:15 a 12:30","horas_catedra":[{"dia_semana":"Lunes","hora_catedra_inicio":"4","hora_catedra_fin":"6"}]},"a96f20c25b37435ebbb17df973115756bd0bfabc":{"comision":"53668","comision_nombre":"K1030","periodo":"35795","periodo_nombre":"Grado Anual 2025","actividad_nombre":"Arquitectura de Computadores","actividad_codigo":"082022","actividad":"88","ubicacion_nombre":"Sede Medrano","ubicacion":"1","horario":"Mie 11:00 a 13:15 - Mie 13:30 a 14:15","horas_catedra":[{"dia_semana":"Miercoles","hora_catedra_inicio":"5","hora_catedra_fin":"7"},{"dia_semana":"Miercoles","hora_catedra_inicio":"8","hora_catedra_fin":"8"}]},"40dc45d25f6a368ab332def488e9bf0472439de0":{"comision":"54021","comision_nombre":"K1030","periodo":"35795","periodo_nombre":"Grado Anual 2025","actividad_nombre":"Sistemas y Procesos de Negocio","actividad_codigo":"232011","actividad":"5765","ubicacion_nombre":"Sede Medrano","ubicacion":"1","horario":"Lun 07:45 a 10:00","horas_catedra":[{"dia_semana":"Lunes","hora_catedra_inicio":"1","hora_catedra_fin":"3"}]},"356ea789bc535c3d54244b492cfb766ad4f68015":{"comision":"53185","comision_nombre":"O1021","periodo":"35795","periodo_nombre":"Grado Anual 2025","actividad_nombre":"An\\u00e1lisis Matem\\u00e1tico I","actividad_codigo":"950702","actividad":"2622","ubicacion_nombre":"Sede Campus","ubicacion":"2","horario":"Mar 08:30 a 12:30","horas_catedra":[{"dia_semana":"Martes","hora_catedra_inicio":"2","hora_catedra_fin":"6"}]},"e27f3ee5b3bb045e19a57d05eed0c71d9b3f91ec":{"comision":"53086","comision_nombre":"O1021","periodo":"35795","periodo_nombre":"Grado Anual 2025","actividad_nombre":"\\u00c1lgebra y Geometr\\u00eda Anal\\u00edtica","actividad_codigo":"950701","actividad":"2621","ubicacion_nombre":"Sede Campus","ubicacion":"2","horario":"Vie 08:30 a 12:30","horas_catedra":[{"dia_semana":"Viernes","hora_catedra_inicio":"2","hora_catedra_fin":"6"}]}},"cursadas":["e9a65d694a31c36e45aabd8328252118e983b389","51594eefdd010cd83640ff6ca97c2dab693bacd3","864b4acf24e9871cd04da29cc3e9e4e4b2046e5b","a616de23efef59688b075545d6ec1066afe88b3f","a96f20c25b37435ebbb17df973115756bd0bfabc","40dc45d25f6a368ab332def488e9bf0472439de0","356ea789bc535c3d54244b492cfb766ad4f68015","e27f3ee5b3bb045e19a57d05eed0c71d9b3f91ec"],"alternativas":[]},"alternativa":"1","cantidad_alternativas":"3","url_info_comision":"https:\\/\\/guarani.frba.utn.edu.ar\\/autogestion\\/grado\\/cursada\\/info_comision"},"content":"            \\n    \\n        \\n    <h2 id=\\"titulo\\">Horarios de cursadas<\\/h2>\\n\\n    \\n    \\n    <div class=\\"column-flex\\">\\n                <div id=\\"agenda-holder\\" class=\\"agenda row-flex\\"><\\/div>\\n\\n            <\\/div>\\n\\n    <div id=\\"comisiones-holder\\" class=\\"row-flex\\"><\\/div>\\n\\n            <div>\\n            <a id=\\"btn-imprimir-comprobante-cursada\\"\\n               class=\\"btn no-ajax descargar_cert\\"\\n               href=\\"https:\\/\\/guarani.frba.utn.edu.ar\\/autogestion\\/grado\\/cursada\\/descargar_comprobante\\">\\n                Imprimir comprobante de inscripci\\u00f3n a materias\\n                <span style=\\"width: 20px; height: 20px\\" class=\\"g3w-icono-pdf\\"><\\/span>\\n            <\\/a>\\n        <\\/div>\\n    \\n    <hr>\\n    ","clase_js":"agenda_utn","tiene_archivo_js":"1"});</script><script type="text/javascript">kernel_config.pagelet_count = 1</script></div>
+
+			<script type="text/javascript">kernel.renderer.on_arrival({"css":["\\/autogestion\\/grado\\/_comp\\/utn\\/operaciones\\/_comun\\/pagelets\\/agenda_utn\\/default.css"],"js":["\\/autogestion\\/grado\\/_comp\\/utn\\/operaciones\\/_comun\\/pagelets\\/agenda_utn\\/pagelet_agenda_utn.js"],"op":"_comun\\/pagelets","info":{"id":"agenda_utn","visible":"1","estado":"inicial","mensajes":[],"tdh":{"turnos":{"manana":{"horarios":[{"hora_catedra":"1","hora_descr":"0","hora_reloj_fin":"08:30","hora_reloj_inicio":"07:45","turno":"Ma\\u00f1ana"},{"hora_catedra":"2","hora_descr":"1","hora_reloj_fin":"09:15","hora_reloj_inicio":"08:30","turno":"Ma\\u00f1ana"},{"hora_catedra":"3","hora_descr":"2","hora_reloj_fin":"10:00","hora_reloj_inicio":"09:15","turno":"Ma\\u00f1ana"},{"hora_catedra":"4","hora_descr":"3","hora_reloj_fin":"11:00","hora_reloj_inicio":"10:15","turno":"Ma\\u00f1ana"},{"hora_catedra":"5","hora_descr":"4","hora_reloj_fin":"11:45","hora_reloj_inicio":"11:00","turno":"Ma\\u00f1ana"},{"hora_catedra":"6","hora_descr":"5","hora_reloj_fin":"12:30","hora_reloj_inicio":"11:45","turno":"Ma\\u00f1ana"},{"hora_catedra":"7","hora_descr":"6","hora_reloj_fin":"13:15","hora_reloj_inicio":"12:30","turno":"Ma\\u00f1ana"}],"nombre":"Ma\\u00f1ana","sigla":"m"},"tarde":{"horarios":[{"hora_catedra":"8","hora_descr":"0","hora_reloj_fin":"14:15","hora_reloj_inicio":"13:30","turno":"Tarde"},{"hora_catedra":"9","hora_descr":"1","hora_reloj_fin":"15:00","hora_reloj_inicio":"14:15","turno":"Tarde"},{"hora_catedra":"10","hora_descr":"2","hora_reloj_fin":"15:45","hora_reloj_inicio":"15:00","turno":"Tarde"},{"hora_catedra":"11","hora_descr":"3","hora_reloj_fin":"16:45","hora_reloj_inicio":"16:00","turno":"Tarde"},{"hora_catedra":"12","hora_descr":"4","hora_reloj_fin":"17:30","hora_reloj_inicio":"16:45","turno":"Tarde"},{"hora_catedra":"13","hora_descr":"5","hora_reloj_fin":"18:15","hora_reloj_inicio":"17:30","turno":"Tarde"},{"hora_catedra":"14","hora_descr":"6","hora_reloj_fin":"19:00","hora_reloj_inicio":"18:15","turno":"Tarde"}],"nombre":"Tarde","sigla":"t"},"noche":{"horarios":[{"hora_catedra":"15","hora_descr":"0","hora_reloj_fin":"19:00","hora_reloj_inicio":"18:15","turno":"Noche"},{"hora_catedra":"16","hora_descr":"1","hora_reloj_fin":"19:45","hora_reloj_inicio":"19:00","turno":"Noche"},{"hora_catedra":"17","hora_descr":"2","hora_reloj_fin":"20:30","hora_reloj_inicio":"19:45","turno":"Noche"},{"hora_catedra":"18","hora_descr":"3","hora_reloj_fin":"21:30","hora_reloj_inicio":"20:45","turno":"Noche"},{"hora_catedra":"19","hora_descr":"4","hora_reloj_fin":"22:15","hora_reloj_inicio":"21:30","turno":"Noche"},{"hora_catedra":"20","hora_descr":"5","hora_reloj_fin":"23:00","hora_reloj_inicio":"22:15","turno":"Noche"}],"nombre":"Noche","sigla":"n"}},"dias":[{"nombre":"Lunes","id_prefix":"lunes"},{"nombre":"Martes","id_prefix":"martes"},{"nombre":"Mi\\u00e9rcoles","id_prefix":"miercoles"},{"nombre":"Jueves","id_prefix":"jueves"},{"nombre":"Viernes","id_prefix":"viernes"},{"nombre":"S\\u00e1bado","id_prefix":"sabado"}],"ultima_hora_catedra":"20"},"tipo":"completa","agenda":{"comisiones":[],"cursadas":[],"alternativas":[]},"alternativa":"1","cantidad_alternativas":"3","url_info_comision":"https:\\/\\/guarani.frba.utn.edu.ar\\/autogestion\\/grado\\/cursada\\/info_comision"},"content":"            \\n    \\n        \\n    <h2 id=\\"titulo\\">Horarios de cursadas<\\/h2>\\n\\n    \\n    \\n    <div class=\\"column-flex\\">\\n                <div id=\\"agenda-holder\\" class=\\"agenda row-flex\\"><\\/div>\\n\\n            <\\/div>\\n\\n    <div id=\\"comisiones-holder\\" class=\\"row-flex\\"><\\/div>\\n\\n    \\n    <hr>\\n    ","clase_js":"agenda_utn","tiene_archivo_js":"1"});</script><script type="text/javascript">kernel_config.pagelet_count = 1</script>
+					</div>
 
         <footer>
     <div class="container">
-    <div class="row">
-        <div class="span6">
-        <div id="copyleft">
-
-        </div>
-        </div>
-        <div class="span6">
-        <div id="copyright">
-
-        </div>
-        </div>
-    </div>
-    </div>
-</footer>
-        <a id="back-to-top" href="#" class="btn btn-inverse btn-large" role="button" title="Ir arriba" style="display: none;">
-            <i class="fa fa-chevron-up" aria-hidden="true"></i>
-        </a>
-
-
-<div id="ui-datepicker-div" class="ui-datepicker ui-widget ui-widget-content ui-helper-clearfix ui-corner-all"></div>"
-`;
-
-exports[`horariosPage.init missing cursada elements 1`] = `
-"        <div class="brand-nav">
-    <div class="container">
-        <div class="row-fluid">
-            <div class="span3">
-                <a class="brand" href="https://guarani.frba.utn.edu.ar/autogestion/grado/inicio_alumno"><img src="/autogestion/grado/_comp/utn/img/logo-transparente.png"></a>
-            </div>
-
-            <div class="span9">
-                                    <div class="row-fluid"><span class="powered-by-utnba-helper"></span>
-                        <div class="span12">
-                            <div class="navbar user-navbar clearfix">
-                                <ul class="nav pull-right">
-
-                                    <li class="notificaciones">
-                                        <a href="https://guarani.frba.utn.edu.ar/autogestion/grado/mensajes">
-                                            <i class="icon-envelope"></i>
-                                            <span id="js-cant-mensajes" class="badge">0</span>
-                                        </a>
-                                    </li>
-                                    <li class="dropdown">
-                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-user"></i> PABLO MATIAS GOMEZ <b class="caret"></b></a>
-                                        <ul class="dropdown-menu">
-                                            <li><a href="https://guarani.frba.utn.edu.ar/autogestion/grado/configuracion"><i class="icon-cog"></i> Configuración</a></li>
-                                            <li><a href="https://guarani.frba.utn.edu.ar/autogestion/grado/acceso/logout" class="no-ajax"><i class="icon-off"></i> Cerrar sesión</a></li>
-                                        </ul>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-
-                                            <div class="row-fluid">
-                            <div class="span12">
-                                <div class="form-horizontal carreras">
-                                    <div class="pull-right control-group">
-                                                                                                                                <span>Propuesta:</span>
-                                            <span class="control-label-carrera ">Ingeniería en Sistemas de Información</span>
-                                                                                <div class="legajo-container">
-                                            <span> Legajo:</span>
-                                            <span class="control-label-carrera legajo-numero">149.388-7</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                                                </div>
-        </div>
-    </div>
-</div>
-<div class="navbar main-nav">
-    <div class="navbar-inner">
-        <div class="container">
-            <div role="navigation">
-                                    <ul id="js-nav" class="nav">
-
-
-
-                                <li id="cursada" class="js-menuitem-root">
-                                    <a href="https://guarani.frba.utn.edu.ar/autogestion/grado/cursada">Preinscripción a materias</a>
-                                </li>
-
-
-                                <li id="examen" class="js-menuitem-root">
-                                    <a href="https://guarani.frba.utn.edu.ar/autogestion/grado/examen">Inscripción a Exámenes</a>
-                                </li>
-
-
-                                <li class="dropdown js-menuitem-root menu-item-seleccionado">
-
-
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Reportes <b class="caret"></b></a>
-
-    <ul class="dropdown-menu">
-
-
-
-                <li id="actuacion_provisoria"><a href="https://guarani.frba.utn.edu.ar/autogestion/grado/actuacion_provisoria">Actuación provisoria</a></li>
-
-
-
-
-                <li id="calendario"><a href="https://guarani.frba.utn.edu.ar/autogestion/grado/calendario">Agenda</a></li>
-
-
-
-
-                <li id="encuestas_kolla"><a href="https://guarani.frba.utn.edu.ar/autogestion/grado/encuestas_kolla">Encuestas Pendientes</a></li>
-
-
-
-
-                <li id="encuestas_respondidas"><a href="https://guarani.frba.utn.edu.ar/autogestion/grado/encuestas_respondidas">Encuestas respondidas</a></li>
-
-
-
-
-                <li id="historia_academica"><a href="https://guarani.frba.utn.edu.ar/autogestion/grado/historia_academica">Historia académica</a></li>
-
-
-
-
-                <li id="reporte_inasistencias"><a href="https://guarani.frba.utn.edu.ar/autogestion/grado/reporte_inasistencias">Inasistencias</a></li>
-
-
-
-
-                <li id="inscripciones"><a href="https://guarani.frba.utn.edu.ar/autogestion/grado/inscripciones">Mis inscripciones</a></li>
-
-
-
-
-                <li id="plan_estudio"><a href="https://guarani.frba.utn.edu.ar/autogestion/grado/plan_estudio">Plan de estudios</a></li>
-
-
-
-
-                <li id="tramites_mesa_entrada"><a href="https://guarani.frba.utn.edu.ar/autogestion/grado/tramites_mesa_entrada">Trámites Mesa de Entrada</a></li>
-
-
-
-
-    </ul>
-
-
-
-                                </li>
-
-
-                                <li class="dropdown js-menuitem-root">
-
-
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Trámites <b class="caret"></b></a>
-
-    <ul class="dropdown-menu">
-
-
-
-                <li id="datos_censales"><a class="no-ajax" href="https://guarani.frba.utn.edu.ar/autogestion/grado/datos_censales">Mis datos personales</a></li>
-
-
-
-
-                <li id="solicitudes"><a href="https://guarani.frba.utn.edu.ar/autogestion/grado/solicitudes">Solicitar Constancias y Certificados</a></li>
-
-
-
-
-    </ul>
-
-
-
-                                </li>
-
-
-                                <li id="noticias" class="js-menuitem-root">
-                                    <a href="https://guarani.frba.utn.edu.ar/autogestion/grado/noticias">Noticias</a>
-                                </li>
-
-
-                                <li id="calendario_academico" class="js-menuitem-root">
-                                    <a href="https://guarani.frba.utn.edu.ar/autogestion/grado/calendario_academico">Calendario Académico</a>
-                                </li>
-
-
-                                            <li class="dropdown js-menuitem-root">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">UTN.BA Helper <b class="caret"></b></a>
-                <ul class="dropdown-menu"><li><a class="no-ajax" href="/autogestion/grado/?customPage=Buscar%20cursos">Buscar cursos</a></li><li><a class="no-ajax" href="/autogestion/grado/?customPage=Buscar%20docentes">Buscar docentes</a></li><li><a class="no-ajax" href="/autogestion/grado/?customPage=Seguimiento%20de%20Plan">Seguimiento de Plan</a></li></ul></li></ul>
-
-                                    <ul id="js-selector-perfiles" class="nav pull-right perfiles">
-                        <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="js-texto-perfil">Perfil: Alumno</span> <b class="caret"></b></a>
-                            <ul class="dropdown-menu" id="js-select-perfil">
-                                                                                                            <li data-perfil="Alumno" data-perfilnombre="Alumno" class="js-seleccion-perfil js-perfil-item">
-                                            <a href="#"><i class="icon-ok"></i> Alumno</a>
-                                        </li>
-                                                                                                </ul>
-                        </li>
-                    </ul>
-                            </div><!--/.nav-collapse -->
-        </div><!-- container-fluid -->
-    </div><!-- navbar-inner -->
-</div><!-- navbar -->
-
-<!-- https://gist.github.com/tentacode/3892186 -->
-
-        <div id="loading" class="" style="display: none;"></div>
-        <div id="loading_top" style="top: 0px; left: 917px; display: none;" class="">Cargando...</div>
-        <div id="_msg_placeholder" style="display:none;" class="msg_placeholder alert-success"></div>
-        <div id="kernel_contenido" class="container">
-        <div id="agenda_utn" aria-live="polite" class="pagelet" style="display: block; clear: both;">
-
-
-    <h2 id="titulo">Horarios de cursadas</h2>
-
-
-
-    <div class="column-flex">
-                <div id="agenda-holder" class="agenda row-flex"><div class="col-flex dia-descr-holder"><div class="dia-descr std-height top-left-border" id="dia-lunes">Lunes</div><div class="dia-descr std-height top-left-border" id="dia-martes">Martes</div><div class="dia-descr std-height top-left-border" id="dia-miercoles">Miércoles</div><div class="dia-descr std-height top-left-border" id="dia-jueves">Jueves</div><div class="dia-descr std-height top-left-border" id="dia-viernes">Viernes</div><div class="dia-descr std-height top-left-border" id="dia-sabado">Sábado</div></div><div class="row-flex" id="turnos-holder"><div class="agenda-turno" id="turno-[object Object]"><div class="turno-nombre">Mañana</div><div class="row-flex"><div class="hora-descr std-height top-left-border" data-toggle="tooltip" data-placement="bottom" title="07:45 a 08:30">0</div><div class="hora-descr std-height top-left-border" data-toggle="tooltip" data-placement="bottom" title="08:30 a 09:15">1</div><div class="hora-descr std-height top-left-border" data-toggle="tooltip" data-placement="bottom" title="09:15 a 10:00">2</div><div class="hora-descr std-height top-left-border" data-toggle="tooltip" data-placement="bottom" title="10:15 a 11:00">3</div><div class="hora-descr std-height top-left-border" data-toggle="tooltip" data-placement="bottom" title="11:00 a 11:45">4</div><div class="hora-descr std-height top-left-border" data-toggle="tooltip" data-placement="bottom" title="11:45 a 12:30">5</div><div class="hora-descr std-height top-left-border" data-toggle="tooltip" data-placement="bottom" title="12:30 a 13:15">6</div></div><div class="row-flex"><div class="agenda-hora std-height top-left-border materia-color-6" id="lunes-1"></div><div class="agenda-hora std-height top-left-border materia-color-6" id="lunes-2"></div><div class="agenda-hora std-height top-left-border materia-color-6" id="lunes-3"></div><div class="agenda-hora std-height top-left-border materia-color-4" id="lunes-4"></div><div class="agenda-hora std-height top-left-border materia-color-4" id="lunes-5"></div><div class="agenda-hora std-height top-left-border materia-color-4" id="lunes-6"></div><div class="agenda-hora std-height top-left-border" id="lunes-7"></div></div><div class="row-flex"><div class="agenda-hora std-height top-left-border" id="martes-1"></div><div class="agenda-hora std-height top-left-border materia-color-7" id="martes-2"></div><div class="agenda-hora std-height top-left-border materia-color-7" id="martes-3"></div><div class="agenda-hora std-height top-left-border materia-color-7" id="martes-4"></div><div class="agenda-hora std-height top-left-border materia-color-7" id="martes-5"></div><div class="agenda-hora std-height top-left-border materia-color-7" id="martes-6"></div><div class="agenda-hora std-height top-left-border" id="martes-7"></div></div><div class="row-flex"><div class="agenda-hora std-height top-left-border" id="miercoles-1"></div><div class="agenda-hora std-height top-left-border" id="miercoles-2"></div><div class="agenda-hora std-height top-left-border" id="miercoles-3"></div><div class="agenda-hora std-height top-left-border" id="miercoles-4"></div><div class="agenda-hora std-height top-left-border materia-color-5" id="miercoles-5"></div><div class="agenda-hora std-height top-left-border materia-color-5" id="miercoles-6"></div><div class="agenda-hora std-height top-left-border materia-color-5" id="miercoles-7"></div></div><div class="row-flex"><div class="agenda-hora std-height top-left-border" id="jueves-1"></div><div class="agenda-hora std-height top-left-border materia-color-3" id="jueves-2"></div><div class="agenda-hora std-height top-left-border materia-color-3" id="jueves-3"></div><div class="agenda-hora std-height top-left-border materia-color-3" id="jueves-4"></div><div class="agenda-hora std-height top-left-border materia-color-3" id="jueves-5"></div><div class="agenda-hora std-height top-left-border materia-color-3" id="jueves-6"></div><div class="agenda-hora std-height top-left-border" id="jueves-7"></div></div><div class="row-flex"><div class="agenda-hora std-height top-left-border" id="viernes-1"></div><div class="agenda-hora std-height top-left-border materia-color-8" id="viernes-2"></div><div class="agenda-hora std-height top-left-border materia-color-8" id="viernes-3"></div><div class="agenda-hora std-height top-left-border materia-color-8" id="viernes-4"></div><div class="agenda-hora std-height top-left-border materia-color-8" id="viernes-5"></div><div class="agenda-hora std-height top-left-border materia-color-8" id="viernes-6"></div><div class="agenda-hora std-height top-left-border" id="viernes-7"></div></div><div class="row-flex"><div class="agenda-hora std-height top-left-border" id="sabado-1"></div><div class="agenda-hora std-height top-left-border materia-color-1" id="sabado-2"></div><div class="agenda-hora std-height top-left-border materia-color-1" id="sabado-3"></div><div class="agenda-hora std-height top-left-border materia-color-1" id="sabado-4"></div><div class="agenda-hora std-height top-left-border materia-color-1" id="sabado-5"></div><div class="agenda-hora std-height top-left-border materia-color-1" id="sabado-6"></div><div class="agenda-hora std-height top-left-border" id="sabado-7"></div></div></div><div class="agenda-turno" id="turno-[object Object]"><div class="turno-nombre">Tarde</div><div class="row-flex"><div class="hora-descr std-height top-left-border" data-toggle="tooltip" data-placement="bottom" title="13:30 a 14:15">0</div><div class="hora-descr std-height top-left-border" data-toggle="tooltip" data-placement="bottom" title="14:15 a 15:00">1</div><div class="hora-descr std-height top-left-border" data-toggle="tooltip" data-placement="bottom" title="15:00 a 15:45">2</div><div class="hora-descr std-height top-left-border" data-toggle="tooltip" data-placement="bottom" title="16:00 a 16:45">3</div><div class="hora-descr std-height top-left-border" data-toggle="tooltip" data-placement="bottom" title="16:45 a 17:30">4</div><div class="hora-descr std-height top-left-border" data-toggle="tooltip" data-placement="bottom" title="17:30 a 18:15">5</div><div class="hora-descr std-height top-left-border" data-toggle="tooltip" data-placement="bottom" title="18:15 a 19:00">6</div></div><div class="row-flex"><div class="agenda-hora std-height top-left-border" id="lunes-8"></div><div class="agenda-hora std-height top-left-border" id="lunes-9"></div><div class="agenda-hora std-height top-left-border" id="lunes-10"></div><div class="agenda-hora std-height top-left-border" id="lunes-11"></div><div class="agenda-hora std-height top-left-border" id="lunes-12"></div><div class="agenda-hora std-height top-left-border" id="lunes-13"></div><div class="agenda-hora std-height top-left-border" id="lunes-14"></div></div><div class="row-flex"><div class="agenda-hora std-height top-left-border" id="martes-8"></div><div class="agenda-hora std-height top-left-border materia-color-2" id="martes-9"></div><div class="agenda-hora std-height top-left-border materia-color-2" id="martes-10"></div><div class="agenda-hora std-height top-left-border materia-color-2" id="martes-11"></div><div class="agenda-hora std-height top-left-border materia-color-2" id="martes-12"></div><div class="agenda-hora std-height top-left-border" id="martes-13"></div><div class="agenda-hora std-height top-left-border" id="martes-14"></div></div><div class="row-flex"><div class="agenda-hora std-height top-left-border materia-color-5" id="miercoles-8"></div><div class="agenda-hora std-height top-left-border" id="miercoles-9"></div><div class="agenda-hora std-height top-left-border" id="miercoles-10"></div><div class="agenda-hora std-height top-left-border" id="miercoles-11"></div><div class="agenda-hora std-height top-left-border" id="miercoles-12"></div><div class="agenda-hora std-height top-left-border" id="miercoles-13"></div><div class="agenda-hora std-height top-left-border" id="miercoles-14"></div></div><div class="row-flex"><div class="agenda-hora std-height top-left-border" id="jueves-8"></div><div class="agenda-hora std-height top-left-border" id="jueves-9"></div><div class="agenda-hora std-height top-left-border" id="jueves-10"></div><div class="agenda-hora std-height top-left-border" id="jueves-11"></div><div class="agenda-hora std-height top-left-border" id="jueves-12"></div><div class="agenda-hora std-height top-left-border" id="jueves-13"></div><div class="agenda-hora std-height top-left-border" id="jueves-14"></div></div><div class="row-flex"><div class="agenda-hora std-height top-left-border" id="viernes-8"></div><div class="agenda-hora std-height top-left-border" id="viernes-9"></div><div class="agenda-hora std-height top-left-border" id="viernes-10"></div><div class="agenda-hora std-height top-left-border" id="viernes-11"></div><div class="agenda-hora std-height top-left-border" id="viernes-12"></div><div class="agenda-hora std-height top-left-border" id="viernes-13"></div><div class="agenda-hora std-height top-left-border" id="viernes-14"></div></div><div class="row-flex"><div class="agenda-hora std-height top-left-border" id="sabado-8"></div><div class="agenda-hora std-height top-left-border" id="sabado-9"></div><div class="agenda-hora std-height top-left-border" id="sabado-10"></div><div class="agenda-hora std-height top-left-border" id="sabado-11"></div><div class="agenda-hora std-height top-left-border" id="sabado-12"></div><div class="agenda-hora std-height top-left-border" id="sabado-13"></div><div class="agenda-hora std-height top-left-border" id="sabado-14"></div></div></div><div class="agenda-turno" id="turno-[object Object]"><div class="turno-nombre">Noche</div><div class="row-flex"><div class="hora-descr std-height top-left-border" data-toggle="tooltip" data-placement="bottom" title="18:15 a 19:00">0</div><div class="hora-descr std-height top-left-border" data-toggle="tooltip" data-placement="bottom" title="19:00 a 19:45">1</div><div class="hora-descr std-height top-left-border" data-toggle="tooltip" data-placement="bottom" title="19:45 a 20:30">2</div><div class="hora-descr std-height top-left-border" data-toggle="tooltip" data-placement="bottom" title="20:45 a 21:30">3</div><div class="hora-descr std-height top-left-border" data-toggle="tooltip" data-placement="bottom" title="21:30 a 22:15">4</div><div class="hora-descr std-height top-left-border" data-toggle="tooltip" data-placement="bottom" title="22:15 a 23:00">5</div></div><div class="row-flex"><div class="agenda-hora std-height top-left-border" id="lunes-15"></div><div class="agenda-hora std-height top-left-border" id="lunes-16"></div><div class="agenda-hora std-height top-left-border" id="lunes-17"></div><div class="agenda-hora std-height top-left-border" id="lunes-18"></div><div class="agenda-hora std-height top-left-border" id="lunes-19"></div><div class="agenda-hora std-height top-left-border" id="lunes-20"></div></div><div class="row-flex"><div class="agenda-hora std-height top-left-border" id="martes-15"></div><div class="agenda-hora std-height top-left-border" id="martes-16"></div><div class="agenda-hora std-height top-left-border" id="martes-17"></div><div class="agenda-hora std-height top-left-border" id="martes-18"></div><div class="agenda-hora std-height top-left-border" id="martes-19"></div><div class="agenda-hora std-height top-left-border" id="martes-20"></div></div><div class="row-flex"><div class="agenda-hora std-height top-left-border" id="miercoles-15"></div><div class="agenda-hora std-height top-left-border" id="miercoles-16"></div><div class="agenda-hora std-height top-left-border" id="miercoles-17"></div><div class="agenda-hora std-height top-left-border" id="miercoles-18"></div><div class="agenda-hora std-height top-left-border" id="miercoles-19"></div><div class="agenda-hora std-height top-left-border" id="miercoles-20"></div></div><div class="row-flex"><div class="agenda-hora std-height top-left-border" id="jueves-15"></div><div class="agenda-hora std-height top-left-border" id="jueves-16"></div><div class="agenda-hora std-height top-left-border" id="jueves-17"></div><div class="agenda-hora std-height top-left-border" id="jueves-18"></div><div class="agenda-hora std-height top-left-border" id="jueves-19"></div><div class="agenda-hora std-height top-left-border" id="jueves-20"></div></div><div class="row-flex"><div class="agenda-hora std-height top-left-border" id="viernes-15"></div><div class="agenda-hora std-height top-left-border" id="viernes-16"></div><div class="agenda-hora std-height top-left-border" id="viernes-17"></div><div class="agenda-hora std-height top-left-border" id="viernes-18"></div><div class="agenda-hora std-height top-left-border" id="viernes-19"></div><div class="agenda-hora std-height top-left-border" id="viernes-20"></div></div><div class="row-flex"><div class="agenda-hora std-height top-left-border" id="sabado-15"></div><div class="agenda-hora std-height top-left-border" id="sabado-16"></div><div class="agenda-hora std-height top-left-border" id="sabado-17"></div><div class="agenda-hora std-height top-left-border" id="sabado-18"></div><div class="agenda-hora std-height top-left-border" id="sabado-19"></div><div class="agenda-hora std-height top-left-border" id="sabado-20"></div></div></div></div></div>
-
-            </div>
-
-    <div id="comisiones-holder" class="row-flex">
-        <!-- No cursada elements -->
-    </div>
-
-            <div>
-            <a id="btn-imprimir-comprobante-cursada" class="btn no-ajax descargar_cert" href="https://guarani.frba.utn.edu.ar/autogestion/grado/cursada/descargar_comprobante">
-                Imprimir comprobante de inscripción a materias
-                <span style="width: 20px; height: 20px" class="g3w-icono-pdf"></span>
-            </a>
-        </div>
-
-    <hr>
-    </div>
-
-<script type="text/javascript">kernel.renderer.on_arrival({"css":["\\/autogestion\\/grado\\/_comp\\/utn\\/operaciones\\/_comun\\/pagelets\\/agenda_utn\\/default.css"],"js":["\\/autogestion\\/grado\\/_comp\\/utn\\/operaciones\\/_comun\\/pagelets\\/agenda_utn\\/pagelet_agenda_utn.js"],"op":"_comun\\/pagelets","info":{"id":"agenda_utn","visible":"1","estado":"inicial","mensajes":[],"tdh":{"turnos":{"manana":{"horarios":[{"hora_catedra":"1","hora_descr":"0","hora_reloj_fin":"08:30","hora_reloj_inicio":"07:45","turno":"Ma\\u00f1ana"},{"hora_catedra":"2","hora_descr":"1","hora_reloj_fin":"09:15","hora_reloj_inicio":"08:30","turno":"Ma\\u00f1ana"},{"hora_catedra":"3","hora_descr":"2","hora_reloj_fin":"10:00","hora_reloj_inicio":"09:15","turno":"Ma\\u00f1ana"},{"hora_catedra":"4","hora_descr":"3","hora_reloj_fin":"11:00","hora_reloj_inicio":"10:15","turno":"Ma\\u00f1ana"},{"hora_catedra":"5","hora_descr":"4","hora_reloj_fin":"11:45","hora_reloj_inicio":"11:00","turno":"Ma\\u00f1ana"},{"hora_catedra":"6","hora_descr":"5","hora_reloj_fin":"12:30","hora_reloj_inicio":"11:45","turno":"Ma\\u00f1ana"},{"hora_catedra":"7","hora_descr":"6","hora_reloj_fin":"13:15","hora_reloj_inicio":"12:30","turno":"Ma\\u00f1ana"}],"nombre":"Ma\\u00f1ana","sigla":"m"},"tarde":{"horarios":[{"hora_catedra":"8","hora_descr":"0","hora_reloj_fin":"14:15","hora_reloj_inicio":"13:30","turno":"Tarde"},{"hora_catedra":"9","hora_descr":"1","hora_reloj_fin":"15:00","hora_reloj_inicio":"14:15","turno":"Tarde"},{"hora_catedra":"10","hora_descr":"2","hora_reloj_fin":"15:45","hora_reloj_inicio":"15:00","turno":"Tarde"},{"hora_catedra":"11","hora_descr":"3","hora_reloj_fin":"16:45","hora_reloj_inicio":"16:00","turno":"Tarde"},{"hora_catedra":"12","hora_descr":"4","hora_reloj_fin":"17:30","hora_reloj_inicio":"16:45","turno":"Tarde"},{"hora_catedra":"13","hora_descr":"5","hora_reloj_fin":"18:15","hora_reloj_inicio":"17:30","turno":"Tarde"},{"hora_catedra":"14","hora_descr":"6","hora_reloj_fin":"19:00","hora_reloj_inicio":"18:15","turno":"Tarde"}],"nombre":"Tarde","sigla":"t"},"noche":{"horarios":[{"hora_catedra":"15","hora_descr":"0","hora_reloj_fin":"19:00","hora_reloj_inicio":"18:15","turno":"Noche"},{"hora_catedra":"16","hora_descr":"1","hora_reloj_fin":"19:45","hora_reloj_inicio":"19:00","turno":"Noche"},{"hora_catedra":"17","hora_descr":"2","hora_reloj_fin":"20:30","hora_reloj_inicio":"19:45","turno":"Noche"},{"hora_catedra":"18","hora_descr":"3","hora_reloj_fin":"21:30","hora_reloj_inicio":"20:45","turno":"Noche"},{"hora_catedra":"19","hora_descr":"4","hora_reloj_fin":"22:15","hora_reloj_inicio":"21:30","turno":"Noche"},{"hora_catedra":"20","hora_descr":"5","hora_reloj_fin":"23:00","hora_reloj_inicio":"22:15","turno":"Noche"}],"nombre":"Noche","sigla":"n"}},"dias":[{"nombre":"Lunes","id_prefix":"lunes"},{"nombre":"Martes","id_prefix":"martes"},{"nombre":"Mi\\u00e9rcoles","id_prefix":"miercoles"},{"nombre":"Jueves","id_prefix":"jueves"},{"nombre":"Viernes","id_prefix":"viernes"},{"nombre":"S\\u00e1bado","id_prefix":"sabado"}],"ultima_hora_catedra":"20"},"tipo":"completa","agenda":{"comisiones":{"e9a65d694a31c36e45aabd8328252118e983b389":{"comision":"53309","comision_nombre":"I1022","periodo":"35795","periodo_nombre":"Grado Anual 2025","actividad_nombre":"F\\u00edsica I","actividad_codigo":"950605","actividad":"2618","ubicacion_nombre":"Sede Campus","ubicacion":"2","horario":"Sab 08:30 a 12:30","horas_catedra":[{"dia_semana":"Sabado","hora_catedra_inicio":"2","hora_catedra_fin":"6"}]},"51594eefdd010cd83640ff6ca97c2dab693bacd3":{"comision":"55874","comision_nombre":"K1545","periodo":"35825","periodo_nombre":"Grado Segundo Cuatrimestre 2025","actividad_nombre":"Ingenier\\u00eda y Sociedad","actividad_codigo":"951604","actividad":"2804","ubicacion_nombre":"Sede Campus","ubicacion":"2","horario":"Mar 14:15 a 17:30","horas_catedra":[{"dia_semana":"Martes","hora_catedra_inicio":"9","hora_catedra_fin":"12"}]},"864b4acf24e9871cd04da29cc3e9e4e4b2046e5b":{"comision":"53120","comision_nombre":"K1030","periodo":"35795","periodo_nombre":"Grado Anual 2025","actividad_nombre":"Algoritmos y Estructura de Datos","actividad_codigo":"082021","actividad":"87","ubicacion_nombre":"Sede Campus","ubicacion":"2","horario":"Jue 08:30 a 12:30","horas_catedra":[{"dia_semana":"Jueves","hora_catedra_inicio":"2","hora_catedra_fin":"6"}]},"a616de23efef59688b075545d6ec1066afe88b3f":{"comision":"53857","comision_nombre":"K1030","periodo":"35795","periodo_nombre":"Grado Anual 2025","actividad_nombre":"L\\u00f3gica y Estructuras Discretas","actividad_codigo":"232010","actividad":"5764","ubicacion_nombre":"Sede Medrano","ubicacion":"1","horario":"Lun 10:15 a 12:30","horas_catedra":[{"dia_semana":"Lunes","hora_catedra_inicio":"4","hora_catedra_fin":"6"}]},"a96f20c25b37435ebbb17df973115756bd0bfabc":{"comision":"53668","comision_nombre":"K1030","periodo":"35795","periodo_nombre":"Grado Anual 2025","actividad_nombre":"Arquitectura de Computadores","actividad_codigo":"082022","actividad":"88","ubicacion_nombre":"Sede Medrano","ubicacion":"1","horario":"Mie 11:00 a 13:15 - Mie 13:30 a 14:15","horas_catedra":[{"dia_semana":"Miercoles","hora_catedra_inicio":"5","hora_catedra_fin":"7"},{"dia_semana":"Miercoles","hora_catedra_inicio":"8","hora_catedra_fin":"8"}]},"40dc45d25f6a368ab332def488e9bf0472439de0":{"comision":"54021","comision_nombre":"K1030","periodo":"35795","periodo_nombre":"Grado Anual 2025","actividad_nombre":"Sistemas y Procesos de Negocio","actividad_codigo":"232011","actividad":"5765","ubicacion_nombre":"Sede Medrano","ubicacion":"1","horario":"Lun 07:45 a 10:00","horas_catedra":[{"dia_semana":"Lunes","hora_catedra_inicio":"1","hora_catedra_fin":"3"}]},"356ea789bc535c3d54244b492cfb766ad4f68015":{"comision":"53185","comision_nombre":"O1021","periodo":"35795","periodo_nombre":"Grado Anual 2025","actividad_nombre":"An\\u00e1lisis Matem\\u00e1tico I","actividad_codigo":"950702","actividad":"2622","ubicacion_nombre":"Sede Campus","ubicacion":"2","horario":"Mar 08:30 a 12:30","horas_catedra":[{"dia_semana":"Martes","hora_catedra_inicio":"2","hora_catedra_fin":"6"}]},"e27f3ee5b3bb045e19a57d05eed0c71d9b3f91ec":{"comision":"53086","comision_nombre":"O1021","periodo":"35795","periodo_nombre":"Grado Anual 2025","actividad_nombre":"\\u00c1lgebra y Geometr\\u00eda Anal\\u00edtica","actividad_codigo":"950701","actividad":"2621","ubicacion_nombre":"Sede Campus","ubicacion":"2","horario":"Vie 08:30 a 12:30","horas_catedra":[{"dia_semana":"Viernes","hora_catedra_inicio":"2","hora_catedra_fin":"6"}]}},"cursadas":["e9a65d694a31c36e45aabd8328252118e983b389","51594eefdd010cd83640ff6ca97c2dab693bacd3","864b4acf24e9871cd04da29cc3e9e4e4b2046e5b","a616de23efef59688b075545d6ec1066afe88b3f","a96f20c25b37435ebbb17df973115756bd0bfabc","40dc45d25f6a368ab332def488e9bf0472439de0","356ea789bc535c3d54244b492cfb766ad4f68015","e27f3ee5b3bb045e19a57d05eed0c71d9b3f91ec"],"alternativas":[]},"alternativa":"1","cantidad_alternativas":"3","url_info_comision":"https:\\/\\/guarani.frba.utn.edu.ar\\/autogestion\\/grado\\/cursada\\/info_comision"},"content":"            \\n    \\n        \\n    <h2 id=\\"titulo\\">Horarios de cursadas<\\/h2>\\n\\n    \\n    \\n    <div class=\\"column-flex\\">\\n                <div id=\\"agenda-holder\\" class=\\"agenda row-flex\\"><\\/div>\\n\\n            <\\/div>\\n\\n    <div id=\\"comisiones-holder\\" class=\\"row-flex\\"><\\/div>\\n\\n            <div>\\n            <a id=\\"btn-imprimir-comprobante-cursada\\"\\n               class=\\"btn no-ajax descargar_cert\\"\\n               href=\\"https:\\/\\/guarani.frba.utn.edu.ar\\/autogestion\\/grado\\/cursada\\/descargar_comprobante\\">\\n                Imprimir comprobante de inscripci\\u00f3n a materias\\n                <span style=\\"width: 20px; height: 20px\\" class=\\"g3w-icono-pdf\\"><\\/span>\\n            <\\/a>\\n        <\\/div>\\n    \\n    <hr>\\n    ","clase_js":"agenda_utn","tiene_archivo_js":"1"});</script><script type="text/javascript">kernel_config.pagelet_count = 1</script></div>
-
-        <footer>
-    <div class="container">
-    <div class="row">
-        <div class="span6">
-        <div id="copyleft">
-
-        </div>
-        </div>
-        <div class="span6">
-        <div id="copyright">
-
-        </div>
-        </div>
-    </div>
+	<div class="row">
+	    <div class="span6">
+		<div id="copyleft">
+
+		</div>
+	    </div>
+	    <div class="span6">
+		<div id="copyright">
+
+		</div>
+	    </div>
+	</div>
     </div>
 </footer>
-        <a id="back-to-top" href="#" class="btn btn-inverse btn-large" role="button" title="Ir arriba" style="display: none;">
-            <i class="fa fa-chevron-up" aria-hidden="true"></i>
-        </a>
+		<a id="back-to-top" href="#" class="btn btn-inverse btn-large" role="button" title="Ir arriba">
+			<i class="fa fa-chevron-up" aria-hidden="true"></i>
+		</a>
 
 
-<div id="ui-datepicker-div" class="ui-datepicker ui-widget ui-widget-content ui-helper-clearfix ui-corner-all"></div>"
+"
 `;
 
 exports[`horariosPage.init successful parsing 1`] = `
-"        <div class="brand-nav">
+"
+        <div class="brand-nav">
     <div class="container">
         <div class="row-fluid">
             <div class="span3">
@@ -493,7 +248,7 @@ exports[`horariosPage.init successful parsing 1`] = `
             </div>
 
             <div class="span9">
-                                    <div class="row-fluid"><span class="powered-by-utnba-helper"></span>
+                                    <div class="row-fluid">
                         <div class="span12">
                             <div class="navbar user-navbar clearfix">
                                 <ul class="nav pull-right">
@@ -501,7 +256,9 @@ exports[`horariosPage.init successful parsing 1`] = `
                                     <li class="notificaciones">
                                         <a href="https://guarani.frba.utn.edu.ar/autogestion/grado/mensajes">
                                             <i class="icon-envelope"></i>
-                                            <span id="js-cant-mensajes" class="badge">0</span>
+                                            <span id="js-cant-mensajes" class="badge ">
+											0
+										</span>
                                         </a>
                                     </li>
                                     <li class="dropdown">
@@ -542,12 +299,12 @@ exports[`horariosPage.init successful parsing 1`] = `
 
 
 
-                                <li id="cursada" class="js-menuitem-root">
+                                <li id="cursada" class="js-menuitem-root ">
                                     <a href="https://guarani.frba.utn.edu.ar/autogestion/grado/cursada">Preinscripción a materias</a>
                                 </li>
 
 
-                                <li id="examen" class="js-menuitem-root">
+                                <li id="examen" class="js-menuitem-root ">
                                     <a href="https://guarani.frba.utn.edu.ar/autogestion/grado/examen">Inscripción a Exámenes</a>
                                 </li>
 
@@ -613,7 +370,7 @@ exports[`horariosPage.init successful parsing 1`] = `
                                 </li>
 
 
-                                <li class="dropdown js-menuitem-root">
+                                <li class="dropdown js-menuitem-root ">
 
 
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">Trámites <b class="caret"></b></a>
@@ -639,19 +396,17 @@ exports[`horariosPage.init successful parsing 1`] = `
                                 </li>
 
 
-                                <li id="noticias" class="js-menuitem-root">
+                                <li id="noticias" class="js-menuitem-root ">
                                     <a href="https://guarani.frba.utn.edu.ar/autogestion/grado/noticias">Noticias</a>
                                 </li>
 
 
-                                <li id="calendario_academico" class="js-menuitem-root">
+                                <li id="calendario_academico" class="js-menuitem-root ">
                                     <a href="https://guarani.frba.utn.edu.ar/autogestion/grado/calendario_academico">Calendario Académico</a>
                                 </li>
 
 
-                                            <li class="dropdown js-menuitem-root">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">UTN.BA Helper <b class="caret"></b></a>
-                <ul class="dropdown-menu"><li><a class="no-ajax" href="/autogestion/grado/?customPage=Buscar%20cursos">Buscar cursos</a></li><li><a class="no-ajax" href="/autogestion/grado/?customPage=Buscar%20docentes">Buscar docentes</a></li><li><a class="no-ajax" href="/autogestion/grado/?customPage=Seguimiento%20de%20Plan">Seguimiento de Plan</a></li></ul></li></ul>
+                                            </ul>
 
                                     <ul id="js-selector-perfiles" class="nav pull-right perfiles">
                         <li class="dropdown">
@@ -671,9 +426,10 @@ exports[`horariosPage.init successful parsing 1`] = `
 <!-- https://gist.github.com/tentacode/3892186 -->
 
         <div id="loading" class="" style="display: none;"></div>
-        <div id="loading_top" style="top: 0px; left: 917px; display: none;" class="">Cargando...</div>
-        <div id="_msg_placeholder" style="display:none;" class="msg_placeholder alert-success"></div>
-        <div id="kernel_contenido" class="container">
+		<div id="loading_top" style="top: 0px; left: 675.5px; display: none;" class="">Cargando...</div>
+		<div id="_msg_placeholder" style="display:none;" class="msg_placeholder alert-success"></div>
+		<div id="kernel_contenido" class="container">
+
         <div id="agenda_utn" aria-live="polite" class="pagelet" style="display: block; clear: both;">
 
 
@@ -688,38 +444,34 @@ exports[`horariosPage.init successful parsing 1`] = `
 
     <div id="comisiones-holder" class="row-flex"><div class="cursada"><div class="cursada-header fondo-gris"><div class="cuadrado materia-color-1"></div><h4>Física I</h4></div><div class="cursada-body"><div class="cursada-text"><strong>Horario</strong>: Sab 08:30 a 12:30</div><div class="cursada-text"><strong>Comision</strong>: I1022</div><div class="cursada-text"><strong>Ubicacion</strong>: Sede Campus</div></div></div><div class="cursada"><div class="cursada-header fondo-gris"><div class="cuadrado materia-color-2"></div><h4>Ingeniería y Sociedad</h4></div><div class="cursada-body"><div class="cursada-text"><strong>Horario</strong>: Mar 14:15 a 17:30</div><div class="cursada-text"><strong>Comision</strong>: K1545</div><div class="cursada-text"><strong>Ubicacion</strong>: Sede Campus</div></div></div><div class="cursada"><div class="cursada-header fondo-gris"><div class="cuadrado materia-color-3"></div><h4>Algoritmos y Estructura de Datos</h4></div><div class="cursada-body"><div class="cursada-text"><strong>Horario</strong>: Jue 08:30 a 12:30</div><div class="cursada-text"><strong>Comision</strong>: K1030</div><div class="cursada-text"><strong>Ubicacion</strong>: Sede Campus</div></div></div><div class="cursada"><div class="cursada-header fondo-gris"><div class="cuadrado materia-color-4"></div><h4>Lógica y Estructuras Discretas</h4></div><div class="cursada-body"><div class="cursada-text"><strong>Horario</strong>: Lun 10:15 a 12:30</div><div class="cursada-text"><strong>Comision</strong>: K1030</div><div class="cursada-text"><strong>Ubicacion</strong>: Sede Medrano</div></div></div><div class="cursada"><div class="cursada-header fondo-gris"><div class="cuadrado materia-color-5"></div><h4>Arquitectura de Computadores</h4></div><div class="cursada-body"><div class="cursada-text"><strong>Horario</strong>: Mie 11:00 a 13:15 - Mie 13:30 a 14:15</div><div class="cursada-text"><strong>Comision</strong>: K1030</div><div class="cursada-text"><strong>Ubicacion</strong>: Sede Medrano</div></div></div><div class="cursada"><div class="cursada-header fondo-gris"><div class="cuadrado materia-color-6"></div><h4>Sistemas y Procesos de Negocio</h4></div><div class="cursada-body"><div class="cursada-text"><strong>Horario</strong>: Lun 07:45 a 10:00</div><div class="cursada-text"><strong>Comision</strong>: K1030</div><div class="cursada-text"><strong>Ubicacion</strong>: Sede Medrano</div></div></div><div class="cursada"><div class="cursada-header fondo-gris"><div class="cuadrado materia-color-7"></div><h4>Análisis Matemático I</h4></div><div class="cursada-body"><div class="cursada-text"><strong>Horario</strong>: Mar 08:30 a 12:30</div><div class="cursada-text"><strong>Comision</strong>: O1021</div><div class="cursada-text"><strong>Ubicacion</strong>: Sede Campus</div></div></div><div class="cursada"><div class="cursada-header fondo-gris"><div class="cuadrado materia-color-8"></div><h4>Álgebra y Geometría Analítica</h4></div><div class="cursada-body"><div class="cursada-text"><strong>Horario</strong>: Vie 08:30 a 12:30</div><div class="cursada-text"><strong>Comision</strong>: O1021</div><div class="cursada-text"><strong>Ubicacion</strong>: Sede Campus</div></div></div></div>
 
-            <div>
-            <a id="btn-imprimir-comprobante-cursada" class="btn no-ajax descargar_cert" href="https://guarani.frba.utn.edu.ar/autogestion/grado/cursada/descargar_comprobante">
-                Imprimir comprobante de inscripción a materias
-                <span style="width: 20px; height: 20px" class="g3w-icono-pdf"></span>
-            </a>
-        </div>
 
     <hr>
     </div>
 
-<script type="text/javascript">kernel.renderer.on_arrival({"css":["\\/autogestion\\/grado\\/_comp\\/utn\\/operaciones\\/_comun\\/pagelets\\/agenda_utn\\/default.css"],"js":["\\/autogestion\\/grado\\/_comp\\/utn\\/operaciones\\/_comun\\/pagelets\\/agenda_utn\\/pagelet_agenda_utn.js"],"op":"_comun\\/pagelets","info":{"id":"agenda_utn","visible":"1","estado":"inicial","mensajes":[],"tdh":{"turnos":{"manana":{"horarios":[{"hora_catedra":"1","hora_descr":"0","hora_reloj_fin":"08:30","hora_reloj_inicio":"07:45","turno":"Ma\\u00f1ana"},{"hora_catedra":"2","hora_descr":"1","hora_reloj_fin":"09:15","hora_reloj_inicio":"08:30","turno":"Ma\\u00f1ana"},{"hora_catedra":"3","hora_descr":"2","hora_reloj_fin":"10:00","hora_reloj_inicio":"09:15","turno":"Ma\\u00f1ana"},{"hora_catedra":"4","hora_descr":"3","hora_reloj_fin":"11:00","hora_reloj_inicio":"10:15","turno":"Ma\\u00f1ana"},{"hora_catedra":"5","hora_descr":"4","hora_reloj_fin":"11:45","hora_reloj_inicio":"11:00","turno":"Ma\\u00f1ana"},{"hora_catedra":"6","hora_descr":"5","hora_reloj_fin":"12:30","hora_reloj_inicio":"11:45","turno":"Ma\\u00f1ana"},{"hora_catedra":"7","hora_descr":"6","hora_reloj_fin":"13:15","hora_reloj_inicio":"12:30","turno":"Ma\\u00f1ana"}],"nombre":"Ma\\u00f1ana","sigla":"m"},"tarde":{"horarios":[{"hora_catedra":"8","hora_descr":"0","hora_reloj_fin":"14:15","hora_reloj_inicio":"13:30","turno":"Tarde"},{"hora_catedra":"9","hora_descr":"1","hora_reloj_fin":"15:00","hora_reloj_inicio":"14:15","turno":"Tarde"},{"hora_catedra":"10","hora_descr":"2","hora_reloj_fin":"15:45","hora_reloj_inicio":"15:00","turno":"Tarde"},{"hora_catedra":"11","hora_descr":"3","hora_reloj_fin":"16:45","hora_reloj_inicio":"16:00","turno":"Tarde"},{"hora_catedra":"12","hora_descr":"4","hora_reloj_fin":"17:30","hora_reloj_inicio":"16:45","turno":"Tarde"},{"hora_catedra":"13","hora_descr":"5","hora_reloj_fin":"18:15","hora_reloj_inicio":"17:30","turno":"Tarde"},{"hora_catedra":"14","hora_descr":"6","hora_reloj_fin":"19:00","hora_reloj_inicio":"18:15","turno":"Tarde"}],"nombre":"Tarde","sigla":"t"},"noche":{"horarios":[{"hora_catedra":"15","hora_descr":"0","hora_reloj_fin":"19:00","hora_reloj_inicio":"18:15","turno":"Noche"},{"hora_catedra":"16","hora_descr":"1","hora_reloj_fin":"19:45","hora_reloj_inicio":"19:00","turno":"Noche"},{"hora_catedra":"17","hora_descr":"2","hora_reloj_fin":"20:30","hora_reloj_inicio":"19:45","turno":"Noche"},{"hora_catedra":"18","hora_descr":"3","hora_reloj_fin":"21:30","hora_reloj_inicio":"20:45","turno":"Noche"},{"hora_catedra":"19","hora_descr":"4","hora_reloj_fin":"22:15","hora_reloj_inicio":"21:30","turno":"Noche"},{"hora_catedra":"20","hora_descr":"5","hora_reloj_fin":"23:00","hora_reloj_inicio":"22:15","turno":"Noche"}],"nombre":"Noche","sigla":"n"}},"dias":[{"nombre":"Lunes","id_prefix":"lunes"},{"nombre":"Martes","id_prefix":"martes"},{"nombre":"Mi\\u00e9rcoles","id_prefix":"miercoles"},{"nombre":"Jueves","id_prefix":"jueves"},{"nombre":"Viernes","id_prefix":"viernes"},{"nombre":"S\\u00e1bado","id_prefix":"sabado"}],"ultima_hora_catedra":"20"},"tipo":"completa","agenda":{"comisiones":{"e9a65d694a31c36e45aabd8328252118e983b389":{"comision":"53309","comision_nombre":"I1022","periodo":"35795","periodo_nombre":"Grado Anual 2025","actividad_nombre":"F\\u00edsica I","actividad_codigo":"950605","actividad":"2618","ubicacion_nombre":"Sede Campus","ubicacion":"2","horario":"Sab 08:30 a 12:30","horas_catedra":[{"dia_semana":"Sabado","hora_catedra_inicio":"2","hora_catedra_fin":"6"}]},"51594eefdd010cd83640ff6ca97c2dab693bacd3":{"comision":"55874","comision_nombre":"K1545","periodo":"35825","periodo_nombre":"Grado Segundo Cuatrimestre 2025","actividad_nombre":"Ingenier\\u00eda y Sociedad","actividad_codigo":"951604","actividad":"2804","ubicacion_nombre":"Sede Campus","ubicacion":"2","horario":"Mar 14:15 a 17:30","horas_catedra":[{"dia_semana":"Martes","hora_catedra_inicio":"9","hora_catedra_fin":"12"}]},"864b4acf24e9871cd04da29cc3e9e4e4b2046e5b":{"comision":"53120","comision_nombre":"K1030","periodo":"35795","periodo_nombre":"Grado Anual 2025","actividad_nombre":"Algoritmos y Estructura de Datos","actividad_codigo":"082021","actividad":"87","ubicacion_nombre":"Sede Campus","ubicacion":"2","horario":"Jue 08:30 a 12:30","horas_catedra":[{"dia_semana":"Jueves","hora_catedra_inicio":"2","hora_catedra_fin":"6"}]},"a616de23efef59688b075545d6ec1066afe88b3f":{"comision":"53857","comision_nombre":"K1030","periodo":"35795","periodo_nombre":"Grado Anual 2025","actividad_nombre":"L\\u00f3gica y Estructuras Discretas","actividad_codigo":"232010","actividad":"5764","ubicacion_nombre":"Sede Medrano","ubicacion":"1","horario":"Lun 10:15 a 12:30","horas_catedra":[{"dia_semana":"Lunes","hora_catedra_inicio":"4","hora_catedra_fin":"6"}]},"a96f20c25b37435ebbb17df973115756bd0bfabc":{"comision":"53668","comision_nombre":"K1030","periodo":"35795","periodo_nombre":"Grado Anual 2025","actividad_nombre":"Arquitectura de Computadores","actividad_codigo":"082022","actividad":"88","ubicacion_nombre":"Sede Medrano","ubicacion":"1","horario":"Mie 11:00 a 13:15 - Mie 13:30 a 14:15","horas_catedra":[{"dia_semana":"Miercoles","hora_catedra_inicio":"5","hora_catedra_fin":"7"},{"dia_semana":"Miercoles","hora_catedra_inicio":"8","hora_catedra_fin":"8"}]},"40dc45d25f6a368ab332def488e9bf0472439de0":{"comision":"54021","comision_nombre":"K1030","periodo":"35795","periodo_nombre":"Grado Anual 2025","actividad_nombre":"Sistemas y Procesos de Negocio","actividad_codigo":"232011","actividad":"5765","ubicacion_nombre":"Sede Medrano","ubicacion":"1","horario":"Lun 07:45 a 10:00","horas_catedra":[{"dia_semana":"Lunes","hora_catedra_inicio":"1","hora_catedra_fin":"3"}]},"356ea789bc535c3d54244b492cfb766ad4f68015":{"comision":"53185","comision_nombre":"O1021","periodo":"35795","periodo_nombre":"Grado Anual 2025","actividad_nombre":"An\\u00e1lisis Matem\\u00e1tico I","actividad_codigo":"950702","actividad":"2622","ubicacion_nombre":"Sede Campus","ubicacion":"2","horario":"Mar 08:30 a 12:30","horas_catedra":[{"dia_semana":"Martes","hora_catedra_inicio":"2","hora_catedra_fin":"6"}]},"e27f3ee5b3bb045e19a57d05eed0c71d9b3f91ec":{"comision":"53086","comision_nombre":"O1021","periodo":"35795","periodo_nombre":"Grado Anual 2025","actividad_nombre":"\\u00c1lgebra y Geometr\\u00eda Anal\\u00edtica","actividad_codigo":"950701","actividad":"2621","ubicacion_nombre":"Sede Campus","ubicacion":"2","horario":"Vie 08:30 a 12:30","horas_catedra":[{"dia_semana":"Viernes","hora_catedra_inicio":"2","hora_catedra_fin":"6"}]}},"cursadas":["e9a65d694a31c36e45aabd8328252118e983b389","51594eefdd010cd83640ff6ca97c2dab693bacd3","864b4acf24e9871cd04da29cc3e9e4e4b2046e5b","a616de23efef59688b075545d6ec1066afe88b3f","a96f20c25b37435ebbb17df973115756bd0bfabc","40dc45d25f6a368ab332def488e9bf0472439de0","356ea789bc535c3d54244b492cfb766ad4f68015","e27f3ee5b3bb045e19a57d05eed0c71d9b3f91ec"],"alternativas":[]},"alternativa":"1","cantidad_alternativas":"3","url_info_comision":"https:\\/\\/guarani.frba.utn.edu.ar\\/autogestion\\/grado\\/cursada\\/info_comision"},"content":"            \\n    \\n        \\n    <h2 id=\\"titulo\\">Horarios de cursadas<\\/h2>\\n\\n    \\n    \\n    <div class=\\"column-flex\\">\\n                <div id=\\"agenda-holder\\" class=\\"agenda row-flex\\"><\\/div>\\n\\n            <\\/div>\\n\\n    <div id=\\"comisiones-holder\\" class=\\"row-flex\\"><\\/div>\\n\\n            <div>\\n            <a id=\\"btn-imprimir-comprobante-cursada\\"\\n               class=\\"btn no-ajax descargar_cert\\"\\n               href=\\"https:\\/\\/guarani.frba.utn.edu.ar\\/autogestion\\/grado\\/cursada\\/descargar_comprobante\\">\\n                Imprimir comprobante de inscripci\\u00f3n a materias\\n                <span style=\\"width: 20px; height: 20px\\" class=\\"g3w-icono-pdf\\"><\\/span>\\n            <\\/a>\\n        <\\/div>\\n    \\n    <hr>\\n    ","clase_js":"agenda_utn","tiene_archivo_js":"1"});</script><script type="text/javascript">kernel_config.pagelet_count = 1</script></div>
+
+            <script type="text/javascript">kernel.renderer.on_arrival({"css":["\\/autogestion\\/grado\\/_comp\\/utn\\/operaciones\\/_comun\\/pagelets\\/agenda_utn\\/default.css"],"js":["\\/autogestion\\/grado\\/_comp\\/utn\\/operaciones\\/_comun\\/pagelets\\/agenda_utn\\/pagelet_agenda_utn.js"],"op":"_comun\\/pagelets","info":{"id":"agenda_utn","visible":"1","estado":"inicial","mensajes":[],"tdh":{"turnos":{"manana":{"horarios":[{"hora_catedra":"1","hora_descr":"0","hora_reloj_fin":"08:30","hora_reloj_inicio":"07:45","turno":"Ma\\u00f1ana"},{"hora_catedra":"2","hora_descr":"1","hora_reloj_fin":"09:15","hora_reloj_inicio":"08:30","turno":"Ma\\u00f1ana"},{"hora_catedra":"3","hora_descr":"2","hora_reloj_fin":"10:00","hora_reloj_inicio":"09:15","turno":"Ma\\u00f1ana"},{"hora_catedra":"4","hora_descr":"3","hora_reloj_fin":"11:00","hora_reloj_inicio":"10:15","turno":"Ma\\u00f1ana"},{"hora_catedra":"5","hora_descr":"4","hora_reloj_fin":"11:45","hora_reloj_inicio":"11:00","turno":"Ma\\u00f1ana"},{"hora_catedra":"6","hora_descr":"5","hora_reloj_fin":"12:30","hora_reloj_inicio":"11:45","turno":"Ma\\u00f1ana"},{"hora_catedra":"7","hora_descr":"6","hora_reloj_fin":"13:15","hora_reloj_inicio":"12:30","turno":"Ma\\u00f1ana"}],"nombre":"Ma\\u00f1ana","sigla":"m"},"tarde":{"horarios":[{"hora_catedra":"8","hora_descr":"0","hora_reloj_fin":"14:15","hora_reloj_inicio":"13:30","turno":"Tarde"},{"hora_catedra":"9","hora_descr":"1","hora_reloj_fin":"15:00","hora_reloj_inicio":"14:15","turno":"Tarde"},{"hora_catedra":"10","hora_descr":"2","hora_reloj_fin":"15:45","hora_reloj_inicio":"15:00","turno":"Tarde"},{"hora_catedra":"11","hora_descr":"3","hora_reloj_fin":"16:45","hora_reloj_inicio":"16:00","turno":"Tarde"},{"hora_catedra":"12","hora_descr":"4","hora_reloj_fin":"17:30","hora_reloj_inicio":"16:45","turno":"Tarde"},{"hora_catedra":"13","hora_descr":"5","hora_reloj_fin":"18:15","hora_reloj_inicio":"17:30","turno":"Tarde"},{"hora_catedra":"14","hora_descr":"6","hora_reloj_fin":"19:00","hora_reloj_inicio":"18:15","turno":"Tarde"}],"nombre":"Tarde","sigla":"t"},"noche":{"horarios":[{"hora_catedra":"15","hora_descr":"0","hora_reloj_fin":"19:00","hora_reloj_inicio":"18:15","turno":"Noche"},{"hora_catedra":"16","hora_descr":"1","hora_reloj_fin":"19:45","hora_reloj_inicio":"19:00","turno":"Noche"},{"hora_catedra":"17","hora_descr":"2","hora_reloj_fin":"20:30","hora_reloj_inicio":"19:45","turno":"Noche"},{"hora_catedra":"18","hora_descr":"3","hora_reloj_fin":"21:30","hora_reloj_inicio":"20:45","turno":"Noche"},{"hora_catedra":"19","hora_descr":"4","hora_reloj_fin":"22:15","hora_reloj_inicio":"21:30","turno":"Noche"},{"hora_catedra":"20","hora_descr":"5","hora_reloj_fin":"23:00","hora_reloj_inicio":"22:15","turno":"Noche"}],"nombre":"Noche","sigla":"n"}},"dias":[{"nombre":"Lunes","id_prefix":"lunes"},{"nombre":"Martes","id_prefix":"martes"},{"nombre":"Mi\\u00e9rcoles","id_prefix":"miercoles"},{"nombre":"Jueves","id_prefix":"jueves"},{"nombre":"Viernes","id_prefix":"viernes"},{"nombre":"S\\u00e1bado","id_prefix":"sabado"}],"ultima_hora_catedra":"20"},"tipo":"completa","agenda":{"comisiones":{"e9a65d694a31c36e45aabd8328252118e983b389":{"comision":"53309","comision_nombre":"I1022","periodo":"35795","periodo_nombre":"Grado Anual 2025","actividad_nombre":"F\\u00edsica I","actividad_codigo":"950605","actividad":"2618","ubicacion_nombre":"Sede Campus","ubicacion":"2","horario":"Sab 08:30 a 12:30","horas_catedra":[{"dia_semana":"Sabado","hora_catedra_inicio":"2","hora_catedra_fin":"6"}]},"51594eefdd010cd83640ff6ca97c2dab693bacd3":{"comision":"55874","comision_nombre":"K1545","periodo":"35825","periodo_nombre":"Grado Segundo Cuatrimestre 2025","actividad_nombre":"Ingenier\\u00eda y Sociedad","actividad_codigo":"951604","actividad":"2804","ubicacion_nombre":"Sede Campus","ubicacion":"2","horario":"Mar 14:15 a 17:30","horas_catedra":[{"dia_semana":"Martes","hora_catedra_inicio":"9","hora_catedra_fin":"12"}]},"864b4acf24e9871cd04da29cc3e9e4e4b2046e5b":{"comision":"53120","comision_nombre":"K1030","periodo":"35795","periodo_nombre":"Grado Anual 2025","actividad_nombre":"Algoritmos y Estructura de Datos","actividad_codigo":"082021","actividad":"87","ubicacion_nombre":"Sede Campus","ubicacion":"2","horario":"Jue 08:30 a 12:30","horas_catedra":[{"dia_semana":"Jueves","hora_catedra_inicio":"2","hora_catedra_fin":"6"}]},"a616de23efef59688b075545d6ec1066afe88b3f":{"comision":"53857","comision_nombre":"K1030","periodo":"35795","periodo_nombre":"Grado Anual 2025","actividad_nombre":"L\\u00f3gica y Estructuras Discretas","actividad_codigo":"232010","actividad":"5764","ubicacion_nombre":"Sede Medrano","ubicacion":"1","horario":"Lun 10:15 a 12:30","horas_catedra":[{"dia_semana":"Lunes","hora_catedra_inicio":"4","hora_catedra_fin":"6"}]},"a96f20c25b37435ebbb17df973115756bd0bfabc":{"comision":"53668","comision_nombre":"K1030","periodo":"35795","periodo_nombre":"Grado Anual 2025","actividad_nombre":"Arquitectura de Computadores","actividad_codigo":"082022","actividad":"88","ubicacion_nombre":"Sede Medrano","ubicacion":"1","horario":"Mie 11:00 a 13:15 - Mie 13:30 a 14:15","horas_catedra":[{"dia_semana":"Miercoles","hora_catedra_inicio":"5","hora_catedra_fin":"7"},{"dia_semana":"Miercoles","hora_catedra_inicio":"8","hora_catedra_fin":"8"}]},"40dc45d25f6a368ab332def488e9bf0472439de0":{"comision":"54021","comision_nombre":"K1030","periodo":"35795","periodo_nombre":"Grado Anual 2025","actividad_nombre":"Sistemas y Procesos de Negocio","actividad_codigo":"232011","actividad":"5765","ubicacion_nombre":"Sede Medrano","ubicacion":"1","horario":"Lun 07:45 a 10:00","horas_catedra":[{"dia_semana":"Lunes","hora_catedra_inicio":"1","hora_catedra_fin":"3"}]},"356ea789bc535c3d54244b492cfb766ad4f68015":{"comision":"53185","comision_nombre":"O1021","periodo":"35795","periodo_nombre":"Grado Anual 2025","actividad_nombre":"An\\u00e1lisis Matem\\u00e1tico I","actividad_codigo":"950702","actividad":"2622","ubicacion_nombre":"Sede Campus","ubicacion":"2","horario":"Mar 08:30 a 12:30","horas_catedra":[{"dia_semana":"Martes","hora_catedra_inicio":"2","hora_catedra_fin":"6"}]},"e27f3ee5b3bb045e19a57d05eed0c71d9b3f91ec":{"comision":"53086","comision_nombre":"O1021","periodo":"35795","periodo_nombre":"Grado Anual 2025","actividad_nombre":"\\u00c1lgebra y Geometr\\u00eda Anal\\u00edtica","actividad_codigo":"950701","actividad":"2621","ubicacion_nombre":"Sede Campus","ubicacion":"2","horario":"Vie 08:30 a 12:30","horas_catedra":[{"dia_semana":"Viernes","hora_catedra_inicio":"2","hora_catedra_fin":"6"}]}},"cursadas":["e9a65d694a31c36e45aabd8328252118e983b389","51594eefdd010cd83640ff6ca97c2dab693bacd3","864b4acf24e9871cd04da29cc3e9e4e4b2046e5b","a616de23efef59688b075545d6ec1066afe88b3f","a96f20c25b37435ebbb17df973115756bd0bfabc","40dc45d25f6a368ab332def488e9bf0472439de0","356ea789bc535c3d54244b492cfb766ad4f68015","e27f3ee5b3bb045e19a57d05eed0c71d9b3f91ec"],"alternativas":[]},"alternativa":"1","cantidad_alternativas":"3","url_info_comision":"https:\\/\\/guarani.frba.utn.edu.ar\\/autogestion\\/grado\\/cursada\\/info_comision"},"content":"            \\n    \\n        \\n    <h2 id=\\"titulo\\">Horarios de cursadas<\\/h2>\\n\\n    \\n    \\n    <div class=\\"column-flex\\">\\n                <div id=\\"agenda-holder\\" class=\\"agenda row-flex\\"><\\/div>\\n\\n            <\\/div>\\n\\n    <div id=\\"comisiones-holder\\" class=\\"row-flex\\"><\\/div>\\n\\n            <div>\\n            <a id=\\"btn-imprimir-comprobante-cursada\\"\\n               class=\\"btn no-ajax descargar_cert\\"\\n               href=\\"https:\\/\\/guarani.frba.utn.edu.ar\\/autogestion\\/grado\\/cursada\\/descargar_comprobante\\">\\n                Imprimir comprobante de inscripci\\u00f3n a materias\\n                <span style=\\"width: 20px; height: 20px\\" class=\\"g3w-icono-pdf\\"><\\/span>\\n            <\\/a>\\n        <\\/div>\\n    \\n    <hr>\\n    ","clase_js":"agenda_utn","tiene_archivo_js":"1"});</script><script type="text/javascript">kernel_config.pagelet_count = 1</script></div>
+					
 
         <footer>
     <div class="container">
-    <div class="row">
-        <div class="span6">
-        <div id="copyleft">
+	<div class="row">
+	    <div class="span6">
+		<div id="copyleft">
 
-        </div>
-        </div>
-        <div class="span6">
-        <div id="copyright">
+		</div>
+	    </div>
+	    <div class="span6">
+		<div id="copyright">
 
-        </div>
-        </div>
-    </div>
+		</div>
+	    </div>
+	</div>
     </div>
 </footer>
-        <a id="back-to-top" href="#" class="btn btn-inverse btn-large" role="button" title="Ir arriba" style="display: none;">
-            <i class="fa fa-chevron-up" aria-hidden="true"></i>
-        </a>
+		<a id="back-to-top" href="#" class="btn btn-inverse btn-large" role="button" title="Ir arriba">
+			<i class="fa fa-chevron-up" aria-hidden="true"></i>
+		</a>
 
 
-<div id="ui-datepicker-div" class="ui-datepicker ui-widget ui-widget-content ui-helper-clearfix ui-corner-all"></div>"
+"
 `;
