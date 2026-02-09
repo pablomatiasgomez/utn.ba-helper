@@ -70,6 +70,7 @@ export class PagesDataParser {
 			if (response.cod === "1" && response.titulo === "Grado - Acceso" && response.operacion === "acceso") throw new LoggedOutError();
 			if (response.cod === "-2" && response.cont.url.includes("/autogestion/grado/acceso/login")) throw new LoggedOutError();
 			if (response.cod === "-2" && response.cont.url.includes("/autogestion/grado/inicio_alumno")) throw new RedirectedToHomeError();
+			if (response.cod === "-2" && response.cont.url.includes("/autogestion/grado/zona_comisiones")) throw new ProfileNotHandledError(); // This happens when the user switches profile from "Alumno" to "Docente"
 			if (response.cod === "-1" && response.cont === "error") throw new GuaraniBackendError(response);
 			if (response.cod !== "1") throw new Error(`Invalid ajax contents for url ${cacheKey}. response: ${JSON.stringify(response)}`);
 			return response;

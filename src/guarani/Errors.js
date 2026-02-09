@@ -31,8 +31,17 @@ export class MissingStudentIdError extends Error {
 	}
 }
 
+// ProfileNotHandledError is thrown when the selected profile is one not handled by the extension.
+export class ProfileNotHandledError extends Error {
+	constructor(message, options) {
+		super(message, options);
+		this.name = "ProfileNotHandledError";
+	}
+}
+
+
 // Errors that we don't want to log to our backend
-const IGNORED_ERROR_TYPES = [LoggedOutError, GuaraniBackendError, MissingStudentIdError];
+const IGNORED_ERROR_TYPES = [LoggedOutError, GuaraniBackendError, MissingStudentIdError, ProfileNotHandledError];
 
 /**
  * Checks if the given error or any error in its cause chain is of a type that should be ignored.
