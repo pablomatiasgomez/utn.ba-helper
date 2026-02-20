@@ -7,7 +7,6 @@ export class Store {
 	}
 
 	saveHashedStudentIdToStore(hashedStudentId) {
-		// Some old browsers return undefined instead of Promise... so we return an empty one if that happens.
-		return chrome.storage.sync.set({[HASHED_STUDENT_ID_DATASTORE_KEY]: hashedStudentId}) || Promise.resolve();
+		return chrome.storage.sync.set({[HASHED_STUDENT_ID_DATASTORE_KEY]: hashedStudentId});
 	}
 }
