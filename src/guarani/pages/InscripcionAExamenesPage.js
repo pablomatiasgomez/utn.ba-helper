@@ -13,10 +13,8 @@ export class InscripcionAExamenesPage {
 		}
 	}
 
-	init() {
-		return Promise.resolve().then(() => {
-			this.#replaceMessageIfExists();
-		});
+	async init() {
+		this.#replaceMessageIfExists();
 	}
 
 	close() {

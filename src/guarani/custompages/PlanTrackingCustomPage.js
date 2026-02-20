@@ -86,11 +86,10 @@ export class PlanTrackingCustomPage {
 
 	//...
 
-	#loadPlan(planCode, coursesHistory) {
+	async #loadPlan(planCode, coursesHistory) {
 		if (!planCode) return;
-		return this.#services.apiConnector.getPlanCourses(planCode).then(planCourses => {
-			return this.#loadPlanCourses(planCourses, coursesHistory);
-		});
+		let planCourses = await this.#services.apiConnector.getPlanCourses(planCode);
+		return this.#loadPlanCourses(planCourses, coursesHistory);
 	}
 
 	#loadPlanCourses(planCourses, coursesHistory) {
@@ -226,17 +225,12 @@ export class PlanTrackingCustomPage {
 		});
 	}
 
-	init() {
-		return Promise.resolve().then(() => {
-			return Promise.all([
-				this.#services.pagesDataParser.getStudentPlanCode(),
-				this.#services.pagesDataParser.getCoursesHistory(),
-			]);
-		}).then(result => {
-			let planCode = result[0];
-			let coursesHistory = result[1];
-			return this.#createPage(planCode, coursesHistory);
-		});
+	async init() {
+		let [planCode, coursesHistory] = await Promise.all([
+			this.#services.pagesDataParser.getStudentPlanCode(),
+			this.#services.pagesDataParser.getCoursesHistory(),
+		]);
+		return this.#createPage(planCode, coursesHistory);
 	}
 
 	close() {

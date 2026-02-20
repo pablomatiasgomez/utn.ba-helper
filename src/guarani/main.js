@@ -17,7 +17,7 @@ import {InscripcionAExamenesPage} from './pages/InscripcionAExamenesPage.js';
 
 	let apiConnector = new ApiConnector();
 	let utils = new Utils(apiConnector);
-	utils.runAsync("main", () => {
+	utils.runAsync("main", async function main() {
 		let store = new Store();
 		let pagesDataParser = new PagesDataParser(utils);
 		let dataCollector = new DataCollector(store, pagesDataParser, apiConnector);
@@ -41,7 +41,7 @@ import {InscripcionAExamenesPage} from './pages/InscripcionAExamenesPage.js';
 		];
 
 		let currentHandler = null;
-		let handleCurrentPage = () => utils.runAsync("HandlePage " + window.location.pathname + window.location.search, () => {
+		let handleCurrentPage = () => utils.runAsync("HandlePage " + window.location.pathname + window.location.search, async function handlePage() {
 			if (currentHandler) currentHandler.close();
 
 			// We only will handle pages if:
@@ -70,12 +70,11 @@ import {InscripcionAExamenesPage} from './pages/InscripcionAExamenesPage.js';
 			utils.runAsync("collectBackgroundDataIfNeeded", () => dataCollector.collectBackgroundDataIfNeeded());
 
 			// Wait for the loading div to hide... applies for both loading from document or ajax.
-			return utils.waitForElementToHide("#loading_top").then(() => {
-				currentHandler = customPages.getSelectedPageHandler() || PAGE_HANDLERS.find(entry => entry.pathRegex.test(window.location.pathname))?.handler;
-				if (!currentHandler) return;
-				currentHandler = currentHandler();
-				return currentHandler.init();
-			});
+			await utils.waitForElementToHide("#loading_top");
+			currentHandler = customPages.getSelectedPageHandler() || PAGE_HANDLERS.find(entry => entry.pathRegex.test(window.location.pathname))?.handler;
+			if (!currentHandler) return;
+			currentHandler = currentHandler();
+			return currentHandler.init();
 		});
 
 		handleCurrentPage();

@@ -16,16 +16,12 @@ export class Utils {
 	}
 
 	// Related to the extension:
-	delay(delayMs) {
-		return result => new Promise(resolve => setTimeout(() => resolve(result), delayMs));
-	}
 
 	// TODO this is duplicated in the ApiConnector.
-	backgroundFetch(options) {
-		return chrome.runtime.sendMessage(options).then(response => {
-			if (response && response.errorStr) throw new Error(response.errorStr);
-			return response;
-		});
+	async backgroundFetch(options) {
+		let response = await chrome.runtime.sendMessage(options);
+		if (response && response.errorStr) throw new Error(response.errorStr);
+		return response;
 	}
 
 	injectScript(filePath, removeAfterLoad = false) {
@@ -51,7 +47,7 @@ export class Utils {
 	 * Wraps a function that is triggered from an async event, and handles errors by logging them to the api.
 	 */
 	runAsync(name, fn) {
-		// Start with Promise.resolve() as we don't know if fn returns promise or not.
+		// Wrap with Promise.resolve() to safely handle both async and non-async functions.
 		Promise.resolve().then(() => {
 			return fn();
 		}).catch(e => {

@@ -11,34 +11,29 @@ chrome.runtime.onMessage.addListener(function (requestInfo, sender, resolve) {
 	return true;
 });
 
-const requestFetch = function (requestInfo) {
-	return fetch(requestInfo.url, requestInfo).then(response => {
-		if (response.ok) {
-			let contentType = response.headers.get("content-type");
-			let isJson = contentType && contentType.indexOf("application/json") !== -1;
-			let useCharsetDecoder = contentType && contentType.indexOf("charset=iso-8859-1") !== -1;
-			if (isJson) {
-				return response.text().then(r => JSON.parse(r));
-			} else if (useCharsetDecoder) {
-				return response.arrayBuffer().then(buffer => new TextDecoder("iso-8859-1").decode(buffer));
-			} else {
-				return response.text();
-			}
+async function requestFetch(requestInfo) {
+	let response = await fetch(requestInfo.url, requestInfo);
+	if (response.ok) {
+		let contentType = response.headers.get("content-type");
+		let isJson = contentType && contentType.indexOf("application/json") !== -1;
+		let useCharsetDecoder = contentType && contentType.indexOf("charset=iso-8859-1") !== -1;
+		if (isJson) {
+			let text = await response.text();
+			return JSON.parse(text);
+		} else if (useCharsetDecoder) {
+			let buffer = await response.arrayBuffer();
+			return new TextDecoder("iso-8859-1").decode(buffer);
 		} else {
-			if (response.status === 429) {
-				console.warn(`Got 429 for ${requestInfo.url}, retrying in 1 second...`);
-				return Promise.resolve().then(delay(1000)).then(() => {
-					return requestFetch(requestInfo);
-				});
-			}
-
-			return response.text().then(body => {
-				throw new Error(`Got unexpected ResponseStatus: ${response.status} for url: ${requestInfo.url} - ResponseBody: ${body}`);
-			});
+			return response.text();
 		}
-	});
-};
+	} else {
+		if (response.status === 429) {
+			console.warn(`Got 429 for ${requestInfo.url}, retrying in 1 second...`);
+			await new Promise(resolve => setTimeout(resolve, 1000));
+			return requestFetch(requestInfo);
+		}
 
-const delay = (delayMs) => {
-	return result => new Promise(resolve => setTimeout(() => resolve(result), delayMs));
+		let body = await response.text();
+		throw new Error(`Got unexpected ResponseStatus: ${response.status} for url: ${requestInfo.url} - ResponseBody: ${body}`);
+	}
 }
