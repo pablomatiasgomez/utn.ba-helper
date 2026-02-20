@@ -32,7 +32,7 @@ export class ProfessorsSearchCustomPage {
 		let $searchTxt = $(`<input type="text" style="margin: 0 5px 0 0;" placeholder="Minimo 3 caracteres..." />`);
 		$searchTxt.on("keydown", (e) => {
 			if (e.key === "Enter") {
-				this.#services.utils.runAsync("ProfessorsSearch", () => this.#searmergech($searchTxt.val().trim()));
+				this.#services.utils.runAsync("ProfessorsSearch", () => this.#search($searchTxt.val().trim()));
 				return false;
 			}
 		});
