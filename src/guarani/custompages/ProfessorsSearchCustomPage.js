@@ -32,7 +32,7 @@ export class ProfessorsSearchCustomPage {
 		let $searchTxt = $(`<input type="text" style="margin: 0 5px 0 0;" placeholder="Minimo 3 caracteres..." />`);
 		$searchTxt.on("keydown", (e) => {
 			if (e.key === "Enter") {
-				this.#services.utils.runAsync("ProfessorsSearch", () => this.#search($searchTxt.val().trim()));
+				this.#services.utils.runAsync("ProfessorsSearch", () => this.#searmergech($searchTxt.val().trim()));
 				return false;
 			}
 		});
@@ -67,21 +67,20 @@ export class ProfessorsSearchCustomPage {
 		this.#$container.append(this.#$surveyResultDiv);
 	}
 
-	#search(query) {
+	async #search(query) {
 		if (query.length < 3) return;
 		this.#hideProfessorData();
 		this.#$searchResultsDiv.show().get(0).scrollIntoView({behavior: "smooth"});
 		this.#$searchResultsDiv.hide();
 		log.message("Searching professors", 'info', {attributes: {query: query}});
-		return this.#services.apiConnector.searchProfessors(query).then(results => {
-			let trs = results.map(item => {
-				return `<tr><td><a href="#">${item.value}</a></td><td>${item.data.surveysCount}</td><td>${item.data.classScheduleOccurrences}</td></tr>`;
-			}).join("");
-			this.#$searchResultsDiv.show();
-			this.#$searchResultsDiv.find("table tbody")
-				.html(trs)
-				.prepend("<tr><th>Profesor</th><th>Cantidad de encuestas (total historico)</th><th>Cantidad de cursos (total historico)</th></tr>");
-		});
+		let results = await this.#services.apiConnector.searchProfessors(query);
+		let trs = results.map(item => {
+			return `<tr><td><a href="#">${item.value}</a></td><td>${item.data.surveysCount}</td><td>${item.data.classScheduleOccurrences}</td></tr>`;
+		}).join("");
+		this.#$searchResultsDiv.show();
+		this.#$searchResultsDiv.find("table tbody")
+			.html(trs)
+			.prepend("<tr><th>Profesor</th><th>Cantidad de encuestas (total historico)</th><th>Cantidad de cursos (total historico)</th></tr>");
 	}
 
 	#hideProfessorData() {
@@ -99,49 +98,47 @@ export class ProfessorsSearchCustomPage {
 		]);
 	}
 
-	#retrieveProfessorCourses(professorName) {
+	async #retrieveProfessorCourses(professorName) {
 		this.#$coursesResultDiv.hide();
 		// For now, we are showing just the latest 20 classes.
-		return this.#services.apiConnector.getClassesForProfessor(professorName, 0, 20).then(classSchedules => {
-			this.#$coursesResultDiv.html("");
-			let trs = classSchedules.map(classSchedule => {
-				let professorLis = (classSchedule.professors || []).map(professor => {
-					return this.#services.utils.getProfessorLi(professor);
-				}).join("");
-				return `<tr>
-					<td>${classSchedule.year}</td>
-					<td>${classSchedule.quarter}</td>
-					<td><a class="no-ajax" href="${CustomPages.getCourseResultsUrl(classSchedule.courseCode)}" target="_blank">${classSchedule.courseName}</a></td>
-					<td>${classSchedule.classCode}</td>
-					<td>${classSchedule.branch || "-"}</td>
-					<td>${this.#services.utils.getSchedulesAsString(classSchedule.schedules)}</td>
-					<td><ul class="no-margin">${professorLis}</ul></td>
-				</tr>`;
+		let classSchedules = await this.#services.apiConnector.getClassesForProfessor(professorName, 0, 20);
+		this.#$coursesResultDiv.html("");
+		let trs = classSchedules.map(classSchedule => {
+			let professorLis = (classSchedule.professors || []).map(professor => {
+				return this.#services.utils.getProfessorLi(professor);
 			}).join("");
-			this.#$coursesResultDiv.append(`
-				<h3>Cursos en los que estuvo presente en los últimos 3 años (incluyendo el actual)</h3>
-				<table>
-					<tbody>
-						<tr><th colspan="2">Cuatr.</th><th>Materia</th><th>Curso</th><th>Anexo</th><th>Horario</th><th>Profesores</th></tr>
-						${trs}
-					</tbody>
-				</table>
-			`);
-			this.#$coursesResultDiv.append(`<hr>`);
-			this.#$coursesResultDiv.show();
-		});
+			return `<tr>
+				<td>${classSchedule.year}</td>
+				<td>${classSchedule.quarter}</td>
+				<td><a class="no-ajax" href="${CustomPages.getCourseResultsUrl(classSchedule.courseCode)}" target="_blank">${classSchedule.courseName}</a></td>
+				<td>${classSchedule.classCode}</td>
+				<td>${classSchedule.branch || "-"}</td>
+				<td>${this.#services.utils.getSchedulesAsString(classSchedule.schedules)}</td>
+				<td><ul class="no-margin">${professorLis}</ul></td>
+			</tr>`;
+		}).join("");
+		this.#$coursesResultDiv.append(`
+			<h3>Cursos en los que estuvo presente en los últimos 3 años (incluyendo el actual)</h3>
+			<table>
+				<tbody>
+					<tr><th colspan="2">Cuatr.</th><th>Materia</th><th>Curso</th><th>Anexo</th><th>Horario</th><th>Profesores</th></tr>
+					${trs}
+				</tbody>
+			</table>
+		`);
+		this.#$coursesResultDiv.append(`<hr>`);
+		this.#$coursesResultDiv.show();
 	}
 
-	#retrieveSurveyResults(professorName) {
+	async #retrieveSurveyResults(professorName) {
 		this.#$surveyResultDiv.hide();
-		return this.#services.apiConnector.getProfessorSurveysAggregate(professorName).then(response => {
-			this.#$surveyResultDiv.html("");
-			Object.entries(response)
-				// Put DOCENTE before AUXILIAR
-				.sort((a, b) => (a[0] > b[0] ? -1 : 1))
-				.forEach(entry => this.#appendSurveyResults(entry[0], entry[1]));
-			this.#$surveyResultDiv.show();
-		});
+		let response = await this.#services.apiConnector.getProfessorSurveysAggregate(professorName);
+		this.#$surveyResultDiv.html("");
+		Object.entries(response)
+			// Put DOCENTE before AUXILIAR
+			.sort((a, b) => (a[0] > b[0] ? -1 : 1))
+			.forEach(entry => this.#appendSurveyResults(entry[0], entry[1]));
+		this.#$surveyResultDiv.show();
 	}
 
 	#appendSurveyResults(surveyKind, results) {
@@ -287,14 +284,12 @@ export class ProfessorsSearchCustomPage {
 		this.#$surveyResultDiv.append(`<hr>`);
 	}
 
-	init() {
-		return Promise.resolve().then(() => {
-			this.#createPage();
-			let professorName = new URLSearchParams(window.location.search).get(ProfessorsSearchCustomPage.customParamKey);
-			if (professorName) {
-				return this.#retrieveProfessorData(professorName);
-			}
-		});
+	async init() {
+		this.#createPage();
+		let professorName = new URLSearchParams(window.location.search).get(ProfessorsSearchCustomPage.customParamKey);
+		if (professorName) {
+			return this.#retrieveProfessorData(professorName);
+		}
 	}
 
 	close() {

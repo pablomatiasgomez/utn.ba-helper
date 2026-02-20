@@ -61,47 +61,45 @@ export class CoursesSearchCustomPage {
 		this.#$container.append(this.#$courseDataDiv);
 	}
 
-	#search(query) {
+	async #search(query) {
 		if (query.length < 3) return;
 		this.#$searchResultsDiv.show().get(0).scrollIntoView({behavior: "smooth"});
 		this.#$searchResultsDiv.hide();
 		this.#$courseDataDiv.hide();
 		log.message("Searching courses", 'info', {attributes: {query: query}});
-		return this.#services.apiConnector.searchCourses(query).then(results => {
-			let trs = results.map(item => {
-				return `<tr><td>${item.value}</td><td><a href="#">${item.data}</a></td></tr>`;
-			}).join("");
-			this.#$searchResultsDiv.show();
-			this.#$searchResultsDiv.find("table tbody")
-				.html(trs)
-				.prepend("<tr><th>Nombre</th><th>Codigo</th></tr>");
-		});
+		let results = await this.#services.apiConnector.searchCourses(query);
+		let trs = results.map(item => {
+			return `<tr><td>${item.value}</td><td><a href="#">${item.data}</a></td></tr>`;
+		}).join("");
+		this.#$searchResultsDiv.show();
+		this.#$searchResultsDiv.find("table tbody")
+			.html(trs)
+			.prepend("<tr><th>Nombre</th><th>Codigo</th></tr>");
 	}
 
-	#retrieveClassesForCourse(courseCode, offset, limit) {
+	async #retrieveClassesForCourse(courseCode, offset, limit) {
 		if (offset === 0) {
 			this.#$courseDataDiv.show().get(0).scrollIntoView({behavior: "smooth"});
 			this.#$courseDataDiv.hide();
 		}
-		return this.#services.apiConnector.getClassesForCourse(courseCode, offset, limit).then(classSchedules => {
-			if (offset === 0) {
-				this.#lastYear = this.#lastQuarter = null;
-				this.#$courseDataDiv.find("h2").text(`Resultados para ${courseCode}`);
-				this.#$courseDataDiv.show();
-				this.#$courseDataDiv.find("table tbody")
-					.html(`
-					<tr><th colspan="2">Cuatr.</th><th>Curso</th><th>Anexo</th><th>Horario</th><th>Profesores</th></tr>
-					<tr><td colspan="6"><a href="#">Ver mas resultados...</a></td></tr>`);
-				this.#$courseDataDiv.find("table tbody tr:last a").on("click", () => {
-					this.#services.utils.runAsync("retrieveClassesForCoursePage", () => this.#retrieveClassesForCourse(courseCode, offset += limit, limit));
-					return false;
-				});
-			}
-			if (classSchedules.length < limit) {
-				this.#$courseDataDiv.find("table tbody tr:last").hide();
-			}
-			this.#appendClassesToTable(classSchedules);
-		});
+		let classSchedules = await this.#services.apiConnector.getClassesForCourse(courseCode, offset, limit);
+		if (offset === 0) {
+			this.#lastYear = this.#lastQuarter = null;
+			this.#$courseDataDiv.find("h2").text(`Resultados para ${courseCode}`);
+			this.#$courseDataDiv.show();
+			this.#$courseDataDiv.find("table tbody")
+				.html(`
+				<tr><th colspan="2">Cuatr.</th><th>Curso</th><th>Anexo</th><th>Horario</th><th>Profesores</th></tr>
+				<tr><td colspan="6"><a href="#">Ver mas resultados...</a></td></tr>`);
+			this.#$courseDataDiv.find("table tbody tr:last a").on("click", () => {
+				this.#services.utils.runAsync("retrieveClassesForCoursePage", () => this.#retrieveClassesForCourse(courseCode, offset += limit, limit));
+				return false;
+			});
+		}
+		if (classSchedules.length < limit) {
+			this.#$courseDataDiv.find("table tbody tr:last").hide();
+		}
+		this.#appendClassesToTable(classSchedules);
 	}
 
 	#appendClassesToTable(classSchedules) {
@@ -124,14 +122,12 @@ export class CoursesSearchCustomPage {
 		this.#$courseDataDiv.find("table tbody tr:last").before(trs);
 	}
 
-	init() {
-		return Promise.resolve().then(() => {
-			this.#createPage();
-			let courseCode = new URLSearchParams(window.location.search).get(CoursesSearchCustomPage.customParamKey);
-			if (courseCode) {
-				return this.#retrieveClassesForCourse(courseCode, 0, 15);
-			}
-		});
+	async init() {
+		this.#createPage();
+		let courseCode = new URLSearchParams(window.location.search).get(CoursesSearchCustomPage.customParamKey);
+		if (courseCode) {
+			return this.#retrieveClassesForCourse(courseCode, 0, 15);
+		}
 	}
 
 	close() {

@@ -96,12 +96,11 @@ export class ApiConnector {
 		});
 	}
 
-	#makeRequest(options) {
+	async #makeRequest(options) {
 		// TODO this is duplicated in Utils.backgroundFetch.
-		return chrome.runtime.sendMessage(options).then(response => {
-			if (response && response.errorStr) throw new Error(response.errorStr);
-			return response;
-		});
+		let response = await chrome.runtime.sendMessage(options);
+		if (response && response.errorStr) throw new Error(response.errorStr);
+		return response;
 	}
 
 	#buildQueryParams(params) {

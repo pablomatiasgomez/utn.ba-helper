@@ -80,31 +80,24 @@ export class PreInscripcionPage {
 		});
 	}
 
-	#addPreviousProfessorsTable(alternativesCombo, filtersDiv, previousProfessorsTableBody) {
-		return Promise.resolve().then(() => {
-			return this.#fetchCourseAlternatives();
-		}).then(courseOptionsData => {
-			return this.#renderPreviousProfessorsTable(alternativesCombo, previousProfessorsTableBody, courseOptionsData);
-		}).then(() => {
-			// Once everything is rendered, display filter box:
-			return this.#addClassSchedulesFilter(alternativesCombo, filtersDiv, previousProfessorsTableBody);
-		});
+	async #addPreviousProfessorsTable(alternativesCombo, filtersDiv, previousProfessorsTableBody) {
+		let courseOptionsData = await this.#fetchCourseAlternatives();
+		await this.#renderPreviousProfessorsTable(alternativesCombo, previousProfessorsTableBody, courseOptionsData);
+		// Once everything is rendered, display filter box:
+		this.#addClassSchedulesFilter(alternativesCombo, filtersDiv, previousProfessorsTableBody);
 	}
 
-	#fetchCourseAlternatives() {
-		return Promise.resolve().then(() => {
-			// Avoid using cache as the endpoint is always the same but the student may register or unregister from the course.
-			return this.#pagesDataParser.fetchAjaxGETContents(location.href, false);
-		}).then(response => {
-			if (!response.agenda || !response.agenda.comisiones) throw new Error(`Missing course alternatives for ${location.href}. response: ${JSON.stringify(response)}`);
+	async #fetchCourseAlternatives() {
+		// Avoid using cache as the endpoint is always the same but the student may register or unregister from the course.
+		let response = await this.#pagesDataParser.fetchAjaxGETContents(location.href, false);
+		if (!response.agenda || !response.agenda.comisiones) throw new Error(`Missing course alternatives for ${location.href}. response: ${JSON.stringify(response)}`);
 
-			// `comisiones` may include the current class schedules. This is not a problem because we access the array by id.
-			// But we could eventually filter them out by using the `cursadas` array if we confirm it
-			return response.agenda.comisiones;
-		});
+		// `comisiones` may include the current class schedules. This is not a problem because we access the array by id.
+		// But we could eventually filter them out by using the `cursadas` array if we confirm it
+		return response.agenda.comisiones;
 	}
 
-	#renderPreviousProfessorsTable(alternativesCombo, previousProfessorsTableBody, courseOptionsData) {
+	async #renderPreviousProfessorsTable(alternativesCombo, previousProfessorsTableBody, courseOptionsData) {
 		let optionId = 0;
 		let optionDetails = [];
 		let previousProfessorsRequest = Array.from(alternativesCombo.options)
@@ -127,42 +120,40 @@ export class PreInscripcionPage {
 			.filter(req => !!req);
 
 		// Returns a List that corresponds one to one with the request list, with maps that represent: year -> classCode (the new one) -> List of professors
-		return this.#apiConnector.getPreviousProfessors(previousProfessorsRequest).then(response => {
-			for (let i = 0; i < response.length; i++) {
-				let previousProfessors = response[i];
-				optionId = i + 1;
+		let response = await this.#apiConnector.getPreviousProfessors(previousProfessorsRequest);
+		for (let i = 0; i < response.length; i++) {
+			let previousProfessors = response[i];
+			optionId = i + 1;
 
-				let content = `<ul class="no-margin">`;
-				Object.entries(previousProfessors)
-					.sort((a, b) => (a[0] < b[0] ? 1 : a[0] > b[0] ? -1 : 0))
-					.forEach(([year, classes]) => {
-						content += `<li>${year}<ul class="no-margin">`;
-						Object.entries(classes)
-							.sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0))
-							.forEach(([newClassCode, professors]) => {
-								content += `<li>${newClassCode}<ul class="no-margin">`;
-								professors.forEach(professor => {
-									content += this.#utils.getProfessorLi(professor);
-								});
-								content += `</ul></li>`;
+			let content = `<ul class="no-margin">`;
+			Object.entries(previousProfessors)
+				.sort((a, b) => (a[0] < b[0] ? 1 : a[0] > b[0] ? -1 : 0))
+				.forEach(([year, classes]) => {
+					content += `<li>${year}<ul class="no-margin">`;
+					Object.entries(classes)
+						.sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0))
+						.forEach(([newClassCode, professors]) => {
+							content += `<li>${newClassCode}<ul class="no-margin">`;
+							professors.forEach(professor => {
+								content += this.#utils.getProfessorLi(professor);
 							});
-						content += `</ul></li>`;
-					});
-				content += `</ul>`;
+							content += `</ul></li>`;
+						});
+					content += `</ul></li>`;
+				});
+			content += `</ul>`;
 
-				const row = document.createElement("tr");
-				row.setAttribute("data-option-id", optionId);
-				row.innerHTML = `<td>(${optionId})</td><td>${optionDetails[i]}</td><td>${content}</td>`;
-				previousProfessorsTableBody.appendChild(row);
-			}
-		});
+			const row = document.createElement("tr");
+			row.setAttribute("data-option-id", optionId);
+			row.innerHTML = `<td>(${optionId})</td><td>${optionDetails[i]}</td><td>${content}</td>`;
+			previousProfessorsTableBody.appendChild(row);
+		}
 	}
 
-	init() {
-		return Promise.resolve().then(() => {
-			// Need to listen to course register changes, as the combo is reloaded, and we need to add the table again.
-			// We need to un register them on close, as changing a course will trigger a new PreInscripcionPage.
-			// Events triggered from foreground script:
+	async init() {
+		// Need to listen to course register changes, as the combo is reloaded, and we need to add the table again.
+		// We need to un register them on close, as changing a course will trigger a new PreInscripcionPage.
+		// Events triggered from foreground script:
 			this.#addPreviousProfessorsTableEventFn = () => {
 				let alternativesDiv = document.querySelector("#insc_alternativas .inscripcion-alternativa");
 				if (!alternativesDiv) return; // There may be no div if for example the alternative already has a selected option.
@@ -195,7 +186,6 @@ export class PreInscripcionPage {
 			window.addEventListener("__utn_ba_event_comision_despreinscripta", this.#addPreviousProfessorsTableEventFn);
 			window.addEventListener("__utn_ba_event_setear_comisiones_insc_alternativa", this.#addPreviousProfessorsTableEventWithDelayFn);
 			return this.#addPreviousProfessorsTableEventFn();
-		});
 	}
 
 	close() {

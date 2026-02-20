@@ -42,10 +42,8 @@ export class HorariosPage {
 		});
 	}
 
-	init() {
-		return Promise.resolve().then(() => {
-			this.#setCourseNamesInTable();
-		});
+	async init() {
+		this.#setCourseNamesInTable();
 	}
 
 	close() {

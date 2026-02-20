@@ -1,10 +1,9 @@
 const HASHED_STUDENT_ID_DATASTORE_KEY = "UtnBaHelper.HashedStudentId";
 
 export class Store {
-	readHashedStudentIdFromStore() {
-		return chrome.storage.sync.get(HASHED_STUDENT_ID_DATASTORE_KEY).then(result => {
-			return result[HASHED_STUDENT_ID_DATASTORE_KEY];
-		});
+	async readHashedStudentIdFromStore() {
+		let result = await chrome.storage.sync.get(HASHED_STUDENT_ID_DATASTORE_KEY);
+		return result[HASHED_STUDENT_ID_DATASTORE_KEY];
 	}
 
 	saveHashedStudentIdToStore(hashedStudentId) {

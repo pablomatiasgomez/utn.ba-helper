@@ -32,52 +32,47 @@ export class PagesDataParser {
 		}, useCache);
 	}
 
-	#fetchWithRetry(url, fetchOpts) {
-		return fetch(url, fetchOpts).then(response => {
-			if (response.ok) {
-				return response;
-			} else {
-				if (response.status === 429) {
-					console.warn(`Got 429 for ${url}, retrying in 1 second...`);
-					return Promise.resolve().then(this.#utils.delay(1000)).then(() => {
-						return this.#fetchWithRetry(url, fetchOpts);
-					});
-				} else if (response.status === 500) {
-					throw new GuaraniBackendError();
-				}
-
-				return response.text().then(body => {
-					throw new Error(`Got unexpected ResponseStatus: ${response.status} for url: ${url} - ResponseBody: ${body}`);
-				});
-			}
-		});
+	async #fetchWithRetry(url, fetchOpts) {
+		let response = await fetch(url, fetchOpts);
+		if (response.ok) {
+			return response;
+		}
+		if (response.status === 429) {
+			console.warn(`Got 429 for ${url}, retrying in 1 second...`);
+			await new Promise(resolve => setTimeout(resolve, 1000));
+			return this.#fetchWithRetry(url, fetchOpts);
+		} else if (response.status === 500) {
+			throw new GuaraniBackendError();
+		}
+		let body = await response.text();
+		throw new Error(`Got unexpected ResponseStatus: ${response.status} for url: ${url} - ResponseBody: ${body}`);
 	}
 
 	/**
 	 * Fetches and parses the way Guaraní's page ajax contents are loaded.
 	 */
-	#fetchAjaxContents(url, fetchOpts, useCache = true) {
+	async #fetchAjaxContents(url, fetchOpts, useCache = true) {
 		let cacheKey = `${fetchOpts.method || "GET"}:${url}:${fetchOpts.body || ""}`;
 		if (useCache && this.#responsesCache[cacheKey]) {
-			return Promise.resolve(this.#responsesCache[cacheKey]);
+			return this.#responsesCache[cacheKey];
 		}
 
-		return this.#fetchWithRetry(url, fetchOpts).catch(e => {
+		let fetchResponse;
+		try {
+			fetchResponse = await this.#fetchWithRetry(url, fetchOpts);
+		} catch (e) {
 			throw new Error(`Error on fetchAjaxContents for ${cacheKey}`, {cause: e});
-		}).then(response => {
-			return response.text().then(r => JSON.parse(r));
-		}).then(response => {
-			if (response.cod === "1" && response.titulo === "Grado - Acceso" && response.operacion === "acceso") throw new LoggedOutError();
-			if (response.cod === "-2" && response.cont.url.includes("/autogestion/grado/acceso/login")) throw new LoggedOutError();
-			if (response.cod === "-2" && response.cont.url.includes("/autogestion/grado/inicio_alumno")) throw new RedirectedToHomeError();
-			if (response.cod === "-2" && response.cont.url.includes("/autogestion/grado/zona_comisiones")) throw new ProfileNotHandledError(); // This happens when the user switches profile from "Alumno" to "Docente"
-			if (response.cod === "-1" && response.cont === "error") throw new GuaraniBackendError(response);
-			if (response.cod !== "1") throw new Error(`Invalid ajax contents for url ${cacheKey}. response: ${JSON.stringify(response)}`);
-			return response;
-		}).then(contents => {
-			this.#responsesCache[cacheKey] = contents;
-			return contents;
-		});
+		}
+		let text = await fetchResponse.text();
+		let response = JSON.parse(text);
+		if (response.cod === "1" && response.titulo === "Grado - Acceso" && response.operacion === "acceso") throw new LoggedOutError();
+		if (response.cod === "-2" && response.cont.url.includes("/autogestion/grado/acceso/login")) throw new LoggedOutError();
+		if (response.cod === "-2" && response.cont.url.includes("/autogestion/grado/inicio_alumno")) throw new RedirectedToHomeError();
+		if (response.cod === "-2" && response.cont.url.includes("/autogestion/grado/zona_comisiones")) throw new ProfileNotHandledError(); // This happens when the user switches profile from "Alumno" to "Docente"
+		if (response.cod === "-1" && response.cont === "error") throw new GuaraniBackendError(response);
+		if (response.cod !== "1") throw new Error(`Invalid ajax contents for url ${cacheKey}. response: ${JSON.stringify(response)}`);
+		this.#responsesCache[cacheKey] = response;
+		return response;
 	}
 
 	/**
@@ -102,24 +97,27 @@ export class PagesDataParser {
 	 * @param url url that returns a XLS.
 	 * @returns {Promise<{}>}
 	 */
-	#fetchXlsContents(url) {
+	async #fetchXlsContents(url) {
 		if (this.#responsesCache[url]) {
-			return Promise.resolve(this.#responsesCache[url]);
+			return this.#responsesCache[url];
 		}
 
-		return this.#fetchWithRetry(url).catch(e => {
+		let fetchResponse;
+		try {
+			fetchResponse = await this.#fetchWithRetry(url);
+		} catch (e) {
 			throw new Error(`Error on fetchXlsContents for ${url}`, {cause: e});
-		}).then(response => {
-			return response.arrayBuffer();
-		}).then(response => {
-			let uint8Array = new Uint8Array(response);
-			return Promise.resolve().then(() => XLSX.read(uint8Array), {type: "array"}).catch(e => {
-				throw new Error(`Error on XLSX.read for ${url}. uint8Array: [${uint8Array}].`, {cause: e});
-			});
-		}).then(contents => {
-			this.#responsesCache[url] = contents;
-			return contents;
-		});
+		}
+		let buffer = await fetchResponse.arrayBuffer();
+		let uint8Array = new Uint8Array(buffer);
+		let contents;
+		try {
+			contents = XLSX.read(uint8Array, {type: "array"});
+		} catch (e) {
+			throw new Error(`Error on XLSX.read for ${url}. uint8Array: [${uint8Array}].`, {cause: e});
+		}
+		this.#responsesCache[url] = contents;
+		return contents;
 	}
 
 	// --------------------
@@ -143,35 +141,35 @@ export class PagesDataParser {
 	 * Used to collect the classSchedules
 	 * @returns {Promise<Array<{}>>} array of objects for each class, that contains the schedule for it.
 	 */
-	getClassSchedules() {
-		return this.fetchAjaxGETContents("/autogestion/grado/calendario").then(responseContents => {
+	async getClassSchedules() {
+		try {
+			let responseContents = await this.fetchAjaxGETContents("/autogestion/grado/calendario");
 			let renderData = this.#parseAjaxPageRenderer(responseContents.cont, "agenda_utn");
 			return renderData.info.agenda.cursadas.map(cursadaId => {
 				let classData = renderData.info.agenda.comisiones[cursadaId];
 				return this.mapClassDataToClassSchedule(classData);
 			});
-		}).catch(e => {
+		} catch (e) {
 			if (e instanceof RedirectedToHomeError) {
 				// This happens when students are in the process to register to new schedules,
 				// and there is a time window in which class schedules page cannot be seen.
 				return [];
 			}
 			throw e;
-		});
+		}
 	}
 
 	/**
 	 * The student's current plan code as shown in the /autogestion/grado/plan_estudio page.
 	 * @returns {Promise<string>}
 	 */
-	getStudentPlanCode() {
-		return this.fetchAjaxGETContents("/autogestion/grado/plan_estudio").then(responseContents => {
-			let responseText = this.#parseAjaxPageRenderer(responseContents.cont, "info_plan").content;
-			let planText = $(responseText).filter(".encabezado").find("td:eq(1)").text();
-			let groups = /^Plan: \((\w+)\)/.exec(planText);
-			if (!groups) throw new Error(`planText couldn't be parsed: ${planText}`);
-			return groups[1];
-		});
+	async getStudentPlanCode() {
+		let responseContents = await this.fetchAjaxGETContents("/autogestion/grado/plan_estudio");
+		let responseText = this.#parseAjaxPageRenderer(responseContents.cont, "info_plan").content;
+		let planText = $(responseText).filter(".encabezado").find("td:eq(1)").text();
+		let groups = /^Plan: \((\w+)\)/.exec(planText);
+		if (!groups) throw new Error(`planText couldn't be parsed: ${planText}`);
+		return groups[1];
 	}
 
 
@@ -179,7 +177,7 @@ export class PagesDataParser {
 	 * Parses and returns all the courses for the currently selected student's plan.
 	 * @returns {Promise<[{planCode: string, level: number, courseCode: string, courseName: string, elective: boolean, dependencies: [{kind: string, requirement: string, courseCode: string}]}]>}
 	 */
-	getStudentPlanCourses() {
+	async getStudentPlanCourses() {
 		const levelsMapping = {
 			"módulo: primer nivel": 1,
 			"módulo: segundo nivel": 2,
@@ -203,7 +201,7 @@ export class PagesDataParser {
 			"Aprobada": "PASSED",
 		};
 
-		let getDependencies = (courseCode, dependenciesBtn) => {
+		let getDependencies = async (courseCode, dependenciesBtn) => {
 			let dependencies = [
 				{
 					// Add its own dependency (has to be signed in order to take final exam).
@@ -213,139 +211,137 @@ export class PagesDataParser {
 				}
 			];
 
-			if (!dependenciesBtn) return Promise.resolve(dependencies);
+			if (!dependenciesBtn) return dependencies;
 			let body = `elemento=${dependenciesBtn.getAttribute("data-elemento")}&elemento_padre=${dependenciesBtn.getAttribute("data-elemento-padre")}`;
-			return this.#fetchAjaxPOSTContents("https://guarani.frba.utn.edu.ar/autogestion/grado/plan_estudio/correlativas", body).then(response => {
-				let $response = $(response.cont).filter(".td-table-correlativas");
-				if ($response.find(".alert").text().trim() === "No hay definidas correlativas para la actividad") return dependencies;
+			let response = await this.#fetchAjaxPOSTContents("https://guarani.frba.utn.edu.ar/autogestion/grado/plan_estudio/correlativas", body);
+			let $response = $(response.cont).filter(".td-table-correlativas");
+			if ($response.find(".alert").text().trim() === "No hay definidas correlativas para la actividad") return dependencies;
 
-				let elems = $response.children().toArray();
-				let i = 0;
-				while (i < elems.length) {
-					// There are 4 type elements per each kind:
-					// 1. div with h3 that tells the kind
-					// 2. div.alert_verificar_correlativas that is used to verify dependencies (not used here)
-					// There could be N of these 2:
-					// 		3. h4 that represents one option (right now we expect to only have "Opción 1")
-					// 		4. table.table-correlativas with dependencies
+			let elems = $response.children().toArray();
+			let i = 0;
+			while (i < elems.length) {
+				// There are 4 type elements per each kind:
+				// 1. div with h3 that tells the kind
+				// 2. div.alert_verificar_correlativas that is used to verify dependencies (not used here)
+				// There could be N of these 2:
+				// 		3. h4 that represents one option (right now we expect to only have "Opción 1")
+				// 		4. table.table-correlativas with dependencies
 
-					// 1. div with h3 that tells the kind
-					let kindTxt = $(elems[i++]).find("> div > h3").text();
-					let kind = kindsMapping[kindTxt];
-					if (!kind) throw new Error(`Invalid kind ${kindTxt}. responseCont: ${response.cont}`);
+				// 1. div with h3 that tells the kind
+				let kindTxt = $(elems[i++]).find("> div > h3").text();
+				let kind = kindsMapping[kindTxt];
+				if (!kind) throw new Error(`Invalid kind ${kindTxt}. responseCont: ${response.cont}`);
 
-					// 2. div.alert_verificar_correlativas that is used to verify dependencies (not used here)
-					if (!$(elems[i++]).hasClass("alert_verificar_correlativas")) throw new Error(`Found invalid div in second position. responseCont: ${response.cont}`);
+				// 2. div.alert_verificar_correlativas that is used to verify dependencies (not used here)
+				if (!$(elems[i++]).hasClass("alert_verificar_correlativas")) throw new Error(`Found invalid div in second position. responseCont: ${response.cont}`);
 
-					while (i < elems.length && $(elems[i]).filter("h4").length) {
-						// 3. h4 that represents one option (right now we expect to only have "Opción 1")
-						let option = $(elems[i++]).filter("h4").text();
-						if (option !== "Opción 1") {
-							// For now, we only handle "Opción 1"... TODO: Eventually we should support all of them:
-							i++;
-							continue;
-						}
-
-						// 4. table.table-correlativas with dependencies
-						$(elems[i++]).filter("table.table-correlativas").find("tr:not(:first)").toArray().forEach(tr => {
-							let $tr = $(tr);
-
-							// Some new rows have the following texts: 'Módulo: Maquinas Alternativas y Turbomáquinas'	'Tener 1 actividades aprobadas'
-							// TODO for now we are ignoring these, eventually we should support them.
-							let dependencyCourse = $tr.find("td:eq(0)").text().trim();
-							if (dependencyCourse.startsWith("Módulo: ")) return;
-
-							let groups = /^(.*) \((\d{6})\)$/.exec(dependencyCourse);
-							if (!groups) throw new Error(`dependencyCourse couldn't be parsed: ${dependencyCourse}. responseCont: ${response.cont}`);
-							// let courseName = groups[1];
-							let dependencyCourseCode = groups[2];
-
-							let requirementTxt = $tr.find("td:eq(1)").text().trim();
-							let requirement = requirementMapping[requirementTxt];
-							if (!requirement) throw new Error(`requirementTxt couldn't be parsed: ${requirementTxt}. responseCont: ${response.cont}`);
-
-							dependencies.push({
-								kind: kind,
-								requirement: requirement,
-								courseCode: dependencyCourseCode,
-							});
-						});
+				while (i < elems.length && $(elems[i]).filter("h4").length) {
+					// 3. h4 that represents one option (right now we expect to only have "Opción 1")
+					let option = $(elems[i++]).filter("h4").text();
+					if (option !== "Opción 1") {
+						// For now, we only handle "Opción 1"... TODO: Eventually we should support all of them:
+						i++;
+						continue;
 					}
-				}
-				return dependencies;
-			});
-		};
 
-		return this.fetchAjaxGETContents("/autogestion/grado/plan_estudio").then(responseContents => {
-			let responseText = this.#parseAjaxPageRenderer(responseContents.cont, "info_plan").content;
-			// Need to wrap contents into parent div as many elements come as first level, and we cannot use querySelector() then.
-			let doc = document.createElement("div");
-			doc.id = "info_plan";
-			doc.innerHTML = responseText;
+					// 4. table.table-correlativas with dependencies
+					$(elems[i++]).filter("table.table-correlativas").find("tr:not(:first)").toArray().forEach(tr => {
+						let $tr = $(tr);
 
-			// PlanCode
-			let planText = doc.querySelectorAll(".encabezado td")[1].textContent.trim();
-			let groups = /^Plan: \((\w+)\)/.exec(planText);
-			if (!groups) throw new Error(`planText couldn't be parsed: ${planText}. responseText: ${responseText}`);
-			let planCode = groups[1];
+						// Some new rows have the following texts: 'Módulo: Maquinas Alternativas y Turbomáquinas'	'Tener 1 actividades aprobadas'
+						// TODO for now we are ignoring these, eventually we should support them.
+						let dependencyCourse = $tr.find("td:eq(0)").text().trim();
+						if (dependencyCourse.startsWith("Módulo: ")) return;
 
-			// Courses, cannot do it in parallel as the server returns a lot of 429s.
-			let courses = [];
-			let maxLevel = -1;
-			let promise = Promise.resolve();
-			doc.querySelectorAll(".accordion").forEach(accordion => {
-				let accordionHeading = accordion.querySelector(":scope > .accordion-group > .accordion-heading a");
-				let areElectives = accordionHeading.classList.contains("materia_generica") || accordionHeading.textContent.toLowerCase().includes("electivas");
+						let groups = /^(.*) \((\d{6})\)$/.exec(dependencyCourse);
+						if (!groups) throw new Error(`dependencyCourse couldn't be parsed: ${dependencyCourse}. responseCont: ${response.cont}`);
+						// let courseName = groups[1];
+						let dependencyCourseCode = groups[2];
 
-				// The table could be within a level, so we try to grab it from there first.
-				let parentAccordion = accordion.parentElement?.closest(".accordion");
-				if (parentAccordion) {
-					accordionHeading = parentAccordion.querySelector(":scope > .accordion-group > .accordion-heading a");
-				}
-				let levelText = accordionHeading.textContent.trim().toLowerCase();
-				let level = levelsMapping[levelText];
-				// If level couldn't be matched, but this is an accordion of electives and is a first level accordion,
-				// then it means they are the electives of the entire plan, and should be considered as part of the last level.
-				if (typeof level === "undefined" && areElectives && !parentAccordion) level = maxLevel;
-				if (typeof level === "undefined") throw new Error(`Invalid levelText: '${levelText}'. responseText: ${responseText}`);
-				if (level === -1) return [];
-				maxLevel = Math.max(maxLevel, level);
+						let requirementTxt = $tr.find("td:eq(1)").text().trim();
+						let requirement = requirementMapping[requirementTxt];
+						if (!requirement) throw new Error(`requirementTxt couldn't be parsed: ${requirementTxt}. responseCont: ${response.cont}`);
 
-				return accordion.querySelectorAll("table")[0].querySelectorAll("tbody tr:not(.correlatividades)").forEach(courseRow => {
-					let courseText = courseRow.querySelector("td").textContent.trim();
-					let groups = /(.*) \((\d{6})\)/.exec(courseText);
-					if (!groups) throw new Error(`courseText couldn't be parsed: ${courseText}. responseText: ${responseText}`);
-					let courseName = groups[1];
-					let courseCode = groups[2];
-
-					// Dependencies btn:
-					let dependenciesBtn = courseRow.lastChild.querySelector(".ver_correlatividades");
-					promise = promise.then(() => {
-						return getDependencies(courseCode, dependenciesBtn)
-					}).then(dependencies => {
-						courses.push({
-							planCode: planCode,
-							level: level,
-							courseCode: courseCode,
-							courseName: courseName,
-							elective: areElectives,
-							dependencies: dependencies,
+						dependencies.push({
+							kind: kind,
+							requirement: requirement,
+							courseCode: dependencyCourseCode,
 						});
 					});
+				}
+			}
+			return dependencies;
+		};
+
+		let responseContents = await this.fetchAjaxGETContents("/autogestion/grado/plan_estudio");
+		let responseText = this.#parseAjaxPageRenderer(responseContents.cont, "info_plan").content;
+		// Need to wrap contents into parent div as many elements come as first level, and we cannot use querySelector() then.
+		let doc = document.createElement("div");
+		doc.id = "info_plan";
+		doc.innerHTML = responseText;
+
+		// PlanCode
+		let planText = doc.querySelectorAll(".encabezado td")[1].textContent.trim();
+		let groups = /^Plan: \((\w+)\)/.exec(planText);
+		if (!groups) throw new Error(`planText couldn't be parsed: ${planText}. responseText: ${responseText}`);
+		let planCode = groups[1];
+
+		// Courses, cannot do it in parallel as the server returns a lot of 429s.
+		let courses = [];
+		let maxLevel = -1;
+		let courseRows = [];
+		doc.querySelectorAll(".accordion").forEach(accordion => {
+			let accordionHeading = accordion.querySelector(":scope > .accordion-group > .accordion-heading a");
+			let areElectives = accordionHeading.classList.contains("materia_generica") || accordionHeading.textContent.toLowerCase().includes("electivas");
+
+			// The table could be within a level, so we try to grab it from there first.
+			let parentAccordion = accordion.parentElement?.closest(".accordion");
+			if (parentAccordion) {
+				accordionHeading = parentAccordion.querySelector(":scope > .accordion-group > .accordion-heading a");
+			}
+			let levelText = accordionHeading.textContent.trim().toLowerCase();
+			let level = levelsMapping[levelText];
+			// If level couldn't be matched, but this is an accordion of electives and is a first level accordion,
+			// then it means they are the electives of the entire plan, and should be considered as part of the last level.
+			if (typeof level === "undefined" && areElectives && !parentAccordion) level = maxLevel;
+			if (typeof level === "undefined") throw new Error(`Invalid levelText: '${levelText}'. responseText: ${responseText}`);
+			if (level === -1) return;
+			maxLevel = Math.max(maxLevel, level);
+
+			accordion.querySelectorAll("table")[0].querySelectorAll("tbody tr:not(.correlatividades)").forEach(courseRow => {
+				let courseText = courseRow.querySelector("td").textContent.trim();
+				let groups = /(.*) \((\d{6})\)/.exec(courseText);
+				if (!groups) throw new Error(`courseText couldn't be parsed: ${courseText}. responseText: ${responseText}`);
+				courseRows.push({
+					courseName: groups[1],
+					courseCode: groups[2],
+					level: level,
+					areElectives: areElectives,
+					dependenciesBtn: courseRow.lastChild.querySelector(".ver_correlatividades"),
 				});
 			});
-
-			return promise.then(() => {
-				return courses;
-			});
 		});
+
+		for (let row of courseRows) {
+			let dependencies = await getDependencies(row.courseCode, row.dependenciesBtn);
+			courses.push({
+				planCode: planCode,
+				level: row.level,
+				courseCode: row.courseCode,
+				courseName: row.courseName,
+				elective: row.areElectives,
+				dependencies: dependencies,
+			});
+		}
+
+		return courses;
 	}
 
 	/**
 	 * Parses and returns all the student's academic history. Includes courses and final exams (both passed and failed)
 	 * @returns {Promise<{courses: [{courseCode: string, isPassed: boolean, grade: number, weightedGrade: number, date: Date}], finalExams: [{courseCode: string, isPassed: boolean, grade: number, weightedGrade: number, date: Date}]}>}
 	 */
-	getCoursesHistory() {
+	async getCoursesHistory() {
 		let courses = [];
 		let finalExams = [];
 		// Use a map to also validate returned types.
@@ -362,49 +358,48 @@ export class PagesDataParser {
 			"Reprobado": false,
 			"Ausente": false,
 		};
-		return this.#fetchXlsContents("/autogestion/grado/historia_academica/exportar_xls/?checks=PromocionA,RegularidadA,RegularidadR,RegularidadU,EnCurso,ExamenA,ExamenR,ExamenU,EquivalenciaA,EquivalenciaR,AprobResA,CreditosA,&modo=anio&param_modo=").then(workbook => {
-			let sheet = workbook.Sheets["Reporte"];
-			if (!sheet) throw new Error(`Workbook does not contain sheet. Sheetnames: ${workbook.SheetNames}`);
+		let workbook = await this.#fetchXlsContents("/autogestion/grado/historia_academica/exportar_xls/?checks=PromocionA,RegularidadA,RegularidadR,RegularidadU,EnCurso,ExamenA,ExamenR,ExamenU,EquivalenciaA,EquivalenciaR,AprobResA,CreditosA,&modo=anio&param_modo=");
+		let sheet = workbook.Sheets["Reporte"];
+		if (!sheet) throw new Error(`Workbook does not contain sheet. Sheetnames: ${workbook.SheetNames}`);
 
-			// First 5 rows do not include important data:
-			if (sheet.A6.v !== "Fecha") throw new Error(`Invalid sheet data: ${JSON.stringify(XLSX.utils.sheet_to_json(sheet))}`);
-			sheet["!ref"] = sheet["!ref"].replace("A1:", "A6:");
+		// First 5 rows do not include important data:
+		if (sheet.A6.v !== "Fecha") throw new Error(`Invalid sheet data: ${JSON.stringify(XLSX.utils.sheet_to_json(sheet))}`);
+		sheet["!ref"] = sheet["!ref"].replace("A1:", "A6:");
 
-			XLSX.utils.sheet_to_json(sheet).forEach(row => {
-				let date = this.#parseDate(row["Fecha"]);
-				let courseText = row["Actividad"];
-				let type = row["Tipo"];
-				let gradeText = row["Nota"];
-				let gradeIsPassedText = row["Resultado"];
+		XLSX.utils.sheet_to_json(sheet).forEach(row => {
+			let date = this.#parseDate(row["Fecha"]);
+			let courseText = row["Actividad"];
+			let type = row["Tipo"];
+			let gradeText = row["Nota"];
+			let gradeIsPassedText = row["Resultado"];
 
-				if (!gradeText || !gradeIsPassedText) return; // Ignore non finished items
+			if (!gradeText || !gradeIsPassedText) return; // Ignore non finished items
 
-				let groups = /(.*) \((\d{6})\)/.exec(courseText);
-				if (!groups) throw new Error(`courseText couldn't be parsed: ${courseText}. Row: ${JSON.stringify(row)}`);
-				let courseCode = groups[2];
+			let groups = /(.*) \((\d{6})\)/.exec(courseText);
+			if (!groups) throw new Error(`courseText couldn't be parsed: ${courseText}. Row: ${JSON.stringify(row)}`);
+			let courseCode = groups[2];
 
-				let arr = arrayByTypes[type];
-				if (!arr) throw new Error(`Type not handled: ${type}. Row: ${JSON.stringify(row)}`);
+			let arr = arrayByTypes[type];
+			if (!arr) throw new Error(`Type not handled: ${type}. Row: ${JSON.stringify(row)}`);
 
-				let grade = parseInt(gradeText) || null;
-				let weightedGrade = grade !== null ? this.#getWeightedGrade(date, grade) : null;
+			let grade = parseInt(gradeText) || null;
+			let weightedGrade = grade !== null ? this.#getWeightedGrade(date, grade) : null;
 
-				if (typeof gradeIsPassedTypes[gradeIsPassedText] === "undefined") throw new Error(`gradeIsPassedText couldn't be parsed: ${gradeIsPassedText}. Row: ${JSON.stringify(row)}`);
-				let isPassed = gradeIsPassedTypes[gradeIsPassedText];
+			if (typeof gradeIsPassedTypes[gradeIsPassedText] === "undefined") throw new Error(`gradeIsPassedText couldn't be parsed: ${gradeIsPassedText}. Row: ${JSON.stringify(row)}`);
+			let isPassed = gradeIsPassedTypes[gradeIsPassedText];
 
-				arr.push({
-					courseCode: courseCode,
-					isPassed: isPassed,
-					grade: grade,
-					weightedGrade: weightedGrade,
-					date: date,
-				});
+			arr.push({
+				courseCode: courseCode,
+				isPassed: isPassed,
+				grade: grade,
+				weightedGrade: weightedGrade,
+				date: date,
 			});
-			return {
-				courses: courses,
-				finalExams: finalExams,
-			};
 		});
+		return {
+			courses: courses,
+			finalExams: finalExams,
+		};
 	}
 
 	/**
@@ -412,49 +407,46 @@ export class PagesDataParser {
 	 * For each of them resolves the current professor name, class, course, quarter, etc.
 	 * @returns {Promise<*[]>} an array of class schedules for each combination of professor and class
 	 */
-	getProfessorClassesFromSurveys() {
-		return this.fetchAjaxGETContents("/autogestion/grado/inicio_alumno").then(responseContents => {
-			let surveysResponseText = this.#parseAjaxPageRenderer(responseContents.cont, "lista_encuestas_pendientes").content;
+	async getProfessorClassesFromSurveys() {
+		let responseContents = await this.fetchAjaxGETContents("/autogestion/grado/inicio_alumno");
+		let surveysResponseText = this.#parseAjaxPageRenderer(responseContents.cont, "lista_encuestas_pendientes").content;
 
-			let promises = $(surveysResponseText).find("ul li a").toArray()
-				.map(a => a.href)
-				.map(siuUrl => {
-					siuUrl += (siuUrl.includes("?") ? "&" : "?") + "terminos_condiciones=true";
-					return this.fetchAjaxGETContents(siuUrl).then(siuResponse => {
-						try {
-							// Return the kollaUrl
-							return $(siuResponse.cont).find("iframe").get(0).src;
-						} catch (e) {
-							throw new Error(`Could not get kolla url for siuUrl: ${siuUrl}. siuResponse: ${JSON.stringify(siuResponse)}.\n surveysResponseText:${surveysResponseText}`);
+		let kollaUrls = await Promise.all($(surveysResponseText).find("ul li a").toArray()
+			.map(a => a.href)
+			.map(async siuUrl => {
+				siuUrl += (siuUrl.includes("?") ? "&" : "?") + "terminos_condiciones=true";
+				let siuResponse = await this.fetchAjaxGETContents(siuUrl);
+				try {
+					// Return the kollaUrl
+					return $(siuResponse.cont).find("iframe").get(0).src;
+				} catch (e) {
+					throw new Error(`Could not get kolla url for siuUrl: ${siuUrl}. siuResponse: ${JSON.stringify(siuResponse)}.\n surveysResponseText:${surveysResponseText}`);
+				}
+			}));
+		kollaUrls = kollaUrls.flat();
+
+		let surveys = await Promise.all(kollaUrls.map(async kollaUrl => {
+			let kollaResponseText = await this.#utils.backgroundFetch({url: kollaUrl});
+			let surveysMetadata = this.parseKollaSurveyForm($(kollaResponseText), kollaResponseText);
+
+			// We could eventually merge same class professors, but the backend still accepts this:
+			return surveysMetadata.map(surveyMetadata => {
+				return {
+					year: surveyMetadata.year,
+					quarter: surveyMetadata.quarter,
+					classCode: surveyMetadata.classCode,
+					courseCode: surveyMetadata.courseCode,
+					professors: [
+						{
+							name: surveyMetadata.professorName,
+							kind: surveyMetadata.surveyKind,
+							role: surveyMetadata.professorRole,
 						}
-					});
-				});
-			return Promise.all(promises).then(kollaUrls => kollaUrls.flat());
-		}).then(kollaUrls => {
-			let promises = kollaUrls.map(kollaUrl => {
-				return this.#utils.backgroundFetch({url: kollaUrl}).then(kollaResponseText => {
-					let surveysMetadata = this.parseKollaSurveyForm($(kollaResponseText), kollaResponseText);
-
-					// We could eventually merge same class professors, but the backend still accepts this:
-					return surveysMetadata.map(surveyMetadata => {
-						return {
-							year: surveyMetadata.year,
-							quarter: surveyMetadata.quarter,
-							classCode: surveyMetadata.classCode,
-							courseCode: surveyMetadata.courseCode,
-							professors: [
-								{
-									name: surveyMetadata.professorName,
-									kind: surveyMetadata.surveyKind,
-									role: surveyMetadata.professorRole,
-								}
-							]
-						};
-					});
-				});
+					]
+				};
 			});
-			return Promise.all(promises).then(surveys => surveys.flat());
-		});
+		}));
+		return surveys.flat();
 	}
 
 	// --------------------
