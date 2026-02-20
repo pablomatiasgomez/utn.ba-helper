@@ -52,7 +52,10 @@ export class Utils {
 		}).catch(e => {
 			console.error(`Error while executing ${name}`, e);
 			// Not logging errors that we can't do anything.
-			if (isIgnoredError(e)) return;
+			if (isIgnoredError(e)) {
+				log.logException(e, {handled: true, attributes: {name: name}});
+				return;
+			}
 
 			let errStr = stringifyError(e);
 			// Skip first 2 Failed to fetch errors. We only want to know about these if it's failing for every request.
@@ -60,7 +63,7 @@ export class Utils {
 			if (errStr.includes("Failed to fetch") && ++this.#failedToFetchErrors <= 2) return;
 
 			// Log to Embrace
-			log.logException(e, {handled: true, attributes: {name: name}});
+			log.logException(e, {handled: false, attributes: {name: name}});
 
 			// Log to our backend
 			return this.#apiConnector.logMessage(name, true, errStr);
