@@ -1,6 +1,7 @@
 import {ApiConnector} from '../__mocks__/ApiConnector.js';
 import {Utils} from './Utils.js';
 import {PagesDataParser} from './PagesDataParser.js';
+import {ProfileNotHandledError} from './Errors.js';
 
 import fs from "node:fs";
 import path from "node:path";
@@ -26,5 +27,28 @@ describe('pagesDataParser.getStudentId', () => {
 		expect(() => {
 			pagesDataParser.getStudentId();
 		}).toThrow();
+	});
+});
+
+describe('pagesDataParser.fetchAjaxGETContents', () => {
+	let pagesDataParser;
+
+	beforeEach(() => {
+		let apiConnector = new ApiConnector();
+		let utils = new Utils(apiConnector);
+		pagesDataParser = new PagesDataParser(utils);
+	});
+
+	it('throws ProfileNotHandledError when redirected to zona_comisiones', async () => {
+		global.fetch = () => Promise.resolve({
+			ok: true,
+			text: () => Promise.resolve(JSON.stringify({
+				cod: "-2",
+				cont: {url: "/autogestion/grado/zona_comisiones"}
+			})),
+		});
+
+		await expect(pagesDataParser.fetchAjaxGETContents("https://example.com"))
+			.rejects.toThrow(ProfileNotHandledError);
 	});
 });
