@@ -3,7 +3,7 @@
 import $ from 'jquery';
 import * as XLSX from 'xlsx';
 import {Consts} from './Consts.js';
-import {GuaraniBackendError, LoggedOutError, MissingStudentIdError, RedirectedToHomeError} from './Errors.js';
+import {GuaraniBackendError, LoggedOutError, MissingStudentIdError, ProfileNotHandledError, RedirectedToHomeError} from './Errors.js';
 
 export class PagesDataParser {
 	#utils;
