@@ -98,8 +98,9 @@ export class ApiConnector {
 
 	#makeRequest(options) {
 		// TODO this is duplicated in Utils.backgroundFetch.
-		return new Promise((resolve, reject) => {
-			chrome.runtime.sendMessage(options, response => (response && response.errorStr) ? reject(new Error(response.errorStr)) : resolve(response));
+		return chrome.runtime.sendMessage(options).then(response => {
+			if (response && response.errorStr) throw new Error(response.errorStr);
+			return response;
 		});
 	}
 
