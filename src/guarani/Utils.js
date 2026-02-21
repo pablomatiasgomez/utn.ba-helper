@@ -28,16 +28,12 @@ export class Utils {
 		return new Promise((resolve, reject) => {
 			let script = document.createElement('script');
 			script.type = 'text/javascript';
-			let scriptUrl = chrome.runtime.getURL(filePath);
-			script.src = scriptUrl;
+			script.src = chrome.runtime.getURL(filePath);
 			script.onload = () => {
 				if (removeAfterLoad) script.remove();
 				resolve();
 			};
-			script.onerror = () => {
-				let contextInvalidated = typeof chrome.runtime?.id === 'undefined';
-				reject(new Error(`Failed to load script: ${filePath}. URL: ${scriptUrl}. Extension context invalidated: ${contextInvalidated}`));
-			};
+			script.onerror = () => reject(new Error(`Failed to load script: ${filePath}`));
 			document.head.appendChild(script);
 		});
 	}
