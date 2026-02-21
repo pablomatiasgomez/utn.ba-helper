@@ -51,6 +51,7 @@ export class ExtensionMessageError extends Error {
 
 // Errors that we don't want to log to our backend
 const IGNORED_ERROR_TYPES = [LoggedOutError, GuaraniBackendError, MissingStudentIdError, ProfileNotHandledError, ExtensionMessageError];
+const IGNORED_ERROR_MESSAGES = ["Extension context invalidated"];
 
 /**
  * Checks if the given error or any error in its cause chain is of a type that should be ignored.
@@ -60,6 +61,7 @@ const IGNORED_ERROR_TYPES = [LoggedOutError, GuaraniBackendError, MissingStudent
 export function isIgnoredError(error) {
 	if (!error) return false;
 	if (IGNORED_ERROR_TYPES.some(ErrorType => error instanceof ErrorType)) return true;
+	if (IGNORED_ERROR_MESSAGES.some(msg => error.message?.includes(msg))) return true;
 	return isIgnoredError(error.cause);
 }
 
