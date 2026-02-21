@@ -40,8 +40,17 @@ export class ProfileNotHandledError extends Error {
 }
 
 
+// ExtensionMessageError is thrown when chrome.runtime.sendMessage fails due to the message channel closing
+// or the receiving end not existing. This happens when the user navigates away, closes the tab, or the service worker is inactive.
+export class ExtensionMessageError extends Error {
+	constructor(message, options) {
+		super(message, options);
+		this.name = "ExtensionMessageError";
+	}
+}
+
 // Errors that we don't want to log to our backend
-const IGNORED_ERROR_TYPES = [LoggedOutError, GuaraniBackendError, MissingStudentIdError, ProfileNotHandledError];
+const IGNORED_ERROR_TYPES = [LoggedOutError, GuaraniBackendError, MissingStudentIdError, ProfileNotHandledError, ExtensionMessageError];
 
 /**
  * Checks if the given error or any error in its cause chain is of a type that should be ignored.

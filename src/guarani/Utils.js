@@ -5,8 +5,6 @@ import {log} from "@embrace-io/web-sdk";
 import {CustomPages} from './custompages/CustomPages.js';
 
 export class Utils {
-	// TODO utils eventually shouldn't be instantiated and should be a set of functions.
-	//  But we need to get rid of using apiConnector here.
 
 	#apiConnector;
 	#failedToFetchErrors = 0;
@@ -16,13 +14,6 @@ export class Utils {
 	}
 
 	// Related to the extension:
-
-	// TODO this is duplicated in the ApiConnector.
-	async backgroundFetch(options) {
-		let response = await chrome.runtime.sendMessage(options);
-		if (response && response.errorStr) throw new Error(response.errorStr);
-		return response;
-	}
 
 	injectScript(filePath, removeAfterLoad = false) {
 		return new Promise((resolve, reject) => {
@@ -37,7 +28,6 @@ export class Utils {
 			document.head.appendChild(script);
 		});
 	}
-
 
 	/**
 	 * Wraps a function that is triggered from an async event, and handles errors by logging them to the api.

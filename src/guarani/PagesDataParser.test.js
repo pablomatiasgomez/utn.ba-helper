@@ -1,5 +1,3 @@
-import {ApiConnector} from '../__mocks__/ApiConnector.js';
-import {Utils} from './Utils.js';
 import {PagesDataParser} from './PagesDataParser.js';
 import {ProfileNotHandledError} from './Errors.js';
 
@@ -9,9 +7,7 @@ import path from "node:path";
 const __dirname = import.meta.dirname;
 
 describe('pagesDataParser.getStudentId', () => {
-	let apiConnector = new ApiConnector();
-	let utils = new Utils(apiConnector);
-	let pagesDataParser = new PagesDataParser(utils);
+	let pagesDataParser = new PagesDataParser();
 
 	beforeEach(() => {
 		const inputFile = expect.getState().currentTestName.replaceAll(" ", "_") + '.html';
@@ -34,9 +30,7 @@ describe('pagesDataParser.fetchAjaxGETContents', () => {
 	let pagesDataParser;
 
 	beforeEach(() => {
-		let apiConnector = new ApiConnector();
-		let utils = new Utils(apiConnector);
-		pagesDataParser = new PagesDataParser(utils);
+		pagesDataParser = new PagesDataParser();
 	});
 
 	it('throws ProfileNotHandledError when redirected to zona_comisiones', async () => {

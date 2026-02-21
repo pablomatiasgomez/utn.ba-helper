@@ -1,3 +1,5 @@
+import {backgroundFetch} from './BackgroundMessaging.js';
+
 const CLIENT = `CHROME@${chrome.runtime.getManifest().version}`;
 const BASE_API_URL = "https://www.pablomatiasgomez.com.ar/utnba-helper/v2";
 
@@ -75,7 +77,7 @@ export class ApiConnector {
 	}
 
 	#postData(url, data) {
-		return this.#makeRequest({
+		return backgroundFetch({
 			url: url,
 			method: 'POST',
 			headers: {
@@ -87,20 +89,13 @@ export class ApiConnector {
 	}
 
 	#getData(url) {
-		return this.#makeRequest({
+		return backgroundFetch({
 			url: url,
 			method: 'GET',
 			headers: {
 				"X-Client": CLIENT
 			}
 		});
-	}
-
-	async #makeRequest(options) {
-		// TODO this is duplicated in Utils.backgroundFetch.
-		let response = await chrome.runtime.sendMessage(options);
-		if (response && response.errorStr) throw new Error(response.errorStr);
-		return response;
 	}
 
 	#buildQueryParams(params) {

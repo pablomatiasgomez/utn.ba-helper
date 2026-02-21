@@ -3,15 +3,17 @@
 import $ from 'jquery';
 import * as XLSX from 'xlsx';
 import {Consts} from './Consts.js';
-import {GuaraniBackendError, LoggedOutError, MissingStudentIdError, ProfileNotHandledError, RedirectedToHomeError} from './Errors.js';
+import {
+	GuaraniBackendError,
+	LoggedOutError,
+	MissingStudentIdError,
+	ProfileNotHandledError,
+	RedirectedToHomeError
+} from './Errors.js';
+import {backgroundFetch} from '../BackgroundMessaging.js';
 
 export class PagesDataParser {
-	#utils;
 	#responsesCache = {}; 	// We want to fetch only once each page.
-
-	constructor(utils) {
-		this.#utils = utils;
-	}
 
 	#fetchAjaxPOSTContents(url, body, useCache = true) {
 		return this.#fetchAjaxContents(url, {
@@ -426,7 +428,7 @@ export class PagesDataParser {
 		kollaUrls = kollaUrls.flat();
 
 		let surveys = await Promise.all(kollaUrls.map(async kollaUrl => {
-			let kollaResponseText = await this.#utils.backgroundFetch({url: kollaUrl});
+			let kollaResponseText = await backgroundFetch({url: kollaUrl});
 			let surveysMetadata = this.parseKollaSurveyForm($(kollaResponseText), kollaResponseText);
 
 			// We could eventually merge same class professors, but the backend still accepts this:
