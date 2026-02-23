@@ -39,10 +39,7 @@ export class Utils {
 		}).catch(e => {
 			console.error(`Error while executing ${name}`, e);
 			// Not logging errors that we can't do anything.
-			if (isIgnoredError(e)) {
-				log.logException(e, {handled: true, attributes: {name: name}});
-				return;
-			}
+			if (isIgnoredError(e)) return;
 
 			let errStr = stringifyError(e);
 			// Skip first 2 Failed to fetch errors. We only want to know about these if it's failing for every request.
