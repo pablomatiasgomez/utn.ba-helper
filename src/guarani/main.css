@@ -15,3 +15,8 @@
 .brand-nav .row-fluid .span12 {
     min-height: initial !important;
 }
+
+/* Gives more space to add the UTN.BA Helper dropdown */
+.main-nav #js-nav.nav > li > a {
+    padding: 10px !important;
+}
