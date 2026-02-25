@@ -1,4 +1,5 @@
 import './PreInscripcionPage.css';
+import { Consts } from '../Consts.js';
 
 export class PreInscripcionPage {
 	#pagesDataParser;
@@ -34,6 +35,15 @@ export class PreInscripcionPage {
 			`).join(" | ");
 		}
 
+		let dayOrder = Object.values(Consts.DAYS).map(d => d.substring(0, 2));
+		let shiftOrder = Object.values(Consts.TIME_SHIFTS).map(s => s[0].toLowerCase());
+		let sortedSchedules = Array.from(schedules).sort((a, b) => {
+			const dayA = a.substring(0, 2), dayB = b.substring(0, 2);
+			const shiftA = a.match(/\((\w)\)/)?.[1], shiftB = b.match(/\((\w)\)/)?.[1];
+			return (dayOrder.indexOf(dayA) - dayOrder.indexOf(dayB))
+				|| (shiftOrder.indexOf(shiftA) - shiftOrder.indexOf(shiftB));
+		});
+
 		// Adds the checkboxes html
 		filtersDiv.insertAdjacentHTML("beforeend", `
 			<div class="filter">
@@ -46,7 +56,7 @@ export class PreInscripcionPage {
 			</div>
 			<div class="filter">
 				<span style="font-weight: bold;">Turno: </span>
-				${createFilterOptions(schedules)}
+				${createFilterOptions(sortedSchedules)}
 			</div>
 			<a href="#" class="btn btn-info btn-small">Filtrar</a>
 		`);
