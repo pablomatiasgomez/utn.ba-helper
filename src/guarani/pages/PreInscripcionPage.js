@@ -1,5 +1,5 @@
 import './PreInscripcionPage.css';
-import { Consts } from '../Consts.js';
+import {Consts} from '../Consts.js';
 
 export class PreInscripcionPage {
 	#pagesDataParser;
@@ -164,10 +164,10 @@ export class PreInscripcionPage {
 		// Need to listen to course register changes, as the combo is reloaded, and we need to add the table again.
 		// We need to un register them on close, as changing a course will trigger a new PreInscripcionPage.
 		// Events triggered from foreground script:
-			this.#addPreviousProfessorsTableEventFn = () => {
-				let alternativesDiv = document.querySelector("#insc_alternativas .inscripcion-alternativa");
-				if (!alternativesDiv) return; // There may be no div if for example the alternative already has a selected option.
-				alternativesDiv.insertAdjacentHTML("beforebegin", `
+		this.#addPreviousProfessorsTableEventFn = () => {
+			let alternativesDiv = document.querySelector("#insc_alternativas .inscripcion-alternativa");
+			if (!alternativesDiv) return; // There may be no div if for example the alternative already has a selected option.
+			alternativesDiv.insertAdjacentHTML("beforebegin", `
 					<div class="utnba-helper">
 						<div class="alert info">
 							<h3 style="text-align: center;">UTN.BA HELPER - Información importante</h3>
@@ -185,17 +185,17 @@ export class PreInscripcionPage {
 						<hr>
 					</div>
 				`);
-				let alternativesCombo = document.querySelector('#comision');
-				let filtersDiv = document.querySelector("#insc_alternativas .utnba-helper .filters");
-				let previousProfessorsTableBody = document.querySelector("#insc_alternativas .utnba-helper .previous-professors tbody");
-				this.#utils.runAsync("addPreviousProfessorsTable", () => this.#addPreviousProfessorsTable(alternativesCombo, filtersDiv, previousProfessorsTableBody));
-			};
-			this.#addPreviousProfessorsTableEventWithDelayFn = () => setTimeout(this.#addPreviousProfessorsTableEventFn, 500);
+			let alternativesCombo = document.querySelector('#comision');
+			let filtersDiv = document.querySelector("#insc_alternativas .utnba-helper .filters");
+			let previousProfessorsTableBody = document.querySelector("#insc_alternativas .utnba-helper .previous-professors tbody");
+			this.#utils.runAsync("addPreviousProfessorsTable", () => this.#addPreviousProfessorsTable(alternativesCombo, filtersDiv, previousProfessorsTableBody));
+		};
+		this.#addPreviousProfessorsTableEventWithDelayFn = () => setTimeout(this.#addPreviousProfessorsTableEventFn, 500);
 
-			window.addEventListener("__utn_ba_event_comision_preinscripta", this.#addPreviousProfessorsTableEventFn);
-			window.addEventListener("__utn_ba_event_comision_despreinscripta", this.#addPreviousProfessorsTableEventFn);
-			window.addEventListener("__utn_ba_event_setear_comisiones_insc_alternativa", this.#addPreviousProfessorsTableEventWithDelayFn);
-			return this.#addPreviousProfessorsTableEventFn();
+		window.addEventListener("__utn_ba_event_comision_preinscripta", this.#addPreviousProfessorsTableEventFn);
+		window.addEventListener("__utn_ba_event_comision_despreinscripta", this.#addPreviousProfessorsTableEventFn);
+		window.addEventListener("__utn_ba_event_setear_comisiones_insc_alternativa", this.#addPreviousProfessorsTableEventWithDelayFn);
+		return this.#addPreviousProfessorsTableEventFn();
 	}
 
 	close() {
