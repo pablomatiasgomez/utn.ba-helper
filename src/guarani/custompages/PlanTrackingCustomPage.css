@@ -1,3 +1,7 @@
+.utnba-helper .plan-tracking {
+    width: 100%;
+}
+
 .utnba-helper .plan-tracking tbody td {
     vertical-align: top;
 }
