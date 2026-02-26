@@ -2,9 +2,13 @@ chrome.runtime.onMessage.addListener(function (requestInfo, sender, resolve) {
 	requestFetch(requestInfo).then(response => {
 		resolve(response);
 	}).catch(e => {
+		// Error objects are not JSON-serializable, so we need to serialize them manually.
 		resolve({
-			// Need to do .toString() as Error is not "JSON-ifiable" and may get erased.
-			errorStr: `Error executing ${requestInfo.method || "GET"} ${requestInfo.url} - ${e.toString()}`
+			error: {
+				name: e.name,
+				message: `Error executing ${requestInfo.method || "GET"} ${requestInfo.url} - ${e.toString()}`,
+				status: e.status,
+			},
 		});
 	});
 
@@ -34,6 +38,8 @@ async function requestFetch(requestInfo) {
 		}
 
 		let body = await response.text();
-		throw new Error(`Got unexpected ResponseStatus: ${response.status} for url: ${requestInfo.url} - ResponseBody: ${body}`);
+		let error = new Error(`Got unexpected ResponseStatus: ${response.status} - ResponseBody: ${body}`);
+		error.status = response.status;
+		throw error;
 	}
 }

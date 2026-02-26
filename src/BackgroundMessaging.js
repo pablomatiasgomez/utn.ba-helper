@@ -10,11 +10,21 @@ export async function backgroundFetch(options) {
 		response = await chrome.runtime.sendMessage(options);
 	} catch (e) {
 		// These errors happen when the user navigates away, closes the tab, or the service worker is inactive.
-		if (e.message?.includes("message channel closed") || e.message?.includes("Receiving end does not exist") || e.message?.includes("Extension context invalidated")) {
+		if (e.message?.includes("message channel closed") || e.message?.includes("Receiving end does not exist")) {
 			throw new ExtensionMessageError(e.message, {cause: e});
 		}
 		throw e;
 	}
-	if (response && response.errorStr) throw new Error(response.errorStr);
+	if (response && response.error) {
+		let error = new Error(response.error.message);
+		let method = options.method || "GET";
+		let {origin, pathname} = new URL(options.url);
+		if (response.error.status) {
+			error.name = `HttpError(${response.error.status} ${method} ${origin}${pathname})`;
+		} else {
+			error.name = `${response.error.name || "Error"}(${method} ${origin}${pathname})`;
+		}
+		throw error;
+	}
 	return response;
 }
