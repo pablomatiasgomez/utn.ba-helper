@@ -347,6 +347,7 @@ export class PagesDataParser {
 	async getCoursesHistory() {
 		let courses = [];
 		let finalExams = [];
+		let equivalenceTypesByActivity = await this.#fetchEquivalenceTypesByActivity();
 		// Use a map to also validate returned types.
 		let arrayByTypes = {
 			"En curso": courses,
@@ -376,7 +377,11 @@ export class PagesDataParser {
 			let gradeText = row["Nota"];
 			let gradeIsPassedText = row["Resultado"];
 
-			if (!gradeText || !gradeIsPassedText) return; // Ignore non finished items
+			if (!gradeText && !gradeIsPassedText) return; // Ignore non finished items
+
+			if (type === "Equivalencia") {
+				type = this.#getEquivalenceTypeForActivity(courseText, equivalenceTypesByActivity);
+			}
 
 			let groups = /(.*) \((\d{6})\)/.exec(courseText);
 			if (!groups) throw new Error(`courseText couldn't be parsed: ${courseText}. Row: ${JSON.stringify(row)}`);
@@ -403,6 +408,50 @@ export class PagesDataParser {
 			courses: courses,
 			finalExams: finalExams,
 		};
+	}
+
+	#getEquivalenceTypeForActivity(courseText, equivalenceTypesByActivity) {
+		let equivalenceTypes = equivalenceTypesByActivity[courseText];
+		if (!equivalenceTypes || equivalenceTypes.length === 0) {
+			throw new Error(`Could not resolve equivalence type for activity: ${courseText}`);
+		}
+
+		if (equivalenceTypes.includes("Equivalencia")) return "Equivalencia";
+		return "Regularidad";
+	}
+
+	async #fetchEquivalenceTypesByActivity() {
+		let responseContents = await this.fetchAjaxGETContents("/autogestion/grado/historia_academica/?checks=EquivalenciaA,&modo=materia");
+		let responseText = this.#parseAjaxPageRenderer(responseContents.cont, "info_historia").content;
+		let doc = new DOMParser().parseFromString(responseText, "text/html");
+		let listado = doc.querySelector("#listado");
+		if (!listado) throw new Error(`Could not find #listado in equivalence response. responseText: ${responseText}`);
+
+		let equivalenceTypesByActivity = {};
+		Array.from(listado.children).filter(activityDiv => activityDiv.classList.contains("catedras")).forEach(activityDiv => {
+			let activityText = activityDiv.querySelector("h3.titulo-corte")?.textContent.trim();
+			if (!activityText) return;
+
+			let equivalenceTypes = [];
+			Array.from(activityDiv.querySelectorAll(".catedra[equivalencia='Aprobado']")).forEach(catedraDiv => {
+				let equivalenceText = catedraDiv.querySelector(".catedra_nombre strong")?.textContent.trim() || "";
+				let equivalenceType = this.#parseEquivalenceType(equivalenceText);
+				if (equivalenceType) equivalenceTypes.push(equivalenceType);
+			});
+
+			if (equivalenceTypes.length > 0) {
+				equivalenceTypesByActivity[activityText] = equivalenceTypes;
+			}
+		});
+
+		return equivalenceTypesByActivity;
+	}
+
+	#parseEquivalenceType(equivalenceText) {
+		let normalizedText = equivalenceText.toLowerCase();
+		if (normalizedText.includes("total")) return "Equivalencia";
+		if (normalizedText.includes("regularidad")) return "Regularidad";
+		return null;
 	}
 
 	/**
