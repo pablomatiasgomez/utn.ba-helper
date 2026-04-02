@@ -347,7 +347,7 @@ export class PagesDataParser {
 	async getCoursesHistory() {
 		let courses = [];
 		let finalExams = [];
-		let equivalenceTypesByActivity = await this.#fetchEquivalenceTypesByActivity();
+		let equivalenceTypesByCourseText = await this.#fetchEquivalenceTypesByCourseText();
 		// Use a map to also validate returned types.
 		let arrayByTypes = {
 			"En curso": courses,
@@ -355,6 +355,8 @@ export class PagesDataParser {
 			"Promocion": finalExams,
 			"Examen": finalExams,
 			"Equivalencia": finalExams,
+			"Equivalencia Regularidad": courses,
+			"Equivalencia Total": finalExams,
 		};
 		const gradeIsPassedTypes = {
 			"Promocionado": true,
@@ -380,7 +382,7 @@ export class PagesDataParser {
 			if (!gradeText && !gradeIsPassedText) return; // Ignore non finished items
 
 			if (type === "Equivalencia") {
-				type = this.#getEquivalenceTypeForActivity(courseText, equivalenceTypesByActivity);
+				type = this.#getEquivalenceTypeForCourseText(courseText, equivalenceTypesByCourseText);
 			}
 
 			let groups = /(.*) \((\d{6})\)/.exec(courseText);
@@ -410,48 +412,43 @@ export class PagesDataParser {
 		};
 	}
 
-	#getEquivalenceTypeForActivity(courseText, equivalenceTypesByActivity) {
-		let equivalenceTypes = equivalenceTypesByActivity[courseText];
+	#getEquivalenceTypeForCourseText(courseText, equivalenceTypesByCourseText) {
+		let equivalenceTypes = equivalenceTypesByCourseText[courseText];
 		if (!equivalenceTypes || equivalenceTypes.length === 0) {
 			throw new Error(`Could not resolve equivalence type for activity: ${courseText}`);
 		}
 
 		if (equivalenceTypes.includes("Equivalencia")) return "Equivalencia";
-		return "Regularidad";
+		if (equivalenceTypes.includes("Equivalencia Total")) return "Equivalencia Total";
+		return "Equivalencia Regularidad";
 	}
 
-	async #fetchEquivalenceTypesByActivity() {
+	async #fetchEquivalenceTypesByCourseText() {
 		let responseContents = await this.fetchAjaxGETContents("/autogestion/grado/historia_academica/?checks=EquivalenciaA,&modo=materia");
 		let responseText = this.#parseAjaxPageRenderer(responseContents.cont, "info_historia").content;
 		let doc = new DOMParser().parseFromString(responseText, "text/html");
 		let listado = doc.querySelector("#listado");
 		if (!listado) throw new Error(`Could not find #listado in equivalence response. responseText: ${responseText}`);
 
-		let equivalenceTypesByActivity = {};
-		Array.from(listado.children).filter(activityDiv => activityDiv.classList.contains("catedras")).forEach(activityDiv => {
-			let activityText = activityDiv.querySelector("h3.titulo-corte")?.textContent.trim();
-			if (!activityText) return;
+		let equivalenceTypesByCourseText = {};
+		Array.from(listado.children).filter(catedraGroupDiv => catedraGroupDiv.classList.contains("catedras")).forEach(catedraGroupDiv => {
+			let courseText = catedraGroupDiv.querySelector("h3.titulo-corte")?.textContent.trim();
+			if (!courseText) return;
 
 			let equivalenceTypes = [];
-			Array.from(activityDiv.querySelectorAll(".catedra[equivalencia='Aprobado']")).forEach(catedraDiv => {
+			Array.from(catedraGroupDiv.querySelectorAll(".catedra[equivalencia='Aprobado']")).forEach(catedraDiv => {
 				let equivalenceText = catedraDiv.querySelector(".catedra_nombre strong")?.textContent.trim() || "";
-				let equivalenceType = this.#parseEquivalenceType(equivalenceText);
-				if (equivalenceType) equivalenceTypes.push(equivalenceType);
+				if (equivalenceText.includes("Equivalencia Total")) equivalenceTypes.push("Equivalencia Total");
+				if (equivalenceText.includes("Equivalencia Regularidad")) equivalenceTypes.push("Equivalencia Regularidad");
+				if (equivalenceText === "Equivalencia") equivalenceTypes.push("Equivalencia");
 			});
 
 			if (equivalenceTypes.length > 0) {
-				equivalenceTypesByActivity[activityText] = equivalenceTypes;
+				equivalenceTypesByCourseText[courseText] = equivalenceTypes;
 			}
 		});
 
-		return equivalenceTypesByActivity;
-	}
-
-	#parseEquivalenceType(equivalenceText) {
-		let normalizedText = equivalenceText.toLowerCase();
-		if (normalizedText.includes("total")) return "Equivalencia";
-		if (normalizedText.includes("regularidad")) return "Regularidad";
-		return null;
+		return equivalenceTypesByCourseText;
 	}
 
 	/**
