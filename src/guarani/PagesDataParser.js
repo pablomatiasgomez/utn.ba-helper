@@ -423,6 +423,8 @@ export class PagesDataParser {
 		return "Equivalencia Regularidad";
 	}
 
+	// fetchEquivalenceTypesByCourseText is needed to fetch the Equivalences directly from HTML and not XLS,
+	// as the XLS only includes the string "Equivalencia" which cannot be distinguished between Regularidad and Total
 	async #fetchEquivalenceTypesByCourseText() {
 		let responseContents = await this.fetchAjaxGETContents("/autogestion/grado/historia_academica/?checks=EquivalenciaA,&modo=materia");
 		let responseText = this.#parseAjaxPageRenderer(responseContents.cont, "info_historia").content;
