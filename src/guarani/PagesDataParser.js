@@ -347,6 +347,80 @@ export class PagesDataParser {
 	 * Parses and returns all the student's academic history. Includes courses and final exams (both passed and failed)
 	 * @returns {Promise<{courses: [{courseCode: string, isPassed: boolean, grade: number, weightedGrade: number, date: Date}], finalExams: [{courseCode: string, isPassed: boolean, grade: number, weightedGrade: number, date: Date}]}>}
 	 */
+	async getCoursesHistoryFromHTML() {
+		let courses = [];
+		let finalExams = [];
+		// Use a map to also validate returned types.
+		let arrayByTypes = {
+			"En curso": courses,
+			"Regularidad": courses,
+			"Promoción": finalExams,
+			"Examen": finalExams,
+			"Equivalencia Parcial": courses,
+			"Equivalencia Total": finalExams,
+		};
+		const gradeIsPassedTypes = {
+			"Promocionado": true,
+			"Aprobado": true,
+			"Reprobado": false,
+			"Ausente": false,
+		};
+
+		let responseContents = await this.fetchAjaxGETContents("/autogestion/grado/historia_academica/?checks=PromocionA,RegularidadA,RegularidadR,RegularidadU,EnCurso,ExamenA,ExamenR,ExamenU,EquivalenciaA,EquivalenciaR,AprobResA,CreditosA,&modo=anio&param_modo=");
+		let responseText = this.#parseAjaxPageRenderer(responseContents.cont, "info_historia").content;
+		let doc = new DOMParser().parseFromString(responseText, "text/html");
+		Array.from(doc.querySelectorAll(".catedra_nombre")).forEach(item => {
+			let courseText = item.querySelector("h4")?.textContent?.trim() || "";
+			let courseCodeGroups = /(.*) \((\d{6})\)/.exec(courseText);
+			if (!courseCodeGroups) throw new Error(`courseText couldn't be parsed: ${courseText}`);
+			let courseCode = courseCodeGroups[2];
+
+			// Row shape: "<type>  - <gradeInfo> <date> - Libro <X> - Folio <Y> - Detalle"
+			// Examples:
+			//            "Promoción  - 10 (Diez) Promocionado 10/07/2018 - Libro PR038 - Folio 190 - Detalle"
+			//            "Regularidad  - Aprobada (Aprobada) Aprobado 22/03/2017 - Libro XVII200 - Folio 29 - Detalle"
+			let historyRow = item.querySelector("span")?.textContent?.trim() || "";
+			let parts = historyRow.split(" - ");
+			if (parts.length !== 5 || parts[4] !== "Detalle") throw new Error(`historyRow couldn't be parsed: ${historyRow}`);
+
+			let type = parts[0].trim();
+			let arr = arrayByTypes[type];
+			if (!arr) throw new Error(`Type not handled: ${type}. Row: ${historyRow}`);
+
+			// parts[1] is "<gradeInfo> <date>" — split off the trailing date.
+			let lastSpace = parts[1].lastIndexOf(" ");
+			let dateStr = parts[1].slice(lastSpace + 1);
+			let gradeInfo = parts[1].slice(0, lastSpace);
+
+			// Last word of gradeInfo is the gradeOutcome.
+			let gradeOutcome = gradeInfo.split(" ").pop();
+			if (typeof gradeIsPassedTypes[gradeOutcome] === "undefined") throw new Error(`gradeOutcome couldn't be parsed: ${gradeOutcome}. Row: ${JSON.stringify(historyRow)}`);
+			let isPassed = gradeIsPassedTypes[gradeOutcome];
+
+			// First token of gradeInfo is the numeric grade if present (e.g. "8 (OCHO) Aprobado").
+			let grade = parseInt(gradeInfo.split(" ")[0]) || null;
+
+			let date = this.#parseDate(dateStr);
+			let weightedGrade = grade !== null ? this.#getWeightedGrade(date, grade) : null;
+
+			arr.push({
+				courseCode: courseCode,
+				isPassed: isPassed,
+				grade: grade,
+				weightedGrade: weightedGrade,
+				date: date,
+			});
+		});
+		return {
+			courses: courses,
+			finalExams: finalExams,
+		};
+	}
+
+	/**
+	 * Parses and returns all the student's academic history. Includes courses and final exams (both passed and failed)
+	 * @returns {Promise<{courses: [{courseCode: string, isPassed: boolean, grade: number, weightedGrade: number, date: Date}], finalExams: [{courseCode: string, isPassed: boolean, grade: number, weightedGrade: number, date: Date}]}>}
+	 */
 	async getCoursesHistory() {
 		let courses = [];
 		let finalExams = [];
@@ -379,13 +453,13 @@ export class PagesDataParser {
 			let courseText = row["Actividad"];
 			let type = row["Tipo"];
 			let gradeText = row["Nota"];
-			let gradeIsPassedText = row["Resultado"];
+			let gradeOutcome = row["Resultado"];
 
-			if (!gradeText && !gradeIsPassedText) return; // Ignore non finished items
+			if (!gradeText && !gradeOutcome) return; // Ignore non finished items
 
-			let groups = /(.*) \((\d{6})\)/.exec(courseText);
-			if (!groups) throw new Error(`courseText couldn't be parsed: ${courseText}. Row: ${JSON.stringify(row)}`);
-			let courseCode = groups[2];
+			let courseCodeGroups = /(.*) \((\d{6})\)/.exec(courseText);
+			if (!courseCodeGroups) throw new Error(`courseText couldn't be parsed: ${courseText}. Row: ${JSON.stringify(row)}`);
+			let courseCode = courseCodeGroups[2];
 
 			if (type === "Equivalencia") {
 				let equivalenceType = equivalenceTypeByCourseCode[courseCode];
@@ -399,8 +473,8 @@ export class PagesDataParser {
 			let grade = parseInt(gradeText) || null;
 			let weightedGrade = grade !== null ? this.#getWeightedGrade(date, grade) : null;
 
-			if (typeof gradeIsPassedTypes[gradeIsPassedText] === "undefined") throw new Error(`gradeIsPassedText couldn't be parsed: ${gradeIsPassedText}. Row: ${JSON.stringify(row)}`);
-			let isPassed = gradeIsPassedTypes[gradeIsPassedText];
+			if (typeof gradeIsPassedTypes[gradeOutcome] === "undefined") throw new Error(`gradeOutcome couldn't be parsed: ${gradeOutcome}. Row: ${JSON.stringify(row)}`);
+			let isPassed = gradeIsPassedTypes[gradeOutcome];
 
 			arr.push({
 				courseCode: courseCode,
