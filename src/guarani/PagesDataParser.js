@@ -347,15 +347,14 @@ export class PagesDataParser {
 	async getCoursesHistory() {
 		let courses = [];
 		let finalExams = [];
-		let equivalenceTypesByCourseCode = await this.#fetchEquivalenceTypesByCourseCode();
+		let equivalenceTypeByCourseCode = await this.#fetchEquivalenceTypeByCourseCode();
 		// Use a map to also validate returned types.
 		let arrayByTypes = {
 			"En curso": courses,
 			"Regularidad": courses,
 			"Promocion": finalExams,
 			"Examen": finalExams,
-			"Equivalencia": finalExams,
-			"Equivalencia Regularidad": courses,
+			"Equivalencia Parcial": courses,
 			"Equivalencia Total": finalExams,
 		};
 		const gradeIsPassedTypes = {
@@ -386,7 +385,9 @@ export class PagesDataParser {
 			let courseCode = groups[2];
 
 			if (type === "Equivalencia") {
-				type = this.#getEquivalenceTypeForCourseCode(courseCode, equivalenceTypesByCourseCode);
+				let equivalenceType = equivalenceTypeByCourseCode[courseCode];
+				if (!equivalenceType) throw new Error(`Could not resolve equivalence type for courseCode: ${courseCode}. equivalenceTypeByCourseCode: ${JSON.stringify(equivalenceTypeByCourseCode)}`);
+				type = equivalenceType;
 			}
 
 			let arr = arrayByTypes[type];
@@ -412,29 +413,16 @@ export class PagesDataParser {
 		};
 	}
 
-	#getEquivalenceTypeForCourseCode(courseCode, equivalenceTypesByCourseCode) {
-		let equivalenceTypes = equivalenceTypesByCourseCode[courseCode];
-		if (!equivalenceTypes || equivalenceTypes.length === 0) {
-			throw new Error(`Could not resolve equivalence type for courseCode: ${courseCode}. equivalenceTypesByCourseCode: ${JSON.stringify(equivalenceTypesByCourseCode)}`);
-		}
-
-		if (equivalenceTypes.includes("Equivalencia")) return "Equivalencia";
-		if (equivalenceTypes.includes("Equivalencia Total")) return "Equivalencia Total";
-		return "Equivalencia Regularidad";
-	}
-
-	// fetchEquivalenceTypesByCourseCode is needed to fetch the Equivalences directly from HTML and not XLS,
-	// as the XLS only includes the string "Equivalencia" which cannot be distinguished between Regularidad and Total.
-	// We key the map by course code (instead of the full course text) because the HTML and XLS sometimes differ
-	// in accents/whitespace for the course name, but the numeric code is stable across both sources.
-	async #fetchEquivalenceTypesByCourseCode() {
+	// fetchEquivalenceTypeByCourseCode is needed to fetch the Equivalences directly from HTML and not XLS,
+	// as the XLS only includes the string "Equivalencia" which cannot be distinguished between Parcial and Total.
+	async #fetchEquivalenceTypeByCourseCode() {
 		let responseContents = await this.fetchAjaxGETContents("/autogestion/grado/historia_academica/?checks=EquivalenciaA,&modo=materia");
 		let responseText = this.#parseAjaxPageRenderer(responseContents.cont, "info_historia").content;
 		let doc = new DOMParser().parseFromString(responseText, "text/html");
 		let listado = doc.querySelector("#listado");
 		if (!listado) throw new Error(`Could not find #listado in equivalence response. responseText: ${responseText}`);
 
-		let equivalenceTypesByCourseCode = {};
+		let equivalenceTypeByCourseCode = {};
 		Array.from(listado.children).filter(catedraGroupDiv => catedraGroupDiv.classList.contains("catedras")).forEach(catedraGroupDiv => {
 			let courseText = catedraGroupDiv.querySelector("h3.titulo-corte")?.textContent.trim();
 			if (!courseText) return;
@@ -442,20 +430,16 @@ export class PagesDataParser {
 			if (!courseCodeGroups) throw new Error(`Equivalence courseText couldn't be parsed: ${courseText}`);
 			let courseCode = courseCodeGroups[2];
 
-			let equivalenceTypes = [];
 			Array.from(catedraGroupDiv.querySelectorAll(".catedra[equivalencia='Aprobado']")).forEach(catedraDiv => {
 				let equivalenceText = catedraDiv.querySelector(".catedra_nombre strong")?.textContent.trim() || "";
-				if (equivalenceText.includes("Equivalencia Total")) equivalenceTypes.push("Equivalencia Total");
-				if (equivalenceText.includes("Equivalencia Regularidad")) equivalenceTypes.push("Equivalencia Regularidad");
-				if (equivalenceText === "Equivalencia") equivalenceTypes.push("Equivalencia");
+				if (!["Equivalencia Parcial", "Equivalencia Total"].includes(equivalenceText)) throw new Error(`Unknown equivalenceText: ${equivalenceText}`);
+				// "Equivalencia Total" takes priority over "Equivalencia Parcial".
+				if (equivalenceTypeByCourseCode[courseCode] === "Equivalencia Total") return;
+				equivalenceTypeByCourseCode[courseCode] = equivalenceText;
 			});
-
-			if (equivalenceTypes.length > 0) {
-				equivalenceTypesByCourseCode[courseCode] = equivalenceTypes;
-			}
 		});
 
-		return equivalenceTypesByCourseCode;
+		return equivalenceTypeByCourseCode;
 	}
 
 	/**
