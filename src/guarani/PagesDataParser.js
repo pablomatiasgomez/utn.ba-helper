@@ -347,7 +347,7 @@ export class PagesDataParser {
 	async getCoursesHistory() {
 		let courses = [];
 		let finalExams = [];
-		let equivalenceTypesByCourseText = await this.#fetchEquivalenceTypesByCourseText();
+		let equivalenceTypesByCourseCode = await this.#fetchEquivalenceTypesByCourseCode();
 		// Use a map to also validate returned types.
 		let arrayByTypes = {
 			"En curso": courses,
@@ -381,13 +381,13 @@ export class PagesDataParser {
 
 			if (!gradeText && !gradeIsPassedText) return; // Ignore non finished items
 
-			if (type === "Equivalencia") {
-				type = this.#getEquivalenceTypeForCourseText(courseText, equivalenceTypesByCourseText);
-			}
-
 			let groups = /(.*) \((\d{6})\)/.exec(courseText);
 			if (!groups) throw new Error(`courseText couldn't be parsed: ${courseText}. Row: ${JSON.stringify(row)}`);
 			let courseCode = groups[2];
+
+			if (type === "Equivalencia") {
+				type = this.#getEquivalenceTypeForCourseCode(courseCode, equivalenceTypesByCourseCode);
+			}
 
 			let arr = arrayByTypes[type];
 			if (!arr) throw new Error(`Type not handled: ${type}. Row: ${JSON.stringify(row)}`);
@@ -412,10 +412,10 @@ export class PagesDataParser {
 		};
 	}
 
-	#getEquivalenceTypeForCourseText(courseText, equivalenceTypesByCourseText) {
-		let equivalenceTypes = equivalenceTypesByCourseText[courseText];
+	#getEquivalenceTypeForCourseCode(courseCode, equivalenceTypesByCourseCode) {
+		let equivalenceTypes = equivalenceTypesByCourseCode[courseCode];
 		if (!equivalenceTypes || equivalenceTypes.length === 0) {
-			throw new Error(`Could not resolve equivalence type for activity: ${courseText}`);
+			throw new Error(`Could not resolve equivalence type for courseCode: ${courseCode}. equivalenceTypesByCourseCode: ${JSON.stringify(equivalenceTypesByCourseCode)}`);
 		}
 
 		if (equivalenceTypes.includes("Equivalencia")) return "Equivalencia";
@@ -423,19 +423,24 @@ export class PagesDataParser {
 		return "Equivalencia Regularidad";
 	}
 
-	// fetchEquivalenceTypesByCourseText is needed to fetch the Equivalences directly from HTML and not XLS,
-	// as the XLS only includes the string "Equivalencia" which cannot be distinguished between Regularidad and Total
-	async #fetchEquivalenceTypesByCourseText() {
+	// fetchEquivalenceTypesByCourseCode is needed to fetch the Equivalences directly from HTML and not XLS,
+	// as the XLS only includes the string "Equivalencia" which cannot be distinguished between Regularidad and Total.
+	// We key the map by course code (instead of the full course text) because the HTML and XLS sometimes differ
+	// in accents/whitespace for the course name, but the numeric code is stable across both sources.
+	async #fetchEquivalenceTypesByCourseCode() {
 		let responseContents = await this.fetchAjaxGETContents("/autogestion/grado/historia_academica/?checks=EquivalenciaA,&modo=materia");
 		let responseText = this.#parseAjaxPageRenderer(responseContents.cont, "info_historia").content;
 		let doc = new DOMParser().parseFromString(responseText, "text/html");
 		let listado = doc.querySelector("#listado");
 		if (!listado) throw new Error(`Could not find #listado in equivalence response. responseText: ${responseText}`);
 
-		let equivalenceTypesByCourseText = {};
+		let equivalenceTypesByCourseCode = {};
 		Array.from(listado.children).filter(catedraGroupDiv => catedraGroupDiv.classList.contains("catedras")).forEach(catedraGroupDiv => {
 			let courseText = catedraGroupDiv.querySelector("h3.titulo-corte")?.textContent.trim();
 			if (!courseText) return;
+			let courseCodeGroups = /(.*) \((\d{6})\)/.exec(courseText);
+			if (!courseCodeGroups) throw new Error(`Equivalence courseText couldn't be parsed: ${courseText}`);
+			let courseCode = courseCodeGroups[2];
 
 			let equivalenceTypes = [];
 			Array.from(catedraGroupDiv.querySelectorAll(".catedra[equivalencia='Aprobado']")).forEach(catedraDiv => {
@@ -446,11 +451,11 @@ export class PagesDataParser {
 			});
 
 			if (equivalenceTypes.length > 0) {
-				equivalenceTypesByCourseText[courseText] = equivalenceTypes;
+				equivalenceTypesByCourseCode[courseCode] = equivalenceTypes;
 			}
 		});
 
-		return equivalenceTypesByCourseText;
+		return equivalenceTypesByCourseCode;
 	}
 
 	/**
