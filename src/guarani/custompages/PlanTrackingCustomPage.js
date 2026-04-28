@@ -1,6 +1,5 @@
 import './PlanTrackingCustomPage.css';
 
-import $ from 'jquery';
 import {CustomPages} from './CustomPages.js';
 
 const TRANSLATIONS = {
@@ -14,29 +13,29 @@ export class PlanTrackingCustomPage {
 	static menuName = "Seguimiento de Plan";
 	static customParamKey = "";
 
-	#$container;
+	#container;
 	#services;
-	#$gradesSummary;
+	#gradesSummaryDiv;
 	#planDiv;
 
 	constructor(container, services) {
-		this.#$container = $(container);
+		this.#container = container;
 		this.#services = services;
 	}
 
 	#createPage(planCode, coursesHistory) {
 		let promises = [];
 
-		this.#$container.append(`<h3>Plan ${planCode}</h3>`);
+		this.#container.insertAdjacentHTML("beforeend", `<h3>Plan ${planCode}</h3>`);
 
-		this.#$gradesSummary = $("<div></div>");
-		this.#$container.append(this.#$gradesSummary);
+		this.#gradesSummaryDiv = document.createElement("div");
+		this.#container.appendChild(this.#gradesSummaryDiv);
 		promises.push(this.#buildGradesSummary(coursesHistory));
 
-		this.#$container.append("<hr>");
+		this.#container.insertAdjacentHTML("beforeend", "<hr>");
 
-		this.#planDiv = document.createElement('div');
-		this.#$container.append(this.#planDiv);
+		this.#planDiv = document.createElement("div");
+		this.#container.appendChild(this.#planDiv);
 		promises.push(this.#loadPlan(planCode, coursesHistory));
 
 		return Promise.all(promises);
@@ -68,10 +67,11 @@ export class PlanTrackingCustomPage {
 		let allNonWeightedGradesAverage = arrayAverage(passedNonWeightedGrades.concat(failedNonWeightedGrades));
 		let passedNonWeightedGradesAverage = arrayAverage(passedNonWeightedGrades);
 
-		this.#$gradesSummary.html(`<table><tbody></tbody></table>
+		this.#gradesSummaryDiv.innerHTML = `<table><tbody></tbody></table>
 				<i><span><sup>a</sup> Peso académico: Materias Aprobadas * 11 - años de carrera * 5 - finales desaprobados * 3</span></br>
-				<span><sup>b</sup> La nota ponderada es calculada por el "UTN.BA Helper" según <a href="https://www.frba.utn.edu.ar/wp-content/uploads/2019/09/ordenanza_1549.pdf" target="_blank">Ordenanza Nº 1549</a></span></i>`);
-		const appendTableRow = (description, value) => this.#$gradesSummary.find("tbody").append("<tr><td>" + description + "</td><td><b>" + (value || value === 0 ? value : "n/a") + "</b></td></tr>");
+				<span><sup>b</sup> La nota ponderada es calculada por el "UTN.BA Helper" según <a href="https://www.frba.utn.edu.ar/wp-content/uploads/2019/09/ordenanza_1549.pdf" target="_blank">Ordenanza Nº 1549</a></span></i>`;
+		const tbody = this.#gradesSummaryDiv.querySelector("tbody");
+		const appendTableRow = (description, value) => tbody.insertAdjacentHTML("beforeend", "<tr><td>" + description + "</td><td><b>" + (value || value === 0 ? value : "n/a") + "</b></td></tr>");
 
 		appendTableRow("Peso academico", `${pesoAcademico} <small>(11*${passedFinalExams.length} - 5*${yearsCount} - 3*${failedFinalExams.length})</small> <sup>a</sup>`);
 		appendTableRow("Cantidad de finales aprobados", passedFinalExams.length);
