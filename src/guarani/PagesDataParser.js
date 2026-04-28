@@ -85,8 +85,9 @@ export class PagesDataParser {
 	 * @param infoId the infoId to filter the elements out.
 	 */
 	#parseAjaxPageRenderer(responseContents, infoId) {
-		let renderData = $(responseContents).filter("script").toArray()
-			.map(script => $(script).html())
+		let doc = new DOMParser().parseFromString(responseContents, "text/html");
+		let renderData = Array.from(doc.querySelectorAll("script"))
+			.map(el => el.textContent)
 			.filter(script => script.startsWith("kernel.renderer.on_arrival"))
 			.map(script => JSON.parse(script.replace("kernel.renderer.on_arrival(", "").replace(");", "")))
 			.filter(data => data.info.id === infoId);
@@ -168,7 +169,8 @@ export class PagesDataParser {
 	async getStudentPlanCode() {
 		let responseContents = await this.fetchAjaxGETContents("/autogestion/grado/plan_estudio");
 		let responseText = this.#parseAjaxPageRenderer(responseContents.cont, "info_plan").content;
-		let planText = $(responseText).filter(".encabezado").find("td:eq(1)").text();
+		let doc = new DOMParser().parseFromString(responseText, "text/html");
+		let planText = doc.querySelectorAll(".encabezado td")[1].textContent.trim();
 		let groups = /^Plan: \((\w+)\)/.exec(planText);
 		if (!groups) throw new Error(`planText couldn't be parsed: ${planText}`);
 		return groups[1];
@@ -217,10 +219,11 @@ export class PagesDataParser {
 			if (!dependenciesBtn) return dependencies;
 			let body = `elemento=${dependenciesBtn.getAttribute("data-elemento")}&elemento_padre=${dependenciesBtn.getAttribute("data-elemento-padre")}`;
 			let response = await this.#fetchAjaxPOSTContents("https://guarani.frba.utn.edu.ar/autogestion/grado/plan_estudio/correlativas", body);
-			let $response = $(response.cont).filter(".td-table-correlativas");
-			if ($response.find(".alert").text().trim() === "No hay definidas correlativas para la actividad") return dependencies;
+			let responseDoc = new DOMParser().parseFromString(response.cont, "text/html");
+			let container = responseDoc.querySelector(".td-table-correlativas");
+			if (container.querySelector(".alert")?.textContent.trim() === "No hay definidas correlativas para la actividad") return dependencies;
 
-			let elems = $response.children().toArray();
+			let elems = Array.from(container.children);
 			let i = 0;
 			while (i < elems.length) {
 				// There are 4 type elements per each kind:
@@ -231,16 +234,16 @@ export class PagesDataParser {
 				// 		4. table.table-correlativas with dependencies
 
 				// 1. div with h3 that tells the kind
-				let kindTxt = $(elems[i++]).find("> div > h3").text();
+				let kindTxt = elems[i++].querySelector(":scope > div > h3")?.textContent || "";
 				let kind = kindsMapping[kindTxt];
 				if (!kind) throw new Error(`Invalid kind ${kindTxt}. responseCont: ${response.cont}`);
 
 				// 2. div.alert_verificar_correlativas that is used to verify dependencies (not used here)
-				if (!$(elems[i++]).hasClass("alert_verificar_correlativas")) throw new Error(`Found invalid div in second position. responseCont: ${response.cont}`);
+				if (!elems[i++].classList.contains("alert_verificar_correlativas")) throw new Error(`Found invalid div in second position. responseCont: ${response.cont}`);
 
-				while (i < elems.length && $(elems[i]).filter("h4").length) {
+				while (i < elems.length && elems[i].matches("h4")) {
 					// 3. h4 that represents one option (right now we expect to only have "Opción 1")
-					let option = $(elems[i++]).filter("h4").text();
+					let option = elems[i++].textContent;
 					if (option !== "Opción 1") {
 						// For now, we only handle "Opción 1"... TODO: Eventually we should support all of them:
 						i++;
@@ -248,12 +251,14 @@ export class PagesDataParser {
 					}
 
 					// 4. table.table-correlativas with dependencies
-					$(elems[i++]).filter("table.table-correlativas").find("tr:not(:first)").toArray().forEach(tr => {
-						let $tr = $(tr);
+					let tableElem = elems[i++];
+					if (!tableElem.matches("table.table-correlativas")) continue;
+					Array.from(tableElem.querySelectorAll("tr")).slice(1).forEach(tr => {
+						let tds = tr.querySelectorAll("td");
 
 						// Some new rows have the following texts: 'Módulo: Maquinas Alternativas y Turbomáquinas'	'Tener 1 actividades aprobadas'
 						// TODO for now we are ignoring these, eventually we should support them.
-						let dependencyCourse = $tr.find("td:eq(0)").text().trim();
+						let dependencyCourse = tds[0]?.textContent.trim() || "";
 						if (dependencyCourse.startsWith("Módulo: ")) return;
 
 						let groups = /^(.*) \((\d{6})\)$/.exec(dependencyCourse);
@@ -261,7 +266,7 @@ export class PagesDataParser {
 						// let courseName = groups[1];
 						let dependencyCourseCode = groups[2];
 
-						let requirementTxt = $tr.find("td:eq(1)").text().trim();
+						let requirementTxt = tds[1]?.textContent.trim() || "";
 						let requirement = requirementMapping[requirementTxt];
 						if (!requirement) throw new Error(`requirementTxt couldn't be parsed: ${requirementTxt}. responseCont: ${response.cont}`);
 
@@ -278,10 +283,7 @@ export class PagesDataParser {
 
 		let responseContents = await this.fetchAjaxGETContents("/autogestion/grado/plan_estudio");
 		let responseText = this.#parseAjaxPageRenderer(responseContents.cont, "info_plan").content;
-		// Need to wrap contents into parent div as many elements come as first level, and we cannot use querySelector() then.
-		let doc = document.createElement("div");
-		doc.id = "info_plan";
-		doc.innerHTML = responseText;
+		let doc = new DOMParser().parseFromString(responseText, "text/html");
 
 		// PlanCode
 		let planText = doc.querySelectorAll(".encabezado td")[1].textContent.trim();
@@ -451,17 +453,16 @@ export class PagesDataParser {
 		let responseContents = await this.fetchAjaxGETContents("/autogestion/grado/inicio_alumno");
 		let surveysResponseText = this.#parseAjaxPageRenderer(responseContents.cont, "lista_encuestas_pendientes").content;
 
-		let kollaUrls = await Promise.all($(surveysResponseText).find("ul li a").toArray()
+		let surveysDoc = new DOMParser().parseFromString(surveysResponseText, "text/html");
+		let kollaUrls = await Promise.all(Array.from(surveysDoc.querySelectorAll("ul li a"))
 			.map(a => a.href)
 			.map(async siuUrl => {
 				siuUrl += (siuUrl.includes("?") ? "&" : "?") + "terminos_condiciones=true";
 				let siuResponse = await this.fetchAjaxGETContents(siuUrl);
-				try {
-					// Return the kollaUrl
-					return $(siuResponse.cont).find("iframe").get(0).src;
-				} catch (e) {
-					throw new Error(`Could not get kolla url for siuUrl: ${siuUrl}. siuResponse: ${JSON.stringify(siuResponse)}.\n surveysResponseText:${surveysResponseText}`);
-				}
+				let siuDoc = new DOMParser().parseFromString(siuResponse.cont, "text/html");
+				let iframe = siuDoc.querySelector("iframe");
+				if (!iframe) throw new Error(`Could not get kolla url for siuUrl: ${siuUrl}. siuResponse: ${JSON.stringify(siuResponse)}.\n surveysResponseText:${surveysResponseText}`);
+				return iframe.src;
 			}));
 		kollaUrls = kollaUrls.flat();
 
