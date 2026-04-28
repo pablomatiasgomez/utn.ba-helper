@@ -219,7 +219,8 @@ export class PagesDataParser {
 			if (!dependenciesBtn) return dependencies;
 			let body = `elemento=${dependenciesBtn.getAttribute("data-elemento")}&elemento_padre=${dependenciesBtn.getAttribute("data-elemento-padre")}`;
 			let response = await this.#fetchAjaxPOSTContents("https://guarani.frba.utn.edu.ar/autogestion/grado/plan_estudio/correlativas", body);
-			let responseDoc = new DOMParser().parseFromString(response.cont, "text/html");
+			// Response starts with a top-level <td> which the HTML5 parser drops outside a <tr>, so we wrap it in table context to preserve the cell.
+			let responseDoc = new DOMParser().parseFromString(`<table><tbody><tr>${response.cont}</tr></tbody></table>`, "text/html");
 			let container = responseDoc.querySelector(".td-table-correlativas");
 			if (container.querySelector(".alert")?.textContent.trim() === "No hay definidas correlativas para la actividad") return dependencies;
 
