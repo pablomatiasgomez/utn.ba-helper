@@ -401,6 +401,7 @@ export class PagesDataParser {
 			//            "En curso  - Inicio de dictado 25/03/2026 - Detalle"
 			//            "Equivalencia Total - 6 (SEIS) Aprobado 07/03/2025 - Detalle"
 			//            "Regularidad  - Ausente 11/07/2025 - Libro XXV030001 - Detalle"
+			//            "Regularidad  - Aprobada (Aprobada) Aprobado 28/11/2019  (Vencida) - Libro XIX071 - Folio 39 - Detalle"
 			let historyRow = item.querySelector("span")?.textContent?.trim() || "";
 			let parts = historyRow.split(" - ");
 			if (parts.length < 3 || parts.length > 5 || parts[parts.length - 1] !== "Detalle") throw new Error(`historyRow couldn't be parsed: ${historyRow}`);
@@ -408,6 +409,10 @@ export class PagesDataParser {
 			let type = parts[0].trim();
 			let arr = arrayByTypes[type];
 			if (!arr) throw new Error(`Type not handled: ${type}. Row: ${historyRow}`);
+
+			// A trailing "(Vencida)" marker on parts[1] means the regularidad expired. Strip it so the rest of the parsing works, and force isPassed=false below.
+			let isExpired = /\s\(Vencida\)$/.test(parts[1]);
+			if (isExpired) parts[1] = parts[1].replace(/\s*\(Vencida\)\s*$/, "");
 
 			// parts[1] is "<gradeInfo> <date>" — split off the trailing date.
 			let lastSpace = parts[1].lastIndexOf(" ");
@@ -418,6 +423,7 @@ export class PagesDataParser {
 			let outcome = Object.keys(outcomes).find(key => gradeInfo.endsWith(key));
 			if (!outcome) throw new Error(`gradeInfo couldn't be parsed: ${gradeInfo}. Row: ${JSON.stringify(historyRow)}`);
 			let {isPassed, isInProgress} = outcomes[outcome];
+			if (isExpired) isPassed = false;
 
 			// First token of gradeInfo is the numeric grade if present (e.g. "8 (OCHO) Aprobado").
 			let grade = parseInt(gradeInfo.split(" ")[0]) || null;
