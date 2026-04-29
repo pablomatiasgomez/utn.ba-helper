@@ -130,6 +130,8 @@ export class DataCollector {
 			return this.#apiConnector.logMessage("checkCoursesHistoryParity", true, JSON.stringify({
 				xls: normalizedXls,
 				html: normalizedHtml,
+				rawXls: xls.rawDataForDebug,
+				rawHtml: html.rawDataForDebug,
 			}));
 		}
 	}

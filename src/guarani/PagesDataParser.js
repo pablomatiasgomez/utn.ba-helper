@@ -353,8 +353,9 @@ export class PagesDataParser {
 	 */
 
 	/**
-	 * Parses and returns all the student's academic history. Includes courses and final exams (passed, failed, and in-progress)
-	 * @returns {Promise<{courses: CoursesHistoryEntry[], finalExams: CoursesHistoryEntry[]}>}
+	 * Parses and returns all the student's academic history. Includes courses and final exams (passed, failed, and in-progress).
+	 * Also returns the raw responseText under `rawDataForDebug`, used by the parity check to surface diffs against the XLS path.
+	 * @returns {Promise<{courses: CoursesHistoryEntry[], finalExams: CoursesHistoryEntry[], rawDataForDebug: string}>}
 	 */
 	async getCoursesHistoryFromHTML() {
 		let courses = [];
@@ -428,12 +429,14 @@ export class PagesDataParser {
 		return {
 			courses: courses,
 			finalExams: finalExams,
+			rawDataForDebug: responseText,
 		};
 	}
 
 	/**
-	 * Parses and returns all the student's academic history. Includes courses and final exams (passed, failed, and in-progress)
-	 * @returns {Promise<{courses: CoursesHistoryEntry[], finalExams: CoursesHistoryEntry[]}>}
+	 * Parses and returns all the student's academic history. Includes courses and final exams (passed, failed, and in-progress).
+	 * Also returns the raw XLS rows (full sheet, including metadata) under `rawDataForDebug`, used by the parity check to surface diffs against the HTML path.
+	 * @returns {Promise<{courses: CoursesHistoryEntry[], finalExams: CoursesHistoryEntry[], rawDataForDebug: Array<Array<*>>}>}
 	 */
 	async getCoursesHistory() {
 		let courses = [];
@@ -459,6 +462,9 @@ export class PagesDataParser {
 		let workbook = await this.#fetchXlsContents("/autogestion/grado/historia_academica/exportar_xls/?checks=PromocionA,RegularidadA,RegularidadR,RegularidadU,EnCurso,ExamenA,ExamenR,ExamenU,EquivalenciaA,EquivalenciaR,AprobResA,CreditosA,&modo=anio&param_modo=");
 		let sheet = workbook.Sheets["Reporte"];
 		if (!sheet) throw new Error(`Workbook does not contain sheet. Sheetnames: ${workbook.SheetNames}`);
+
+		// Capture the full sheet (including the first 5 metadata rows) for debugging before we trim. {header: 1} returns each row as an array of cell values so the metadata doesn't get misread as headers.
+		let allRowsForDebug = XLSX.utils.sheet_to_json(sheet, {header: 1});
 
 		// First 5 rows do not include important data:
 		if (sheet.A6.v !== "Fecha") throw new Error(`Invalid sheet data: ${JSON.stringify(XLSX.utils.sheet_to_json(sheet))}`);
@@ -504,6 +510,7 @@ export class PagesDataParser {
 		return {
 			courses: courses,
 			finalExams: finalExams,
+			rawDataForDebug: allRowsForDebug,
 		};
 	}
 
