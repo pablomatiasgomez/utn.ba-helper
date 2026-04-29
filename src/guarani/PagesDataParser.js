@@ -1,6 +1,5 @@
 // noinspection JSNonASCIINames
 
-import $ from 'jquery';
 import * as XLSX from 'xlsx';
 import {Consts} from './Consts.js';
 import {
@@ -543,7 +542,8 @@ export class PagesDataParser {
 
 		let surveys = await Promise.all(kollaUrls.map(async kollaUrl => {
 			let kollaResponseText = await backgroundFetch({url: kollaUrl});
-			let surveysMetadata = this.parseKollaSurveyForm($(kollaResponseText), kollaResponseText);
+			let kollaDoc = new DOMParser().parseFromString(kollaResponseText, "text/html");
+			let surveysMetadata = this.parseKollaSurveyForm(kollaDoc, kollaResponseText);
 
 			// We could eventually merge same class professors, but the backend still accepts this:
 			return surveysMetadata.map(surveyMetadata => {
@@ -681,25 +681,28 @@ export class PagesDataParser {
 	}
 
 	/**
-	 * returns whether the given $kollaDocument represents a survey form that is already completed
+	 * returns whether the given kollaDoc represents a survey form that is already completed
+	 * @param kollaDoc Document or Element to query inside.
 	 * @returns boolean
 	 */
-	kollaSurveyFromCompleted($kollaDocument) {
+	kollaSurveyFormCompleted(kollaDoc) {
 		// Sometimes the survey is already completed, and it looks like there are 2 types of HTML that represent this
 		// first one looks to be when completing at the moment, and second when opening a completed one, which shouldn't
 		// really happen as we are only grabbing the pending ones (or forms being completed) but from time to time
 		// we get some errors, so we can ignore these. The alert box may contain the following messages:
 		// 1. `La encuesta 'Probabilidad y Estadística (950704) - Comisión: Z2017' ya ha sido respondida.`
 		// 2. `Gracias por completar la encuesta. Por favor descargá y guardá el comprobante generado. Los códigos allí incluídos se generaron por única vez y serán requeridos si solicitas consultar las respuestas.`
-		let alertBoxText = $kollaDocument.find(".alert.alert-success").text().trim();
+		let alertBoxText = kollaDoc.querySelector(".alert.alert-success")?.textContent.trim() || "";
 		return alertBoxText.includes(" ya ha sido respondida.") || alertBoxText.includes("Gracias por completar la encuesta");
 	}
 
 	/**
-	 * Parses the responseText of the Kolla forms, and returns the survey form data along with the answers.
+	 * Parses the kollaDoc of the Kolla forms, and returns the survey form data along with the answers.
+	 * @param kollaDoc Document or Element to query inside.
+	 * @param htmlForLog raw HTML used in error messages for debugging.
 	 * @returns {[{surveyKind: string, professorRole: string, classCode: string, year: number, courseCode: string, professorName: string, quarter: string, surveyFieldValues: []}]}
 	 */
-	parseKollaSurveyForm($kollaResponseText, htmlForLog) {
+	parseKollaSurveyForm(kollaDoc, htmlForLog) {
 		const surveyKindsMapping = {
 			"DOCENTE": "DOCENTE",
 			"AUXILIARES DOCENTES": "AUXILIAR",
@@ -724,10 +727,10 @@ export class PagesDataParser {
 		};
 		const professorRegex = new RegExp(`^(.*) \\((${Object.keys(professorRolesMapping).join("|")})(?: \\(Responsable de Cátedra\\))?\\)$`);
 
-		if (this.kollaSurveyFromCompleted($kollaResponseText)) return [];
+		if (this.kollaSurveyFormCompleted(kollaDoc)) return [];
 
 		// E.g.: 'Simulación (082041) - Comisión: K4053', 'Administración Gerencial (082039) - Comisión: K5054'
-		let courseTitle = $kollaResponseText.find(".formulario-titulo").text()
+		let courseTitle = (kollaDoc.querySelector(".formulario-titulo")?.textContent || "")
 			.trim()
 			.replace(" - TUTORÍA", "")  // Fix for cases like 'Inglés Técnico Nivel I (951602) - Comisión: Z2498 - TUTORÍA'
 			.replace(/\.$/, "") // Replace last dot in string, if any, for cases like 'Práctica Profesional Supervisada (951699) - Comisión: I5051.'
@@ -740,11 +743,8 @@ export class PagesDataParser {
 		let courseCode = groups[2]; // E.g. 082041
 		let classCode = groups[3]; // E.g. K4053
 
-		return $kollaResponseText.find(".encuesta").toArray().map(surveyDiv => {
-			let $surveyDiv = $(surveyDiv);
-
-			let surveyTitle = $surveyDiv.find(".encuesta-titulo");
-			surveyTitle = surveyTitle.text().trim();
+		return Array.from(kollaDoc.querySelectorAll(".encuesta")).map(surveyDiv => {
+			let surveyTitle = surveyDiv.querySelector(".encuesta-titulo")?.textContent.trim() || "";
 
 			groups = surveyTitleRegex.exec(surveyTitle);
 			if (!groups) throw new Error(`surveyTitle couldn't be parsed: ${surveyTitle}. HTML: ${htmlForLog}`);
@@ -753,8 +753,7 @@ export class PagesDataParser {
 			let quarter = quarterMapping[groups[2]]; // A, 1C, 2C
 			let year = parseInt(groups[3]); // 2018, 2019, ...
 
-			let professor = $surveyDiv.find(".encuesta-elemento h3");
-			professor = professor.text().trim();
+			let professor = surveyDiv.querySelector(".encuesta-elemento h3")?.textContent.trim() || "";
 
 			groups = professorRegex.exec(professor);
 			if (!groups) throw new Error(`professor couldn't be parsed: ${professor}. HTML: ${htmlForLog}`);
@@ -762,23 +761,22 @@ export class PagesDataParser {
 			let professorName = groups[1].toUpperCase();
 			let professorRole = professorRolesMapping[groups[2]]; // TITULAR, ASOCIADO, ADJUNTO, etc.
 
-			let surveyFieldValues = $surveyDiv.find(".panel-info .panel-body .form-group").toArray()
+			let surveyFieldValues = Array.from(surveyDiv.querySelectorAll(".panel-info .panel-body .form-group"))
 				.map(item => {
-					let $item = $(item);
-					let $questionLabel = $item.find("> label");
-
-					let question = $questionLabel.text().replace("*", "").trim();
+					let questionLabel = item.querySelector(":scope > label");
+					let question = (questionLabel?.textContent || "").replace("*", "").trim();
 					let value = null;
 
-					let labelFor = $questionLabel.attr("for");
-					let $answerElement = $item.find(`[name=${labelFor}]`);
-					if ($answerElement.is("textarea")) {
-						value = $answerElement.val() || null;
-					} else if ($answerElement.is("input")) {
-						value = parseInt($answerElement.filter(":checked").parent().text());
-						value = isNaN(value) ? null : value;
+					let labelFor = questionLabel?.getAttribute("for");
+					let answerElement = item.querySelector(`[name=${labelFor}]`);
+					if (answerElement?.matches("textarea")) {
+						value = answerElement.value || null;
+					} else if (answerElement?.matches("input")) {
+						let checked = item.querySelector(`[name=${labelFor}]:checked`);
+						let parsed = parseInt(checked?.parentElement?.textContent);
+						value = isNaN(parsed) ? null : parsed;
 					} else {
-						throw new Error(`Couldn't parse value for question ${question}. Item: ${$item.html()}`);
+						throw new Error(`Couldn't parse value for question ${question}. Item: ${item.outerHTML}`);
 					}
 					return {
 						question: question,

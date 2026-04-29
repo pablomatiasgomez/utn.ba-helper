@@ -1,6 +1,5 @@
 import './main.css';
 
-import $ from 'jquery';
 import {log} from "@embrace-io/web-sdk";
 
 import {initializeEmbrace} from '../Embrace.js';
@@ -19,21 +18,18 @@ import {PagesDataParser} from './PagesDataParser.js';
 		let store = new Store();
 		let pagesDataParser = new PagesDataParser();
 
-		if (pagesDataParser.kollaSurveyFromCompleted($(document))) {
+		if (pagesDataParser.kollaSurveyFormCompleted(document)) {
 			log.message("Exiting completed kolla survey", 'info', {attributes: {location_href: location.href}});
 			return;
 		}
 		log.message("Entering kolla survey", 'info', {attributes: {location_href: location.href}});
 
-		let $btn = $("#formulario .btn-primary[type=submit][onclick]:visible:enabled");
-		if (!$btn.length) return utils.logHTML("kollaMissingBtn", 100);
-
-		$btn.on("mousedown", function () {
+		document.getElementById("btn-terminar").addEventListener("mousedown", () => {
 			utils.runAsync("surveyFinished", async function surveyFinished() {
 				let hashedStudentId = await store.readHashedStudentIdFromStore();
 				if (!hashedStudentId) throw new Error(`Couldn't find hashedStudentId within form url ${location.href}.`);
 
-				let surveys = pagesDataParser.parseKollaSurveyForm($(document), document.documentElement.outerHTML);
+				let surveys = pagesDataParser.parseKollaSurveyForm(document, document.documentElement.outerHTML);
 				if (surveys.length) {
 					surveys.forEach(survey => survey.surveyTaker = hashedStudentId);
 					return apiConnector.postProfessorSurveys(surveys);
