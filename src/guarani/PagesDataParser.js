@@ -354,8 +354,9 @@ export class PagesDataParser {
 
 	/**
 	 * Parses and returns all the student's academic history. Includes courses and final exams (passed, failed, and in-progress).
-	 * Also returns the raw responseText under `rawDataForDebug`, used by the parity check to surface diffs against the XLS path.
-	 * @returns {Promise<{courses: CoursesHistoryEntry[], finalExams: CoursesHistoryEntry[], rawDataForDebug: string}>}
+	 * Also returns the raw responseText for both the by-year and by-course HTML views under `rawDataForDebug`,
+	 * used by the parity check to surface diffs against the XLS path.
+	 * @returns {Promise<{courses: CoursesHistoryEntry[], finalExams: CoursesHistoryEntry[], rawDataForDebug: {anio: string, materia: string}}>}
 	 */
 	async getCoursesHistoryFromHTML() {
 		let courses = [];
@@ -378,8 +379,13 @@ export class PagesDataParser {
 			"Inicio de dictado": {isPassed: false, isInProgress: true},
 		};
 
-		let responseContents = await this.fetchAjaxGETContents("/autogestion/grado/historia_academica/?checks=PromocionA,RegularidadA,RegularidadR,RegularidadU,EnCurso,ExamenA,ExamenR,ExamenU,EquivalenciaA,EquivalenciaR,AprobResA,CreditosA,&modo=anio&param_modo=");
-		let responseText = this.#parseAjaxPageRenderer(responseContents.cont, "info_historia").content;
+		// Fetch both the by-year and by-course views in parallel. We only parse the by-year one; by-course is captured for the parity-check debug payload.
+		let [anioResponse, materiaResponse] = await Promise.all([
+			this.fetchAjaxGETContents("/autogestion/grado/historia_academica/?checks=PromocionA,RegularidadA,RegularidadR,RegularidadU,EnCurso,ExamenA,ExamenR,ExamenU,EquivalenciaA,EquivalenciaR,AprobResA,CreditosA,&modo=anio&param_modo=&e_cu=A&e_ex=A&e_re=A"),
+			this.fetchAjaxGETContents("/autogestion/grado/historia_academica/?checks=PromocionA,RegularidadA,RegularidadR,RegularidadU,EnCurso,ExamenA,ExamenR,ExamenU,EquivalenciaA,EquivalenciaR,AprobResA,CreditosA,&modo=materia&param_modo=&e_cu=A&e_ex=A&e_re=A"),
+		]);
+		let responseText = this.#parseAjaxPageRenderer(anioResponse.cont, "info_historia").content;
+		let materiaResponseText = this.#parseAjaxPageRenderer(materiaResponse.cont, "info_historia").content;
 		let doc = new DOMParser().parseFromString(responseText, "text/html");
 		Array.from(doc.querySelectorAll(".catedra_nombre")).forEach(item => {
 			let courseText = item.querySelector("h4")?.textContent?.trim() || "";
@@ -429,7 +435,7 @@ export class PagesDataParser {
 		return {
 			courses: courses,
 			finalExams: finalExams,
-			rawDataForDebug: responseText,
+			rawDataForDebug: {anio: responseText, materia: materiaResponseText},
 		};
 	}
 
@@ -441,7 +447,7 @@ export class PagesDataParser {
 	async getCoursesHistory() {
 		let courses = [];
 		let finalExams = [];
-		let equivalenceTypeByCourseCode = await this.#fetchEquivalenceTypeByCourseCode();
+		let equivalenceEntriesByCourseCode = await this.#fetchEquivalenceEntriesByCourseCode();
 		// Use a map to also validate returned types.
 		let arrayByTypes = {
 			"En curso": courses,
@@ -483,9 +489,17 @@ export class PagesDataParser {
 			let courseCode = courseCodeGroups[2];
 
 			if (type === "Equivalencia") {
-				let equivalenceType = equivalenceTypeByCourseCode[courseCode];
-				if (!equivalenceType) throw new Error(`Could not resolve equivalence type for courseCode: ${courseCode}. equivalenceTypeByCourseCode: ${JSON.stringify(equivalenceTypeByCourseCode)}`);
-				type = equivalenceType;
+				// XLS lumps every equivalence under "Equivalencia". Match the row to its precise type using the by-course HTML view as truth: same date + same Nota.
+				let entries = equivalenceEntriesByCourseCode[courseCode];
+				if (!entries || !entries.length) throw new Error(`Could not resolve equivalence entries for courseCode: ${courseCode}. equivalenceEntriesByCourseCode: ${JSON.stringify(equivalenceEntriesByCourseCode)}`);
+				let xlsNota = gradeText || null;
+				let match = entries.find(e => e.date === row["Fecha"] && e.notaEquivalent === xlsNota);
+				if (match) {
+					type = match.type;
+				} else {
+					// Equivalence page didn't list a row for this exact (date, Nota) — surface the data rather than silently picking a type.
+					throw new Error(`Could not match XLS Equivalencia row to HTML lookup. Row: ${JSON.stringify(row)}. entries: ${JSON.stringify(entries)}`);
+				}
 			}
 
 			let arr = arrayByTypes[type];
@@ -514,16 +528,17 @@ export class PagesDataParser {
 		};
 	}
 
-	// fetchEquivalenceTypeByCourseCode is needed to fetch the Equivalences directly from HTML and not XLS,
-	// as the XLS only includes the string "Equivalencia" which cannot be distinguished between Parcial and Total.
-	async #fetchEquivalenceTypeByCourseCode() {
-		let responseContents = await this.fetchAjaxGETContents("/autogestion/grado/historia_academica/?checks=EquivalenciaA,&modo=materia");
+	// fetchEquivalenceEntriesByCourseCode is needed to fetch the Equivalences directly from HTML and not XLS,
+	// as the XLS only includes the string "Equivalencia" which cannot be distinguished between Parcial/Regularidad and Total.
+	// Returns one entry per equivalence row (with type, date and notaEquivalent) so the XLS parser can match each XLS row to its real type.
+	async #fetchEquivalenceEntriesByCourseCode() {
+		let responseContents = await this.fetchAjaxGETContents("/autogestion/grado/historia_academica/?checks=EquivalenciaA,&modo=materia&param_modo=&e_cu=A&e_ex=A&e_re=A");
 		let responseText = this.#parseAjaxPageRenderer(responseContents.cont, "info_historia").content;
 		let doc = new DOMParser().parseFromString(responseText, "text/html");
 		let listado = doc.querySelector("#listado");
 		if (!listado) throw new Error(`Could not find #listado in equivalence response. responseText: ${responseText}`);
 
-		let equivalenceTypeByCourseCode = {};
+		let equivalenceEntriesByCourseCode = {};
 		Array.from(listado.children).filter(catedraGroupDiv => catedraGroupDiv.classList.contains("catedras")).forEach(catedraGroupDiv => {
 			let courseText = catedraGroupDiv.querySelector("h3.titulo-corte")?.textContent.trim();
 			if (!courseText) return;
@@ -532,15 +547,28 @@ export class PagesDataParser {
 			let courseCode = courseCodeGroups[2];
 
 			Array.from(catedraGroupDiv.querySelectorAll(".catedra[equivalencia='Aprobado']")).forEach(catedraDiv => {
-				let equivalenceText = catedraDiv.querySelector(".catedra_nombre strong")?.textContent.trim() || "";
-				if (!["Equivalencia Parcial", "Equivalencia Regularidad", "Equivalencia Total"].includes(equivalenceText)) throw new Error(`Unknown equivalenceText: ${equivalenceText}`);
-				// "Equivalencia Total" takes priority over the others.
-				if (equivalenceTypeByCourseCode[courseCode] === "Equivalencia Total") return;
-				equivalenceTypeByCourseCode[courseCode] = equivalenceText;
+				// Each row has the same shape as the main history rows: "<type> - <gradeInfo> <date> - Detalle"
+				let rowText = catedraDiv.querySelector(".catedra_nombre span")?.textContent?.trim() || "";
+				let parts = rowText.split(" - ");
+				if (parts.length !== 3 || parts[2] !== "Detalle") throw new Error(`Equivalence row couldn't be parsed: ${rowText}`);
+
+				let type = parts[0].trim();
+				if (!["Equivalencia Parcial", "Equivalencia Regularidad", "Equivalencia Total"].includes(type)) throw new Error(`Unknown equivalenceText: ${type}`);
+
+				// parts[1] = "<gradeInfo> <date>" (date format DD/MM/YYYY, matches XLS Fecha).
+				let lastSpace = parts[1].lastIndexOf(" ");
+				let date = parts[1].slice(lastSpace + 1);
+				let gradeInfo = parts[1].slice(0, lastSpace);
+				// XLS Nota equivalent: empty when gradeInfo is just an outcome word (e.g. "Aprobado"); otherwise the leading token (e.g. "Aprobada" or a numeric grade).
+				let tokens = gradeInfo.split(" ");
+				let notaEquivalent = tokens.length === 1 ? null : tokens[0];
+
+				if (!equivalenceEntriesByCourseCode[courseCode]) equivalenceEntriesByCourseCode[courseCode] = [];
+				equivalenceEntriesByCourseCode[courseCode].push({type, date, notaEquivalent});
 			});
 		});
 
-		return equivalenceTypeByCourseCode;
+		return equivalenceEntriesByCourseCode;
 	}
 
 	/**
