@@ -49,3 +49,11 @@
 .utnba-helper table tr.top-border-without-first-cell td:not(:first-child) {
     border-top: 2px solid black;
 }
+
+.utnba-helper .search-section span {
+    font-weight: bold;
+}
+
+.utnba-helper .search-section input {
+    margin: 0 5px 0 0;
+}

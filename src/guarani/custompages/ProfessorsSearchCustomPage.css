@@ -1,0 +1,27 @@
+.utnba-helper .professor-title {
+    text-align: center;
+}
+
+.utnba-helper .historical-score-chart {
+    height: 400px;
+    width: 100%;
+}
+
+.utnba-helper .overall-score {
+    font-weight: bold;
+    margin-bottom: 12px;
+}
+
+.utnba-helper .text-questions {
+    table-layout: fixed;
+    width: 100%;
+}
+
+.utnba-helper .text-questions .group-key {
+    text-align: center;
+    font-weight: bold;
+}
+
+.utnba-helper .text-questions hr {
+    margin: 8px 0;
+}

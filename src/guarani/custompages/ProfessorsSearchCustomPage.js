@@ -1,4 +1,5 @@
-import $ from 'jquery';
+import './ProfessorsSearchCustomPage.css';
+
 import {Chart} from 'chart.js/auto';
 import {log} from "@embrace-io/web-sdk";
 import {CustomPages} from './CustomPages.js';
@@ -13,85 +14,96 @@ export class ProfessorsSearchCustomPage {
 	static menuName = "Buscar docentes";
 	static customParamKey = "professorName";
 
-	#$container;
+	#container;
 	#services;
-	#$searchDiv;
-	#$searchResultsDiv;
-	#$professorResultsTitleDiv; // Just the title with the professor name.
-	#$coursesResultDiv; // Shows the last courses in which the professor was present
-	#$surveyResultDiv; // Shows the survey results of the given professor
+	#searchDiv;
+	#searchResultsDiv;
+	#professorResultsTitleDiv; // Just the title with the professor name.
+	#coursesResultDiv; // Shows the last courses in which the professor was present
+	#surveyResultDiv; // Shows the survey results of the given professor
 
 	constructor(container, services) {
-		this.#$container = $(container);
+		this.#container = container;
 		this.#services = services;
 	}
 
 	#createPage() {
-		this.#$searchDiv = $("<div></div>");
-		this.#$searchDiv.append(`<span style="font-weight: bold;">Buscar docente: </span>`);
-		let $searchTxt = $(`<input type="text" style="margin: 0 5px 0 0;" placeholder="Minimo 3 caracteres..." />`);
-		$searchTxt.on("keydown", (e) => {
+		this.#searchDiv = document.createElement("div");
+		this.#searchDiv.className = "search-section";
+		this.#searchDiv.insertAdjacentHTML("beforeend", `<span>Buscar docente: </span>`);
+		let searchTxt = document.createElement("input");
+		searchTxt.type = "text";
+		searchTxt.placeholder = "Minimo 3 caracteres...";
+		searchTxt.addEventListener("keydown", (e) => {
 			if (e.key === "Enter") {
-				this.#services.utils.runAsync("ProfessorsSearch", () => this.#search($searchTxt.val().trim()));
-				return false;
+				this.#services.utils.runAsync("ProfessorsSearch", () => this.#search(searchTxt.value.trim()));
+				e.preventDefault();
 			}
 		});
-		this.#$searchDiv.append($searchTxt);
-		let $searchBtn = $(`<a href="#" class="btn btn-info btn-small">Buscar</a>`);
-		$searchBtn.on("click", () => {
-			this.#services.utils.runAsync("ProfessorsSearch", () => this.#search($searchTxt.val().trim()));
-			return false;
+		this.#searchDiv.appendChild(searchTxt);
+		let searchBtn = document.createElement("a");
+		searchBtn.href = "#";
+		searchBtn.className = "btn btn-info btn-small";
+		searchBtn.textContent = "Buscar";
+		searchBtn.addEventListener("click", (e) => {
+			this.#services.utils.runAsync("ProfessorsSearch", () => this.#search(searchTxt.value.trim()));
+			e.preventDefault();
 		});
-		this.#$searchDiv.append($searchBtn);
-		this.#$searchDiv.append("<hr>");
-		this.#$container.append(this.#$searchDiv);
+		this.#searchDiv.appendChild(searchBtn);
+		this.#searchDiv.insertAdjacentHTML("beforeend", "<hr>");
+		this.#container.appendChild(this.#searchDiv);
 
-		this.#$searchResultsDiv = $(`<div></div>`);
-		this.#$searchResultsDiv.hide();
-		this.#$searchResultsDiv.append("<h2>Resultados de busqueda</h2>");
-		let $searchResultsTable = $(`<table></table>`).append("<tbody></tbody>");
-		$searchResultsTable.on("click", "a", (e) => {
-			let professorName = $(e.currentTarget).text();
+		this.#searchResultsDiv = document.createElement("div");
+		this.#searchResultsDiv.style.display = "none";
+		this.#searchResultsDiv.insertAdjacentHTML("beforeend", "<h2>Resultados de busqueda</h2>");
+		let searchResultsTable = document.createElement("table");
+		searchResultsTable.appendChild(document.createElement("tbody"));
+		searchResultsTable.addEventListener("click", (e) => {
+			let a = e.target.closest("a");
+			if (!a || !searchResultsTable.contains(a)) return;
+			let professorName = a.textContent;
 			this.#services.utils.runAsync("retrieveProfessorData", () => this.#retrieveProfessorData(professorName));
-			return false;
+			e.preventDefault();
 		});
-		this.#$searchResultsDiv.append($searchResultsTable);
-		this.#$searchResultsDiv.append("<hr>");
-		this.#$container.append(this.#$searchResultsDiv);
+		this.#searchResultsDiv.appendChild(searchResultsTable);
+		this.#searchResultsDiv.insertAdjacentHTML("beforeend", "<hr>");
+		this.#container.appendChild(this.#searchResultsDiv);
 
-		this.#$professorResultsTitleDiv = $(`<div></div>`);
-		this.#$container.append(this.#$professorResultsTitleDiv);
-		this.#$coursesResultDiv = $(`<div></div>`);
-		this.#$container.append(this.#$coursesResultDiv);
-		this.#$surveyResultDiv = $(`<div></div>`);
-		this.#$container.append(this.#$surveyResultDiv);
+		this.#professorResultsTitleDiv = document.createElement("div");
+		this.#container.appendChild(this.#professorResultsTitleDiv);
+		this.#coursesResultDiv = document.createElement("div");
+		this.#container.appendChild(this.#coursesResultDiv);
+		this.#surveyResultDiv = document.createElement("div");
+		this.#container.appendChild(this.#surveyResultDiv);
 	}
 
 	async #search(query) {
 		if (query.length < 3) return;
 		this.#hideProfessorData();
-		this.#$searchResultsDiv.show().get(0).scrollIntoView({behavior: "smooth"});
-		this.#$searchResultsDiv.hide();
+		this.#searchResultsDiv.style.display = "";
+		this.#searchResultsDiv.scrollIntoView({behavior: "smooth"});
+		this.#searchResultsDiv.style.display = "none";
 		log.message("Searching professors", 'info', {attributes: {query: query}});
 		let results = await this.#services.apiConnector.searchProfessors(query);
 		let trs = results.map(item => {
 			return `<tr><td><a href="#">${item.value}</a></td><td>${item.data.surveysCount}</td><td>${item.data.classScheduleOccurrences}</td></tr>`;
 		}).join("");
-		this.#$searchResultsDiv.show();
-		this.#$searchResultsDiv.find("table tbody")
-			.html(trs)
-			.prepend("<tr><th>Profesor</th><th>Cantidad de encuestas (total historico)</th><th>Cantidad de cursos (total historico)</th></tr>");
+		this.#searchResultsDiv.style.display = "";
+		let tbody = this.#searchResultsDiv.querySelector("table tbody");
+		tbody.innerHTML = trs;
+		tbody.insertAdjacentHTML("afterbegin", "<tr><th>Profesor</th><th>Cantidad de encuestas (total historico)</th><th>Cantidad de cursos (total historico)</th></tr>");
 	}
 
 	#hideProfessorData() {
-		this.#$professorResultsTitleDiv.hide();
-		this.#$coursesResultDiv.hide();
-		this.#$surveyResultDiv.hide();
+		this.#professorResultsTitleDiv.style.display = "none";
+		this.#coursesResultDiv.style.display = "none";
+		this.#surveyResultDiv.style.display = "none";
 	}
 
 	#retrieveProfessorData(professorName) {
-		this.#$professorResultsTitleDiv.show().get(0).scrollIntoView({behavior: "smooth"});
-		this.#$professorResultsTitleDiv.html(`<h2 style="text-align: center;">Resultados para ${professorName}</h2><hr>`);
+		this.#professorResultsTitleDiv.style.display = "";
+		this.#professorResultsTitleDiv.scrollIntoView({behavior: "smooth"});
+		this.#professorResultsTitleDiv.innerHTML = `<h2 class="professor-title">Resultados para ${professorName}</h2><hr>`;
 		return Promise.all([
 			this.#retrieveProfessorCourses(professorName),
 			this.#retrieveSurveyResults(professorName),
@@ -99,10 +111,10 @@ export class ProfessorsSearchCustomPage {
 	}
 
 	async #retrieveProfessorCourses(professorName) {
-		this.#$coursesResultDiv.hide();
+		this.#coursesResultDiv.style.display = "none";
 		// For now, we are showing just the latest 20 classes.
 		let classSchedules = await this.#services.apiConnector.getClassesForProfessor(professorName, 0, 20);
-		this.#$coursesResultDiv.html("");
+		this.#coursesResultDiv.innerHTML = "";
 		let trs = classSchedules.map(classSchedule => {
 			let professorLis = (classSchedule.professors || []).map(professor => {
 				return this.#services.utils.getProfessorLi(professor);
@@ -117,7 +129,7 @@ export class ProfessorsSearchCustomPage {
 				<td><ul class="no-margin">${professorLis}</ul></td>
 			</tr>`;
 		}).join("");
-		this.#$coursesResultDiv.append(`
+		this.#coursesResultDiv.insertAdjacentHTML("beforeend", `
 			<h3>Cursos en los que estuvo presente en los últimos 3 años (incluyendo el actual)</h3>
 			<table>
 				<tbody>
@@ -126,29 +138,29 @@ export class ProfessorsSearchCustomPage {
 				</tbody>
 			</table>
 		`);
-		this.#$coursesResultDiv.append(`<hr>`);
-		this.#$coursesResultDiv.show();
+		this.#coursesResultDiv.insertAdjacentHTML("beforeend", `<hr>`);
+		this.#coursesResultDiv.style.display = "";
 	}
 
 	async #retrieveSurveyResults(professorName) {
-		this.#$surveyResultDiv.hide();
+		this.#surveyResultDiv.style.display = "none";
 		let response = await this.#services.apiConnector.getProfessorSurveysAggregate(professorName);
-		this.#$surveyResultDiv.html("");
+		this.#surveyResultDiv.innerHTML = "";
 		Object.entries(response)
 			// Put DOCENTE before AUXILIAR
 			.sort((a, b) => (a[0] > b[0] ? -1 : 1))
 			.forEach(entry => this.#appendSurveyResults(entry[0], entry[1]));
-		this.#$surveyResultDiv.show();
+		this.#surveyResultDiv.style.display = "";
 	}
 
 	#appendSurveyResults(surveyKind, results) {
-		this.#$surveyResultDiv.append(`<h3>Encuesta de tipo ${surveyKind}</h3>`);
+		this.#surveyResultDiv.insertAdjacentHTML("beforeend", `<h3>Encuesta de tipo ${surveyKind}</h3>`);
 
 		if (results.historicalScores && Object.keys(results.historicalScores).length) {
 			let canvasId = `historical-score-${surveyKind}`;
 
-			this.#$surveyResultDiv.append(`
-				<div style="height: 400px; width: 100%;"><canvas id="${canvasId}"></canvas></div>
+			this.#surveyResultDiv.insertAdjacentHTML("beforeend", `
+				<div class="historical-score-chart"><canvas id="${canvasId}"></canvas></div>
 			`);
 
 			let minYear, maxYear;
@@ -227,9 +239,9 @@ export class ProfessorsSearchCustomPage {
 			let percentageRows = results.percentageFields.map(item => {
 				return `<tr><td>${item.question}</td><td style="background-color: ${this.#services.utils.getColorForAvg(item.average)}">${item.average}</td><td>${item.count}</td></tr>`;
 			}).join("");
-			this.#$surveyResultDiv.append(`
+			this.#surveyResultDiv.insertAdjacentHTML("beforeend", `
 				<h4>Puntajes</h4>
-				<div style="font-weight: bold; margin-bottom: 12px;">General: ${this.#services.utils.getOverallScoreSpan(results.overallScore)}</div>
+				<div class="overall-score">General: ${this.#services.utils.getOverallScoreSpan(results.overallScore)}</div>
 				<table class="percentage-questions">
 					<tbody>
 						<tr><th>Pregunta</th><th>Promedio</th><th>Muestra</th></tr>
@@ -261,19 +273,19 @@ export class ProfessorsSearchCustomPage {
 			let textValueRows = Object.keys(answersByGroup).sort().reverse().map(groupKey => {
 				let textValueColumns = sentimentsSorted.map(sentiment => {
 					let values = answersByGroup[groupKey][sentiment] || [];
-					let answers = values.map(answer => `<i>"${answer}"</i>`).join(`<hr style="margin: 8px 0;">`);
+					let answers = values.map(answer => `<i>"${answer}"</i>`).join(`<hr>`);
 					return `<td style="color: ${SENTIMENT_COLORS[sentiment]}">${answers}</td>`;
 				}).join("");
 
 				return `
-					<tr><td style="text-align: center; font-weight: bold;" colspan="${sentimentsSorted.length}">${groupKey}</td></tr>
+					<tr><td class="group-key" colspan="${sentimentsSorted.length}">${groupKey}</td></tr>
 					<tr>${textValueColumns}</tr>
 				`;
 			}).join("");
 
-			this.#$surveyResultDiv.append(`
+			this.#surveyResultDiv.insertAdjacentHTML("beforeend", `
 				<h4>Comentarios</h4>
-				<table class="text-questions" style="table-layout: fixed; width: 100%;">
+				<table class="text-questions">
 					<tbody>
 						<tr>${textHeaderColumns}</tr>
 						${textValueRows}
@@ -281,7 +293,7 @@ export class ProfessorsSearchCustomPage {
 				</table>
 			`);
 		}
-		this.#$surveyResultDiv.append(`<hr>`);
+		this.#surveyResultDiv.insertAdjacentHTML("beforeend", `<hr>`);
 	}
 
 	async init() {
