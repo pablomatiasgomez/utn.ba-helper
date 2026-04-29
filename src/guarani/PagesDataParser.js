@@ -437,7 +437,8 @@ export class PagesDataParser {
 			"Regularidad": courses,
 			"Promocion": finalExams,
 			"Examen": finalExams,
-			"Equivalencia Parcial": courses,
+			"Equivalencia Parcial": courses, // Estos en realidad creo que corresponden a las equivalencias que le faltan cosas como rendir laboratorio. Por ahora lo tomamos como curso aprobado.
+			"Equivalencia Regularidad": courses,
 			"Equivalencia Total": finalExams,
 		};
 		const gradeIsPassedTypes = {
@@ -515,8 +516,8 @@ export class PagesDataParser {
 
 			Array.from(catedraGroupDiv.querySelectorAll(".catedra[equivalencia='Aprobado']")).forEach(catedraDiv => {
 				let equivalenceText = catedraDiv.querySelector(".catedra_nombre strong")?.textContent.trim() || "";
-				if (!["Equivalencia Parcial", "Equivalencia Total"].includes(equivalenceText)) throw new Error(`Unknown equivalenceText: ${equivalenceText}`);
-				// "Equivalencia Total" takes priority over "Equivalencia Parcial".
+				if (!["Equivalencia Parcial", "Equivalencia Regularidad", "Equivalencia Total"].includes(equivalenceText)) throw new Error(`Unknown equivalenceText: ${equivalenceText}`);
+				// "Equivalencia Total" takes priority over the others.
 				if (equivalenceTypeByCourseCode[courseCode] === "Equivalencia Total") return;
 				equivalenceTypeByCourseCode[courseCode] = equivalenceText;
 			});
