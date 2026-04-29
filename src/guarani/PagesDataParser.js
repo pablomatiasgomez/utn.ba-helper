@@ -355,7 +355,8 @@ export class PagesDataParser {
 			"Regularidad": courses,
 			"Promoción": finalExams,
 			"Examen": finalExams,
-			"Equivalencia Parcial": courses,
+			"Equivalencia Parcial": courses, // Estos en realidad creo que corresponden a las equivalencias que le faltan cosas como rendir laboratorio. Por ahora lo tomamos como curso aprobado.
+			"Equivalencia Regularidad": courses,
 			"Equivalencia Total": finalExams,
 		};
 		const gradeIsPassedTypes = {
@@ -374,13 +375,17 @@ export class PagesDataParser {
 			if (!courseCodeGroups) throw new Error(`courseText couldn't be parsed: ${courseText}`);
 			let courseCode = courseCodeGroups[2];
 
-			// Row shape: "<type>  - <gradeInfo> <date> - Libro <X> - Folio <Y> - Detalle"
+			// Row shape: "<type>  - <gradeInfo> <date> [- Libro <X>] [- Folio <Y>] - Detalle"
+			// Libro and Folio are optional, so we accept 3, 4, or 5 parts.
 			// Examples:
 			//            "Promoción  - 10 (Diez) Promocionado 10/07/2018 - Libro PR038 - Folio 190 - Detalle"
 			//            "Regularidad  - Aprobada (Aprobada) Aprobado 22/03/2017 - Libro XVII200 - Folio 29 - Detalle"
+			//            "En curso  - Inicio de dictado 25/03/2026 - Detalle"
+			//            "Equivalencia Total - 6 (SEIS) Aprobado 07/03/2025 - Detalle"
+			//            "Regularidad  - Ausente 11/07/2025 - Libro XXV030001 - Detalle"
 			let historyRow = item.querySelector("span")?.textContent?.trim() || "";
 			let parts = historyRow.split(" - ");
-			if (parts.length !== 5 || parts[4] !== "Detalle") throw new Error(`historyRow couldn't be parsed: ${historyRow}`);
+			if (parts.length < 3 || parts.length > 5 || parts[parts.length - 1] !== "Detalle") throw new Error(`historyRow couldn't be parsed: ${historyRow}`);
 
 			let type = parts[0].trim();
 			let arr = arrayByTypes[type];
@@ -390,6 +395,8 @@ export class PagesDataParser {
 			let lastSpace = parts[1].lastIndexOf(" ");
 			let dateStr = parts[1].slice(lastSpace + 1);
 			let gradeInfo = parts[1].slice(0, lastSpace);
+
+			if (gradeInfo.startsWith("Inicio de dictado")) return; // Ignore in-progress courses
 
 			// Last word of gradeInfo is the gradeOutcome.
 			let gradeOutcome = gradeInfo.split(" ").pop();
@@ -454,7 +461,7 @@ export class PagesDataParser {
 			let gradeText = row["Nota"];
 			let gradeOutcome = row["Resultado"];
 
-			if (!gradeText && !gradeOutcome) return; // Ignore non finished items
+			if (!gradeText && !gradeOutcome) return; // Ignore in-progress courses
 
 			let courseCodeGroups = /(.*) \((\d{6})\)/.exec(courseText);
 			if (!courseCodeGroups) throw new Error(`courseText couldn't be parsed: ${courseText}. Row: ${JSON.stringify(row)}`);
