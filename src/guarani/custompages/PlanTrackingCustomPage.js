@@ -101,6 +101,7 @@ export class PlanTrackingCustomPage {
 		// For signed courses we consider both passed and signed, and remove duplicates.
 		let passedCourses = coursesHistory.finalExams.filter(course => course.isPassed).map(course => course.courseCode);
 		let signedCourses = [...new Set([...passedCourses, ...coursesHistory.courses.filter(course => course.isPassed).map(course => course.courseCode)])];
+		let inProgressCourses = coursesHistory.courses.filter(course => course.isInProgress).map(course => course.courseCode);
 		let courseRequirementToArray = {
 			"SIGNED": signedCourses,
 			"PASSED": passedCourses,
@@ -118,6 +119,7 @@ export class PlanTrackingCustomPage {
 					.every(dependency => hasCourse(dependency.requirement, dependency.courseCode));
 				course.isSigned = hasCourse("SIGNED", course.courseCode);
 				course.isPassed = hasCourse("PASSED", course.courseCode);
+				course.isInProgress = inProgressCourses.includes(course.courseCode);
 				course.canRegister = meetsDependencies("REGISTER");
 				course.canTakeFinalExam = meetsDependencies("TAKE_FINAL_EXAM");
 				return course;
@@ -125,10 +127,11 @@ export class PlanTrackingCustomPage {
 				let courseWeight = course => {
 					let w;
 					if (course.isPassed) w = 10;
-					else if (course.canTakeFinalExam) w = 9;
-					else if (course.isSigned) w = 8;
-					else if (course.canRegister) w = 7;
-					else w = 6;
+					else if (course.isInProgress) w = 9;
+					else if (course.canTakeFinalExam) w = 8;
+					else if (course.isSigned) w = 7;
+					else if (course.canRegister) w = 6;
+					else w = 5;
 					if (course.elective) {
 						w -= 5;
 					}
@@ -142,6 +145,9 @@ export class PlanTrackingCustomPage {
 				if (course.isPassed) {
 					status = TRANSLATIONS["PASSED"];
 					backgroundColor = "#55bb55";
+				} else if (course.isInProgress) {
+					status = "Cursando";
+					backgroundColor = "#ff8c42";
 				} else if (course.canTakeFinalExam) {
 					status = "Puede " + TRANSLATIONS["TAKE_FINAL_EXAM"].toLowerCase();
 					backgroundColor = "#ffcc00";
@@ -162,7 +168,7 @@ export class PlanTrackingCustomPage {
 
 				let divClass = "";
 				let showExtraElectivesButton = "";
-				if (course.elective && !course.isPassed && !course.canTakeFinalExam && !course.isSigned) {
+				if (course.elective && !course.isPassed && !course.isInProgress && !course.canTakeFinalExam && !course.isSigned) {
 					divClass = "hidden";
 					if (!showExtraElectivesButtonAdded) {
 						showExtraElectivesButtonAdded = true;

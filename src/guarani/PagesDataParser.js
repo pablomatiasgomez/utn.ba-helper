@@ -343,8 +343,18 @@ export class PagesDataParser {
 	}
 
 	/**
-	 * Parses and returns all the student's academic history. Includes courses and final exams (both passed and failed)
-	 * @returns {Promise<{courses: [{courseCode: string, isPassed: boolean, grade: number, weightedGrade: number, date: Date}], finalExams: [{courseCode: string, isPassed: boolean, grade: number, weightedGrade: number, date: Date}]}>}
+	 * @typedef {Object} CoursesHistoryEntry
+	 * @property {string} courseCode
+	 * @property {boolean} isPassed
+	 * @property {boolean} isInProgress
+	 * @property {number} grade
+	 * @property {number} weightedGrade
+	 * @property {Date} date
+	 */
+
+	/**
+	 * Parses and returns all the student's academic history. Includes courses and final exams (passed, failed, and in-progress)
+	 * @returns {Promise<{courses: CoursesHistoryEntry[], finalExams: CoursesHistoryEntry[]}>}
 	 */
 	async getCoursesHistoryFromHTML() {
 		let courses = [];
@@ -359,11 +369,12 @@ export class PagesDataParser {
 			"Equivalencia Regularidad": courses,
 			"Equivalencia Total": finalExams,
 		};
-		const gradeIsPassedTypes = {
-			"Promocionado": true,
-			"Aprobado": true,
-			"Reprobado": false,
-			"Ausente": false,
+		const outcomes = {
+			"Promocionado":      {isPassed: true,  isInProgress: false},
+			"Aprobado":          {isPassed: true,  isInProgress: false},
+			"Reprobado":         {isPassed: false, isInProgress: false},
+			"Ausente":           {isPassed: false, isInProgress: false},
+			"Inicio de dictado": {isPassed: false, isInProgress: true},
 		};
 
 		let responseContents = await this.fetchAjaxGETContents("/autogestion/grado/historia_academica/?checks=PromocionA,RegularidadA,RegularidadR,RegularidadU,EnCurso,ExamenA,ExamenR,ExamenU,EquivalenciaA,EquivalenciaR,AprobResA,CreditosA,&modo=anio&param_modo=");
@@ -393,25 +404,22 @@ export class PagesDataParser {
 
 			// parts[1] is "<gradeInfo> <date>" — split off the trailing date.
 			let lastSpace = parts[1].lastIndexOf(" ");
-			let dateStr = parts[1].slice(lastSpace + 1);
+			let date = this.#parseDate(parts[1].slice(lastSpace + 1));
 			let gradeInfo = parts[1].slice(0, lastSpace);
 
-			if (gradeInfo.startsWith("Inicio de dictado")) return; // Ignore in-progress courses
-
-			// Last word of gradeInfo is the gradeOutcome.
-			let gradeOutcome = gradeInfo.split(" ").pop();
-			if (typeof gradeIsPassedTypes[gradeOutcome] === "undefined") throw new Error(`gradeOutcome couldn't be parsed: ${gradeOutcome}. Row: ${JSON.stringify(historyRow)}`);
-			let isPassed = gradeIsPassedTypes[gradeOutcome];
+			// gradeInfo ends with the outcome token (single word like "Aprobado", or multi-word like "Inicio de dictado").
+			let outcome = Object.keys(outcomes).find(key => gradeInfo.endsWith(key));
+			if (!outcome) throw new Error(`gradeInfo couldn't be parsed: ${gradeInfo}. Row: ${JSON.stringify(historyRow)}`);
+			let {isPassed, isInProgress} = outcomes[outcome];
 
 			// First token of gradeInfo is the numeric grade if present (e.g. "8 (OCHO) Aprobado").
 			let grade = parseInt(gradeInfo.split(" ")[0]) || null;
-
-			let date = this.#parseDate(dateStr);
 			let weightedGrade = grade !== null ? this.#getWeightedGrade(date, grade) : null;
 
 			arr.push({
 				courseCode: courseCode,
 				isPassed: isPassed,
+				isInProgress: isInProgress,
 				grade: grade,
 				weightedGrade: weightedGrade,
 				date: date,
@@ -424,8 +432,8 @@ export class PagesDataParser {
 	}
 
 	/**
-	 * Parses and returns all the student's academic history. Includes courses and final exams (both passed and failed)
-	 * @returns {Promise<{courses: [{courseCode: string, isPassed: boolean, grade: number, weightedGrade: number, date: Date}], finalExams: [{courseCode: string, isPassed: boolean, grade: number, weightedGrade: number, date: Date}]}>}
+	 * Parses and returns all the student's academic history. Includes courses and final exams (passed, failed, and in-progress)
+	 * @returns {Promise<{courses: CoursesHistoryEntry[], finalExams: CoursesHistoryEntry[]}>}
 	 */
 	async getCoursesHistory() {
 		let courses = [];
@@ -441,11 +449,12 @@ export class PagesDataParser {
 			"Equivalencia Regularidad": courses,
 			"Equivalencia Total": finalExams,
 		};
-		const gradeIsPassedTypes = {
-			"Promocionado": true,
-			"Aprobado": true,
-			"Reprobado": false,
-			"Ausente": false,
+		const outcomes = {
+			"Promocionado":      {isPassed: true,  isInProgress: false},
+			"Aprobado":          {isPassed: true,  isInProgress: false},
+			"Reprobado":         {isPassed: false, isInProgress: false},
+			"Ausente":           {isPassed: false, isInProgress: false},
+			"Inicio de dictado": {isPassed: false, isInProgress: true},
 		};
 		let workbook = await this.#fetchXlsContents("/autogestion/grado/historia_academica/exportar_xls/?checks=PromocionA,RegularidadA,RegularidadR,RegularidadU,EnCurso,ExamenA,ExamenR,ExamenU,EquivalenciaA,EquivalenciaR,AprobResA,CreditosA,&modo=anio&param_modo=");
 		let sheet = workbook.Sheets["Reporte"];
@@ -461,8 +470,7 @@ export class PagesDataParser {
 			let type = row["Tipo"];
 			let gradeText = row["Nota"];
 			let gradeOutcome = row["Resultado"];
-
-			if (!gradeText && !gradeOutcome) return; // Ignore in-progress courses
+			if (!gradeOutcome && type === "En curso") gradeOutcome = "Inicio de dictado"; // Matcheamos lo que se hace en el parsing de HTML
 
 			let courseCodeGroups = /(.*) \((\d{6})\)/.exec(courseText);
 			if (!courseCodeGroups) throw new Error(`courseText couldn't be parsed: ${courseText}. Row: ${JSON.stringify(row)}`);
@@ -477,15 +485,17 @@ export class PagesDataParser {
 			let arr = arrayByTypes[type];
 			if (!arr) throw new Error(`Type not handled: ${type}. Row: ${JSON.stringify(row)}`);
 
+			let outcome = outcomes[gradeOutcome];
+			if (!outcome) throw new Error(`gradeOutcome couldn't be parsed: ${gradeOutcome}. Row: ${JSON.stringify(row)}`);
+			let {isPassed, isInProgress} = outcome;
+
 			let grade = parseInt(gradeText) || null;
 			let weightedGrade = grade !== null ? this.#getWeightedGrade(date, grade) : null;
-
-			if (typeof gradeIsPassedTypes[gradeOutcome] === "undefined") throw new Error(`gradeOutcome couldn't be parsed: ${gradeOutcome}. Row: ${JSON.stringify(row)}`);
-			let isPassed = gradeIsPassedTypes[gradeOutcome];
 
 			arr.push({
 				courseCode: courseCode,
 				isPassed: isPassed,
+				isInProgress: isInProgress,
 				grade: grade,
 				weightedGrade: weightedGrade,
 				date: date,
