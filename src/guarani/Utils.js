@@ -1,4 +1,3 @@
-import $ from 'jquery';
 import {Consts} from './Consts.js';
 import {isIgnoredError, stringifyError} from './Errors.js';
 import {log} from "@embrace-io/web-sdk";
@@ -78,7 +77,9 @@ export class Utils {
 	waitForElementToHide(selector) {
 		return new Promise((resolve) => {
 			let check = () => {
-				if (!$(selector).is(":visible")) {
+				let el = document.querySelector(selector);
+				// Matches jQuery's :visible — element absent or has zero offset dimensions.
+				if (!el || (el.offsetWidth === 0 && el.offsetHeight === 0)) {
 					resolve();
 				} else {
 					setTimeout(check, 100);
