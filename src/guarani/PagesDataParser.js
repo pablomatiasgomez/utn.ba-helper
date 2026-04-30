@@ -485,6 +485,7 @@ export class PagesDataParser {
 		sheet["!ref"] = sheet["!ref"].replace("A1:", "A6:");
 
 		XLSX.utils.sheet_to_json(sheet).forEach(row => {
+			if (row["Fecha"] === "No hay registros disponibles") return;
 			let date = this.#parseDate(row["Fecha"]);
 			let courseText = row["Actividad"];
 			let type = row["Tipo"];
