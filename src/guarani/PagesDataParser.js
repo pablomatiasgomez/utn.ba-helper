@@ -372,70 +372,72 @@ export class PagesDataParser {
 			"Equivalencia Total": finalExams,
 		};
 		const outcomes = {
-			"Promocionado":      {isPassed: true,  isInProgress: false},
-			"Aprobado":          {isPassed: true,  isInProgress: false},
-			"Reprobado":         {isPassed: false, isInProgress: false},
-			"Ausente":           {isPassed: false, isInProgress: false},
+			"Promocionado": {isPassed: true, isInProgress: false},
+			"Aprobado": {isPassed: true, isInProgress: false},
+			"Reprobado": {isPassed: false, isInProgress: false},
+			"Ausente": {isPassed: false, isInProgress: false},
 			"Inicio de dictado": {isPassed: false, isInProgress: true},
 		};
 
-		// Fetch both the by-year and by-course views in parallel. We only parse the by-year one; by-course is captured for the parity-check debug payload.
+		// Fetch both views in parallel. We parse the by-course one (it's the complete view); by-year is kept for the parity-check debug payload.
 		let [anioResponse, materiaResponse] = await Promise.all([
 			this.fetchAjaxGETContents("/autogestion/grado/historia_academica/?checks=PromocionA,RegularidadA,RegularidadR,RegularidadU,EnCurso,ExamenA,ExamenR,ExamenU,EquivalenciaA,EquivalenciaR,AprobResA,CreditosA,&modo=anio&param_modo=&e_cu=A&e_ex=A&e_re=A"),
 			this.fetchAjaxGETContents("/autogestion/grado/historia_academica/?checks=PromocionA,RegularidadA,RegularidadR,RegularidadU,EnCurso,ExamenA,ExamenR,ExamenU,EquivalenciaA,EquivalenciaR,AprobResA,CreditosA,&modo=materia&param_modo=&e_cu=A&e_ex=A&e_re=A"),
 		]);
 		let responseText = this.#parseAjaxPageRenderer(anioResponse.cont, "info_historia").content;
 		let materiaResponseText = this.#parseAjaxPageRenderer(materiaResponse.cont, "info_historia").content;
-		let doc = new DOMParser().parseFromString(responseText, "text/html");
-		Array.from(doc.querySelectorAll(".catedra_nombre")).forEach(item => {
-			let courseText = item.querySelector("h4")?.textContent?.trim() || "";
+		let doc = new DOMParser().parseFromString(materiaResponseText, "text/html");
+		Array.from(doc.querySelectorAll(".catedras")).forEach(group => {
+			let courseText = group.querySelector("h3.titulo-corte")?.textContent?.trim() || "";
 			let courseCodeGroups = /(.*) \((\d{6})\)/.exec(courseText);
 			if (!courseCodeGroups) throw new Error(`courseText couldn't be parsed: ${courseText}`);
 			let courseCode = courseCodeGroups[2];
 
-			// Row shape: "<type>  - <gradeInfo> <date> [- Libro <X>] [- Folio <Y>] - Detalle"
-			// Libro and Folio are optional, so we accept 3, 4, or 5 parts.
-			// Examples:
-			//            "Promoción  - 10 (Diez) Promocionado 10/07/2018 - Libro PR038 - Folio 190 - Detalle"
-			//            "Regularidad  - Aprobada (Aprobada) Aprobado 22/03/2017 - Libro XVII200 - Folio 29 - Detalle"
-			//            "En curso  - Inicio de dictado 25/03/2026 - Detalle"
-			//            "Equivalencia Total - 6 (SEIS) Aprobado 07/03/2025 - Detalle"
-			//            "Regularidad  - Ausente 11/07/2025 - Libro XXV030001 - Detalle"
-			//            "Regularidad  - Aprobada (Aprobada) Aprobado 28/11/2019  (Vencida) - Libro XIX071 - Folio 39 - Detalle"
-			let historyRow = item.querySelector("span")?.textContent?.trim() || "";
-			let parts = historyRow.split(" - ");
-			if (parts.length < 3 || parts.length > 5 || parts[parts.length - 1] !== "Detalle") throw new Error(`historyRow couldn't be parsed: ${historyRow}`);
+			Array.from(group.querySelectorAll(".catedra_nombre")).forEach(item => {
+				// Row shape: "<type>  - <gradeInfo> <date> [- Libro <X>] [- Folio <Y>] - Detalle"
+				// Libro and Folio are optional, so we accept 3, 4, or 5 parts.
+				// Examples:
+				//            "Promoción  - 10 (Diez) Promocionado 10/07/2018 - Libro PR038 - Folio 190 - Detalle"
+				//            "Regularidad  - Aprobada (Aprobada) Aprobado 22/03/2017 - Libro XVII200 - Folio 29 - Detalle"
+				//            "En curso  - Inicio de dictado 25/03/2026 - Detalle"
+				//            "Equivalencia Total - 6 (SEIS) Aprobado 07/03/2025 - Detalle"
+				//            "Regularidad  - Ausente 11/07/2025 - Libro XXV030001 - Detalle"
+				//            "Regularidad  - Aprobada (Aprobada) Aprobado 28/11/2019  (Vencida) - Libro XIX071 - Folio 39 - Detalle"
+				let historyRow = item.querySelector("span")?.textContent?.trim() || "";
+				let parts = historyRow.split(" - ");
+				if (parts.length < 3 || parts.length > 5 || parts[parts.length - 1] !== "Detalle") throw new Error(`historyRow couldn't be parsed: ${historyRow}`);
 
-			let type = parts[0].trim();
-			let arr = arrayByTypes[type];
-			if (!arr) throw new Error(`Type not handled: ${type}. Row: ${historyRow}`);
+				let type = parts[0].trim();
+				let arr = arrayByTypes[type];
+				if (!arr) throw new Error(`Type not handled: ${type}. Row: ${historyRow}`);
 
-			// A trailing "(Vencida)" marker on parts[1] means the regularidad expired. Strip it so the rest of the parsing works, and force isPassed=false below.
-			let isExpired = /\s\(Vencida\)$/.test(parts[1]);
-			if (isExpired) parts[1] = parts[1].replace(/\s*\(Vencida\)\s*$/, "");
+				// A trailing "(Vencida)" marker on parts[1] means the regularidad expired. Strip it so the rest of the parsing works, and force isPassed=false below.
+				let isExpired = /\s\(Vencida\)$/.test(parts[1]);
+				if (isExpired) parts[1] = parts[1].replace(/\s*\(Vencida\)\s*$/, "");
 
-			// parts[1] is "<gradeInfo> <date>" — split off the trailing date.
-			let lastSpace = parts[1].lastIndexOf(" ");
-			let date = this.#parseDate(parts[1].slice(lastSpace + 1));
-			let gradeInfo = parts[1].slice(0, lastSpace);
+				// parts[1] is "<gradeInfo> <date>" — split off the trailing date.
+				let lastSpace = parts[1].lastIndexOf(" ");
+				let date = this.#parseDate(parts[1].slice(lastSpace + 1));
+				let gradeInfo = parts[1].slice(0, lastSpace);
 
-			// gradeInfo ends with the outcome token (single word like "Aprobado", or multi-word like "Inicio de dictado").
-			let outcome = Object.keys(outcomes).find(key => gradeInfo.endsWith(key));
-			if (!outcome) throw new Error(`gradeInfo couldn't be parsed: ${gradeInfo}. Row: ${JSON.stringify(historyRow)}`);
-			let {isPassed, isInProgress} = outcomes[outcome];
-			if (isExpired) isPassed = false;
+				// gradeInfo ends with the outcome token (single word like "Aprobado", or multi-word like "Inicio de dictado").
+				let outcome = Object.keys(outcomes).find(key => gradeInfo.endsWith(key));
+				if (!outcome) throw new Error(`gradeInfo couldn't be parsed: ${gradeInfo}. Row: ${JSON.stringify(historyRow)}`);
+				let {isPassed, isInProgress} = outcomes[outcome];
+				if (isExpired) isPassed = false;
 
-			// First token of gradeInfo is the numeric grade if present (e.g. "8 (OCHO) Aprobado").
-			let grade = parseInt(gradeInfo.split(" ")[0]) || null;
-			let weightedGrade = grade !== null ? this.#getWeightedGrade(date, grade) : null;
+				// First token of gradeInfo is the numeric grade if present (e.g. "8 (OCHO) Aprobado").
+				let grade = parseInt(gradeInfo.split(" ")[0]) || null;
+				let weightedGrade = grade !== null ? this.#getWeightedGrade(date, grade) : null;
 
-			arr.push({
-				courseCode: courseCode,
-				isPassed: isPassed,
-				isInProgress: isInProgress,
-				grade: grade,
-				weightedGrade: weightedGrade,
-				date: date,
+				arr.push({
+					courseCode: courseCode,
+					isPassed: isPassed,
+					isInProgress: isInProgress,
+					grade: grade,
+					weightedGrade: weightedGrade,
+					date: date,
+				});
 			});
 		});
 		return {
@@ -465,10 +467,10 @@ export class PagesDataParser {
 			"Equivalencia Total": finalExams,
 		};
 		const outcomes = {
-			"Promocionado":      {isPassed: true,  isInProgress: false},
-			"Aprobado":          {isPassed: true,  isInProgress: false},
-			"Reprobado":         {isPassed: false, isInProgress: false},
-			"Ausente":           {isPassed: false, isInProgress: false},
+			"Promocionado": {isPassed: true, isInProgress: false},
+			"Aprobado": {isPassed: true, isInProgress: false},
+			"Reprobado": {isPassed: false, isInProgress: false},
+			"Ausente": {isPassed: false, isInProgress: false},
 			"Inicio de dictado": {isPassed: false, isInProgress: true},
 		};
 		let workbook = await this.#fetchXlsContents("/autogestion/grado/historia_academica/exportar_xls/?checks=PromocionA,RegularidadA,RegularidadR,RegularidadU,EnCurso,ExamenA,ExamenR,ExamenU,EquivalenciaA,EquivalenciaR,AprobResA,CreditosA,&modo=anio&param_modo=");
