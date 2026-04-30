@@ -449,13 +449,16 @@ export class PagesDataParser {
 
 	/**
 	 * Parses and returns all the student's academic history. Includes courses and final exams (passed, failed, and in-progress).
-	 * Also returns the raw XLS rows (full sheet, including metadata) under `rawDataForDebug`, used by the parity check to surface diffs against the HTML path.
-	 * @returns {Promise<{courses: CoursesHistoryEntry[], finalExams: CoursesHistoryEntry[], rawDataForDebug: Array<Array<*>>}>}
+	 * Also returns under `rawDataForDebug`: `sheet` (raw XLS rows including metadata) and `equivalencePage` (raw HTML of the by-course equivalence-only fetch used to disambiguate Equivalencia rows). Used by the parity check.
+	 * @returns {Promise<{courses: CoursesHistoryEntry[], finalExams: CoursesHistoryEntry[], rawDataForDebug: {sheet: Array<Array<*>>, equivalencePage: string}}>}
 	 */
 	async getCoursesHistory() {
 		let courses = [];
 		let finalExams = [];
-		let equivalenceEntriesByCourseCode = await this.#fetchEquivalenceEntriesByCourseCode();
+		let {
+			entries: equivalenceEntriesByCourseCode,
+			responseText: equivalencePageResponseText
+		} = await this.#fetchEquivalenceEntriesByCourseCode();
 		// Use a map to also validate returned types.
 		let arrayByTypes = {
 			"En curso": courses,
@@ -533,7 +536,7 @@ export class PagesDataParser {
 		return {
 			courses: courses,
 			finalExams: finalExams,
-			rawDataForDebug: allRowsForDebug,
+			rawDataForDebug: {sheet: allRowsForDebug, equivalencePage: equivalencePageResponseText},
 		};
 	}
 
@@ -577,7 +580,7 @@ export class PagesDataParser {
 			});
 		});
 
-		return equivalenceEntriesByCourseCode;
+		return {entries: equivalenceEntriesByCourseCode, responseText};
 	}
 
 	/**
