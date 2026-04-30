@@ -1,6 +1,5 @@
 // noinspection JSNonASCIINames
 
-import * as XLSX from 'xlsx';
 import {Consts} from './Consts.js';
 import {
 	GuaraniBackendError,
@@ -92,34 +91,6 @@ export class PagesDataParser {
 			.filter(data => data.info.id === infoId);
 		if (renderData.length !== 1) throw new Error(`Found unexpected number of renderers: ${renderData.length} for infoId: ${infoId}. response: ${JSON.stringify(responseContents)}`);
 		return renderData[0];
-	}
-
-	/**
-	 * Fetches an url that returns a XLS and returns the parsed workbook
-	 * @param url url that returns a XLS.
-	 * @returns {Promise<{}>}
-	 */
-	async #fetchXlsContents(url) {
-		if (this.#responsesCache[url]) {
-			return this.#responsesCache[url];
-		}
-
-		let fetchResponse;
-		try {
-			fetchResponse = await this.#fetchWithRetry(url);
-		} catch (e) {
-			throw new Error(`Error on fetchXlsContents for ${url}`, {cause: e});
-		}
-		let buffer = await fetchResponse.arrayBuffer();
-		let uint8Array = new Uint8Array(buffer);
-		let contents;
-		try {
-			contents = XLSX.read(uint8Array, {type: "array"});
-		} catch (e) {
-			throw new Error(`Error on XLSX.read for ${url}. uint8Array: [${uint8Array}].`, {cause: e});
-		}
-		this.#responsesCache[url] = contents;
-		return contents;
 	}
 
 	// --------------------
@@ -354,11 +325,9 @@ export class PagesDataParser {
 
 	/**
 	 * Parses and returns all the student's academic history. Includes courses and final exams (passed, failed, and in-progress).
-	 * Also returns the raw responseText for both the by-year and by-course HTML views under `rawDataForDebug`,
-	 * used by the parity check to surface diffs against the XLS path.
-	 * @returns {Promise<{courses: CoursesHistoryEntry[], finalExams: CoursesHistoryEntry[], rawDataForDebug: {anio: string, materia: string}}>}
+	 * @returns {Promise<{courses: CoursesHistoryEntry[], finalExams: CoursesHistoryEntry[]}>}
 	 */
-	async getCoursesHistoryFromHTML() {
+	async getCoursesHistory() {
 		let courses = [];
 		let finalExams = [];
 		// Use a map to also validate returned types.
@@ -379,14 +348,10 @@ export class PagesDataParser {
 			"Inicio de dictado": {isPassed: false, isInProgress: true},
 		};
 
-		// Fetch both views in parallel. We parse the by-course one (it's the complete view); by-year is kept for the parity-check debug payload.
-		let [anioResponse, materiaResponse] = await Promise.all([
-			this.fetchAjaxGETContents("/autogestion/grado/historia_academica/?checks=PromocionA,RegularidadA,RegularidadR,RegularidadU,EnCurso,ExamenA,ExamenR,ExamenU,EquivalenciaA,EquivalenciaR,AprobResA,CreditosA,&modo=anio&param_modo=&e_cu=A&e_ex=A&e_re=A"),
-			this.fetchAjaxGETContents("/autogestion/grado/historia_academica/?checks=PromocionA,RegularidadA,RegularidadR,RegularidadU,EnCurso,ExamenA,ExamenR,ExamenU,EquivalenciaA,EquivalenciaR,AprobResA,CreditosA,&modo=materia&param_modo=&e_cu=A&e_ex=A&e_re=A"),
-		]);
-		let responseText = this.#parseAjaxPageRenderer(anioResponse.cont, "info_historia").content;
-		let materiaResponseText = this.#parseAjaxPageRenderer(materiaResponse.cont, "info_historia").content;
-		let doc = new DOMParser().parseFromString(materiaResponseText, "text/html");
+		// We parse the by-course view — it's the complete view that surfaces all events guarani has for each course.
+		let response = await this.fetchAjaxGETContents("/autogestion/grado/historia_academica/?checks=PromocionA,RegularidadA,RegularidadR,RegularidadU,EnCurso,ExamenA,ExamenR,ExamenU,EquivalenciaA,EquivalenciaR,AprobResA,CreditosA,&modo=materia&param_modo=&e_cu=A&e_ex=A&e_re=A");
+		let responseText = this.#parseAjaxPageRenderer(response.cont, "info_historia").content;
+		let doc = new DOMParser().parseFromString(responseText, "text/html");
 		Array.from(doc.querySelectorAll(".catedras")).forEach(group => {
 			let courseText = group.querySelector("h3.titulo-corte")?.textContent?.trim() || "";
 			let courseCodeGroups = /(.*) \((\d{6})\)/.exec(courseText);
@@ -443,144 +408,7 @@ export class PagesDataParser {
 		return {
 			courses: courses,
 			finalExams: finalExams,
-			rawDataForDebug: {anio: responseText, materia: materiaResponseText},
 		};
-	}
-
-	/**
-	 * Parses and returns all the student's academic history. Includes courses and final exams (passed, failed, and in-progress).
-	 * Also returns under `rawDataForDebug`: `sheet` (raw XLS rows including metadata) and `equivalencePage` (raw HTML of the by-course equivalence-only fetch used to disambiguate Equivalencia rows). Used by the parity check.
-	 * @returns {Promise<{courses: CoursesHistoryEntry[], finalExams: CoursesHistoryEntry[], rawDataForDebug: {sheet: Array<Array<*>>, equivalencePage: string}}>}
-	 */
-	async getCoursesHistory() {
-		let courses = [];
-		let finalExams = [];
-		let {
-			entries: equivalenceEntriesByCourseCode,
-			responseText: equivalencePageResponseText
-		} = await this.#fetchEquivalenceEntriesByCourseCode();
-		// Use a map to also validate returned types.
-		let arrayByTypes = {
-			"En curso": courses,
-			"Regularidad": courses,
-			"Promocion": finalExams,
-			"Examen": finalExams,
-			"Equivalencia Parcial": courses, // Estos en realidad creo que corresponden a las equivalencias que le faltan cosas como rendir laboratorio. Por ahora lo tomamos como curso aprobado.
-			"Equivalencia Regularidad": courses,
-			"Equivalencia Total": finalExams,
-		};
-		const outcomes = {
-			"Promocionado": {isPassed: true, isInProgress: false},
-			"Aprobado": {isPassed: true, isInProgress: false},
-			"Reprobado": {isPassed: false, isInProgress: false},
-			"Ausente": {isPassed: false, isInProgress: false},
-			"Inicio de dictado": {isPassed: false, isInProgress: true},
-		};
-		let workbook = await this.#fetchXlsContents("/autogestion/grado/historia_academica/exportar_xls/?checks=PromocionA,RegularidadA,RegularidadR,RegularidadU,EnCurso,ExamenA,ExamenR,ExamenU,EquivalenciaA,EquivalenciaR,AprobResA,CreditosA,&modo=anio&param_modo=");
-		let sheet = workbook.Sheets["Reporte"];
-		if (!sheet) throw new Error(`Workbook does not contain sheet. Sheetnames: ${workbook.SheetNames}`);
-
-		// Capture the full sheet (including the first 5 metadata rows) for debugging before we trim. {header: 1} returns each row as an array of cell values so the metadata doesn't get misread as headers.
-		let allRowsForDebug = XLSX.utils.sheet_to_json(sheet, {header: 1});
-
-		// First 5 rows do not include important data:
-		if (sheet.A6.v !== "Fecha") throw new Error(`Invalid sheet data: ${JSON.stringify(XLSX.utils.sheet_to_json(sheet))}`);
-		sheet["!ref"] = sheet["!ref"].replace("A1:", "A6:");
-
-		XLSX.utils.sheet_to_json(sheet).forEach(row => {
-			if (row["Fecha"] === "No hay registros disponibles") return;
-			let date = this.#parseDate(row["Fecha"]);
-			let courseText = row["Actividad"];
-			let type = row["Tipo"];
-			let gradeText = row["Nota"];
-			let gradeOutcome = row["Resultado"];
-			if (!gradeOutcome && type === "En curso") gradeOutcome = "Inicio de dictado"; // Matcheamos lo que se hace en el parsing de HTML
-
-			let courseCodeGroups = /(.*) \((\d{6})\)/.exec(courseText);
-			if (!courseCodeGroups) throw new Error(`courseText couldn't be parsed: ${courseText}. Row: ${JSON.stringify(row)}`);
-			let courseCode = courseCodeGroups[2];
-
-			if (type === "Equivalencia") {
-				// XLS lumps every equivalence under "Equivalencia". Match the row to its precise type using the by-course HTML view as truth: same date + same Nota.
-				let entries = equivalenceEntriesByCourseCode[courseCode];
-				if (!entries || !entries.length) throw new Error(`Could not resolve equivalence entries for courseCode: ${courseCode}. equivalenceEntriesByCourseCode: ${JSON.stringify(equivalenceEntriesByCourseCode)}`);
-				let xlsNota = gradeText || null;
-				let match = entries.find(e => e.date === row["Fecha"] && e.notaEquivalent === xlsNota);
-				if (match) {
-					type = match.type;
-				} else {
-					// Equivalence page didn't list a row for this exact (date, Nota) — surface the data rather than silently picking a type.
-					throw new Error(`Could not match XLS Equivalencia row to HTML lookup. Row: ${JSON.stringify(row)}. entries: ${JSON.stringify(entries)}`);
-				}
-			}
-
-			let arr = arrayByTypes[type];
-			if (!arr) throw new Error(`Type not handled: ${type}. Row: ${JSON.stringify(row)}`);
-
-			let outcome = outcomes[gradeOutcome];
-			if (!outcome) throw new Error(`gradeOutcome couldn't be parsed: ${gradeOutcome}. Row: ${JSON.stringify(row)}`);
-			let {isPassed, isInProgress} = outcome;
-
-			let grade = parseInt(gradeText) || null;
-			let weightedGrade = grade !== null ? this.#getWeightedGrade(date, grade) : null;
-
-			arr.push({
-				courseCode: courseCode,
-				isPassed: isPassed,
-				isInProgress: isInProgress,
-				grade: grade,
-				weightedGrade: weightedGrade,
-				date: date,
-			});
-		});
-		return {
-			courses: courses,
-			finalExams: finalExams,
-			rawDataForDebug: {sheet: allRowsForDebug, equivalencePage: equivalencePageResponseText},
-		};
-	}
-
-	// fetchEquivalenceEntriesByCourseCode is needed to fetch the Equivalences directly from HTML and not XLS,
-	// as the XLS only includes the string "Equivalencia" which cannot be distinguished between Parcial/Regularidad and Total.
-	// Returns one entry per equivalence row (with type, date and notaEquivalent) so the XLS parser can match each XLS row to its real type.
-	async #fetchEquivalenceEntriesByCourseCode() {
-		let responseContents = await this.fetchAjaxGETContents("/autogestion/grado/historia_academica/?checks=EquivalenciaA,&modo=materia&param_modo=&e_cu=A&e_ex=A&e_re=A");
-		let responseText = this.#parseAjaxPageRenderer(responseContents.cont, "info_historia").content;
-		let doc = new DOMParser().parseFromString(responseText, "text/html");
-		let listado = doc.querySelector("#listado");
-		if (!listado) throw new Error(`Could not find #listado in equivalence response. responseText: ${responseText}`);
-
-		let equivalenceEntriesByCourseCode = {};
-		Array.from(listado.children).filter(catedraGroupDiv => catedraGroupDiv.classList.contains("catedras")).forEach(catedraGroupDiv => {
-			let courseText = catedraGroupDiv.querySelector("h3.titulo-corte")?.textContent.trim();
-			if (!courseText) return;
-			let courseCodeGroups = /(.*) \((\d{6})\)/.exec(courseText);
-			if (!courseCodeGroups) throw new Error(`Equivalence courseText couldn't be parsed: ${courseText}`);
-			let courseCode = courseCodeGroups[2];
-
-			Array.from(catedraGroupDiv.querySelectorAll(".catedra[equivalencia='Aprobado']")).forEach(catedraDiv => {
-				// Each row has the same shape as the main history rows: "<type> - <gradeInfo> <date> - Detalle"
-				let rowText = catedraDiv.querySelector(".catedra_nombre span")?.textContent?.trim() || "";
-				let parts = rowText.split(" - ");
-				if (parts.length !== 3 || parts[2] !== "Detalle") throw new Error(`Equivalence row couldn't be parsed: ${rowText}`);
-
-				let type = parts[0].trim();
-				if (!["Equivalencia Parcial", "Equivalencia Regularidad", "Equivalencia Total"].includes(type)) throw new Error(`Unknown equivalenceText: ${type}`);
-
-				// parts[1] = "<gradeInfo> <date>" (date format DD/MM/YYYY, matches XLS Fecha).
-				let lastSpace = parts[1].lastIndexOf(" ");
-				let date = parts[1].slice(lastSpace + 1);
-				let gradeInfo = parts[1].slice(0, lastSpace);
-				// XLS Nota equivalent: empty when gradeInfo is just an outcome word (e.g. "Aprobado"); otherwise the leading token (e.g. "Aprobada" or a numeric grade).
-				let tokens = gradeInfo.split(" ");
-				let notaEquivalent = tokens.length === 1 ? null : tokens[0];
-
-				if (!equivalenceEntriesByCourseCode[courseCode]) equivalenceEntriesByCourseCode[courseCode] = [];
-				equivalenceEntriesByCourseCode[courseCode].push({type, date, notaEquivalent});
-			});
-		});
-
-		return {entries: equivalenceEntriesByCourseCode, responseText};
 	}
 
 	/**

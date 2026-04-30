@@ -1,4 +1,4 @@
-import {log, trace} from "@embrace-io/web-sdk";
+import {trace} from "@embrace-io/web-sdk";
 
 const LOCAL_STORAGE_DATA_COLLECTOR_KEY = "UtnBaHelper.DataCollector";
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
@@ -34,7 +34,6 @@ export class DataCollector {
 	 * Collects, every one day or more, background data such as:
 	 * - class schedules and professors
 	 * - student plan courses
-	 * - parity check between the XLS-based and HTML-based coursesHistory parsers
 	 * @returns {Promise<void>}
 	 */
 	async collectBackgroundDataIfNeeded() {
@@ -54,11 +53,6 @@ export class DataCollector {
 				key: "planCourses",
 				minTime: ONE_DAY_MS * 180,
 				method: () => this.#collectStudentPlanCourses(),
-			},
-			{
-				key: "checkCoursesHistoryParity",
-				minTime: ONE_DAY_MS,
-				method: () => this.#checkCoursesHistoryParity(),
 			},
 		];
 
@@ -101,39 +95,6 @@ export class DataCollector {
 	async #collectStudentPlanCourses() {
 		let planCourses = await this.#pagesDataParser.getStudentPlanCourses();
 		return this.#apiConnector.postCourses(planCourses);
-	}
-
-	// Temporary parity check while validating the new HTML-based coursesHistory parser.
-	// Once it matches consistently for real users we can drop both this and the XLS-based path.
-	async #checkCoursesHistoryParity() {
-		let [xls, html] = await Promise.all([
-			this.#pagesDataParser.getCoursesHistory(),
-			this.#pagesDataParser.getCoursesHistoryFromHTML(),
-		]);
-
-		// Sort both sides identically so equal data serializes to equal strings.
-		let bySerialized = (a, b) => {
-			let ka = JSON.stringify(a), kb = JSON.stringify(b);
-			return ka < kb ? -1 : ka > kb ? 1 : 0;
-		};
-		let normalize = data => ({
-			courses: [...data.courses].sort(bySerialized),
-			finalExams: [...data.finalExams].sort(bySerialized),
-		});
-
-		let normalizedXls = normalize(xls);
-		let normalizedHtml = normalize(html);
-		let equal = JSON.stringify(normalizedXls) === JSON.stringify(normalizedHtml);
-		log.message("Checking course history parity", 'info', {attributes: {equal: equal.toString()}});
-
-		if (!equal) {
-			return this.#apiConnector.logMessage("checkCoursesHistoryParity", true, JSON.stringify({
-				xls: normalizedXls,
-				html: normalizedHtml,
-				rawXls: xls.rawDataForDebug,
-				rawHtml: html.rawDataForDebug,
-			}));
-		}
 	}
 
 	// -----
