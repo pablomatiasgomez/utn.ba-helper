@@ -1,5 +1,7 @@
 import {log} from "@embrace-io/web-sdk";
 
+import {getProfessorLi, getSchedulesAsString} from './RenderHelpers.js';
+
 export class CoursesSearchCustomPage {
 	static menuName = "Buscar cursos";
 	static customParamKey = "courseCode";
@@ -116,7 +118,7 @@ export class CoursesSearchCustomPage {
 	#appendClassesToTable(classSchedules) {
 		let trs = classSchedules.map(classSchedule => {
 			let professorLis = (classSchedule.professors || []).map(professor => {
-				return this.#services.utils.getProfessorLi(professor);
+				return getProfessorLi(professor);
 			}).join("");
 			let trClass = (this.#lastYear && this.#lastYear !== classSchedule.year) ? "top-border" : (this.#lastQuarter && this.#lastQuarter !== classSchedule.quarter) ? "top-border-without-first-cell" : "";
 			this.#lastYear = classSchedule.year;
@@ -126,7 +128,7 @@ export class CoursesSearchCustomPage {
 					<td>${classSchedule.quarter}</td>
 					<td>${classSchedule.classCode}</td>
 					<td>${classSchedule.branch || "-"}</td>
-					<td>${this.#services.utils.getSchedulesAsString(classSchedule.schedules)}</td>
+					<td>${getSchedulesAsString(classSchedule.schedules)}</td>
 					<td><ul class="no-margin">${professorLis}</ul></td>
 				</tr>`;
 		}).join("");

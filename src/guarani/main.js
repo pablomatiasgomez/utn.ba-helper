@@ -8,6 +8,7 @@ import {Store} from './Store.js';
 import {PagesDataParser} from './PagesDataParser.js';
 import {DataCollector} from './DataCollector.js';
 import {CustomPages} from './custompages/CustomPages.js';
+import {addPoweredByUTNBAHelper, removePoweredByUTNBAHelper} from './PoweredByBanner.js';
 import {HorariosPage} from './pages/HorariosPage.js';
 import {PreInscripcionPage} from './pages/PreInscripcionPage.js';
 import {InscripcionAExamenesPage} from './pages/InscripcionAExamenesPage.js';
@@ -57,14 +58,14 @@ import {InscripcionAExamenesPage} from './pages/InscripcionAExamenesPage.js';
 			if (!isInGradoPage || !isLoggedIn || !isStudentProfile || isInSurveyPage) {
 				// Remove all the added things when the page is not handled.
 				customPages.removeMenu();
-				utils.removePoweredByUTNBAHelper();
+				removePoweredByUTNBAHelper();
 
 				return apiConnector.logMessage("pageNotHandled", false, `[Path:${window.location.pathname}][IsLoggedIn:${isLoggedIn}][CurrentProfile:${currentProfile}]`);
 			}
 
 			// Init everything:
 			customPages.appendMenu();
-			utils.addPoweredByUTNBAHelper();
+			addPoweredByUTNBAHelper();
 
 			// Collect background data
 			utils.runAsync("collectBackgroundDataIfNeeded", () => dataCollector.collectBackgroundDataIfNeeded());

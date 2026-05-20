@@ -3,6 +3,7 @@ import './ProfessorsSearchCustomPage.css';
 import {Chart} from 'chart.js/auto';
 import {log} from "@embrace-io/web-sdk";
 import {CustomPages} from './CustomPages.js';
+import {getColorForAvg, getOverallScoreSpan, getProfessorLi, getSchedulesAsString} from './RenderHelpers.js';
 
 const SENTIMENT_COLORS = {
 	"POSITIVE": "#19B135",
@@ -117,7 +118,7 @@ export class ProfessorsSearchCustomPage {
 		this.#coursesResultDiv.innerHTML = "";
 		let trs = classSchedules.map(classSchedule => {
 			let professorLis = (classSchedule.professors || []).map(professor => {
-				return this.#services.utils.getProfessorLi(professor);
+				return getProfessorLi(professor);
 			}).join("");
 			return `<tr>
 				<td>${classSchedule.year}</td>
@@ -125,7 +126,7 @@ export class ProfessorsSearchCustomPage {
 				<td><a class="no-ajax" href="${CustomPages.getCourseResultsUrl(classSchedule.courseCode)}" target="_blank">${classSchedule.courseName}</a></td>
 				<td>${classSchedule.classCode}</td>
 				<td>${classSchedule.branch || "-"}</td>
-				<td>${this.#services.utils.getSchedulesAsString(classSchedule.schedules)}</td>
+				<td>${getSchedulesAsString(classSchedule.schedules)}</td>
 				<td><ul class="no-margin">${professorLis}</ul></td>
 			</tr>`;
 		}).join("");
@@ -209,7 +210,7 @@ export class ProfessorsSearchCustomPage {
 								backgroundRules.forEach(rule => {
 									let yTop = yAxis.top + (yAxis.height / 100 * (100 - rule.to));
 									let yHeight = yAxis.height / 100 * (rule.to - rule.from);
-									chart.ctx.fillStyle = this.#services.utils.getColorForAvg(rule.from, 0.1);
+									chart.ctx.fillStyle = getColorForAvg(rule.from, 0.1);
 									chart.ctx.fillRect(xAxis.left, yTop, xAxis.width, yHeight);
 								});
 							}
@@ -237,11 +238,11 @@ export class ProfessorsSearchCustomPage {
 
 		if (results.percentageFields.length) {
 			let percentageRows = results.percentageFields.map(item => {
-				return `<tr><td>${item.question}</td><td style="background-color: ${this.#services.utils.getColorForAvg(item.average)}">${item.average}</td><td>${item.count}</td></tr>`;
+				return `<tr><td>${item.question}</td><td style="background-color: ${getColorForAvg(item.average)}">${item.average}</td><td>${item.count}</td></tr>`;
 			}).join("");
 			this.#surveyResultDiv.insertAdjacentHTML("beforeend", `
 				<h4>Puntajes</h4>
-				<div class="overall-score">General: ${this.#services.utils.getOverallScoreSpan(results.overallScore)}</div>
+				<div class="overall-score">General: ${getOverallScoreSpan(results.overallScore)}</div>
 				<table class="percentage-questions">
 					<tbody>
 						<tr><th>Pregunta</th><th>Promedio</th><th>Muestra</th></tr>

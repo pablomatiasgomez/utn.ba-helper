@@ -1,5 +1,6 @@
 import './PreInscripcionPage.css';
 import {Consts} from '../Consts.js';
+import {getProfessorLi} from '../custompages/RenderHelpers.js';
 
 export class PreInscripcionPage {
 	#pagesDataParser;
@@ -145,7 +146,7 @@ export class PreInscripcionPage {
 						.forEach(([newClassCode, professors]) => {
 							content += `<li>${newClassCode}<ul class="no-margin">`;
 							professors.forEach(professor => {
-								content += this.#utils.getProfessorLi(professor);
+								content += getProfessorLi(professor);
 							});
 							content += `</ul></li>`;
 						});
