@@ -3,7 +3,7 @@ export class ApiConnector {
 	logMessage(method, isError, message) {
 	}
 
-	logUserStat(hashedStudentId, pesoAcademico, passingGradesAverage, allGradesAverage, passingGradesCount, failingGradesCount) {
+	logUserStat(hashedStudentId, pesoAcademico, pesoAcademicoCL2027, passingGradesAverage, allGradesAverage, passingGradesCount, failingGradesCount) {
 	}
 
 	postClassSchedules(classSchedules) {

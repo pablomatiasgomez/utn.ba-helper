@@ -59,4 +59,37 @@
     text-decoration: none;
 }
 
+.utnba-helper .grades-summary-notes {
+    font-size: 12px;
+    font-style: italic;
+    margin-top: 8px;
+    color: #444;
+}
+
+.utnba-helper .grades-summary-notes .footnote {
+    margin: 6px 0;
+    padding-left: 14px;
+    text-indent: -14px;
+}
+
+.utnba-helper .grades-summary-notes ul {
+    list-style: disc;
+    margin: 4px 0 4px 8px;
+    padding: 0;
+    font-style: normal;
+    text-indent: 0;
+}
+
+.utnba-helper .grades-summary-notes ul li {
+    margin: 2px 0;
+}
+
+.utnba-helper .grades-summary-notes ul li b {
+    font-family: monospace;
+    font-weight: normal;
+    background: #f0f0f0;
+    padding: 0 3px;
+    border-radius: 2px;
+}
+
 
