@@ -51,7 +51,7 @@ export class PagesDataParser {
 			}
 			if (response.status === 500) throw new GuaraniBackendError();
 			let body = await response.text();
-			let error = new Error(`ResponseBody: ${body}`);
+			let error = new Error(`Got unexpected ResponseStatus: ${response.status} - ResponseBody: ${body}`);
 			error.name = `HttpError(${response.status} ${method} ${url})`;
 			throw error;
 		}
