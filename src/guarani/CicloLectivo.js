@@ -1,8 +1,7 @@
 import {Consts} from './Consts.js';
 
-// El ciclo lectivo arranca a mediados de marzo (la fecha exacta varía por año entre 13/03 y 05/04
-// según el calendario académico, pero la inscripción a materias ocurre antes, así que el 15/03
-// es un corte estable que clasifica correctamente la actividad relevante).
+// El ciclo lectivo arranca a mediados de marzo (la fecha exacta varía por año entre 13/03 y 05/04 según el año)
+// La inscripción a materias ocurre justo antes de esta fecha.
 const CICLO_LECTIVO_CUTOFF = {month: 2, day: 15};
 
 export function getCicloLectivo(date) {
