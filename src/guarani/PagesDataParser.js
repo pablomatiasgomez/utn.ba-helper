@@ -34,19 +34,27 @@ export class PagesDataParser {
 	}
 
 	async #fetchWithRetry(url, fetchOpts) {
-		let response = await fetch(url, fetchOpts);
-		if (response.ok) {
-			return response;
+		let method = fetchOpts.method || "GET";
+		while (true) {
+			let response;
+			try {
+				response = await fetch(url, fetchOpts);
+			} catch (e) {
+				e.name = `${e.name || "Error"}(${method} ${url})`;
+				throw e;
+			}
+			if (response.ok) return response;
+			if (response.status === 429) {
+				console.warn(`Got 429 for ${url}, retrying in 1 second...`);
+				await new Promise(resolve => setTimeout(resolve, 1000));
+				continue;
+			}
+			if (response.status === 500) throw new GuaraniBackendError();
+			let body = await response.text();
+			let error = new Error(`Got unexpected ResponseStatus: ${response.status} - ResponseBody: ${body}`);
+			error.name = `HttpError(${response.status} ${method} ${url})`;
+			throw error;
 		}
-		if (response.status === 429) {
-			console.warn(`Got 429 for ${url}, retrying in 1 second...`);
-			await new Promise(resolve => setTimeout(resolve, 1000));
-			return this.#fetchWithRetry(url, fetchOpts);
-		} else if (response.status === 500) {
-			throw new GuaraniBackendError();
-		}
-		let body = await response.text();
-		throw new Error(`Got unexpected ResponseStatus: ${response.status} for url: ${url} - ResponseBody: ${body}`);
 	}
 
 	/**
@@ -58,12 +66,7 @@ export class PagesDataParser {
 			return this.#responsesCache[cacheKey];
 		}
 
-		let fetchResponse;
-		try {
-			fetchResponse = await this.#fetchWithRetry(url, fetchOpts);
-		} catch (e) {
-			throw new Error(`Error on fetchAjaxContents for ${cacheKey}`, {cause: e});
-		}
+		let fetchResponse = await this.#fetchWithRetry(url, fetchOpts);
 		let text = await fetchResponse.text();
 		let response = JSON.parse(text);
 		if (response.cod === "1" && response.titulo === "Grado - Acceso" && response.operacion === "acceso") throw new LoggedOutError();
