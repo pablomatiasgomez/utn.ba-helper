@@ -13,10 +13,11 @@ export class ApiConnector {
 		});
 	}
 
-	logUserStat(hashedStudentId, pesoAcademico, passingGradesAverage, allGradesAverage, passingGradesCount, failingGradesCount) {
+	logUserStat(hashedStudentId, pesoAcademico, pesoAcademicoCL2027, passingGradesAverage, allGradesAverage, passingGradesCount, failingGradesCount) {
 		return this.#postData(BASE_API_URL + "/user-stats", {
 			hashedStudentId: hashedStudentId,
 			pesoAcademico: pesoAcademico,
+			pesoAcademicoCL2027: pesoAcademicoCL2027,
 			passingGradesAverage: passingGradesAverage,
 			allGradesAverage: allGradesAverage,
 			passingGradesCount: passingGradesCount,

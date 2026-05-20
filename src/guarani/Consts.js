@@ -44,8 +44,6 @@ export const Consts = {
 		"NIGHT": "Noche",
 	},
 
-	// Doesn't have to be exact... just using March 10th.
-	NEW_GRADES_REGULATION_DATE: new Date(2017, 2, 10),
 	WEIGHTED_GRADES: {
 		// "Ordenanza 1549"
 		1: 1,

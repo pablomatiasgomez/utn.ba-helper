@@ -1,6 +1,7 @@
 import './PlanTrackingCustomPage.css';
 
 import {CustomPages} from './CustomPages.js';
+import {getCicloLectivo} from '../CicloLectivo.js';
 
 const TRANSLATIONS = {
 	"SIGNED": "Firmada",
@@ -56,6 +57,20 @@ export class PlanTrackingCustomPage {
 		let failedFinalExams = coursesHistory.finalExams.filter(course => !course.isPassed);
 		let pesoAcademico = 11 * passedFinalExams.length - 5 * yearsCount - 3 * failedFinalExams.length;
 
+		// Nuevo polinomio desde CL2027
+		//   P = 11*MAp_total - 7*FAd_total - 19*FAu_ciclo - 17*MAb_ciclo + 5*MR_ciclo
+		let passedCourseCodes = new Set(passedFinalExams.map(c => c.courseCode));
+		let signedCourseCodes = new Set(coursesHistory.courses.filter(c => c.isPassed).map(c => c.courseCode));
+		let ultimoCiclo = getCicloLectivo(new Date());
+		let isInUltimoCiclo = course => getCicloLectivo(course.date) === ultimoCiclo;
+
+		let mApTotal = passedFinalExams.length;
+		let fAdTotal = [...signedCourseCodes].filter(code => !passedCourseCodes.has(code)).length;
+		let fAuCiclo = coursesHistory.finalExams.filter(c => c.isAbsent && isInUltimoCiclo(c)).length;
+		let mAbCiclo = coursesHistory.courses.filter(c => c.isAbsent && isInUltimoCiclo(c)).length;
+		let mRCiclo = coursesHistory.courses.filter(c => c.isPassed && isInUltimoCiclo(c)).length;
+		let pesoAcademicoCL2027 = 11 * mApTotal - 7 * fAdTotal - 19 * fAuCiclo - 17 * mAbCiclo + 5 * mRCiclo;
+
 		// Some final exams do not have grade (e.g. "Equivalencia Total") so we ignore them for the average.
 		let passedWeightedGrades = passedFinalExams.filter(course => typeof course.weightedGrade === "number").map(course => course.weightedGrade);
 		let failedWeightedGrades = failedFinalExams.filter(course => typeof course.weightedGrade === "number").map(course => course.weightedGrade);
@@ -68,20 +83,34 @@ export class PlanTrackingCustomPage {
 		let passedNonWeightedGradesAverage = arrayAverage(passedNonWeightedGrades);
 
 		this.#gradesSummaryDiv.innerHTML = `<table><tbody></tbody></table>
-				<i><span><sup>a</sup> Peso académico: Materias Aprobadas * 11 - años de carrera * 5 - finales desaprobados * 3</span></br>
-				<span><sup>b</sup> La nota ponderada es calculada por el "UTN.BA Helper" según <a href="https://www.frba.utn.edu.ar/wp-content/uploads/2019/09/ordenanza_1549.pdf" target="_blank">Ordenanza Nº 1549</a></span></i>`;
+				<div class="grades-summary-notes">
+					<div class="footnote"><sup>a</sup> Peso académico (hasta CL2026): Materias Aprobadas * 11 - años de carrera * 5 - finales desaprobados * 3</div>
+					<div class="footnote">
+						<sup>b</sup> Peso académico (desde CL2027): 11 * MAp_total - 7 * FAd_total - 19 * FAu_ciclo - 17 * MAb_ciclo + 5 * MR_ciclo.<br>
+						Calculado según <a href="https://drive.google.com/file/d/1JgPpygNPqBlHwwuYtwX7a7Qq0oWrKwXs/view" target="_blank">resolución 2902/25</a>, considerando ciclo lectivo ${ultimoCiclo} como "último ciclo", donde:
+						<ul>
+							<li><b>MAp_total</b>: cantidad total de materias aprobadas (con final, promocionadas o acreditadas) desde el inicio de la actividad académica.</li>
+							<li><b>FAd_total</b>: cantidad de finales adeudados desde el inicio de la actividad académica.</li>
+							<li><b>FAu_ciclo</b>: cantidad de finales ausentes en el último ciclo lectivo (se inscribe a una mesa de final, no se presenta y no se da de baja durante el período de preinscripción del turno).</li>
+							<li><b>MAb_ciclo</b>: cantidad de materias abandonadas en el último ciclo lectivo. Se considera abandonada cuando no se presentó al menos a 1 de las instancias (inicial o recuperatorios) de cada evaluación prevista por la cátedra.</li>
+							<li><b>MR_ciclo</b>: cantidad de materias regularizadas en el último ciclo lectivo.</li>
+						</ul>
+					</div>
+					<div class="footnote"><sup>c</sup> La nota ponderada es calculada por el "UTN.BA Helper" según <a href="https://www.frba.utn.edu.ar/wp-content/uploads/2019/09/ordenanza_1549.pdf" target="_blank">Ordenanza Nº 1549</a>.</div>
+				</div>`;
 		const tbody = this.#gradesSummaryDiv.querySelector("tbody");
 		const appendTableRow = (description, value) => tbody.insertAdjacentHTML("beforeend", "<tr><td>" + description + "</td><td><b>" + (value || value === 0 ? value : "n/a") + "</b></td></tr>");
 
-		appendTableRow("Peso academico", `${pesoAcademico} <small>(11*${passedFinalExams.length} - 5*${yearsCount} - 3*${failedFinalExams.length})</small> <sup>a</sup>`);
-		appendTableRow("Cantidad de finales aprobados", passedFinalExams.length);
+		appendTableRow("Peso académico (hasta CL2026)", `${pesoAcademico} <small>(11*${passedFinalExams.length} - 5*${yearsCount} - 3*${failedFinalExams.length})</small> <sup>a</sup>`);
+		appendTableRow("Peso académico (desde CL2027)", `${pesoAcademicoCL2027} <small>(11*${mApTotal} - 7*${fAdTotal} - 19*${fAuCiclo} - 17*${mAbCiclo} + 5*${mRCiclo})</small> <sup>b</sup>`);
+		appendTableRow("Cantidad de materias aprobadas", passedFinalExams.length);
 		appendTableRow("Cantidad de finales desaprobados", failedFinalExams.length);
-		appendTableRow("Promedio de notas ponderadas<sup>b</sup> con desaprobados", allWeightedGradesAverage);
-		appendTableRow("Promedio de notas ponderadas<sup>b</sup> sin desaprobados", passedWeightedGradesAverage);
-		appendTableRow("Promedio de notas originales<sup>b</sup> con desaprobados", allNonWeightedGradesAverage);
-		appendTableRow("Promedio de notas originales<sup>b</sup> sin desaprobados", passedNonWeightedGradesAverage);
+		appendTableRow("Promedio de notas ponderadas<sup>c</sup> con desaprobados", allWeightedGradesAverage);
+		appendTableRow("Promedio de notas ponderadas<sup>c</sup> sin desaprobados", passedWeightedGradesAverage);
+		appendTableRow("Promedio de notas originales<sup>c</sup> con desaprobados", allNonWeightedGradesAverage);
+		appendTableRow("Promedio de notas originales<sup>c</sup> sin desaprobados", passedNonWeightedGradesAverage);
 
-		return this.#services.dataCollector.logUserStat(pesoAcademico, passedWeightedGradesAverage, allWeightedGradesAverage, passedFinalExams.length, failedFinalExams.length);
+		return this.#services.dataCollector.logUserStat(pesoAcademico, pesoAcademicoCL2027, passedWeightedGradesAverage, allWeightedGradesAverage, passedFinalExams.length, failedFinalExams.length);
 	}
 
 	//...

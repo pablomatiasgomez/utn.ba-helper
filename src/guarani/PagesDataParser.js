@@ -1,6 +1,7 @@
 // noinspection JSNonASCIINames
 
 import {Consts} from './Consts.js';
+import {getWeightedGrade} from './CicloLectivo.js';
 import {
 	GuaraniBackendError,
 	LoggedOutError,
@@ -318,6 +319,7 @@ export class PagesDataParser {
 	 * @property {string} courseCode
 	 * @property {boolean} isPassed
 	 * @property {boolean} isInProgress
+	 * @property {boolean} isAbsent
 	 * @property {number} grade
 	 * @property {number} weightedGrade
 	 * @property {Date} date
@@ -341,11 +343,11 @@ export class PagesDataParser {
 			"Equivalencia Total": finalExams,
 		};
 		const outcomes = {
-			"Promocionado": {isPassed: true, isInProgress: false},
-			"Aprobado": {isPassed: true, isInProgress: false},
-			"Reprobado": {isPassed: false, isInProgress: false},
-			"Ausente": {isPassed: false, isInProgress: false},
-			"Inicio de dictado": {isPassed: false, isInProgress: true},
+			"Promocionado": {isPassed: true, isInProgress: false, isAbsent: false},
+			"Aprobado": {isPassed: true, isInProgress: false, isAbsent: false},
+			"Reprobado": {isPassed: false, isInProgress: false, isAbsent: false},
+			"Ausente": {isPassed: false, isInProgress: false, isAbsent: true},
+			"Inicio de dictado": {isPassed: false, isInProgress: true, isAbsent: false},
 		};
 
 		// We parse the by-course view — it's the complete view that surfaces all events guarani has for each course.
@@ -388,17 +390,18 @@ export class PagesDataParser {
 				// gradeInfo ends with the outcome token (single word like "Aprobado", or multi-word like "Inicio de dictado").
 				let outcome = Object.keys(outcomes).find(key => gradeInfo.endsWith(key));
 				if (!outcome) throw new Error(`gradeInfo couldn't be parsed: ${gradeInfo}. Row: ${JSON.stringify(historyRow)}`);
-				let {isPassed, isInProgress} = outcomes[outcome];
+				let {isPassed, isInProgress, isAbsent} = outcomes[outcome];
 				if (isExpired) isPassed = false;
 
 				// First token of gradeInfo is the numeric grade if present (e.g. "8 (OCHO) Aprobado").
 				let grade = parseInt(gradeInfo.split(" ")[0]) || null;
-				let weightedGrade = grade !== null ? this.#getWeightedGrade(date, grade) : null;
+				let weightedGrade = grade !== null ? getWeightedGrade(date, grade) : null;
 
 				arr.push({
 					courseCode: courseCode,
 					isPassed: isPassed,
 					isInProgress: isInProgress,
+					isAbsent: isAbsent,
 					grade: grade,
 					weightedGrade: weightedGrade,
 					date: date,
@@ -464,14 +467,6 @@ export class PagesDataParser {
 	#parseDate(dateStr) {
 		let dateParts = dateStr.split("/");
 		return new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);
-	}
-
-	#getWeightedGrade(date, grade) {
-		if (date < Consts.NEW_GRADES_REGULATION_DATE) {
-			return Consts.WEIGHTED_GRADES[grade];
-		} else {
-			return grade;
-		}
 	}
 
 	/**

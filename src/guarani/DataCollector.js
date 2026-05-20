@@ -26,8 +26,8 @@ export class DataCollector {
 	/**
 	 * Sends the user stat with the hashed student it to keep data anonymous.
 	 */
-	logUserStat(pesoAcademico, passingGradesAverage, allGradesAverage, passingGradesCount, failingGradesCount) {
-		return this.#apiConnector.logUserStat(this.#getHashedStudentId(), pesoAcademico, passingGradesAverage, allGradesAverage, passingGradesCount, failingGradesCount);
+	logUserStat(pesoAcademico, pesoAcademicoCL2027, passingGradesAverage, allGradesAverage, passingGradesCount, failingGradesCount) {
+		return this.#apiConnector.logUserStat(this.#getHashedStudentId(), pesoAcademico, pesoAcademicoCL2027, passingGradesAverage, allGradesAverage, passingGradesCount, failingGradesCount);
 	}
 
 	/**
