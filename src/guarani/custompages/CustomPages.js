@@ -4,7 +4,7 @@ import {CoursesSearchCustomPage} from './CoursesSearchCustomPage.js';
 import {ProfessorsSearchCustomPage} from './ProfessorsSearchCustomPage.js';
 import {PlanTrackingCustomPage} from './PlanTrackingCustomPage.js';
 
-const CUSTOM_PAGES = [
+const getCustomPages = () => [
 	CoursesSearchCustomPage,
 	ProfessorsSearchCustomPage,
 	PlanTrackingCustomPage,
@@ -48,7 +48,7 @@ export class CustomPages {
 		li.appendChild(customMenusContainer);
 		document.querySelector(".main-nav #js-nav").appendChild(li);
 
-		CUSTOM_PAGES.forEach(customPage => {
+		getCustomPages().forEach(customPage => {
 			const menuItem = document.createElement('li');
 			menuItem.innerHTML = `<a class="no-ajax" href="${CustomPages.getCustomPageUrl(customPage)}">${customPage.menuName}</a>`;
 			customMenusContainer.appendChild(menuItem);
@@ -148,7 +148,7 @@ export class CustomPages {
 
 	getSelectedPageHandler() {
 		let selectedCustomPageName = new URLSearchParams(window.location.search).get(CustomPages.CUSTOM_PAGE_QUERY_PARAM);
-		let selectedCustomPage = CUSTOM_PAGES.filter(customPage => selectedCustomPageName === customPage.menuName)[0];
+		let selectedCustomPage = getCustomPages().filter(customPage => selectedCustomPageName === customPage.menuName)[0];
 		if (!selectedCustomPage) return null;
 
 		return () => {
