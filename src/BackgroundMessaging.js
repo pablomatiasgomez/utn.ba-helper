@@ -1,4 +1,5 @@
 import {ExtensionMessageError} from './guarani/Errors.js';
+import {log} from "@embrace-io/web-sdk";
 
 /**
  * Sends a message to the background service worker and returns the response.
@@ -7,6 +8,7 @@ import {ExtensionMessageError} from './guarani/Errors.js';
 export async function backgroundFetch(options) {
 	let response;
 	try {
+		log.message(`Background fetch ${options.method} ${options.url}`, 'info', {attributes: options});
 		response = await chrome.runtime.sendMessage(options);
 	} catch (e) {
 		// These errors happen when the user navigates away, closes the tab, or the service worker is inactive.
