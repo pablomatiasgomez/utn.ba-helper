@@ -623,6 +623,7 @@ export class PagesDataParser {
 		// E.g.: 'Simulación (082041) - Comisión: K4053', 'Administración Gerencial (082039) - Comisión: K5054'
 		let courseTitle = (kollaDoc.querySelector(".formulario-titulo")?.textContent || "")
 			.trim()
+			.replace("ComisiÃ³n", "Comisión")  // Kolla serves this hardcoded label as UTF-8 on an ISO-8859-1 page, so it arrives mojibaked.
 			.replace(" - TUTORÍA", "")  // Fix for cases like 'Inglés Técnico Nivel I (951602) - Comisión: Z2498 - TUTORÍA'
 			.replace(/\.$/, "") // Replace last dot in string, if any, for cases like 'Práctica Profesional Supervisada (951699) - Comisión: I5051.'
 			.replace(/ B$/, ""); // Replace last " B" in string, if any, for cases like 'Proyecto Final (950289) - Comisión: O6051 B';
