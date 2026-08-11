@@ -1,5 +1,3 @@
-import {trace} from "@embrace-io/web-sdk";
-
 const LOCAL_STORAGE_DATA_COLLECTOR_KEY = "UtnBaHelper.DataCollector";
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -21,13 +19,6 @@ export class DataCollector {
 		let studentId = this.#pagesDataParser.getStudentId();
 		this.#hashedStudentId = this.#hashCode(studentId);
 		return this.#hashedStudentId;
-	}
-
-	/**
-	 * Sends the user stat with the hashed student it to keep data anonymous.
-	 */
-	logUserStat(pesoAcademico, pesoAcademicoCL2027, passingGradesAverage, allGradesAverage, passingGradesCount, failingGradesCount) {
-		return this.#apiConnector.logUserStat(this.#getHashedStudentId(), pesoAcademico, pesoAcademicoCL2027, passingGradesAverage, allGradesAverage, passingGradesCount, failingGradesCount);
 	}
 
 	/**
@@ -63,12 +54,9 @@ export class DataCollector {
 		});
 
 		for (let collectMethod of methodsToRun) {
-			const span = trace.startSpan("Collect-" + collectMethod.key);
 			try {
 				await collectMethod.method();
-				span.end();
 			} catch (e) {
-				span.fail();
 				throw e;
 			}
 			// If at least one collect method is executed, we need to save the last time collected info to local storage.

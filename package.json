@@ -1,7 +1,7 @@
 {
   "name": "utn.ba-helper",
-  "version": "7.5.3",
-  "description": "A Chrome extension that makes navigating and using the UTN.BA - FRBA website easier.",
+  "version": "1.0.0",
+  "description": "A Firefox extension that makes navigating and using the UTN.BA - FRBA website easier. Port of the UTN.BA Helper Chrome extension.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,21 +9,22 @@
     "update-golden": "NODE_OPTIONS='--experimental-vm-modules --experimental-specifier-resolution=node' jest -u",
     "watch": "webpack --watch --config webpack.config.js",
     "build": "webpack --config webpack.config.js",
-    "pack": "npm run build && npm run process-sourcemaps && node pack.js && open ./release",
-    "process-sourcemaps": "embrace-web-cli upload -a 08sxm -t \"$(cat embrace-token)\" -p ./build"
+    "pack": "npm run build && node pack.js && open ./release",
+    "web-ext-lint": "web-ext lint --source-dir build",
+    "web-ext-run": "web-ext run --source-dir build",
+    "web-ext-sign": "web-ext sign --source-dir build --channel unlisted"
   },
   "dependencies": {
-    "@embrace-io/web-sdk": "^2.24.0",
     "chart.js": "^4.5.1"
   },
   "devDependencies": {
-    "@embrace-io/web-cli": "^2.24.0",
     "adm-zip": "^0.6.0",
     "copy-webpack-plugin": "^14.0.0",
     "css-loader": "^7.1.4",
     "jest": "^30.4.2",
     "jest-environment-jsdom": "^30.4.1",
     "mini-css-extract-plugin": "^2.10.2",
+    "web-ext": "^8.0.0",
     "webpack": "^5.109.0",
     "webpack-cli": "^7.2.1"
   }

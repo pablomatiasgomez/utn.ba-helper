@@ -109,8 +109,6 @@ export class PlanTrackingCustomPage {
 		appendTableRow("Promedio de notas ponderadas<sup>c</sup> sin desaprobados", passedWeightedGradesAverage);
 		appendTableRow("Promedio de notas originales<sup>c</sup> con desaprobados", allNonWeightedGradesAverage);
 		appendTableRow("Promedio de notas originales<sup>c</sup> sin desaprobados", passedNonWeightedGradesAverage);
-
-		return this.#services.dataCollector.logUserStat(pesoAcademico, pesoAcademicoCL2027, passedWeightedGradesAverage, allWeightedGradesAverage, passedFinalExams.length, failedFinalExams.length);
 	}
 
 	//...
@@ -122,6 +120,7 @@ export class PlanTrackingCustomPage {
 	}
 
 	#loadPlanCourses(planCourses, coursesHistory) {
+		if (!Array.isArray(planCourses)) planCourses = [];
 		let courseNamesByCode = planCourses.reduce(function (courseNamesByCode, course) {
 			courseNamesByCode[course.courseCode] = course.courseName;
 			return courseNamesByCode;

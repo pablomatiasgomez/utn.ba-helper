@@ -1,11 +1,5 @@
 export class ApiConnector {
 	// POSTs:
-	logMessage(method, isError, message) {
-	}
-
-	logUserStat(hashedStudentId, pesoAcademico, pesoAcademicoCL2027, passingGradesAverage, allGradesAverage, passingGradesCount, failingGradesCount) {
-	}
-
 	postClassSchedules(classSchedules) {
 	}
 

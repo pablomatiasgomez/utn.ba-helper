@@ -1,17 +1,11 @@
 import './main.css';
 
-import {log} from "@embrace-io/web-sdk";
-
-import {initializeEmbrace} from '../Embrace.js';
-
 import {ApiConnector} from '../ApiConnector.js';
 import {Utils} from './Utils.js';
 import {Store} from './Store.js';
 import {PagesDataParser} from './PagesDataParser.js';
 
 (function () {
-	initializeEmbrace("main-kolla");
-
 	let apiConnector = new ApiConnector();
 	let utils = new Utils(apiConnector);
 	utils.runAsync("mainKolla", async function mainKolla() {
@@ -19,10 +13,8 @@ import {PagesDataParser} from './PagesDataParser.js';
 		let pagesDataParser = new PagesDataParser();
 
 		if (pagesDataParser.kollaSurveyFormCompleted(document)) {
-			log.message("Exiting completed kolla survey", 'info', {attributes: {location_href: location.href}});
 			return;
 		}
-		log.message("Entering kolla survey", 'info', {attributes: {location_href: location.href}});
 
 		document.getElementById("btn-terminar").addEventListener("mousedown", () => {
 			utils.runAsync("surveyFinished", async function surveyFinished() {

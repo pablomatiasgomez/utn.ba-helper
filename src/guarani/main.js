@@ -1,7 +1,5 @@
 import './main.css';
 
-import {initializeEmbrace} from '../Embrace.js';
-
 import {ApiConnector} from '../ApiConnector.js';
 import {Utils} from './Utils.js';
 import {Store} from './Store.js';
@@ -14,8 +12,6 @@ import {PreInscripcionPage} from './pages/PreInscripcionPage.js';
 import {InscripcionAExamenesPage} from './pages/InscripcionAExamenesPage.js';
 
 (function () {
-	initializeEmbrace("main");
-
 	let apiConnector = new ApiConnector();
 	let utils = new Utils(apiConnector);
 	utils.runAsync("main", async function main() {
@@ -60,7 +56,7 @@ import {InscripcionAExamenesPage} from './pages/InscripcionAExamenesPage.js';
 				customPages.removeMenu();
 				removePoweredByUTNBAHelper();
 
-				return apiConnector.logMessage("pageNotHandled", false, `[Path:${window.location.pathname}][IsLoggedIn:${isLoggedIn}][CurrentProfile:${currentProfile}]`);
+				return;
 			}
 
 			// Init everything:

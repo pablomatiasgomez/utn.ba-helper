@@ -1,30 +1,10 @@
 import {backgroundFetch} from './BackgroundMessaging.js';
 
-const CLIENT = `CHROME@${chrome.runtime.getManifest().version}`;
+const CLIENT = `FIREFOX@${chrome.runtime.getManifest().version}`;
 const BASE_API_URL = "https://www.pablomatiasgomez.com.ar/utnba-helper/v2";
 
 export class ApiConnector {
 	// POSTs:
-	logMessage(method, isError, message) {
-		return this.#postData(BASE_API_URL + "/log", {
-			method: method,
-			error: isError,
-			message: message
-		});
-	}
-
-	logUserStat(hashedStudentId, pesoAcademico, pesoAcademicoCL2027, passingGradesAverage, allGradesAverage, passingGradesCount, failingGradesCount) {
-		return this.#postData(BASE_API_URL + "/user-stats", {
-			hashedStudentId: hashedStudentId,
-			pesoAcademico: pesoAcademico,
-			pesoAcademicoCL2027: pesoAcademicoCL2027,
-			passingGradesAverage: passingGradesAverage,
-			allGradesAverage: allGradesAverage,
-			passingGradesCount: passingGradesCount,
-			failingGradesCount: failingGradesCount
-		});
-	}
-
 	postClassSchedules(classSchedules) {
 		return this.#postData(BASE_API_URL + "/class-schedules", classSchedules);
 	}

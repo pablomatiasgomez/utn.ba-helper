@@ -2,9 +2,20 @@
   "manifest_version": 3,
   "name": "UTN.BA Helper (ex Siga Helper)",
   "short_name": "UTN.BA Helper",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "UTN.BA Helper facilita el uso de la web de la UTN - FRBA.",
   "author": "Pablo Matías Gomez",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "utnba-helper@rocopolas.github.io",
+      "strict_min_version": "109.0",
+      "data_collection_permissions": {
+        "required": [
+          "websiteContent"
+        ]
+      }
+    }
+  },
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
@@ -42,8 +53,7 @@
       ],
       "matches": [
         "*://*.frba.utn.edu.ar/*"
-      ],
-      "use_dynamic_url": true
+      ]
     },
     {
       "resources": [
@@ -55,10 +65,13 @@
     }
   ],
   "host_permissions": [
-    "*://*.kolla.frba.utn.edu.ar/*"
+    "*://*.kolla.frba.utn.edu.ar/*",
+    "https://www.pablomatiasgomez.com.ar/*"
   ],
   "background": {
-    "service_worker": "background.js"
+    "scripts": [
+      "background.js"
+    ]
   },
   "permissions": [
     "storage"

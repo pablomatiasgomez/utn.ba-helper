@@ -1,7 +1,6 @@
 import './ProfessorsSearchCustomPage.css';
 
 import {Chart} from 'chart.js/auto';
-import {log} from "@embrace-io/web-sdk";
 import {CustomPages} from './CustomPages.js';
 import {getColorForAvg, getOverallScoreSpan, getProfessorLi, getSchedulesAsString} from './RenderHelpers.js';
 
@@ -84,15 +83,18 @@ export class ProfessorsSearchCustomPage {
 		this.#searchResultsDiv.style.display = "";
 		this.#searchResultsDiv.scrollIntoView({behavior: "smooth"});
 		this.#searchResultsDiv.style.display = "none";
-		log.message("Searching professors", 'info', {attributes: {query: query}});
 		let results = await this.#services.apiConnector.searchProfessors(query);
-		let trs = results.map(item => {
+		let searchResults = Array.isArray(results) ? results : [];
+		let trs = searchResults.map(item => {
 			return `<tr><td><a href="#">${item.value}</a></td><td>${item.data.surveysCount}</td><td>${item.data.classScheduleOccurrences}</td></tr>`;
 		}).join("");
 		this.#searchResultsDiv.style.display = "";
 		let tbody = this.#searchResultsDiv.querySelector("table tbody");
 		tbody.innerHTML = trs;
 		tbody.insertAdjacentHTML("afterbegin", "<tr><th>Profesor</th><th>Cantidad de encuestas (total historico)</th><th>Cantidad de cursos (total historico)</th></tr>");
+		if (!searchResults.length) {
+			tbody.insertAdjacentHTML("beforeend", "<tr><td colspan=\"3\">No hay resultados disponibles del servidor comunitario en este momento.</td></tr>");
+		}
 	}
 
 	#hideProfessorData() {
@@ -115,6 +117,7 @@ export class ProfessorsSearchCustomPage {
 		this.#coursesResultDiv.style.display = "none";
 		// For now, we are showing just the latest 20 classes.
 		let classSchedules = await this.#services.apiConnector.getClassesForProfessor(professorName, 0, 20);
+		if (!Array.isArray(classSchedules)) classSchedules = [];
 		this.#coursesResultDiv.innerHTML = "";
 		let trs = classSchedules.map(classSchedule => {
 			let professorLis = (classSchedule.professors || []).map(professor => {

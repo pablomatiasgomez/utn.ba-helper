@@ -1,18 +1,16 @@
-chrome.runtime.onMessage.addListener(function (requestInfo, sender, resolve) {
-	requestFetch(requestInfo).then(response => {
-		resolve(response);
-	}).catch(e => {
+browser.runtime.onMessage.addListener(async (requestInfo, sender) => {
+	try {
+		return await requestFetch(requestInfo);
+	} catch (e) {
 		// Error objects are not JSON-serializable, so we need to serialize them manually.
-		resolve({
+		return {
 			error: {
 				name: e.name,
 				message: `Error executing ${requestInfo.method || "GET"} ${requestInfo.url} - ${e.toString()}`,
 				status: e.status,
 			},
-		});
-	});
-
-	return true;
+		};
+	}
 });
 
 async function requestFetch(requestInfo) {

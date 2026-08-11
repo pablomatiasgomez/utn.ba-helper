@@ -1,5 +1,3 @@
-import {log} from "@embrace-io/web-sdk";
-
 import {getProfessorLi, getSchedulesAsString} from './RenderHelpers.js';
 
 export class CoursesSearchCustomPage {
@@ -78,15 +76,18 @@ export class CoursesSearchCustomPage {
 		this.#searchResultsDiv.scrollIntoView({behavior: "smooth"});
 		this.#searchResultsDiv.style.display = "none";
 		this.#courseDataDiv.style.display = "none";
-		log.message("Searching courses", 'info', {attributes: {query: query}});
 		let results = await this.#services.apiConnector.searchCourses(query);
-		let trs = results.map(item => {
+		let searchResults = Array.isArray(results) ? results : [];
+		let trs = searchResults.map(item => {
 			return `<tr><td>${item.value}</td><td><a href="#">${item.data}</a></td></tr>`;
 		}).join("");
 		this.#searchResultsDiv.style.display = "";
 		let tbody = this.#searchResultsDiv.querySelector("table tbody");
 		tbody.innerHTML = trs;
 		tbody.insertAdjacentHTML("afterbegin", "<tr><th>Nombre</th><th>Codigo</th></tr>");
+		if (!searchResults.length) {
+			tbody.insertAdjacentHTML("beforeend", "<tr><td colspan=\"2\">No hay resultados disponibles del servidor comunitario en este momento.</td></tr>");
+		}
 	}
 
 	async #retrieveClassesForCourse(courseCode, offset, limit) {
@@ -116,6 +117,7 @@ export class CoursesSearchCustomPage {
 	}
 
 	#appendClassesToTable(classSchedules) {
+		if (!Array.isArray(classSchedules)) classSchedules = [];
 		let trs = classSchedules.map(classSchedule => {
 			let professorLis = (classSchedule.professors || []).map(professor => {
 				return getProfessorLi(professor);

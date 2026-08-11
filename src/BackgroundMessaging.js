@@ -1,18 +1,18 @@
 import {ExtensionMessageError} from './guarani/Errors.js';
-import {log} from "@embrace-io/web-sdk";
 
 /**
- * Sends a message to the background service worker and returns the response.
- * Wraps chrome.runtime.sendMessage, handling known messaging errors (e.g. tab closed, service worker inactive).
+ * Sends a message to the background script and returns the response.
+ * Wraps browser.runtime.sendMessage, handling known messaging errors (e.g. tab closed, event page inactive).
  */
 export async function backgroundFetch(options) {
 	let response;
 	try {
-		log.message(`Background fetch ${options.method || "GET"} ${options.url}`, 'info', {attributes: options});
-		response = await chrome.runtime.sendMessage(options);
+		response = await browser.runtime.sendMessage(options);
 	} catch (e) {
-		// These errors happen when the user navigates away, closes the tab, or the service worker is inactive.
-		if (e.message?.includes("message channel closed") || e.message?.includes("Receiving end does not exist")) {
+		// These errors happen when the user navigates away, closes the tab, or the event page is inactive.
+		if (e.message?.includes("message channel closed")
+			|| e.message?.includes("Receiving end does not exist")
+			|| e.message?.includes("Could not establish connection")) {
 			throw new ExtensionMessageError(e.message, {cause: e});
 		}
 		throw e;
