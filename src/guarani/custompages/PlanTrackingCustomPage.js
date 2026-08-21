@@ -131,6 +131,11 @@ export class PlanTrackingCustomPage {
 		let passedCourses = coursesHistory.finalExams.filter(course => course.isPassed).map(course => course.courseCode);
 		let signedCourses = [...new Set([...passedCourses, ...coursesHistory.courses.filter(course => course.isPassed).map(course => course.courseCode)])];
 		let inProgressCourses = coursesHistory.courses.filter(course => course.isInProgress).map(course => course.courseCode);
+		// A course is only shown as expired when every regularidad we have for it is expired.
+		// A later valid one (e.g. a recursada) or an already passed final take precedence.
+		let expiredCourses = [...new Set(coursesHistory.courses.filter(course => course.isPassed).map(course => course.courseCode))]
+			.filter(courseCode => !passedCourses.includes(courseCode)) // No final exam for this course
+			.filter(courseCode => coursesHistory.courses.filter(course => course.isPassed && course.courseCode === courseCode).every(course => course.isExpired)); // All expired
 		let courseRequirementToArray = {
 			"SIGNED": signedCourses,
 			"PASSED": passedCourses,
@@ -149,6 +154,7 @@ export class PlanTrackingCustomPage {
 				course.isSigned = hasCourse("SIGNED", course.courseCode);
 				course.isPassed = hasCourse("PASSED", course.courseCode);
 				course.isInProgress = inProgressCourses.includes(course.courseCode);
+				course.isExpired = expiredCourses.includes(course.courseCode);
 				course.canRegister = meetsDependencies("REGISTER");
 				course.canTakeFinalExam = meetsDependencies("TAKE_FINAL_EXAM");
 				return course;
@@ -171,6 +177,7 @@ export class PlanTrackingCustomPage {
 				let status;
 				let backgroundColor = "#7e7e7e";
 				let color = "#000000";
+				let expiredSuffix = course.isExpired ? " (vencida)" : "";
 				if (course.isPassed) {
 					status = TRANSLATIONS["PASSED"];
 					backgroundColor = "#55bb55";
@@ -178,10 +185,10 @@ export class PlanTrackingCustomPage {
 					status = "Cursando";
 					backgroundColor = "#ff8c42";
 				} else if (course.canTakeFinalExam) {
-					status = "Puede " + TRANSLATIONS["TAKE_FINAL_EXAM"].toLowerCase();
+					status = "Puede " + TRANSLATIONS["TAKE_FINAL_EXAM"].toLowerCase() + expiredSuffix;
 					backgroundColor = "#ffcc00";
 				} else if (course.isSigned) {
-					status = TRANSLATIONS["SIGNED"];
+					status = TRANSLATIONS["SIGNED"] + expiredSuffix;
 					backgroundColor = "#ffcc00";
 				} else if (course.canRegister) {
 					status = "Puede " + TRANSLATIONS["REGISTER"].toLowerCase();
