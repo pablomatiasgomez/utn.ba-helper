@@ -71,4 +71,24 @@ describe('pagesDataParser.parseKollaSurveyForm', () => {
 		expect(parse(html)).toEqual([]);
 		expect(utils.logHTML).toHaveBeenCalledWith("KollaDBConnectionError", 100, html);
 	});
+
+	it('removes 23 suffix from 7 chars class codes', () => {
+		const html = `<html><body>
+			<h2 class='formulario-titulo'>Instrumentación (230560) - ComisiÃ³n: Q505123</h2>
+			<div class="encuesta">
+				<h3 class="encuesta-titulo">ENCUESTA DOCENTE PRIMER CUATRIMESTRE 2026  </h3>
+				<div class='encuesta-elemento'><h3>PEREZ JUAN (Adjunto (Responsable de Cátedra))</h3></div>
+			</div>
+		</body></html>`;
+		expect(parse(html)).toEqual([{
+			surveyKind: "DOCENTE",
+			year: 2026,
+			quarter: "1C",
+			classCode: "Q5051",
+			courseCode: "230560",
+			professorName: "PEREZ JUAN",
+			professorRole: "ADJUNTO",
+			surveyFieldValues: [],
+		}]);
+	});
 });
