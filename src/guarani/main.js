@@ -20,7 +20,7 @@ import {InscripcionAExamenesPage} from './pages/InscripcionAExamenesPage.js';
 	let utils = new Utils(apiConnector);
 	utils.runAsync("main", async function main() {
 		let store = new Store();
-		let pagesDataParser = new PagesDataParser();
+		let pagesDataParser = new PagesDataParser(utils);
 		let dataCollector = new DataCollector(store, pagesDataParser, apiConnector);
 		let customPages = new CustomPages(pagesDataParser, dataCollector, utils, apiConnector);
 

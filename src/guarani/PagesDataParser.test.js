@@ -1,3 +1,4 @@
+import {jest} from '@jest/globals';
 import {PagesDataParser} from './PagesDataParser.js';
 import {ProfileNotHandledError} from './Errors.js';
 
@@ -44,5 +45,30 @@ describe('pagesDataParser.fetchAjaxGETContents', () => {
 
 		await expect(pagesDataParser.fetchAjaxGETContents("https://example.com"))
 			.rejects.toThrow(ProfileNotHandledError);
+	});
+});
+
+describe('pagesDataParser.parseKollaSurveyForm', () => {
+	let utils;
+	let pagesDataParser;
+	const parse = html => pagesDataParser.parseKollaSurveyForm(new DOMParser().parseFromString(html, "text/html"), html);
+
+	beforeEach(() => {
+		utils = {logHTML: jest.fn()};
+		pagesDataParser = new PagesDataParser(utils);
+	});
+
+	it('ignores kolla db connection error as plain text', () => {
+		const html = "No es posible realizar la conexión a la base.";
+		expect(parse(html)).toEqual([]);
+		expect(utils.logHTML).toHaveBeenCalledWith("KollaDBConnectionError", 100, html);
+	});
+
+	it('ignores kolla db connection error as html page', () => {
+		const html = `<!DOCTYPE html><html><head><title>Error en la operación</title></head><body>
+			<div class="alert alert-error"><p style="text-align: center;">No es posible realizar la conexión a la base.</p></div>
+		</body></html>`;
+		expect(parse(html)).toEqual([]);
+		expect(utils.logHTML).toHaveBeenCalledWith("KollaDBConnectionError", 100, html);
 	});
 });

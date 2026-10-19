@@ -16,7 +16,7 @@ import {PagesDataParser} from './PagesDataParser.js';
 	let utils = new Utils(apiConnector);
 	utils.runAsync("mainKolla", async function mainKolla() {
 		let store = new Store();
-		let pagesDataParser = new PagesDataParser();
+		let pagesDataParser = new PagesDataParser(utils);
 
 		if (pagesDataParser.kollaSurveyFormCompleted(document)) {
 			log.message("Exiting completed kolla survey", 'info', {attributes: {location_href: location.href}});

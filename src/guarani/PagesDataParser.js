@@ -13,6 +13,11 @@ import {backgroundFetch} from '../BackgroundMessaging.js';
 
 export class PagesDataParser {
 	#responsesCache = {}; 	// We want to fetch only once each page.
+	#utils;
+
+	constructor(utils) {
+		this.#utils = utils;
+	}
 
 	#fetchAjaxPOSTContents(url, body, useCache = true) {
 		return this.#fetchAjaxContents(url, {
@@ -621,6 +626,12 @@ export class PagesDataParser {
 		const professorRegex = new RegExp(`^(.*) \\((${Object.keys(professorRolesMapping).join("|")})(?: \\(Responsable de Cátedra\\))?\\)$`);
 
 		if (this.kollaSurveyFormCompleted(kollaDoc)) return [];
+		// Kolla sometimes fails to connect to its DB, and returns 'No es posible realizar la conexión a la base.' (either as
+		// plain text or within an error HTML page). Matching without the accent in case it arrives mojibaked.
+		if ((kollaDoc.body?.textContent || "").includes("No es posible realizar la conexi")) {
+			this.#utils.logHTML("KollaDBConnectionError", 100, htmlForLog);
+			return [];
+		}
 
 		// E.g.: 'Simulación (082041) - Comisión: K4053', 'Administración Gerencial (082039) - Comisión: K5054'
 		let courseTitle = (kollaDoc.querySelector(".formulario-titulo")?.textContent || "")

@@ -52,15 +52,15 @@ export class Utils {
 	/**
 	 * logHTML is used to report the entire HTML or debug purposes
 	 * Can be called with a given pct of users to sample.
+	 * Defaults to the current page HTML, but a different one can be given (e.g. a fetched page).
 	 * E.g.
 	 * 	this.#utils.logHTML("HorariosPage", 10);
 	 */
-	logHTML(name, pct) {
+	logHTML(name, pct, html = document.documentElement.outerHTML) {
 		// Only log for a percentage of users
 		if (Math.random() * 100 >= pct) return;
 
 		let message = `HTML log for ${name}`;
-		let html = document.documentElement.outerHTML;
 		log.message(message, 'warning', {
 			attributes: {
 				name: name,
